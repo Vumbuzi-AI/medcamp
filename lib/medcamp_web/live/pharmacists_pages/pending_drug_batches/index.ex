@@ -2,7 +2,6 @@ defmodule MedcampWeb.PharmacistsLive.PendingDrugBatchesIndex do
   use MedcampWeb, :pharmacist_live_view
 
   alias Medcamp.DrugBatches
-  alias Medcamp.Batches
 
   @per_page 10
 
@@ -44,6 +43,12 @@ defmodule MedcampWeb.PharmacistsLive.PendingDrugBatchesIndex do
     |> assign(:drug_batch, nil)
   end
 
+  defp apply_action(socket, :new, _params) do
+    socket
+    |> assign(:page_title, "Add Drug Batch")
+    |> assign(:drug_batch, nil)
+  end
+
   defp apply_action(socket, :scan, %{"id" => id}) do
     socket
     |> assign(:page_title, "Listing Drug batches")
@@ -64,21 +69,15 @@ defmodule MedcampWeb.PharmacistsLive.PendingDrugBatchesIndex do
   def handle_event("confirm", %{"id" => id}, socket) do
     drug_batch = DrugBatches.get_drug_batch!(id)
 
-    DrugBatches.update_drug_batch(drug_batch, %{
-      is_confirmed: true,
-      confirmed_by_id: socket.assigns.current_user.id
-    })
-
-    batch = Batches.get_batch!(drug_batch.batch_id)
-
     {:ok, _} =
-      Batches.update_batch(batch, %{
-        has_been_issued: true,
-        remaining_quantity: batch.remaining_quantity - drug_batch.remaining_quantity
+      DrugBatches.update_drug_batch(drug_batch, %{
+        is_confirmed: true,
+        confirmed_by: socket.assigns.current_user.id
       })
 
     {:noreply,
      socket
+     |> put_flash(:info, "Batch confirmed successfully")
      |> push_navigate(to: ~p"/pharmacist/pending_drug_batches")}
   end
 
@@ -102,6 +101,13 @@ defmodule MedcampWeb.PharmacistsLive.PendingDrugBatchesIndex do
         >
           <Heroicons.icon name="arrow-left" type="outline" class="h-5 w-5" />
           <span>Listing Pending Drug Batches that need Scanning</span>
+        </.link>
+
+        <.link
+          patch={~p"/pharmacist/pending_drug_batches/new"}
+          class="mt-3 inline-flex items-center gap-2 rounded-lg bg-[#373896] px-3 py-2 text-sm font-medium text-white hover:bg-[#2f317f]"
+        >
+          <Heroicons.icon name="plus" type="outline" class="h-4 w-4" /> Add Drug Batch
         </.link>
       </div>
       <div class="overflow-hidden">
@@ -191,6 +197,22 @@ defmodule MedcampWeb.PharmacistsLive.PendingDrugBatchesIndex do
           per_page={@per_page}
         />
       </div>
+
+      <.modal
+        :if={@live_action in [:new]}
+        id="drug-batch-modal"
+        show
+        on_cancel={JS.patch(~p"/pharmacist/pending_drug_batches")}
+      >
+        <.live_component
+          module={MedcampWeb.PharmacistsLive.DrugBatchFormComponent}
+          id={:new_drug_batch}
+          title={@page_title}
+          action={@live_action}
+          current_user={@current_user}
+          patch={~p"/pharmacist/pending_drug_batches"}
+        />
+      </.modal>
 
       <.modal
         :if={@live_action in [:scan]}

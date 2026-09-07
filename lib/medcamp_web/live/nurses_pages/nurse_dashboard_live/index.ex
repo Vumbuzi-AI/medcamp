@@ -1,8 +1,7 @@
 defmodule MedcampWeb.NurseDashboardLive.Index do
   use MedcampWeb, :nurse_live_view
 
-  alias Medcamp.NurseProcedures
-  alias Medcamp.RoomAllocations
+  alias Medcamp.Patients
   alias Medcamp.Triages
   alias MedcampWeb.Dashboards.WidgetResolver
 
@@ -94,30 +93,25 @@ defmodule MedcampWeb.NurseDashboardLive.Index do
       )
       |> filter_triage_search(search)
 
-    nurse_procedures =
-      NurseProcedures.list_nurse_procedures_for_nurse(current_user.id)
-      |> Enum.filter(&inserted_in_range?(&1.inserted_at, date_from, date_to))
-      |> filter_patient_search(search)
 
-    room_allocations =
-      RoomAllocations.list_room_allocations()
+    registrations =
+      Patients.list_patients()
       |> Enum.filter(
-        &(same_user?(&1.nurse_id, current_user.id) and
+        &(same_user?(&1.creator_id, current_user.id) and
             inserted_in_range?(&1.inserted_at, date_from, date_to))
       )
-      |> filter_room_search(search)
+      |> filter_patient_search(search)
 
     patients = triages |> Enum.map(& &1.patient) |> Enum.reject(&is_nil/1)
 
     socket
     |> assign(:triages, triages)
-    |> assign(:nurse_procedures, nurse_procedures)
-    |> assign(:room_allocations, room_allocations)
+    |> assign(:registrations, registrations)
     |> assign(:daily_triages, build_daily_counts(triages, :date, date_from, date_to))
     |> assign(:patient_gender_breakdown, build_gender_breakdown(patients))
     |> assign(:patient_age_groups, build_age_groups(patients))
-    |> assign(:workflow_mix, build_workflow_mix(triages, nurse_procedures, room_allocations))
-    |> assign(:recent_items, recent_nursing_items(triages, nurse_procedures, room_allocations))
+    |> assign(:workflow_mix, build_workflow_mix(triages, registrations))
+    |> assign(:recent_items, recent_nursing_items(triages, registrations))
   end
 
   @impl true
@@ -199,12 +193,11 @@ defmodule MedcampWeb.NurseDashboardLive.Index do
   defp dashboard_cards(assigns) do
     summary_cards_for(assigns.visible_summary_cards, %{
       triages_completed: {length(assigns.triages), "Triages recorded this month"},
-      nurse_procedures: {length(assigns.nurse_procedures), "Procedures logged by you"},
-      room_allocations: {length(assigns.room_allocations), "Room assignments updated"}
+      registrations: {length(assigns.registrations), "Patients you registered"}
     })
   end
 
-  defp recent_nursing_items(triages, nurse_procedures, room_allocations) do
+  defp recent_nursing_items(triages, registrations) do
     triage_items =
       Enum.map(triages, fn triage ->
         %{
@@ -216,38 +209,18 @@ defmodule MedcampWeb.NurseDashboardLive.Index do
         }
       end)
 
-    procedure_items =
-      Enum.map(nurse_procedures, fn procedure ->
+    registration_items =
+      Enum.map(registrations, fn patient ->
         %{
-          at: procedure.inserted_at,
-          title: patient_name(procedure.patient),
-          subtitle: "Procedure logged for nursing follow-up",
-          badge: "Procedure",
+          at: patient.inserted_at,
+          title: patient_name(patient),
+          subtitle: "Registered for the camp",
+          badge: "Registration",
           badge_color: "bg-emerald-100 text-emerald-700"
         }
       end)
 
-    room_items =
-      Enum.map(room_allocations, fn allocation ->
-        room_label =
-          case allocation.room do
-            %{room_number: room_number} when is_binary(room_number) and room_number != "" ->
-              room_number
-
-            _ ->
-              "assigned room"
-          end
-
-        %{
-          at: allocation.inserted_at,
-          title: patient_name(allocation.patient),
-          subtitle: "Room allocation updated for #{room_label}",
-          badge: "Room",
-          badge_color: "bg-blue-100 text-blue-700"
-        }
-      end)
-
-    (triage_items ++ procedure_items ++ room_items)
+    (triage_items ++ registration_items)
     |> Enum.sort_by(& &1.at, {:desc, DateTime})
     |> Enum.take(5)
     |> Enum.map(&Map.delete(&1, :at))
@@ -323,11 +296,10 @@ defmodule MedcampWeb.NurseDashboardLive.Index do
     |> Enum.map(fn {label, count} -> %{label: label, count: count} end)
   end
 
-  defp build_workflow_mix(triages, nurse_procedures, room_allocations) do
+  defp build_workflow_mix(triages, registrations) do
     [
-      %{label: "Triages", count: length(triages)},
-      %{label: "Procedures", count: length(nurse_procedures)},
-      %{label: "Room Allocations", count: length(room_allocations)}
+      %{label: "Registrations", count: length(registrations)},
+      %{label: "Triages", count: length(triages)}
     ]
   end
 
@@ -388,18 +360,6 @@ defmodule MedcampWeb.NurseDashboardLive.Index do
 
     Enum.filter(records, fn record ->
       String.contains?(searchable_patient_text(record.patient), term)
-    end)
-  end
-
-  defp filter_room_search(records, search) when search in [nil, ""], do: records
-
-  defp filter_room_search(records, search) do
-    term = String.downcase(search)
-
-    Enum.filter(records, fn record ->
-      patient_match = String.contains?(searchable_patient_text(record.patient), term)
-      room_match = String.contains?(String.downcase(room_label(record.room)), term)
-      patient_match or room_match
     end)
   end
 

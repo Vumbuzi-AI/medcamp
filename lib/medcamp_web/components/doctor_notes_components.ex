@@ -2,7 +2,6 @@ defmodule MedcampWeb.DoctorNotesComponents do
   use Phoenix.Component
   use Gettext, backend: MedcampWeb.Gettext
   import MedcampWeb.CoreComponents
-  import MedcampWeb.FormsComponents, only: [signature_pad: 1]
   alias Medcamp.ArtificialIntelligence.VoiceDictation
   alias Phoenix.LiveView.JS
 

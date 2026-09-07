@@ -4,7 +4,7 @@ defmodule MedcampWeb.SidebarComponents do
 
   alias Phoenix.LiveView.JS
 
-  alias MedcampWeb.{ProcurementPortal, RoleRouteHelpers, SidebarCatalog}
+  alias MedcampWeb.SidebarCatalog
 
   def navbar_user(assigns) do
     ~H"""
@@ -110,44 +110,6 @@ defmodule MedcampWeb.SidebarComponents do
     """
   end
 
-  def supplier_sidebar(assigns) do
-    assigns =
-      assign(
-        assigns,
-        :groups,
-        SidebarCatalog.visible_tab_groups(assigns.current_user, "supplier")
-      )
-
-    ~H"""
-    <aside
-      id="main-sidebar"
-      phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
-      aria-label="Sidebar"
-    >
-      <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
-        <.top_base_sidebar current_user={@current_user} name="Supplier Portal" />
-
-        <ul class="space-y-1 font-medium flex-1">
-          <%!-- Standalone Overview link --%>
-          <.sidebar_card
-            tab={%{name: "Overview", icon: "chart-bar", url: "/supplier", tab_name: :overview}}
-            active_tab={@active_tab}
-            current_user={@current_user}
-          />
-
-          <%!-- Grouped sections --%>
-          <%= for group <- @groups do %>
-            <.sidebar_group group={group} active_tab={@active_tab} current_user={@current_user} />
-          <% end %>
-        </ul>
-
-        <.bottom_base_sidebar current_user={@current_user} />
-      </div>
-    </aside>
-    """
-  end
-
   def doctor_sidebar(assigns) do
     assigns =
       assign(
@@ -184,67 +146,6 @@ defmodule MedcampWeb.SidebarComponents do
           <%!-- Grouped sections --%>
           <%= for group <- @groups do %>
             <.sidebar_group group={group} active_tab={@active_tab} current_user={@current_user} />
-          <% end %>
-        </ul>
-
-        <.bottom_base_sidebar current_user={@current_user} />
-      </div>
-    </aside>
-    """
-  end
-
-  def inventory_manager_sidebar(assigns) do
-    assigns =
-      assigns
-      |> assign(
-        :groups,
-        SidebarCatalog.visible_tab_groups(assigns.current_user, "inventory_manager")
-      )
-      |> assign(:back_to_panel_url, inventory_manager_back_to_panel_url(assigns.current_user))
-
-    ~H"""
-    <aside
-      id="main-sidebar"
-      phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
-      aria-label="Sidebar"
-    >
-      <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
-        <.top_base_sidebar current_user={@current_user} name="Inventory Manager's Panel" />
-
-        <ul class="space-y-1 font-medium flex-1">
-          <%!-- Standalone Back To Panel link --%>
-          <.sidebar_card
-            tab={
-              %{
-                name: "Back To Panel",
-                icon: "arrow-left",
-                url: @back_to_panel_url,
-                tab_name: :home
-              }
-            }
-            active_tab={@active_tab}
-            current_user={@current_user}
-          />
-
-          <%!-- Grouped sections --%>
-          <%= for group <- @groups do %>
-            <.sidebar_group group={group} active_tab={@active_tab} current_user={@current_user} />
-          <% end %>
-
-          <%= if @current_user.role == "admin" do %>
-            <.sidebar_card
-              tab={
-                %{
-                  name: "Back to Admin",
-                  icon: "arrow-left",
-                  url: "/admin/users",
-                  tab_name: :inventory_management
-                }
-              }
-              active_tab={@active_tab}
-              current_user={@current_user}
-            />
           <% end %>
         </ul>
 
@@ -334,104 +235,6 @@ defmodule MedcampWeb.SidebarComponents do
     """
   end
 
-  def procurement_portal_sidebar(assigns) do
-    assigns =
-      assigns
-      |> assign_new(:portal_title, fn -> "Procurement Workspace" end)
-      |> assign_new(:portal_badge, fn -> "Procurement" end)
-      |> assign_new(:portal_accent_classes, fn ->
-        "bg-[#e7e7ff] text-[#373896] ring-1 ring-[#d2d3ff]"
-      end)
-
-    ~H"""
-    <aside
-      id="main-sidebar"
-      phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 h-screen w-72 -translate-x-full transition-transform md:translate-x-0"
-      aria-label="Sidebar"
-    >
-      <div class="flex h-full flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
-        <.portal_top_sidebar
-          current_user={@current_user}
-          portal_title={@portal_title}
-          portal_badge={@portal_badge}
-          portal_accent_classes={@portal_accent_classes}
-          portal_switch_links={@portal_switch_links}
-          unread_count={@unread_count}
-        />
-
-        <ul class="flex-1 space-y-5 font-medium">
-          <li :for={section <- @portal_sections}>
-            <p class="sidebar-label px-2 text-xs font-medium uppercase tracking-wider text-gray-400">
-              {section.title}
-            </p>
-
-            <div class="mt-2 space-y-1.5">
-              <.portal_sidebar_item
-                :for={item <- section.items}
-                item={item}
-                active_tab={@active_tab}
-                current_user={@current_user}
-              />
-            </div>
-          </li>
-        </ul>
-
-        <.portal_bottom_sidebar current_user={@current_user} />
-      </div>
-    </aside>
-    """
-  end
-
-  def supplier_portal_sidebar(assigns) do
-    assigns =
-      assigns
-      |> assign_new(:portal_title, fn -> "Supplier Portal" end)
-      |> assign_new(:portal_badge, fn -> "Supplier" end)
-      |> assign_new(:portal_accent_classes, fn ->
-        "bg-[#f0f0ff] text-[#373896] ring-1 ring-[#d2d3ff]"
-      end)
-
-    ~H"""
-    <aside
-      id="main-sidebar"
-      phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 h-screen w-72 -translate-x-full transition-transform md:translate-x-0"
-      aria-label="Sidebar"
-    >
-      <div class="flex h-full flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
-        <.portal_top_sidebar
-          current_user={@current_user}
-          portal_title={@portal_title}
-          portal_badge={@portal_badge}
-          portal_accent_classes={@portal_accent_classes}
-          portal_switch_links={@portal_switch_links}
-          unread_count={@unread_count}
-        />
-
-        <ul class="flex-1 space-y-5 font-medium">
-          <li :for={section <- @portal_sections}>
-            <p class="sidebar-label px-2 text-xs font-medium uppercase tracking-wider text-gray-400">
-              {section.title}
-            </p>
-
-            <div class="mt-2 space-y-1.5">
-              <.portal_sidebar_item
-                :for={item <- section.items}
-                item={item}
-                active_tab={@active_tab}
-                current_user={@current_user}
-              />
-            </div>
-          </li>
-        </ul>
-
-        <.portal_bottom_sidebar current_user={@current_user} />
-      </div>
-    </aside>
-    """
-  end
-
   @spec lab_sidebar(any()) :: Phoenix.LiveView.Rendered.t()
   def lab_sidebar(assigns) do
     assigns =
@@ -464,126 +267,6 @@ defmodule MedcampWeb.SidebarComponents do
           <%!-- Grouped sections --%>
           <%= for group <- @groups do %>
             <.sidebar_group group={group} active_tab={@active_tab} current_user={@current_user} />
-          <% end %>
-        </ul>
-
-        <.bottom_base_sidebar current_user={@current_user} />
-      </div>
-    </aside>
-    """
-  end
-
-  def support_staff_sidebar(assigns) do
-    assigns =
-      assign(
-        assigns,
-        :groups,
-        SidebarCatalog.visible_tab_groups(assigns.current_user, "support staff")
-      )
-
-    ~H"""
-    <aside
-      id="main-sidebar"
-      phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
-      aria-label="Sidebar"
-    >
-      <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
-        <.top_base_sidebar current_user={@current_user} name="Support Staff's Panel" />
-
-        <ul class="space-y-1 font-medium flex-1">
-          <%!-- Standalone Dashboard link --%>
-          <.sidebar_card
-            tab={
-              %{
-                name: "Dashboard",
-                icon: "home-modern",
-                url: "/support_staff/dashboard",
-                tab_name: :dashboard
-              }
-            }
-            active_tab={@active_tab}
-            current_user={@current_user}
-          />
-
-          <%!-- Grouped sections --%>
-          <%= for group <- @groups do %>
-            <.sidebar_group group={group} active_tab={@active_tab} current_user={@current_user} />
-          <% end %>
-        </ul>
-
-        <.bottom_base_sidebar current_user={@current_user} />
-      </div>
-    </aside>
-    """
-  end
-
-  def radiologist_sidebar(assigns) do
-    assigns =
-      assign(
-        assigns,
-        :groups,
-        SidebarCatalog.visible_tab_groups(assigns.current_user, "radiologist")
-      )
-
-    ~H"""
-    <aside
-      id="main-sidebar"
-      phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
-      aria-label="Sidebar"
-    >
-      <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
-        <.top_base_sidebar current_user={@current_user} name="Radiologist's Panel" />
-
-        <ul class="space-y-1 font-medium flex-1">
-          <%!-- Standalone Dashboard link --%>
-          <.sidebar_card
-            tab={
-              %{
-                name: "Dashboard",
-                icon: "home-modern",
-                url: "/radiologist/dashboard",
-                tab_name: :dashboard
-              }
-            }
-            active_tab={@active_tab}
-            current_user={@current_user}
-          />
-
-          <%!-- Grouped sections --%>
-          <%= for group <- @groups do %>
-            <.sidebar_group group={group} active_tab={@active_tab} current_user={@current_user} />
-          <% end %>
-        </ul>
-
-        <.bottom_base_sidebar current_user={@current_user} />
-      </div>
-    </aside>
-    """
-  end
-
-  def radiologist_each_patient_sidebar(assigns) do
-    assigns =
-      assign(
-        assigns,
-        :patient_tabs,
-        SidebarCatalog.visible_patient_tabs(assigns.current_user, "radiologist", assigns.patient)
-      )
-
-    ~H"""
-    <aside
-      id="main-sidebar"
-      phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
-      aria-label="Sidebar"
-    >
-      <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
-        <.top_base_sidebar current_user={@current_user} name="Radiologist's Panel" />
-
-        <ul class="space-y-1.5 font-medium flex-1">
-          <%= for tab <- @patient_tabs do %>
-            <.sidebar_card tab={tab} active_tab={@active_tab} current_user={@current_user} />
           <% end %>
         </ul>
 
@@ -668,51 +351,6 @@ defmodule MedcampWeb.SidebarComponents do
     """
   end
 
-  def reception_sidebar(assigns) do
-    assigns =
-      assign(
-        assigns,
-        :groups,
-        SidebarCatalog.visible_tab_groups(assigns.current_user, "reception")
-      )
-
-    ~H"""
-    <aside
-      id="main-sidebar"
-      phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
-      aria-label="Sidebar"
-    >
-      <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
-        <.top_base_sidebar current_user={@current_user} name="Reception's Panel" />
-
-        <ul class="space-y-1 font-medium flex-1">
-          <%!-- Standalone Dashboard link --%>
-          <.sidebar_card
-            tab={
-              %{
-                name: "Dashboard",
-                icon: "home-modern",
-                url: "/reception/dashboard",
-                tab_name: :dashboard
-              }
-            }
-            active_tab={@active_tab}
-            current_user={@current_user}
-          />
-
-          <%!-- Grouped sections --%>
-          <%= for group <- @groups do %>
-            <.sidebar_group group={group} active_tab={@active_tab} current_user={@current_user} />
-          <% end %>
-        </ul>
-
-        <.bottom_base_sidebar current_user={@current_user} />
-      </div>
-    </aside>
-    """
-  end
-
   def shared_sidebar(assigns) do
     ~H"""
     <aside
@@ -726,36 +364,6 @@ defmodule MedcampWeb.SidebarComponents do
 
         <ul class="space-y-1.5 font-medium flex-1">
           <%= for tab <- shared_tabs(@current_user) do %>
-            <.sidebar_card tab={tab} active_tab={@active_tab} current_user={@current_user} />
-          <% end %>
-        </ul>
-
-        <.bottom_base_sidebar current_user={@current_user} />
-      </div>
-    </aside>
-    """
-  end
-
-  def reception_each_patient_sidebar(assigns) do
-    assigns =
-      assign(
-        assigns,
-        :patient_tabs,
-        SidebarCatalog.visible_patient_tabs(assigns.current_user, "reception", assigns.patient)
-      )
-
-    ~H"""
-    <aside
-      id="main-sidebar"
-      phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
-      aria-label="Sidebar"
-    >
-      <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
-        <.top_base_sidebar current_user={@current_user} name="Reception's Panel" />
-
-        <ul class="space-y-1.5 font-medium flex-1">
-          <%= for tab <- @patient_tabs do %>
             <.sidebar_card tab={tab} active_tab={@active_tab} current_user={@current_user} />
           <% end %>
         </ul>
@@ -974,227 +582,10 @@ defmodule MedcampWeb.SidebarComponents do
     """
   end
 
-  attr :current_user, :map, required: true
-  attr :portal_title, :string, required: true
-  attr :portal_badge, :string, required: true
-  attr :portal_accent_classes, :string, required: true
-  attr :portal_switch_links, :list, default: []
-  attr :unread_count, :integer, default: 0
-
-  defp portal_top_sidebar(assigns) do
-    ~H"""
-    <div class="mb-7">
-      <div class="sidebar-top-section sidebar-brand-row mb-5 flex items-center justify-between gap-3">
-        <div class="flex min-w-0 items-center gap-3">
-          <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#cfd1ff] bg-[#f0f0ff] text-[13px] font-bold text-[#373896]">
-            GHCE
-          </div>
-
-          <div class="sidebar-brand-copy min-w-0">
-            <p class="truncate text-[17px] font-bold leading-tight text-[#373896]">GHC Excellence</p>
-            <p class="truncate text-[13px] font-medium leading-snug text-[#687083]">
-              {@portal_title}
-            </p>
-          </div>
-        </div>
-
-        <button
-          id="sidebar-toggle-btn"
-          type="button"
-          title="Toggle sidebar"
-          aria-label="Toggle sidebar"
-          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#e2e6f0] bg-white text-[#373896] transition-colors hover:bg-[#f6f5ff]"
-        >
-          <Heroicons.icon name="chevron-left" type="outline" class="sidebar-chevron h-4 w-4" />
-        </button>
-      </div>
-
-      <div class="sidebar-account-card mb-6 rounded-2xl border border-[#e8ebf3] bg-[#fbfbff] px-4 py-3.5">
-        <div class="flex items-center gap-3">
-          <div class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#373896] text-[15px] font-bold text-white">
-            <%= if @current_user.image do %>
-              <img src={@current_user.image} alt="User Avatar" class="h-full w-full object-cover" />
-            <% else %>
-              {ProcurementPortal.initials(@current_user && @current_user.name)}
-            <% end %>
-          </div>
-
-          <div class="min-w-0">
-            <p class="truncate text-[15px] font-bold leading-tight text-[#1f2433]">
-              {@current_user.name}
-            </p>
-            <p class="truncate text-[13px] font-medium leading-snug text-[#687083]">
-              {@portal_badge}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  attr :item, :map, required: true
-  attr :active_tab, :any, required: true
-  attr :current_user, :map, required: true
-
-  defp portal_sidebar_item(assigns) do
-    active? = ProcurementPortal.active_tab?(assigns.active_tab, assigns.item.key)
-    disabled? = is_nil(assigns.item.path)
-
-    assigns =
-      assigns
-      |> assign(:active?, active?)
-      |> assign(:disabled?, disabled?)
-      |> assign(
-        :count,
-        ProcurementPortal.item_count(
-          Map.get(assigns.item, :count) || Map.get(assigns.item, "count")
-        )
-      )
-
-    ~H"""
-    <div title={@item.disabled_label}>
-      <.link
-        :if={!@disabled?}
-        navigate={resolve_sidebar_tab_url(%{url: @item.path}, @current_user)}
-        class={[
-          "sidebar-nav-item group flex min-h-[44px] items-center rounded-xl px-4 py-3 text-[15px] font-semibold transition-colors",
-          if(@active?,
-            do: "bg-[#e7e7ff] text-[#373896]",
-            else: "text-[#687083] hover:bg-[#f6f5ff] hover:text-[#373896]"
-          )
-        ]}
-      >
-        <Heroicons.icon
-          name={portal_tab_icon(@item.key)}
-          type="outline"
-          class={
-            "h-5 w-5 shrink-0 stroke-[2] " <>
-              if(@active?, do: "text-[#373896]", else: "text-[#687083] group-hover:text-[#373896]")
-          }
-        />
-
-        <div class="min-w-0 flex-1">
-          <div class="sidebar-label flex items-center justify-between gap-3">
-            <span class="truncate">{@item.label}</span>
-            <span
-              :if={@count}
-              class="rounded-full bg-[#373896] px-2 py-0.5 text-[11px] font-bold text-white"
-            >
-              {@count}
-            </span>
-          </div>
-        </div>
-      </.link>
-
-      <div
-        :if={@disabled?}
-        class="sidebar-nav-item group flex min-h-[44px] items-center rounded-xl bg-slate-50 px-4 py-3 text-[15px] font-semibold text-slate-400"
-      >
-        <Heroicons.icon
-          name={portal_tab_icon(@item.key)}
-          type="outline"
-          class="h-5 w-5 shrink-0 text-slate-300"
-        />
-
-        <div class="min-w-0 flex-1">
-          <div class="sidebar-label flex items-center justify-between gap-3">
-            <span class="truncate">{@item.label}</span>
-            <span
-              :if={@count}
-              class="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-500"
-            >
-              {@count}
-            </span>
-          </div>
-          <p :if={@item.disabled_label} class="mt-1 text-xs leading-5 text-slate-400">
-            {@item.disabled_label}
-          </p>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  attr :current_user, :map, required: true
-
-  defp portal_bottom_sidebar(assigns) do
-    ~H"""
-    <div class="mt-auto border-t border-[#e8ebf3] pt-6">
-      <div class="flex flex-col space-y-1.5">
-        <.link
-          navigate="/chat"
-          class="sidebar-nav-item flex min-h-[44px] items-center rounded-xl px-4 py-3 text-[15px] font-semibold text-[#687083] transition-colors hover:bg-[#f6f5ff] hover:text-[#373896]"
-        >
-          <Heroicons.icon
-            name="question-mark-circle"
-            type="outline"
-            class="h-5 w-5 shrink-0 stroke-[2]"
-          />
-          <span class="sidebar-label ms-4 flex-1 whitespace-nowrap">Help & Support</span>
-        </.link>
-
-        <.link
-          navigate="/telephone_directory"
-          class="sidebar-nav-item flex min-h-[44px] items-center rounded-xl px-4 py-3 text-[15px] font-semibold text-[#687083] transition-colors hover:bg-[#f6f5ff] hover:text-[#373896]"
-        >
-          <Heroicons.icon name="phone" type="outline" class="h-5 w-5 shrink-0 stroke-[2]" />
-          <span class="sidebar-label ms-4 flex-1 whitespace-nowrap">Telephone Directory</span>
-        </.link>
-
-        <.link
-          href="/users/log_out"
-          method="delete"
-          class="sidebar-nav-item flex min-h-[44px] items-center rounded-xl px-4 py-3 text-[15px] font-semibold text-[#c21f17] transition-colors hover:bg-red-50"
-        >
-          <Heroicons.icon
-            name="arrow-right-on-rectangle"
-            type="outline"
-            class="h-5 w-5 shrink-0 stroke-[2]"
-          />
-          <span class="sidebar-label ms-4 flex-1 whitespace-nowrap">Sign Out</span>
-        </.link>
-      </div>
-    </div>
-    """
-  end
-
-  defp inventory_manager_back_to_panel_url(%{role: "admin"}), do: "/admin/dashboard"
-
-  defp inventory_manager_back_to_panel_url(%{role: "reception"}),
-    do: "/reception/dashboard"
-
-  defp inventory_manager_back_to_panel_url(_current_user),
-    do: "/inventory_manager/inventories_received"
-
-  defp portal_tab_icon(:dashboard), do: "home-modern"
-  defp portal_tab_icon(:profile), do: "identification"
-  defp portal_tab_icon(:suppliers), do: "users"
-  defp portal_tab_icon(:onboarding), do: "clipboard-document-check"
-  defp portal_tab_icon(:rfqs), do: "document-text"
-  defp portal_tab_icon(:quotes), do: "clipboard-document-list"
-  defp portal_tab_icon(:proformas), do: "document-duplicate"
-  defp portal_tab_icon(:purchase_orders), do: "archive-box"
-  defp portal_tab_icon(:invoices), do: "banknotes"
-  defp portal_tab_icon(:shipments), do: "truck"
-  defp portal_tab_icon(:grn), do: "folder-open"
-  defp portal_tab_icon(_), do: "rectangle-stack"
-
-  defp resolve_sidebar_tab_url(%{url: url}, current_user)
-       when url in ["/shift_handovers", "/requisitions", "/forms", "/todos"] do
-    RoleRouteHelpers.role_path(current_user, url)
-  end
-
   defp resolve_sidebar_tab_url(%{url: url}, _current_user), do: url
 
   defp shared_tabs(user) do
     [
-      %{
-        name: "SOPs",
-        icon: "document-duplicate",
-        url: "/sops",
-        tab_name: :sops
-      },
       %{
         name: "Back To Panel",
         icon: "arrow-left-on-rectangle",
@@ -1208,17 +599,9 @@ defmodule MedcampWeb.SidebarComponents do
     case role do
       "doctor" -> "/doctor/patients"
       "nurse" -> "/nurse/scan"
-      "reception" -> "/reception/scan"
       "pharmacist" -> "/pharmacist/scan"
       "labtechnician" -> "/lab/scan"
-      "radiologist" -> "/radiologist/scan"
-      "admin" -> "/admin/users"
-      "support staff" -> "/support_staff/daily_activities"
-      "inventory_manager" -> "/inventory_manager/inventories_received"
-      "supplier" -> "/supplier/dashboard"
-      "procurement_officer" -> "/procurement/dashboard"
-      "stores_officer" -> "/procurement/dashboard"
-      "finance_officer" -> "/procurement/dashboard"
+      "admin" -> "/admin/dashboard"
       _ -> "/"
     end
   end
@@ -1283,16 +666,6 @@ defmodule MedcampWeb.SidebarComponents do
           label="Settings"
         />
 
-        <.sidebar_utility_link navigate="/sops" icon="book-open" label="SOPs" />
-
-        <.sidebar_utility_link navigate="/chat" icon="question-mark-circle" label="Help & Support" />
-
-        <.sidebar_utility_link
-          navigate="/telephone_directory"
-          icon="phone"
-          label="Telephone Directory"
-        />
-
         <.sidebar_utility_link
           href="/users/log_out"
           method="delete"
@@ -1344,12 +717,9 @@ defmodule MedcampWeb.SidebarComponents do
       "doctor" -> "/doctor/settings"
       "nurse" -> "/nurse/settings"
       "admin" -> "/admin/settings"
-      "radiologist" -> "/radiologist/settings"
       "pharmacist" -> "/pharmacist/settings"
       "labtechnician" -> "/lab/settings"
-      "reception" -> "/reception/settings"
-      "inventory_manager" -> "/inventory_manager/settings"
-      _ -> "/settings"
+      _ -> "/users/settings"
     end
   end
 

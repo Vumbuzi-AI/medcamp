@@ -8,7 +8,6 @@ defmodule Medcamp.ConsumptionAnalysis do
   import Ecto.Query, warn: false
   alias Medcamp.Repo
   alias Medcamp.DrugsGiven.DrugGiven
-  alias Medcamp.InventoriesIssues.InventoryIssued
 
   @periods ~w(all_time weekly monthly quarterly yearly custom)
   @categories ~w(pharmaceuticals non_pharmaceuticals both)
@@ -186,64 +185,6 @@ defmodule Medcamp.ConsumptionAnalysis do
         total_sold_amount: total_sold_amount || 0,
         average_unit_price: average_unit_price(total_sold_amount, total_quantity),
         category: :pharmaceuticals
-      }
-    end)
-  end
-
-  defp non_pharmaceuticals_consumption(date_range, search) do
-    base =
-      from(ii in InventoryIssued,
-        join: ir in assoc(ii, :inventory_received),
-        group_by: [ir.id, ir.brand_name, ir.generic_name, ir.gtin],
-        select: {
-          ir.id,
-          ir.brand_name,
-          ir.generic_name,
-          ir.gtin,
-          sum(ii.quantity)
-        }
-      )
-
-    base =
-      case date_range do
-        {from_date, to_date} ->
-          from_datetime = DateTime.new!(from_date, ~T[00:00:00], "Etc/UTC")
-          to_datetime = DateTime.new!(Date.add(to_date, 1), ~T[00:00:00], "Etc/UTC")
-
-          from([ii, _ir] in base,
-            where: ii.inserted_at >= ^from_datetime and ii.inserted_at < ^to_datetime
-          )
-
-        nil ->
-          base
-      end
-
-    query =
-      if search != "" do
-        term = "%#{search}%"
-
-        from([ii, ir] in base,
-          where:
-            ilike(ir.brand_name, ^term) or
-              ilike(ir.generic_name, ^term) or
-              ilike(ir.gtin, ^term) or
-              ilike(ii.gtin, ^term)
-        )
-      else
-        base
-      end
-
-    query
-    |> Repo.all()
-    |> Enum.map(fn {_id, brand, generic, gtin, total} ->
-      %{
-        brand_name: brand,
-        generic_name: generic,
-        gtin: gtin,
-        total_quantity: total || 0,
-        total_sold_amount: nil,
-        average_unit_price: nil,
-        category: :non_pharmaceuticals
       }
     end)
   end

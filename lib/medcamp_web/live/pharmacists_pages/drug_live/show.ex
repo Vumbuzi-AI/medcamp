@@ -45,7 +45,6 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
     socket
     |> assign(:page_title, "Listing Drug batches")
     |> assign(:drug_batch, nil)
-    |> assign(:requisition_prefill, nil)
     |> assign_drug_tab_from_params(params)
     |> assign_batch_tab_from_params(params)
     |> assign_prescriptions_status_from_params(params)
@@ -54,34 +53,6 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
     |> maybe_load_batches_by_tab()
     |> maybe_load_prescriptions_by_status()
     |> maybe_load_drugs_given()
-  end
-
-  defp apply_action(socket, :requisition, params) do
-    ir_id =
-      case params["inventory_received_id"] do
-        "" ->
-          nil
-
-        nil ->
-          nil
-
-        id when is_binary(id) ->
-          case Integer.parse(id) do
-            {n, _} -> n
-            _ -> nil
-          end
-
-        _ ->
-          nil
-      end
-
-    socket
-    |> assign(:page_title, "Listing Drug batches")
-    |> assign(:requisition_prefill, %{
-      inventory_received_id: ir_id,
-      item_title: params["item_title"] || "Requisition",
-      item_description: params["item_description"] || ""
-    })
   end
 
   defp assign_drug_tab_from_params(socket, params) do
@@ -283,18 +254,6 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
   end
 
   @impl true
-  def handle_event("open_requisition_modal", params, socket) do
-    path =
-      "/pharmacist/drugs/#{socket.assigns.drug.id}/requisition?" <>
-        URI.encode_query(%{
-          "inventory_received_id" => params["inventory_received_id"] || "",
-          "item_title" => params["item_title"] || "Requisition",
-          "item_description" => params["item_description"] || ""
-        })
-
-    {:noreply, push_patch(socket, to: path)}
-  end
-
   def handle_event("open_edit_drug_modal", _params, socket) do
     {:noreply, assign(socket, :editing_drug, true)}
   end
@@ -542,19 +501,6 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 bg-[#373896] px-5 text-sm shadow-sm hover:bg-[#2f317f]"
             >
               <.icon name="hero-pencil-square" class="h-4 w-4" /> Edit Drug
-            </.button>
-
-            <.button
-              type="button"
-              phx-click="open_requisition_modal"
-              phx-value-inventory_received_id={@drug.inventory_received_id}
-              phx-value-item_title={"#{@drug.generic_name || @drug.inventory_received.generic_name}"}
-              phx-value-item_description={
-                @drug.brand_name || @drug.inventory_received.brand_name || ""
-              }
-              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 bg-[#23395d] px-5 text-sm shadow-sm hover:bg-[#1b2f4d]"
-            >
-              <.icon name="hero-document-plus" class="h-4 w-4" /> Make requisition
             </.button>
 
             <button type="button" phx-click="toggle_dangerous_drug" class={dda_button_class(@drug)}>
@@ -1094,25 +1040,6 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           </div>
         </div>
       </div>
-    <% end %>
-
-    <%!-- Make requisition modal --%>
-    <%= if @requisition_prefill do %>
-      <.modal
-        id="requisition-for-item-modal"
-        show
-        on_cancel={JS.patch(~p"/pharmacist/drugs/#{@drug.id}")}
-      >
-        <.live_component
-          module={MedcampWeb.RequisitionLive.RequisitionForItemComponent}
-          id="requisition-for-item"
-          inventory_received_id={@requisition_prefill.inventory_received_id}
-          item_title={@requisition_prefill.item_title}
-          item_description={@requisition_prefill.item_description}
-          current_user={@current_user}
-          patch={~p"/pharmacist/drugs/#{@drug.id}"}
-        />
-      </.modal>
     <% end %>
     """
   end

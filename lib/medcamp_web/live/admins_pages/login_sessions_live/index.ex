@@ -2,19 +2,15 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
   use MedcampWeb, :admin_live_view
 
   alias Medcamp.UserLoginSessions
-  alias Medcamp.Departments
 
   @per_page 10
 
   @impl true
   def mount(_params, _session, socket) do
-    departments = Departments.list_departments_for_selection()
-
     {:ok,
      socket
      |> assign(:active_tab, :login_sessions)
-     |> assign(:departments, departments)
-     |> assign(:filters, %{search: "", department_id: "", active: ""})
+     |> assign(:filters, %{search: "", active: ""})
      |> assign(:page, 1)
      |> assign(:per_page, @per_page)
      |> load_sessions()}
@@ -38,23 +34,11 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
     |> Enum.count(&(&1 not in [nil, ""]))
   end
 
-  defp filter_chips(filters, departments) do
+  defp filter_chips(filters) do
     [
-      filter_chip(
-        filters[:department_id],
-        "department_id",
-        department_name(filters[:department_id], departments)
-      ),
       filter_chip(filters[:active], "active", active_label(filters[:active]))
     ]
     |> Enum.reject(&is_nil/1)
-  end
-
-  defp department_name(id, departments) do
-    case Enum.find(departments, fn {_name, dept_id} -> to_string(dept_id) == to_string(id) end) do
-      {name, _id} -> name
-      nil -> id
-    end
   end
 
   defp active_label("active"), do: "Active (logged in)"
@@ -67,7 +51,6 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
 
     filters = %{
       search: params["search"] || "",
-      department_id: params["department_id"] || "",
       active: params["active"] || ""
     }
 
@@ -82,7 +65,7 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
   def handle_event("clear_filters", _params, socket) do
     {:noreply,
      socket
-     |> assign(:filters, %{search: "", department_id: "", active: ""})
+     |> assign(:filters, %{search: "", active: ""})
      |> assign(:page, 1)
      |> load_sessions()}
   end
@@ -144,21 +127,7 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
           apply_event="filter"
           active_count={count_active_filters(@filters)}
         >
-          <:group label="Department and Status">
-            <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Department</label>
-              <select
-                name="department_id"
-                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
-              >
-                <option value="">All departments</option>
-                <%= for {name, id} <- @departments do %>
-                  <option value={id} selected={@filters[:department_id] == to_string(id)}>
-                    {name}
-                  </option>
-                <% end %>
-              </select>
-            </div>
+          <:group label="Status">
             <div>
               <label class="block text-xs font-medium text-gray-600 mb-1">Session Status</label>
               <select
@@ -177,7 +146,7 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
           </:group>
 
           <:chip
-            :for={chip <- filter_chips(@filters, @departments)}
+            :for={chip <- filter_chips(@filters)}
             label={chip.label}
             clear={JS.push("clear_chip", value: %{"field" => chip.field})}
           />
@@ -224,18 +193,6 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
                 <p class="font-medium text-gray-900 text-sm">{session.user.name}</p>
                 <p class="text-xs text-gray-500">{session.user.email}</p>
               </div>
-            </div>
-          </:col>
-
-          <:col :let={session} label="Department">
-            <div class="py-2">
-              <%= if session.user.department do %>
-                <span class="px-2 py-1 text-xs rounded-full bg-[#f0f0ff] text-[#373896]">
-                  {session.user.department.name}
-                </span>
-              <% else %>
-                <span class="text-gray-400 text-sm">—</span>
-              <% end %>
             </div>
           </:col>
 

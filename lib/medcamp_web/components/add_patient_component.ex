@@ -399,14 +399,16 @@ defmodule MedcampWeb.AddPatientComponent do
   end
 
   defp save_patient(socket, :new, patient_params) do
-    case Patients.create_patient(patient_params) do
-      {:ok, patient} ->
+    # Registering someone opens their camp visit in the same transaction, so
+    # they land in the triage queue without anyone opening a second form.
+    case Patients.register_for_camp(patient_params, socket.assigns.current_user) do
+      {:ok, {patient, _visit}} ->
         destination =
           if socket.assigns.show_path, do: socket.assigns.show_path.(patient), else: nil
 
         {:noreply,
          socket
-         |> put_flash(:info, "Patient created successfully")
+         |> put_flash(:info, "Patient registered and sent to triage")
          |> push_navigate(to: destination || socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->

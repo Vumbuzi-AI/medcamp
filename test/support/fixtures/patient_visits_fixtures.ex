@@ -22,8 +22,7 @@ defmodule Medcamp.PatientVisitsFixtures do
       |> Enum.into(%{
         date: ~D[2025-02-24],
         reason: "some reason",
-        payment_type: "some payment_type",
-        has_paid: true,
+        status: "triage_pending",
         patient_id: patient.id,
         creator_id: creator.id
       })

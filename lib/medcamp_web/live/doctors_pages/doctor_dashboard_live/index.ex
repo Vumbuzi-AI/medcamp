@@ -1,7 +1,6 @@
 defmodule MedcampWeb.DoctorDashboardLive.Index do
   use MedcampWeb, :doctor_live_view
 
-  alias Medcamp.Appointments
   alias Medcamp.DoctorNotes
   alias Medcamp.LabResults
   alias Medcamp.PatientVisits
@@ -112,14 +111,6 @@ defmodule MedcampWeb.DoctorDashboardLive.Index do
         search: search
       })
 
-    appointments =
-      Appointments.filter_appointments(%{
-        doctor_id: doctor_id,
-        date_from: Date.to_iso8601(date_from),
-        date_to: Date.to_iso8601(date_to),
-        patient_search: search
-      })
-
     doctor_notes = filter_doctor_notes_for_doctor(doctor_id, date_from, date_to)
 
     lab_results =
@@ -137,11 +128,10 @@ defmodule MedcampWeb.DoctorDashboardLive.Index do
     age_groups = build_age_groups(stats)
     geographic = build_geographic_breakdown(patients)
     visit_types = build_visit_types(visits)
-    payment_types = build_payment_types(visits)
+    visit_statuses = build_visit_statuses(visits)
 
     socket
     |> assign(:visits, visits)
-    |> assign(:appointments, appointments)
     |> assign(:doctor_notes, doctor_notes)
     |> assign(:lab_results, lab_results)
     |> assign(:stats, stats)
@@ -150,7 +140,7 @@ defmodule MedcampWeb.DoctorDashboardLive.Index do
     |> assign(:age_groups, age_groups)
     |> assign(:geographic, geographic)
     |> assign(:visit_types, visit_types)
-    |> assign(:payment_types, payment_types)
+    |> assign(:visit_statuses, visit_statuses)
   end
 
   @impl true
@@ -163,7 +153,7 @@ defmodule MedcampWeb.DoctorDashboardLive.Index do
           subtitle={"Your patients and visits for #{format_date(@date_from)} to #{format_date(@date_to)}"}
           search_name="search[term]"
           search_value={@search}
-          search_placeholder="Search my patients, visits or appointments..."
+          search_placeholder="Search my patients or visits..."
           filter_id="doctor-dashboard-filters"
           active_filter_count={if @period == :custom, do: 1, else: 0}
         >
@@ -230,7 +220,7 @@ defmodule MedcampWeb.DoctorDashboardLive.Index do
             <.visit_breakdown_card
               active_view={@visit_chart_tab}
               visit_types={@visit_types}
-              payment_types={@payment_types}
+              visit_statuses={@visit_statuses}
             />
             <.geographic_spread_table rows={@geographic} />
           </div>
@@ -269,7 +259,6 @@ defmodule MedcampWeb.DoctorDashboardLive.Index do
   defp summary_cards(assigns) do
     summary_cards_for(assigns.visible_summary_cards, %{
       patient_visits: {length(assigns.visits), "Visits in selected window"},
-      appointments: {length(assigns.appointments), "Booked appointments"},
       doctor_notes: {length(assigns.doctor_notes), "Notes recorded"},
       lab_tests_done: {length(assigns.lab_results), "Completed lab tests"}
     })
@@ -372,9 +361,11 @@ defmodule MedcampWeb.DoctorDashboardLive.Index do
     |> Enum.sort_by(& &1.count, :desc)
   end
 
-  defp build_payment_types(visits) do
+  # A camp charges nothing, so this charts where patients are in
+  # the camp flow instead of how they paid.
+  defp build_visit_statuses(visits) do
     visits
-    |> Enum.group_by(fn v -> v.payment_type || "Unspecified" end)
+    |> Enum.group_by(fn v -> Medcamp.PatientVisits.PatientVisit.status_label(v.status) end)
     |> Enum.map(fn {label, list} -> %{label: label, count: length(list)} end)
     |> Enum.sort_by(& &1.count, :desc)
   end

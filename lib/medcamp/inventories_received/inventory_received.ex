@@ -4,6 +4,19 @@ defmodule Medcamp.InventoriesReceived.InventoryReceived do
   alias Medcamp.Repo
   import Ecto.Query
 
+  @moduledoc """
+  The pharmacy item master: one row per distinct product the camp stocks,
+  keyed by GTIN and carrying its brand/generic name, strength, category and
+  unit of measure.
+
+  Despite the legacy `inventories_received` name this is a catalogue, not a
+  goods-receipt document - the camp has no procurement chain. It is the
+  identity a prescription and a dispense are recorded against
+  (`inventory_received_id` flows through drug allocations and drugs given),
+  which is why it survived the trim while the surrounding stores workflow
+  did not.
+  """
+
   schema "inventories_received" do
     field :type, :string
     field :description, :string
@@ -16,7 +29,6 @@ defmodule Medcamp.InventoriesReceived.InventoryReceived do
     field :uom, :string
     field :category, :string
     field :strength, :string
-    belongs_to :room, Medcamp.Rooms.Room
     belongs_to :user, Medcamp.Accounts.User
     timestamps(type: :utc_datetime)
   end
@@ -36,7 +48,6 @@ defmodule Medcamp.InventoriesReceived.InventoryReceived do
       :generic_name,
       :supplier,
       :type,
-      :room_id,
       :user_id
     ])
     |> validate_required([:gtin, :brand_name])

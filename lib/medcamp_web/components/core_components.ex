@@ -1606,4 +1606,55 @@ defmodule MedcampWeb.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  @doc """
+  Interactive e-signature pad backed by the SignaturePad JS hook.
+  Each pad on a page must have a unique `id`.
+  """
+  attr :id, :string, required: true
+  attr :label, :string, default: "Signature"
+  attr :name, :string, default: nil
+  attr :value, :string, default: ""
+
+  def signature_pad(assigns) do
+    assigns =
+      assigns
+      |> assign_new(:name, fn -> assigns.id end)
+      |> assign_new(:value, fn -> "" end)
+
+    ~H"""
+    <div class="space-y-1.5">
+      <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        {@label}
+      </label>
+      <div
+        id={@id}
+        phx-hook="SignaturePad"
+        class="relative border border-gray-300 rounded-lg overflow-hidden bg-white group"
+      >
+        <canvas class="w-full h-24 touch-none cursor-crosshair block"></canvas>
+        <input type="hidden" name={@name} value={@value} />
+        <div class="absolute top-1.5 right-1.5 flex gap-1 print:hidden opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            type="button"
+            data-undo
+            class="px-2 py-0.5 text-xs bg-white border border-gray-200 rounded text-gray-500 hover:bg-gray-50 shadow-sm"
+          >
+            Undo
+          </button>
+          <button
+            type="button"
+            data-clear
+            class="px-2 py-0.5 text-xs bg-white border border-gray-200 rounded text-red-400 hover:bg-red-50 shadow-sm"
+          >
+            Clear
+          </button>
+        </div>
+        <p class="absolute bottom-1.5 left-2 text-[10px] text-gray-300 pointer-events-none print:hidden">
+          Draw signature above
+        </p>
+      </div>
+    </div>
+    """
+  end
 end

@@ -45,14 +45,6 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PendingIndex do
   end
 
   @impl true
-  def handle_info({MedcampWeb.PatientVisitLive.FormComponent, {:saved, patient_visit}}, socket) do
-    {:noreply,
-     socket
-     |> update(:pending_visits_count, &(&1 + 1))
-     |> assign(:patient_visits, upsert(socket.assigns.patient_visits, patient_visit))}
-  end
-
-  @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     patient_visit = PatientVisits.get_patient_visit!(id)
     {:ok, _} = PatientVisits.delete_patient_visit(patient_visit)

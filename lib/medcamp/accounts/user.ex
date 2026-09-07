@@ -2,24 +2,8 @@ defmodule Medcamp.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @non_procurement_roles [
-    "admin",
-    "doctor",
-    "nurse",
-    "labtechnician",
-    "reception",
-    "pharmacist",
-    "radiologist",
-    "support staff",
-    "inventory_manager",
-    "housekeeping",
-    "cleaner",
-    "staff"
-  ]
-  @procurement_roles ~w(supplier procurement_officer stores_officer finance_officer admin)
-  @roles Enum.uniq(@non_procurement_roles ++ @procurement_roles)
+  @roles ~w(admin doctor nurse pharmacist labtechnician)
 
-  def procurement_roles, do: @procurement_roles
   def roles, do: @roles
 
   schema "users" do
@@ -43,8 +27,6 @@ defmodule Medcamp.Accounts.User do
     field :last_logged_out_at, :utc_datetime
 
     field :gsrn, :string
-    belongs_to :department, Medcamp.Departments.Department
-    belongs_to :supplier, Medcamp.Suppliers.Supplier
 
     timestamps(type: :utc_datetime)
   end
@@ -98,9 +80,7 @@ defmodule Medcamp.Accounts.User do
       :hashed_password,
       :otp,
       :otp_expires_at,
-      :inserted_at,
-      :department_id,
-      :supplier_id
+      :inserted_at
     ])
     |> validate_email(opts)
     |> validate_otp_pin_if_changed()

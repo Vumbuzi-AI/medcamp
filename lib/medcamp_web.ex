@@ -79,46 +79,10 @@ defmodule MedcampWeb do
     end
   end
 
-  def inventory_manager_live_view do
-    quote do
-      use Phoenix.LiveView,
-        layout: {MedcampWeb.Layouts, :inventory_manager}
-
-      unquote(html_helpers())
-    end
-  end
-
   def lab_live_view do
     quote do
       use Phoenix.LiveView,
         layout: {MedcampWeb.Layouts, :lab}
-
-      unquote(html_helpers())
-    end
-  end
-
-  def radiologist_live_view do
-    quote do
-      use Phoenix.LiveView,
-        layout: {MedcampWeb.Layouts, :radiologist}
-
-      unquote(html_helpers())
-    end
-  end
-
-  def support_staff_live_view do
-    quote do
-      use Phoenix.LiveView,
-        layout: {MedcampWeb.Layouts, :support_staff}
-
-      unquote(html_helpers())
-    end
-  end
-
-  def radiologist_each_patient_live_view do
-    quote do
-      use Phoenix.LiveView,
-        layout: {MedcampWeb.Layouts, :radiologist_each_patient}
 
       unquote(html_helpers())
     end
@@ -178,42 +142,6 @@ defmodule MedcampWeb do
     end
   end
 
-  def reception_live_view do
-    quote do
-      use Phoenix.LiveView,
-        layout: {MedcampWeb.Layouts, :reception}
-
-      unquote(html_helpers())
-    end
-  end
-
-  def supplier_live_view do
-    quote do
-      use Phoenix.LiveView,
-        layout: {MedcampWeb.Layouts, :supplier}
-
-      unquote(html_helpers())
-    end
-  end
-
-  def procurement_live_view do
-    quote do
-      use Phoenix.LiveView,
-        layout: {MedcampWeb.Layouts, :procurement}
-
-      unquote(html_helpers())
-    end
-  end
-
-  def reception_each_patient_live_view do
-    quote do
-      use Phoenix.LiveView,
-        layout: {MedcampWeb.Layouts, :reception_each_patient}
-
-      unquote(html_helpers())
-    end
-  end
-
   def each_patient_live_view do
     quote do
       use Phoenix.LiveView,
@@ -253,24 +181,15 @@ defmodule MedcampWeb do
       import Phoenix.HTML
       # Core UI components
       import MedcampWeb.CoreComponents
-      import MedcampWeb.PublicSiteComponents
       import MedcampWeb.SidebarComponents
       import MedcampWeb.PatientComponents
       import MedcampWeb.TriageComponents
       import MedcampWeb.DoctorNotesComponents
-      import MedcampWeb.CommunityHealthSurveyComponents
       import MedcampWeb.LabResultComponents
       import MedcampWeb.DrugAllocationComponents
       import MedcampWeb.ScanComponents
-      import MedcampWeb.ReferralsComponents
-      import MedcampWeb.RadiologyComponents
-      import MedcampWeb.AdmissionRequestsComponents
       import MedcampWeb.ProfileComponents
-      import MedcampWeb.TelephoneComponents
-      import MedcampWeb.WalletDepositComponents
-      import MedcampWeb.InPatientComponents
       import MedcampWeb.StockAlertComponents
-      import MedcampWeb.FormsComponents
       import MedcampWeb.DashboardComponents
       import MedcampWeb.MedicalCampReportComponents
 

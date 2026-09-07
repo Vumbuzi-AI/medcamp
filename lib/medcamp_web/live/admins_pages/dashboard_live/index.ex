@@ -2,10 +2,8 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
   use MedcampWeb, :admin_live_view
 
   alias Medcamp.Accounts
-  alias Medcamp.Appointments
   alias Medcamp.DoctorNotes
   alias Medcamp.LabResults
-  alias Medcamp.Mpesas
   alias Medcamp.PatientVisits
   alias Medcamp.Patients
   alias MedcampWeb.Dashboards.WidgetResolver
@@ -115,54 +113,34 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
         search: search
       })
 
-    appointments =
-      Appointments.filter_appointments(%{
-        date_from: Date.to_iso8601(date_from),
-        date_to: Date.to_iso8601(date_to),
-        patient_search: search
-      })
-
-    payments = filter_payments(date_from, date_to, search)
     doctor_notes = filter_doctor_notes(date_from, date_to)
     lab_results = filter_lab_results(date_from, date_to)
     users = Accounts.list_users()
     repeat_patients_count = PatientVisits.count_repeat_patients({date_from, date_to})
 
     stats = compute_stats(patients)
-    revenue = compute_revenue(payments)
-    daily_revenue = build_daily_revenue(payments, date_from, date_to)
     daily_registrations = build_daily_registrations(patients, date_from, date_to)
-    monthly_revenue = build_monthly_revenue()
 
     gender_breakdown = build_gender_breakdown(stats)
     age_groups = build_age_groups(stats)
     geographic = build_geographic_breakdown(patients)
 
     visit_types = build_visit_types(visits)
-    payment_types = build_payment_types(visits)
-    revenue_by_reason = build_revenue_by_reason(payments)
-    revenue_by_prompter = build_revenue_by_prompter(payments)
+    visit_statuses = build_visit_statuses(visits)
 
     socket
     |> assign(:patients, patients)
     |> assign(:visits, visits)
-    |> assign(:appointments, appointments)
-    |> assign(:payments, payments)
     |> assign(:doctor_notes, doctor_notes)
     |> assign(:lab_results, lab_results)
     |> assign(:users, users)
     |> assign(:stats, stats)
-    |> assign(:revenue, revenue)
-    |> assign(:daily_revenue, daily_revenue)
     |> assign(:daily_registrations, daily_registrations)
-    |> assign(:monthly_revenue, monthly_revenue)
     |> assign(:gender_breakdown, gender_breakdown)
     |> assign(:age_groups, age_groups)
     |> assign(:geographic, geographic)
     |> assign(:visit_types, visit_types)
-    |> assign(:payment_types, payment_types)
-    |> assign(:revenue_by_reason, revenue_by_reason)
-    |> assign(:revenue_by_prompter, revenue_by_prompter)
+    |> assign(:visit_statuses, visit_statuses)
     |> assign(:repeat_patients_count, repeat_patients_count)
   end
 
@@ -176,7 +154,7 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
           subtitle={"System-wide view for #{format_date(@date_from)} to #{format_date(@date_to)}"}
           search_name="search[term]"
           search_value={@search}
-          search_placeholder="Search patients, visits, revenue or reports..."
+          search_placeholder="Search patients, visits or reports..."
           filter_id="admin-dashboard-filters"
           active_filter_count={if @period == :custom, do: 1, else: 0}
         >
@@ -211,37 +189,6 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
               active_tab={@dashboard_analytics_tab}
             />
           </:actions>
-          <div :if={@dashboard_analytics_tab == :revenue} class="space-y-6">
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <.chart_panel
-                title="Daily Revenue"
-                subtitle="M-Pesa payments collected per day in the selected window."
-                config={daily_revenue_chart(@daily_revenue)}
-                height="320px"
-              />
-              <.chart_panel
-                title="Monthly Revenue"
-                subtitle="Total revenue collected in the last 12 months."
-                config={monthly_revenue_chart(@monthly_revenue)}
-                height="320px"
-              />
-            </div>
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <.chart_panel
-                title="Revenue by Service"
-                subtitle="Top revenue sources in the selected window."
-                config={revenue_by_reason_chart(@revenue_by_reason)}
-                height="360px"
-              />
-              <.chart_panel
-                title="Revenue by Staff"
-                subtitle="Who initiated the most successful payments."
-                config={revenue_by_prompter_chart(@revenue_by_prompter)}
-                height="360px"
-              />
-            </div>
-          </div>
-
           <div
             :if={@dashboard_analytics_tab == :patients}
             class="grid grid-cols-1 xl:grid-cols-2 gap-6"
@@ -274,7 +221,7 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
             <.visit_breakdown_card
               active_view={@visit_chart_tab}
               visit_types={@visit_types}
-              payment_types={@payment_types}
+              visit_statuses={@visit_statuses}
             />
             <.geographic_spread_table rows={@geographic} />
           </div>
@@ -315,16 +262,12 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
       total_patients: {assigns.stats.total, "Registered patients"},
       patient_visits:
         {length(assigns.visits), "#{assigns.repeat_patients_count} returning (2+ paid visits)"},
-      revenue_collected: {"KSh #{delimited(assigns.revenue.total)}", "M-Pesa payments collected"},
-      appointments: {length(assigns.appointments), "Booked appointments"},
       doctor_notes: {length(assigns.doctor_notes), "Notes recorded"},
       lab_tests_done: {length(assigns.lab_results), "Completed lab tests"},
-      active_system_users: {Enum.count(assigns.users, & &1.is_active), "Enabled system accounts"},
-      mpesa_transactions: {assigns.revenue.count, "Payment transactions"}
+      active_system_users: {Enum.count(assigns.users, & &1.is_active), "Enabled system accounts"}
     })
   end
 
-  defp analytics_subtitle(:revenue), do: "Revenue — Money collected and top sources"
   defp analytics_subtitle(:patients), do: "Patients — Patient mix and registration trends"
   defp analytics_subtitle(:operations), do: "Operations — Visits, staff and locations"
 
@@ -372,26 +315,6 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
 
   # ---- Data filters ----
 
-  defp filter_payments(date_from, date_to, search) do
-    Mpesas.list_successful_payments()
-    |> Enum.filter(fn p ->
-      d = datetime_to_eat_date(p.inserted_at)
-      d != nil and Date.compare(d, date_from) != :lt and Date.compare(d, date_to) != :gt
-    end)
-    |> apply_payment_search(search)
-  end
-
-  defp apply_payment_search(payments, search) when search in [nil, ""], do: payments
-
-  defp apply_payment_search(payments, search) do
-    term = String.downcase(search)
-
-    Enum.filter(payments, fn p ->
-      [p.reason, p.description, p.account_number, p.receipt]
-      |> Enum.any?(fn field -> field && String.contains?(String.downcase(field), term) end)
-    end)
-  end
-
   defp filter_doctor_notes(date_from, date_to) do
     DoctorNotes.list_doctor_notes()
     |> Enum.filter(fn note ->
@@ -427,13 +350,6 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
     Patients.compute_camp_stats_for_patients(patients)
   end
 
-  defp compute_revenue(payments) do
-    %{
-      total: Enum.reduce(payments, 0, fn p, acc -> acc + (p.amount || 0) end),
-      count: length(payments)
-    }
-  end
-
   defp build_gender_breakdown(stats) do
     other = max(stats.total - stats.male - stats.female, 0)
 
@@ -460,32 +376,13 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
     |> Enum.sort_by(& &1.count, :desc)
   end
 
-  defp build_payment_types(visits) do
+  # A camp charges nothing, so this charts where patients are in
+  # the camp flow instead of how they paid.
+  defp build_visit_statuses(visits) do
     visits
-    |> Enum.group_by(fn v -> v.payment_type || "Unspecified" end)
+    |> Enum.group_by(fn v -> Medcamp.PatientVisits.PatientVisit.status_label(v.status) end)
     |> Enum.map(fn {label, list} -> %{label: label, count: length(list)} end)
     |> Enum.sort_by(& &1.count, :desc)
-  end
-
-  defp build_revenue_by_reason(payments) do
-    payments
-    |> Enum.group_by(fn p -> humanize_reason(p.actionable_type) end)
-    |> Enum.map(fn {label, list} ->
-      %{label: label, total: Enum.sum(Enum.map(list, &(&1.amount || 0)))}
-    end)
-    |> Enum.sort_by(& &1.total, :desc)
-    |> Enum.take(8)
-  end
-
-  defp build_revenue_by_prompter(payments) do
-    payments
-    |> Enum.filter(& &1.prompter)
-    |> Enum.group_by(& &1.prompter.name)
-    |> Enum.map(fn {label, list} ->
-      %{label: label, total: Enum.sum(Enum.map(list, &(&1.amount || 0)))}
-    end)
-    |> Enum.sort_by(& &1.total, :desc)
-    |> Enum.take(8)
   end
 
   defp build_geographic_breakdown(patients) do
@@ -510,21 +407,6 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
 
   defp normalize_address(_), do: nil
 
-  defp build_daily_revenue(payments, date_from, date_to) do
-    days = list_days(date_from, date_to) |> Enum.take(-90)
-
-    by_day =
-      payments
-      |> Enum.group_by(fn p -> datetime_to_eat_date(p.inserted_at) end)
-      |> Enum.into(%{}, fn {day, list} ->
-        {day, Enum.sum(Enum.map(list, &(&1.amount || 0)))}
-      end)
-
-    Enum.map(days, fn day ->
-      %{date: day, amount: Map.get(by_day, day, 0)}
-    end)
-  end
-
   defp build_daily_registrations(patients, date_from, date_to) do
     days = list_days(date_from, date_to) |> Enum.take(-90)
 
@@ -535,32 +417,6 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
 
     Enum.map(days, fn day ->
       %{date: day, count: Map.get(by_day, day, 0)}
-    end)
-  end
-
-  defp build_monthly_revenue do
-    today = today_eat()
-    months = build_last_12_months(today)
-
-    all_payments = Mpesas.list_successful_payments()
-
-    by_month =
-      all_payments
-      |> Enum.group_by(fn p ->
-        case datetime_to_eat_date(p.inserted_at) do
-          %Date{year: y, month: m} -> {y, m}
-          _ -> nil
-        end
-      end)
-      |> Enum.into(%{}, fn {ym, list} ->
-        {ym, Enum.sum(Enum.map(list, &(&1.amount || 0)))}
-      end)
-
-    Enum.map(months, fn {y, m} = ym ->
-      %{
-        label: month_label(y, m),
-        amount: Map.get(by_month, ym, 0)
-      }
     end)
   end
 

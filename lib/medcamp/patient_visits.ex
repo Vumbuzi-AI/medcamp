@@ -65,8 +65,14 @@ defmodule Medcamp.PatientVisits do
     |> apply_patient_search_filter(filters[:search])
     |> apply_doctor_filter(filters[:doctor_id])
     |> apply_creator_filter(filters[:creator_id])
-    |> apply_payment_type_filter(filters[:payment_type])
-    |> apply_has_paid_filter(filters[:has_paid])
+    |> apply_status_filter(filters[:status])
+  end
+
+  defp apply_status_filter(query, nil), do: query
+  defp apply_status_filter(query, ""), do: query
+
+  defp apply_status_filter(query, status) do
+    from [pv, _pat, _dn] in query, where: pv.status == ^status
   end
 
   defp apply_date_filter(query, nil, nil), do: query
@@ -193,26 +199,78 @@ defmodule Medcamp.PatientVisits do
     from [pv, _pat, _dn] in query, where: pv.creator_id == ^creator_id
   end
 
-  defp apply_payment_type_filter(query, nil), do: query
-  defp apply_payment_type_filter(query, ""), do: query
 
-  defp apply_payment_type_filter(query, payment_type) do
-    from [pv, _pat, _dn] in query,
-      where: pv.payment_type == ^payment_type
+  @doc """
+  Moves `visit` to `status`, rejecting anything outside the camp flow.
+
+  Kept in one place so the role queues and the pages that advance a patient
+  cannot drift apart: each queue filters on a status, and the only way a
+  visit reaches that status is one of these calls.
+  """
+  def update_status(%PatientVisit{} = visit, status) do
+    visit
+    |> PatientVisit.changeset(%{"status" => status})
+    |> Repo.audited_update()
   end
 
-  defp apply_has_paid_filter(query, nil), do: query
-  defp apply_has_paid_filter(query, ""), do: query
+  @doc """
+  Marks the visit triaged, after a nurse records observations.
+  """
+  def mark_triaged(%PatientVisit{} = visit), do: update_status(visit, "triaged")
 
-  defp apply_has_paid_filter(query, "true") do
-    from [pv, _pat, _dn] in query, where: pv.has_paid == true
+  @doc """
+  Marks the visit as picked up by a doctor.
+  """
+  def mark_with_doctor(%PatientVisit{} = visit), do: update_status(visit, "with_doctor")
+
+  @doc """
+  Sends the visit to the lab queue, after a doctor requests tests.
+  """
+  def mark_lab_pending(%PatientVisit{} = visit), do: update_status(visit, "lab_pending")
+
+  @doc """
+  Sends the visit to the pharmacy queue, after a doctor prescribes drugs.
+  """
+  def mark_pharmacy_pending(%PatientVisit{} = visit),
+    do: update_status(visit, "pharmacy_pending")
+
+  @doc """
+  Closes the visit - the patient is done with the camp.
+  """
+  def mark_completed(%PatientVisit{} = visit), do: update_status(visit, "completed")
+
+  @doc """
+  Today's visits sitting at `status`, oldest first - the shape every role
+  queue (triage list, doctor's pending cases, pharmacy queue) is built from.
+  """
+  def list_queue(status, date \\ nil) do
+    date = date || Date.utc_today()
+
+    from(pv in PatientVisit,
+      where: pv.status == ^status and pv.date == ^date,
+      order_by: [asc: pv.inserted_at],
+      preload: [:patient, :creator, :doctor]
+    )
+    |> Repo.all()
   end
 
-  defp apply_has_paid_filter(query, "false") do
-    from [pv, _pat, _dn] in query, where: pv.has_paid == false
-  end
+  @doc """
+  The patient's currently open visit for today, if any - what a scan-in page
+  resolves a scanned patient to.
+  """
+  def current_visit_for_patient(patient_id, date \\ nil) do
+    date = date || Date.utc_today()
 
-  defp apply_has_paid_filter(query, _), do: query
+    from(pv in PatientVisit,
+      where:
+        pv.patient_id == ^patient_id and pv.date == ^date and
+          pv.status != "completed",
+      order_by: [desc: pv.inserted_at],
+      limit: 1,
+      preload: [:patient, :creator, :doctor]
+    )
+    |> Repo.one()
+  end
 
   @doc """
   Lists patient visits for a patient on a given date that do not yet have a doctor note.
@@ -315,71 +373,9 @@ defmodule Medcamp.PatientVisits do
   def create_patient_visit(attrs \\ %{}) do
     attrs = ensure_date_today(attrs)
 
-    result =
-      %PatientVisit{}
-      |> PatientVisit.changeset(attrs)
-      |> Repo.insert()
-
-    case result do
-      {:ok, _visit} ->
-        async_reduce_assigned_tag()
-        result
-
-      error ->
-        error
-    end
-  end
-
-  defp async_reduce_assigned_tag do
-    if Code.ensure_loaded?(Mix) and Mix.env() == :test do
-      reduce_assigned_tag()
-    else
-      Task.Supervisor.start_child(Medcamp.TaskSupervisor, fn ->
-        reduce_assigned_tag()
-      end)
-    end
-  end
-
-  defp reduce_assigned_tag() do
-    query =
-      from at in Medcamp.AssignedTags.AssignedTag,
-        where: at.remaining_number > 0,
-        order_by: [asc: at.inserted_at],
-        limit: 1
-
-    case Repo.one(query) do
-      nil ->
-        :no_assigned_tag_available
-
-      assigned_tag ->
-        changeset =
-          Ecto.Changeset.change(assigned_tag, %{
-            remaining_number: assigned_tag.remaining_number - 1
-          })
-
-        Repo.update(changeset)
-    end
-
-    total_quantity_remaining =
-      from(at in Medcamp.AssignedTags.AssignedTag, select: sum(at.remaining_number))
-      |> Repo.one()
-
-    tags_data = %{
-      remaining_number: total_quantity_remaining || 0,
-      date: Date.utc_today()
-    }
-
-    if total_quantity_remaining == 20 do
-      Medcamp.Postal.send_assigned_tags_low_stock_notification(
-        "p.otieno@gs1kenya.org",
-        tags_data
-      )
-
-      Medcamp.Postal.send_assigned_tags_low_stock_notification(
-        "alfred.aoko@glocalhealthcentre.org",
-        tags_data
-      )
-    end
+    %PatientVisit{}
+    |> PatientVisit.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -511,7 +507,6 @@ defmodule Medcamp.PatientVisits do
 
     repeat_patient_ids =
       from(v in PatientVisit,
-        where: v.has_paid == true,
         group_by: v.patient_id,
         having: count(v.id) > 1,
         select: v.patient_id

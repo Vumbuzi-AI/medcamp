@@ -76,11 +76,6 @@ defmodule MedcampWeb.NursesPages.PatientVisitIndex do
   end
 
   @impl true
-  def handle_info({MedcampWeb.PatientVisitLive.FormComponent, {:saved, _patient_visit}}, socket) do
-    {:noreply, load_patient_visits(socket)}
-  end
-
-  @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     patient_visit = PatientVisits.get_patient_visit!(id)
     {:ok, _} = PatientVisits.delete_patient_visit(patient_visit)

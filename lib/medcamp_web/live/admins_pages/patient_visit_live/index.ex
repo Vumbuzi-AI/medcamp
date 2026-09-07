@@ -12,8 +12,7 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
     date_from: nil,
     date_to: nil,
     visit_type: nil,
-    payment_type: nil,
-    has_paid: nil,
+    status: nil,
     gender: nil,
     age_group: nil,
     doctor_id: nil
@@ -75,12 +74,6 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
   end
 
   @impl true
-  def handle_info({MedcampWeb.PatientVisitLive.FormComponent, {:saved, patient_visit}}, socket) do
-    {:noreply,
-     assign(socket, :patient_visits, upsert(socket.assigns.patient_visits, patient_visit))}
-  end
-
-  @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     patient_visit = PatientVisits.get_patient_visit!(id)
     {:ok, _} = PatientVisits.delete_patient_visit(patient_visit)
@@ -100,8 +93,7 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
       date_from: parse_date(params["date_from"]),
       date_to: parse_date(params["date_to"]),
       visit_type: nilify(params["visit_type"]),
-      payment_type: nilify(params["payment_type"]),
-      has_paid: nilify(params["has_paid"]),
+      status: nilify(params["status"]),
       gender: nilify(params["gender"]),
       age_group: nilify(params["age_group"]),
       doctor_id: nilify(params["doctor_id"])
@@ -147,7 +139,7 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
     end
   end
 
-  @filter_keys ~w(search date_from date_to visit_type payment_type has_paid
+  @filter_keys ~w(search date_from date_to visit_type status
                   gender age_group doctor_id)a
 
   defp stringify_filters(filters) do
@@ -175,18 +167,13 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
       ),
       filter_chip(filters.date_to, "date_to", filters.date_to && "To #{filters.date_to}"),
       filter_chip(filters.visit_type, "visit_type", filters.visit_type),
-      filter_chip(filters.payment_type, "payment_type", filters.payment_type),
-      filter_chip(filters.has_paid, "has_paid", has_paid_label(filters.has_paid)),
+      filter_chip(filters.status, "status", PatientVisit.status_label(filters.status)),
       filter_chip(filters.gender, "gender", filters.gender && String.capitalize(filters.gender)),
       filter_chip(filters.age_group, "age_group", age_group_label(filters.age_group)),
       filter_chip(filters.doctor_id, "doctor_id", doctor_name(filters.doctor_id, doctors))
     ]
     |> Enum.reject(&is_nil/1)
   end
-
-  defp has_paid_label("true"), do: "Paid"
-  defp has_paid_label("false"), do: "Unpaid"
-  defp has_paid_label(other), do: other
 
   defp age_group_label("<5"), do: "Under 5 years"
   defp age_group_label("5-17"), do: "5 - 17 years"
@@ -253,28 +240,17 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Payment Type</label>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
               <select
-                name="payment_type"
+                name="status"
                 class="w-full rounded-lg border-gray-300 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
               >
                 <option value="">All</option>
-                <option value="Mpesa" selected={@filters.payment_type == "Mpesa"}>Mpesa</option>
-                <option value="Insurance" selected={@filters.payment_type == "Insurance"}>
-                  Insurance
-                </option>
-                <option value="Cash" selected={@filters.payment_type == "Cash"}>Cash</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Payment Status</label>
-              <select
-                name="has_paid"
-                class="w-full rounded-lg border-gray-300 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
-              >
-                <option value="">All</option>
-                <option value="true" selected={@filters.has_paid == "true"}>Paid</option>
-                <option value="false" selected={@filters.has_paid == "false"}>Unpaid</option>
+                <%= for status <- PatientVisit.statuses() do %>
+                  <option value={status} selected={@filters.status == status}>
+                    {PatientVisit.status_label(status)}
+                  </option>
+                <% end %>
               </select>
             </div>
             <div>
@@ -398,14 +374,10 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
           </div>
         </:col>
 
-        <:col :let={pv} label="Payment">
+        <:col :let={pv} label="Status">
           <div class="py-2">
-            <p class="text-sm text-gray-700">{pv.payment_type || "—"}</p>
-            <span class={[
-              "inline-block mt-1 px-1.5 py-0.5 text-xs rounded-full font-medium",
-              if(pv.has_paid, do: "bg-green-100 text-green-700", else: "bg-red-100 text-red-700")
-            ]}>
-              {if pv.has_paid, do: "Paid", else: "Unpaid"}
+            <span class="inline-block px-1.5 py-0.5 text-xs rounded-full font-medium bg-[#e7e7ff] text-[#373896]">
+              {PatientVisit.status_label(pv.status)}
             </span>
           </div>
         </:col>

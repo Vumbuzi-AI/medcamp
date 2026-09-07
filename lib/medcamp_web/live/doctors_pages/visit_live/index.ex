@@ -59,10 +59,6 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PatientVisitIndex do
   end
 
   @impl true
-  def handle_info({MedcampWeb.PatientVisitLive.FormComponent, {:saved, _patient_visit}}, socket) do
-    {:noreply, assign_visits(socket, socket.assigns.patient.id, socket.assigns.page)}
-  end
-
   defp assign_visits(socket, patient_id, page) do
     page = normalize_page(page)
     total_count = PatientVisits.count_patient_visits_by_patient_id(patient_id)

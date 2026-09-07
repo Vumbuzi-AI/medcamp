@@ -3,7 +3,6 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Show do
 
   alias Medcamp.AllergyHistories
   alias Medcamp.AllergyHistories.AllergyHistory
-  alias Medcamp.PatientFormRecords.PatientFormRecord
   alias Medcamp.Patients
   alias Medcamp.Triages
   alias Phoenix.LiveView.JS
@@ -23,14 +22,12 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Show do
     patient = Patients.get_patient!(id)
 
     most_recent_triage = Triages.most_recent_triage(id)
-    forms = Medcamp.PatientFormRecords.list_patient_form_records(id)
 
     {:noreply,
      socket
      |> assign(:page_title, "Patient Overview")
      |> assign(:most_recent_triage, most_recent_triage)
      |> assign(:patient, patient)
-     |> assign(:forms, forms)
      |> assign(:form, to_form(Patients.change_patient(patient)))
      |> assign_allergy_histories()}
   end
@@ -163,20 +160,6 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Show do
           current_user={@current_user}
         />
       </.modal>
-      <div class="mt-6 rounded-lg border border-gray-100 bg-white p-5 shadow-sm">
-        <div class="mb-4 flex items-center justify-between gap-3">
-          <div>
-            <h3 class="text-lg font-semibold text-[#373896]">
-              Medical Forms
-            </h3>
-
-            <p class="text-sm text-gray-500">
-              Forms recorded for this patient.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <div class="mt-6 rounded-lg border border-gray-100 bg-white p-5 shadow-sm">
         <div class="mb-4 flex items-center justify-between gap-3">
           <div>
@@ -345,52 +328,6 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Show do
         </.simple_form>
       </.modal>
 
-      <div class="mt-6 rounded-lg border border-gray-100 bg-white p-5 shadow-sm">
-        <div class="mb-4 flex items-center justify-between gap-3">
-          <div>
-            <h3 class="text-lg font-semibold text-[#373896]">Medical Forms</h3>
-            <p class="text-sm text-gray-500">Forms recorded for this patient.</p>
-          </div>
-
-          <.link
-            navigate={"/doctor/#{@patient.id}/forms"}
-            class="inline-flex items-center gap-2 rounded-lg bg-[#373896] px-3 py-2 text-sm font-medium text-white hover:bg-[#2f327d]"
-          >
-            <Heroicons.icon name="clipboard-document-list" type="outline" class="h-4 w-4" />
-            Open Forms
-          </.link>
-        </div>
-
-        <%= if @forms == [] do %>
-          <p class="text-sm text-gray-500">
-            No forms recorded for this patient.
-          </p>
-        <% else %>
-          <ul class="divide-y divide-gray-200">
-            <%= for form <- @forms do %>
-              <li class="py-3">
-                <div class="flex items-start justify-between gap-4">
-                  <div>
-                    <p class="font-medium text-gray-900">
-                      {PatientFormRecord.form_label(form.form_type)}
-                    </p>
-
-                    <p class="text-sm text-gray-500">
-                      {Calendar.strftime(form.inserted_at, "%Y-%m-%d %H:%M")}
-                    </p>
-
-                    <%= if PatientFormRecord.form_notes(form) do %>
-                      <div class="mt-1 text-sm text-gray-700">
-                        {PatientFormRecord.form_notes(form)}
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
-              </li>
-            <% end %>
-          </ul>
-        <% end %>
-      </div>
     </div>
     """
   end

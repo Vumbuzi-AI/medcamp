@@ -1,25 +1,34 @@
 # Portals
 
-Routes are defined in `lib/medcamp_web/router.ex`. Most authenticated portals redirect users away when their role does not match the route plug in `MedcampWeb.UserAuth`.
+Routes are in `lib/medcamp_web/router.ex`. Each role scope is gated by a
+`require_authenticated_<role>` plug in `MedcampWeb.UserAuth`, which bounces a
+signed-in user of another role to their own landing page. On top of that,
+`MedcampWeb.Plugs.RequirePanelPermission` checks the per-panel permission the
+sidebar link is guarded by, so hiding a tab also closes its URL.
 
-| Portal / section | Role or audience | URL scope | Main screens and actions | Backing modules |
-| --- | --- | --- | --- | --- |
-| Public website | Anonymous users | `/`, `/home`, `/about`, `/services`, `/blog`, `/post/:slug`, `/contact` | Marketing/content pages, blog, service detail, contact. | `Website.*Live`, `Blogs` |
-| Public utility pages | Anonymous or link-based | `/community-health-insurance-survey`, `/feedback`, `/8018/:gsrn`, `/8017/:gsrn`, `/414/:gln`, `/payment/:receipt` | Survey intake, feedback, patient/user/room GS1 lookups, receipts. | survey/feedback/receipt LiveViews |
-| Shared authenticated tools | Any authenticated user | `/chat`, `/telephone_directory`, `/todos`, `/sops`, `/duty_rota`, `/users/settings`, `/daily_activities`, `/shift_handovers`, `/requisitions`, `/forms` | Chat, directory, todos, SOPs, duty rota, settings, staff activity, handover, requisitions, clinical forms. | `UserAuth`, `TodosLive`, `SOPsLive`, `DutyRotaLive`, `RequisitionLive`, `ReceptionsPageFormLive` |
-| Doctor | `doctor` | `/doctor/*` | Scan patient, dashboard, visits, pending visits, patients, MCH, forms, doctor notes, lab/radiology requests, prescriptions, admissions, inpatient documents, appointments, referrals, blogs, procedures, shift handovers, requisitions, todos. | `DoctorsPage*`, `DoctorDashboardLive`, `DoctorNotes`, `LabResults`, `RadiologyResults`, `DrugAllocations`, `AdmissionRequests`, `Inpatient` |
-| Reception | `reception` | `/reception/*` | Register/update patients, create visits, trigger payments, appointments, visitor book, staff meals, survey, patient overview, wallet deposits, general inventory, handovers, requisitions, forms, todos. | `ReceptionsPage*`, `PatientVisits`, `Patients`, `WalletDeposits`, `Appointments`, `Inventories` |
-| Nurse | `nurse` | `/nurse/*` | Dashboard, scan, medical camp scan, patients, visits, triage, room allocations, nursing allocations/consumables, notes, nurse procedures, MCH, doctor notes, admission requests, cadex, forms. | `NursesPages.*`, `Triages`, `NurseNotes`, `NurseProcedures`, `RoomAllocations`, `Nursing`, `Mch` |
-| Pharmacy | `pharmacist` | `/pharmacist/*` | Dashboard, scan, patient medication, drug catalog, pending batches, drug allocations, dispensing/confirm/print, consumption analysis, pharmacy logs, dangerous drug register, handovers, requisitions, forms, todos. | `PharmacistsLive.*`, `Drugs`, `DrugBatches`, `DrugAllocations`, `DrugsGiven`, `PharmacyLogs`, `DangerousDrugRegisters` |
-| Laboratory | `labtechnician` | `/lab/*` | Dashboard, scan, lab results, add/fill/view test entries, print GSRN, lab tests, templates, allocations, consumables, QA charts, duty rota, handovers, requisitions, forms, todos. | `LabPages*`, `LabResults`, `LabTests`, `LabTestTemplates`, `LabAllocations`, `QualityAssurance` |
-| Radiology | `radiologist` | `/radiologist/*` | Dashboard, scan, radiology results, patient result history, settings, handovers, requisitions, forms, todos. | `RadiologistPages.*`, `RadiologyResults`, `RadiologyTests` |
-| Administration | `admin` | `/admin/*`, plus `/lab_tests` | Users, patients, feedback, visitors, payments/export, procedure/catalog setup, subsidized procedures, lab/radiology tests, rooms/equipment, costings, visits, appointments, drugs, allocations, tags, audit logs, login sessions, stock takes, insurance, surveys, medical camp reports/export, inventory, handovers, requisitions, forms, todos. | `AdminsPages.*`, `Admin*Live`, `UsersController`, `MedicalCampExportController`, many contexts |
-| Inventory manager | `inventory_manager`, also accepted by plug for `admin` and `reception` | `/inventory_manager/*` | Dashboard, in-store inventory, received inventory, batches, supplier list/detail, inventory issues/scan, consumption analysis, settings, requisitions. | `InventoryManager*`, `InventoryReceivedLive`, `BatchLive`, `SupplierLive`, `InventoryIssuedLive` |
-| Procurement portal | `procurement_officer`, `stores_officer`, `finance_officer`, `admin` | `/procurement/*` | Dashboard, supplier list/detail, onboarding review, RFQs, quote comparison, purchase orders, invoices, GRNs, requisitions. | `MedcampWeb.Procurement.*`, `Medcamp.Procurement.*`, `RequireProcurementRole` |
-| Supplier portal, new | `supplier` | `/supplier/dashboard`, `/supplier/profile`, `/supplier/rfqs`, `/supplier/quotes`, `/supplier/proforma-invoices`, `/supplier/purchase-orders`, `/supplier/order-flow/*`, `/supplier/shipments` | Supplier dashboard, profile/registration, RFQ inbox, quotes, proformas, purchase orders, invoices, shipments. | `MedcampWeb.Supplier.*`, `Medcamp.ProcurementPortal` |
-| Supplier portal, legacy | `supplier` | `/supplier`, `/supplier/documents`, `/supplier/invoices`, `/supplier/quotes`, `/supplier/advance_ship_notices`, `/supplier/delivery_notes`, `/supplier/recalls`, `/supplier/forms` | Supplier dashboard, documents, invoices, quotes, ASNs, delivery notes, recalls, shared forms. | `SupplierPortalLive.*`, `Suppliers` |
-| Support staff | `support staff` | `/support_staff/*` | Daily activities, activity history, staff meals, handovers, requisitions, forms, todos. | `DailyActivities`, `StaffMeals`, `ShiftHandovers` |
-| Meal entry PIN | Support staff PIN | `/meals/add` after `/meals/session` | PIN-gated mobile meal entry without full portal login. | `MealEntryPinSessionController`, `MealEntryAuth`, `MealEntryLive` |
-| Medical camp | Link-based patient GSRN and user session/OTP flow | `/medical-camp/scan`, `/8018/:gsrn/medical-camp/*`, `/admin/medical_camp/*` | Global scan, patient camp home, triage, doctor notes, camp doctor note show/new, external admin camp access/report. | `MedicalCampPages.*`, `MedicalCampAuth`, `AdminMedicalCampExternalAuth`, `MedicalCampReports` |
-| API | External integrations | `/api/*` | M-Pesa callback, inventory received/batch creation, supplier/room reads, drug scan verification, community health survey creation. | `MpesaController`, `APIController`, `DrugsGivenController`, `CommunityHealthSurveyApiController` |
-| Dev tools | Development only when `:dev_routes` is true | `/dev/dashboard`, `/dev/mailbox` | LiveDashboard and Swoosh mailbox preview. | Phoenix LiveDashboard, Swoosh mailbox |
+Both halves read from `MedcampWeb.SidebarCatalog`, the single source of truth
+for what each role can see.
+
+| Portal | Role | URL scope | Screens |
+| --- | --- | --- | --- |
+| Login | anonymous | `/`, `/users/log_in`, `/users/log_in/otp`, `/users/reset_password` | `/` redirects to login; there is no public website. |
+| Nurse | `nurse` | `/nurse/*` | Scan, patients (register/edit), visits, triages, per-patient overview / triages / visits / doctor notes (read-only), settings. |
+| Doctor | `doctor` | `/doctor/*` | Scan, dashboard, patient list, my visits, pending cases, all lab results; per-patient notes, triages, visits, lab results, drug allocations. Notes support lab requests, prescriptions, AI review and voice dictation. |
+| Laboratory | `labtechnician` | `/lab/*` | Scan, dashboard, lab results queue, add/fill/view templated test entries, print GSRN, lab tests, templates, surveillance, per-patient results. |
+| Pharmacy | `pharmacist` | `/pharmacist/*` | Scan, dashboard, drug catalogue, drug batches (add + DataMatrix confirm), drug allocations, dispensing and print preview, allocation report, per-patient allocations. |
+| Administration | `admin` | `/admin/*`, `/lab_tests` | Camp overview and report, patients, visits, doctor-note quality and search, drugs, drug allocations, consumption analysis, lab tests, lab surveillance, users and permissions, login sessions, audit logs, settings, CSV exports. |
+| Medical camp (link-based) | patient GSRN / camp PIN | `/medical-camp/scan`, `/8018/:gsrn/medical-camp/*`, `/admin/medical_camp/{access,external}` | Global scan, patient camp home, triage, camp doctor notes, external admin camp access and report. |
+| Pharmacy scan API | scanner hardware | `/api/drugs_given_scan_out`, `/api/drugs_to_be_scanned`, `/api/drug_allocations/{check_verify,scan_verify}` | GS1 DataMatrix verification and scan-out during dispensing. |
+| Dev tools | dev only, when `:dev_routes` | `/dev/dashboard`, `/dev/mailbox` | LiveDashboard, Swoosh mailbox preview. |
+
+## Role landing pages
+
+`MedcampWeb.UserAuth.default_path_for_role/1`:
+
+| Role | Lands on |
+| --- | --- |
+| `admin` | `/admin/dashboard` |
+| `doctor` | `/doctor/scan` |
+| `nurse` | `/nurse/scan` |
+| `labtechnician` | `/lab/scan` |
+| `pharmacist` | `/pharmacist/scan` |

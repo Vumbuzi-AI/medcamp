@@ -246,165 +246,37 @@ defmodule MedcampWeb.UserAuth do
     end
   end
 
-  def require_authenticated_doctor(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "doctor" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
+  @role_gates [
+    doctor: "doctor",
+    nurse: "nurse",
+    admin: "admin",
+    pharmacist: "pharmacist",
+    lab_technician: "labtechnician"
+  ]
+
+  # One `require_authenticated_<role>` plug per camp role. They were eleven
+  # near-identical copies before the trim; the five that survive differ only
+  # in the role string, so they are generated from one clause.
+  for {name, role} <- @role_gates do
+    def unquote(:"require_authenticated_#{name}")(conn, _opts) do
+      require_role(conn, unquote(role))
     end
   end
 
-  def require_authenticated_nurse(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "nurse" do
+  defp require_role(conn, role) do
+    case conn.assigns[:current_user] do
+      %{role: ^role} ->
         conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
 
-  def require_authenticated_inventory_manager(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "inventory_manager" ||
-           conn.assigns[:current_user].role == "admin" ||
-           conn.assigns[:current_user].role == "reception" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
+      %{role: other_role} ->
+        redirect_to_page_conn_case(conn, other_role)
 
-  def require_authenticated_reception(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "reception" do
+      nil ->
         conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
-
-  def require_authenticated_admin(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "admin" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
-
-  def require_authenticated_pharmacist(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "pharmacist" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
-
-  def require_authenticated_lab_technician(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "labtechnician" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
-
-  def require_authenticated_support_staff(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "support staff" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
-
-  def require_authenticated_radiologist(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "radiologist" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
-
-  def require_authenticated_supplier(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "supplier" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
+        |> put_flash(:error, "You must log in to access this page.")
+        |> maybe_store_return_to()
+        |> redirect(to: ~p"/users/log_in")
+        |> halt()
     end
   end
 
@@ -423,41 +295,12 @@ defmodule MedcampWeb.UserAuth do
   """
   def default_path_for_role(role) do
     case role do
-      "admin" ->
-        "/admin/dashboard"
-
-      "doctor" ->
-        "/doctor/scan"
-
-      "reception" ->
-        "/reception/scan"
-
-      "nurse" ->
-        "/nurse/scan"
-
-      "labtechnician" ->
-        "/lab/scan"
-
-      "pharmacist" ->
-        "/pharmacist/scan"
-
-      "inventory_manager" ->
-        "/inventory_manager/inventories_received"
-
-      "radiologist" ->
-        "/radiologist/scan"
-
-      "support staff" ->
-        "/support_staff/daily_activities"
-
-      role when role in ["procurement_officer", "stores_officer", "finance_officer"] ->
-        "/procurement/dashboard"
-
-      "supplier" ->
-        "/supplier/dashboard"
-
-      _ ->
-        "/todos"
+      "admin" -> "/admin/dashboard"
+      "doctor" -> "/doctor/scan"
+      "nurse" -> "/nurse/scan"
+      "labtechnician" -> "/lab/scan"
+      "pharmacist" -> "/pharmacist/scan"
+      _ -> "/users/log_in"
     end
   end
 

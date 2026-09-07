@@ -350,7 +350,15 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
         icon_path="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
         title="Drugs"
         subtitle="Search, filter and manage the drug inventory."
-      />
+      >
+        <:actions>
+          <.link patch={~p"/pharmacist/drugs/new"}>
+            <button class="inline-flex items-center gap-2 rounded-lg bg-[#373896] px-4 py-2 text-sm font-medium text-white hover:bg-[#2d2d7a]">
+              <Heroicons.icon name="plus" type="outline" class="h-4 w-4" /> Add Drug
+            </button>
+          </.link>
+        </:actions>
+      </.page_header>
 
       <div class="flex flex-wrap items-center gap-3 mb-4">
         <form phx-change="filter" class="flex-1">

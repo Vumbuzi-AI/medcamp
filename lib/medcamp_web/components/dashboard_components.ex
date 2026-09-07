@@ -625,12 +625,12 @@ defmodule MedcampWeb.DashboardComponents do
   end
 
   @doc """
-  Visits by Type / Visits by Payment Method card with an internal Type ⇄
-  Payment toggle (shared chart card — never shows both charts at once).
+  Visits by Type / Visits by Status card with an internal Type ⇄ Status
+  toggle (shared chart card — never shows both charts at once).
   """
-  attr :active_view, :atom, required: true, doc: ":visit_type or :payment_method"
+  attr :active_view, :atom, required: true, doc: ":visit_type or :visit_status"
   attr :visit_types, :list, required: true
-  attr :payment_types, :list, required: true
+  attr :visit_statuses, :list, required: true
   attr :event, :string, default: "set_visit_chart_tab"
 
   def visit_breakdown_card(assigns) do
@@ -639,7 +639,7 @@ defmodule MedcampWeb.DashboardComponents do
       <div class="mb-4 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h3 class="text-lg font-semibold text-gray-900">
-            {if @active_view == :visit_type, do: "Visits by Type", else: "Visits by Payment Method"}
+            {if @active_view == :visit_type, do: "Visits by Type", else: "Visits by Status"}
           </h3>
           <p class="text-sm text-gray-500 mt-1.5 leading-relaxed">
             {if @active_view == :visit_type,
@@ -665,16 +665,16 @@ defmodule MedcampWeb.DashboardComponents do
           <button
             type="button"
             phx-click={@event}
-            phx-value-tab="payment_method"
+            phx-value-tab="visit_status"
             class={[
               "px-4 py-2 rounded-full text-sm font-medium transition-all",
-              if(@active_view == :payment_method,
+              if(@active_view == :visit_status,
                 do: "bg-[#373896] text-white shadow-[0_10px_22px_rgba(55,56,150,0.28)]",
                 else: "text-[#556781]"
               )
             ]}
           >
-            Payment
+            Status
           </button>
         </div>
       </div>
@@ -686,7 +686,7 @@ defmodule MedcampWeb.DashboardComponents do
             Jason.encode!(
               if @active_view == :visit_type,
                 do: visit_type_chart(@visit_types),
-                else: payment_type_chart(@payment_types)
+                else: visit_status_chart(@visit_statuses)
             )
           }
           class="h-full w-full"
@@ -836,7 +836,7 @@ defmodule MedcampWeb.DashboardComponents do
     }
   end
 
-  def payment_type_chart(rows) do
+  def visit_status_chart(rows) do
     %{
       type: "doughnut",
       data: %{

@@ -446,6 +446,7 @@ defmodule Medcamp.LabResults do
     %LabResult{}
     |> LabResult.changeset(attrs)
     |> Repo.insert()
+    |> Medcamp.CampFlow.advance("lab_pending")
   end
 
   def create_camp_lab_order(attrs \\ %{}) do

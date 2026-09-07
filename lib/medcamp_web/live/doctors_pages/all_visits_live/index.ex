@@ -43,11 +43,6 @@ defmodule MedcampWeb.DoctorsPagePatientLive.VisitsIndex do
   end
 
   @impl true
-  def handle_info({MedcampWeb.PatientVisitLive.FormComponent, {:saved, _patient_visit}}, socket) do
-    {:noreply, assign_visits(socket, socket.assigns.page)}
-  end
-
-  @impl true
   def handle_event("paginate", %{"page" => page}, socket) do
     {:noreply, assign_visits(socket, page)}
   end

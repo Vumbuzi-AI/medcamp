@@ -39,7 +39,7 @@ defmodule Medcamp.Drugs do
     |> Repo.preload([
       :inventory_received,
       :inventory_manager,
-      drug_batches: {@active_batches_query, [batch: :supplier]}
+      drug_batches: {@active_batches_query, [:batch]}
     ])
     |> sort_preloaded_batches()
   end
@@ -72,7 +72,7 @@ defmodule Medcamp.Drugs do
     |> Repo.all()
     |> Repo.preload([
       :inventory_manager,
-      drug_batches: {@available_batches_query, [batch: :supplier]}
+      drug_batches: {@available_batches_query, [:batch]}
     ])
     |> sort_preloaded_batches()
   end
@@ -90,7 +90,7 @@ defmodule Medcamp.Drugs do
     |> Repo.all()
     |> Repo.preload([
       :inventory_manager,
-      drug_batches: {@available_batches_query, [batch: :supplier]}
+      drug_batches: {@available_batches_query, [:batch]}
     ])
     |> sort_preloaded_batches()
   end
@@ -103,7 +103,7 @@ defmodule Medcamp.Drugs do
     |> Repo.preload([
       :inventory_received,
       :inventory_manager,
-      drug_batches: {@active_batches_query, [batch: :supplier]}
+      drug_batches: {@active_batches_query, [:batch]}
     ])
     |> sort_preloaded_batches()
   end
@@ -114,7 +114,7 @@ defmodule Medcamp.Drugs do
     |> Repo.preload([
       :inventory_received,
       :inventory_manager,
-      drug_batches: {@active_batches_query, [batch: :supplier]}
+      drug_batches: {@active_batches_query, [:batch]}
     ])
     |> sort_preloaded_batches()
   end
@@ -133,7 +133,7 @@ defmodule Medcamp.Drugs do
     |> Repo.preload([
       :inventory_received,
       :inventory_manager,
-      drug_batches: {@available_batches_query, [batch: :supplier]}
+      drug_batches: {@available_batches_query, [:batch]}
     ])
     |> sort_preloaded_batches()
   end
@@ -257,7 +257,7 @@ defmodule Medcamp.Drugs do
     Repo.preload(drugs, [
       :inventory_received,
       :inventory_manager,
-      drug_batches: {@active_batches_query, [batch: :supplier]}
+      drug_batches: {@active_batches_query, [:batch]}
     ])
   end
 
@@ -399,7 +399,7 @@ defmodule Medcamp.Drugs do
       Repo.get!(Drug, id)
       |> Repo.preload([
         :inventory_received,
-        drug_batches: {@available_batches_query, [batch: :supplier]}
+        drug_batches: {@available_batches_query, [:batch]}
       ])
       |> sort_preloaded_batches()
 
@@ -478,6 +478,67 @@ defmodule Medcamp.Drugs do
     %Drug{}
     |> Drug.changeset(attrs)
     |> Repo.insert()
+  end
+
+  @doc """
+  Adds a drug to the camp pharmacy, creating its item-master row alongside it.
+
+  A drug is identified by its GTIN, which lives on `inventories_received` -
+  the catalogue row the whole prescribe-and-dispense pipeline records against.
+  Before the trim that row was created upstream by a stores officer receiving
+  goods; at a camp the pharmacist is the only person in the chain, so both are
+  created here in one transaction.
+
+  Re-adding an existing GTIN reuses the item master and returns the drug
+  already attached to it, so scanning the same product twice does not fork the
+  catalogue.
+  """
+  def create_camp_drug(attrs, %Medcamp.Accounts.User{} = pharmacist) do
+    gtin = attrs[:gtin] || attrs["gtin"]
+    generic_name = attrs[:generic_name] || attrs["generic_name"]
+    brand_name = attrs[:brand_name] || attrs["brand_name"]
+
+    case Repo.get_by(Medcamp.InventoriesReceived.InventoryReceived, gtin: gtin) do
+      nil -> create_item_and_drug(attrs, gtin, generic_name, brand_name, pharmacist)
+      item -> get_or_create_drug_with_inventory_received_id(item, pharmacist.id)
+    end
+  end
+
+  defp create_item_and_drug(attrs, gtin, generic_name, brand_name, pharmacist) do
+    item_attrs = %{
+      "gtin" => gtin,
+      "brand_name" => brand_name,
+      "generic_name" => generic_name,
+      "strength" => attrs[:strength] || attrs["strength"],
+      "uom" => attrs[:uom] || attrs["uom"],
+      "type" => "Drug",
+      "category" => "Pharmaceuticals",
+      "user_id" => pharmacist.id
+    }
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(
+      :item,
+      Medcamp.InventoriesReceived.InventoryReceived.changeset(
+        %Medcamp.InventoriesReceived.InventoryReceived{},
+        item_attrs
+      )
+    )
+    |> Ecto.Multi.insert(:drug, fn %{item: item} ->
+      Drug.changeset(%Drug{}, %{
+        inventory_received_id: item.id,
+        inventory_manager_id: pharmacist.id,
+        generic_name: generic_name,
+        brand_name: brand_name,
+        is_otc: attrs[:is_otc] || attrs["is_otc"] || false,
+        is_dangerous_drug: attrs[:is_dangerous_drug] || attrs["is_dangerous_drug"] || false
+      })
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{drug: drug}} -> {:ok, drug}
+      {:error, _step, changeset, _changes} -> {:error, changeset}
+    end
   end
 
   @doc """

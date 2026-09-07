@@ -126,25 +126,6 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
           label="Prescription note to pharmacist.."
         />
 
-        <.input
-          field={@form[:payment_type]}
-          type="select"
-          options={["Mpesa", "Insurance"]}
-          prompt="Select payment type"
-          label="Payment Type"
-        />
-
-        <%= if @payment_type == "Insurance" do %>
-          <.input
-            field={@form[:insurance_name]}
-            type="select"
-            prompt="Select insurance provider"
-            options={["GHCE", "Altiora School"]}
-            label="Insurance Provider"
-            required={true}
-          />
-        <% end %>
-
         <:actions>
           <.button phx-disable-with="Saving...">Prescribe Drug</.button>
         </:actions>
@@ -373,7 +354,6 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
      |> assign(:show_drug_modal, false)
      |> assign(:drug_categories, @drug_categories)
      |> assign(:selected_drug, nil)
-     |> assign(:payment_type, assigns[:payment_type] || drug_allocation.payment_type || "")
      |> assign_new(:form, fn ->
        to_form(DrugAllocations.change_drug_allocation(drug_allocation))
      end)
@@ -540,7 +520,6 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
   end
 
   def handle_event("validate", %{"drug_allocation" => drug_allocation_params}, socket) do
-    payment_type = drug_allocation_params["payment_type"] || socket.assigns.payment_type
 
     changeset =
       DrugAllocations.change_drug_allocation(
@@ -550,7 +529,6 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
 
     {:noreply,
      socket
-     |> assign(:payment_type, payment_type)
      |> assign(form: to_form(changeset, action: :validate))}
   end
 
@@ -571,15 +549,12 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
         }
       end)
 
-    is_insurance = drug_allocation_params["payment_type"] == "Insurance"
-
     drug_allocation_params =
       drug_allocation_params
       |> Map.put("doctor_id", socket.assigns.current_user.id)
       |> Map.put("doctor_note_id", socket.assigns.doctor_note.id)
       |> Map.put("drugs_assigned", drugs_assigned)
       |> Map.put("patient_id", socket.assigns.patient.id)
-      |> Map.put("has_paid", is_insurance)
 
     case DrugAllocations.create_drug_allocation(drug_allocation_params) do
       {:ok, _drug_allocation} ->

@@ -266,6 +266,68 @@ defmodule Medcamp.DrugBatches do
   end
 
   @doc """
+  Takes a batch of a drug into the camp pharmacy in one transaction: creates
+  the physical `Batch` (what is printed on the pack) and the `DrugBatch` that
+  links it to the drug.
+
+  The batch starts unconfirmed - a pharmacist confirms it by scanning the
+  pack's GS1 DataMatrix - and its whole quantity is available.
+
+  `attrs` carries the pack details (`gtin`, `batch`, `expiry`, `quantity`,
+  and optionally `serial`, `manufacturer`, `manufacture_date`, `uom`).
+
+  `inventory_manager_id` is the pharmacist taking the stock in and
+  `inventory_received_id` the item-master row for the product; both keep their
+  pre-camp names because the whole prescribe-and-dispense pipeline is keyed on
+  them (see `Medcamp.InventoriesReceived.InventoryReceived`).
+  """
+  def take_in_batch(
+        %{
+          drug_id: drug_id,
+          inventory_received_id: inventory_received_id,
+          inventory_manager_id: pharmacist_id,
+          quantity: quantity
+        } = attrs
+      ) do
+    batch_attrs =
+      attrs
+      |> Map.take([
+        :gtin,
+        :batch,
+        :expiry,
+        :serial,
+        :manufacturer,
+        :manufacture_date,
+        :uom,
+        :quantity
+      ])
+      |> Map.put(:remaining_quantity, quantity)
+      |> Map.put(:inventory_received_id, inventory_received_id)
+      |> Map.put(:inventory_manager_id, pharmacist_id)
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(
+      :batch,
+      Medcamp.Batches.Batch.changeset(%Medcamp.Batches.Batch{}, batch_attrs)
+    )
+    |> Ecto.Multi.insert(:drug_batch, fn %{batch: batch} ->
+      DrugBatch.changeset(%DrugBatch{}, %{
+        drug_id: drug_id,
+        batch_id: batch.id,
+        remaining_quantity: quantity,
+        is_confirmed: false,
+        inventory_received_id: inventory_received_id,
+        inventory_manager_id: pharmacist_id
+      })
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{drug_batch: drug_batch}} -> {:ok, drug_batch}
+      {:error, _step, changeset, _changes} -> {:error, changeset}
+    end
+  end
+
+  @doc """
   Updates a drug_batch.
 
   ## Examples

@@ -447,6 +447,53 @@ defmodule Medcamp.Patients do
     result
   end
 
+  @doc """
+  Registers a patient for the camp and opens their visit in one transaction.
+
+  At a camp the two are the same act: a nurse takes someone's details at the
+  gate and that person is immediately in the queue for triage. Making the
+  visit here - rather than leaving it to a second screen - is what keeps the
+  queue honest, since a registered patient with no visit would be invisible
+  to every downstream role.
+
+  Returns `{:ok, {patient, visit}}`, or `{:error, changeset}` from whichever
+  step failed, leaving nothing behind.
+  """
+  def register_for_camp(attrs, %Medcamp.Accounts.User{} = nurse) do
+    random_pin = :rand.uniform(9000) + 999
+
+    attrs =
+      attrs
+      |> stringify_keys()
+      |> Map.put("gsrn", get_available_gsrn())
+      |> Map.put("pin", random_pin)
+      |> Map.put("creator_id", nurse.id)
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(:patient, Patient.changeset(%Patient{}, attrs))
+    |> Ecto.Multi.insert(:visit, fn %{patient: patient} ->
+      Medcamp.PatientVisits.PatientVisit.changeset(
+        %Medcamp.PatientVisits.PatientVisit{},
+        %{
+          "patient_id" => patient.id,
+          "creator_id" => nurse.id,
+          "status" => "triage_pending",
+          "visit_type" => attrs["visit_type"],
+          "reason" => attrs["reason"]
+        }
+      )
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{patient: patient, visit: visit}} ->
+        Task.start(fn -> send_pin(patient) end)
+        {:ok, {patient, visit}}
+
+      {:error, _step, changeset, _changes} ->
+        {:error, changeset}
+    end
+  end
+
   def create_patient_document(attrs \\ %{}) do
     %PatientDocument{}
     |> PatientDocument.changeset(attrs)
@@ -601,79 +648,17 @@ defmodule Medcamp.Patients do
         Repo.transaction(fn ->
           id = patient.id
 
-          # Delete leaf-level records first (those that reference other patient records via FK)
-          Repo.delete_all(
-            from r in Medcamp.LabConsumables.LabConsumable, where: r.patient_id == ^id
-          )
-
-          Repo.delete_all(
-            from r in Medcamp.NursingConsumables.NursingConsumable, where: r.patient_id == ^id
-          )
-
-          # lab_results references doctor_notes — must go before doctor_notes
+          # lab_results references doctor_notes - must go before doctor_notes
           Repo.delete_all(from r in Medcamp.LabResults.LabResult, where: r.patient_id == ^id)
 
-          # radiology and referrals may reference doctor_notes — delete before doctor_notes
-          Repo.delete_all(
-            from r in Medcamp.RadiologyResults.RadiologyResult, where: r.patient_id == ^id
-          )
-
-          Repo.delete_all(from r in Medcamp.Referrals.Referral, where: r.patient_id == ^id)
-
-          # procedures may reference doctor/nurse notes — delete before notes
-          Repo.delete_all(
-            from r in Medcamp.DoctorProcedures.DoctorProcedure, where: r.patient_id == ^id
-          )
-
-          Repo.delete_all(
-            from r in Medcamp.NurseProcedures.NurseProcedure, where: r.patient_id == ^id
-          )
-
-          # notes
           Repo.delete_all(from r in Medcamp.DoctorNotes.DoctorNote, where: r.patient_id == ^id)
-          Repo.delete_all(from r in Medcamp.NurseNotes.NurseNote, where: r.patient_id == ^id)
-          Repo.delete_all(from r in Medcamp.Inpatient.AdmissionNote, where: r.patient_id == ^id)
-          Repo.delete_all(from r in Medcamp.CadexNotes.CadexNote, where: r.patient_id == ^id)
 
-          # remaining independent records
           Repo.delete_all(
             from r in Medcamp.DrugAllocations.DrugAllocation, where: r.patient_id == ^id
           )
 
-          Repo.delete_all(
-            from r in Medcamp.PatientCharges.PatientCharge, where: r.patient_id == ^id
-          )
-
-          Repo.delete_all(
-            from r in Medcamp.PatientCharges.PatientChargeBatch, where: r.patient_id == ^id
-          )
-
-          Repo.delete_all(
-            from r in Medcamp.PatientFormRecords.PatientFormRecord, where: r.patient_id == ^id
-          )
-
           Repo.delete_all(from r in Medcamp.PatientVisits.PatientVisit, where: r.patient_id == ^id)
-          Repo.delete_all(from r in Medcamp.Appointments.Appointment, where: r.patient_id == ^id)
-
-          Repo.delete_all(
-            from r in Medcamp.AdmissionRequests.AdmissionRequest, where: r.patient_id == ^id
-          )
-
-          Repo.delete_all(
-            from r in Medcamp.RoomAllocations.RoomAllocation, where: r.patient_id == ^id
-          )
-
           Repo.delete_all(from r in Medcamp.Triages.Triage, where: r.patient_id == ^id)
-          Repo.delete_all(from r in Medcamp.Mch.Mother, where: r.patient_id == ^id)
-          Repo.delete_all(from r in Medcamp.Mpesas.Mpesa, where: r.patient_id == ^id)
-
-          Repo.delete_all(
-            from r in Medcamp.WalletDeposits.WalletDeposit, where: r.patient_id == ^id
-          )
-
-          Repo.delete_all(
-            from r in Medcamp.WalletWithdrawals.WalletWithdrawal, where: r.patient_id == ^id
-          )
 
           Repo.delete!(patient)
           patient
