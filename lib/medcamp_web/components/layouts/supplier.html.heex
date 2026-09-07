@@ -1,0 +1,22 @@
+<main>
+  <div>
+    <.flash_group flash={@flash} />
+
+    <div class="flex min-h-screen flex-col bg-slate-100 p-4 lg:flex-row">
+      <div>
+        <.supplier_portal_sidebar
+          current_user={@current_user}
+          active_tab={@active_tab}
+          portal_sections={@portal_sections}
+          portal_switch_links={@portal_switch_links}
+          unread_count={@unread_count || 0}
+          portal_title={assigns[:portal_shell_title] || "Supplier Portal"}
+        />
+      </div>
+
+      <div class="layout-content min-w-0 flex-1 overflow-x-auto rounded-lg bg-white p-2 shadow-md md:p-6 lg:ml-64">
+        {@inner_content}
+      </div>
+    </div>
+  </div>
+</main>

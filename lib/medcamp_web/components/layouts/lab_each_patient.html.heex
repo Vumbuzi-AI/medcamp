@@ -1,0 +1,37 @@
+<main>
+  <div>
+    <.flash_group flash={@flash} />
+
+    <div
+      id="sidebar-backdrop"
+      class="pointer-events-none fixed inset-0 z-40 bg-[#1f2433]/40 opacity-0 transition-opacity duration-200 lg:hidden"
+      aria-hidden="true"
+    >
+    </div>
+
+    <div class="sticky top-0 z-30 mb-3 flex items-center justify-center rounded-2xl border border-[#e8ebf3] bg-white/95 px-4 py-3 shadow-sm backdrop-blur lg:hidden">
+      <button
+        id="sidebar-mobile-open-btn"
+        type="button"
+        class="absolute left-3 flex h-10 w-10 items-center justify-center rounded-xl border border-[#e2e6f0] bg-white text-[#373896] transition-colors hover:bg-[#F0F0FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6667AB] focus-visible:ring-offset-2"
+        aria-label="Open sidebar"
+      >
+        <Heroicons.icon name="bars-3" type="outline" class="h-5 w-5" />
+      </button>
+      <span class="text-sm font-bold uppercase tracking-[0.28em] text-[#373896]">GHC</span>
+    </div>
+
+    <div class="flex min-h-screen flex-col p-4 lg:flex-row">
+      <div>
+        <.lab_each_patient_sidebar
+          current_user={@current_user}
+          patient={@patient}
+          active_tab={@active_tab}
+        />
+      </div>
+      <div class="layout-content flex-1 min-w-0 overflow-x-auto rounded-lg bg-white p-2 shadow-md md:p-6 lg:ml-72">
+        {@inner_content}
+      </div>
+    </div>
+  </div>
+</main>

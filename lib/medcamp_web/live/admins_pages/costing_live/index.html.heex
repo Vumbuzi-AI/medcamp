@@ -1,0 +1,62 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+  <.page_header
+    icon_path="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+    title="Costings"
+    subtitle="Manage procedure and service cost entries."
+  >
+    <:actions>
+      <.link patch={~p"/admin/costings/new"}>
+        <.button>New Costing</.button>
+      </.link>
+    </:actions>
+  </.page_header>
+
+  <.blank_state
+    :if={@total_count == 0}
+    icon_path="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+    title="No costings found"
+    description="Get started by adding a new costing entry."
+  />
+
+  <.table :if={@total_count > 0} id="costings" rows={@costings}
+    row_id={&"costings-#{&1.id}"}
+  >
+    <:col :let={costing} label="Type">{costing.type}</:col>
+    <:col :let={costing} label="Price">{costing.price}</:col>
+    <:action :let={costing}>
+      <.link patch={~p"/admin/costings/#{costing}/edit"}>Edit</.link>
+    </:action>
+    <:action :let={costing}>
+      <.link
+        phx-click={JS.push("delete", value: %{id: costing.id}) |> hide("#costings-#{costing.id}")}
+        data-confirm="Are you sure?"
+      >
+        Delete
+      </.link>
+    </:action>
+  </.table>
+
+  <.pagination
+    page={@page}
+    total_pages={@total_pages}
+    total_count={@total_count}
+    per_page={@per_page}
+  />
+</div>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="costing-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/costings")}
+>
+  <.live_component
+    module={MedcampWeb.CostingLive.FormComponent}
+    id={@costing.id || :new}
+    title={@page_title}
+    action={@live_action}
+    costing={@costing}
+    current_user={@current_user}
+    patch={~p"/admin/costings"}
+  />
+</.modal>

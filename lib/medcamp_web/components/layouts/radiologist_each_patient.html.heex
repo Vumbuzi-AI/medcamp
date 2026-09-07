@@ -1,0 +1,18 @@
+<main>
+  <div>
+    <.flash_group flash={@flash} />
+
+    <div class="flex p-4 flex-col lg:flex-row min-h-screen">
+      <div>
+        <.radiologist_each_patient_sidebar
+          current_user={@current_user}
+          patient={@patient}
+          active_tab={@active_tab}
+        />
+      </div>
+      <div class="layout-content flex-1 min-w-0 lg:ml-64 md:p-6 p-2 bg-white shadow-md rounded-lg overflow-x-auto">
+        {@inner_content}
+      </div>
+    </div>
+  </div>
+</main>

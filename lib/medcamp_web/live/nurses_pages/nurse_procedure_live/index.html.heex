@@ -1,0 +1,239 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+  <.page_header
+    icon_path="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+    title="Nurse Procedures"
+    subtitle="Search and manage nurse procedures."
+  >
+    <:actions>
+      <.link patch={~p"/nurse/nurse_procedures/new"}>
+        <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+          <div class="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            New Nurse procedure
+          </div>
+        </.button>
+      </.link>
+    </:actions>
+  </.page_header>
+
+  <div class="flex flex-wrap items-center gap-3 mb-4">
+    <form phx-change="search" class="flex-1">
+      <.search_input name="search" value={@search} placeholder="Search by patient name" />
+    </form>
+
+    <.filter_drawer
+      id="nurse-procedures-filters"
+      title="Filter nurse procedures"
+      apply_event="apply_filters"
+      active_count={count_active_filters(@filters)}
+    >
+      <:group label="Payment Status">
+        <select
+          name="filters[status]"
+          class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+        >
+          <option value="" selected={@filters["status"] == ""}>All</option>
+          <option value="paid" selected={@filters["status"] == "paid"}>Paid</option>
+          <option value="not_paid" selected={@filters["status"] == "not_paid"}>Not Paid</option>
+        </select>
+      </:group>
+
+      <:group label="Payment Type">
+        <select
+          name="filters[payment_type]"
+          class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+        >
+          <option value="" selected={@filters["payment_type"] == ""}>All</option>
+          <option :for={pt <- @payment_types} value={pt} selected={@filters["payment_type"] == pt}>
+            {pt}
+          </option>
+        </select>
+      </:group>
+
+      <:chip
+        :for={chip <- filter_chips(@filters)}
+        label={chip.label}
+        clear={JS.push("clear_chip", value: %{"field" => chip.field})}
+      />
+    </.filter_drawer>
+  </div>
+
+  <.table id="nurse_procedures" rows={@nurse_procedures}
+    row_id={&"nurse_procedures-#{&1.id}"}
+  >
+    <:empty_state>
+      <tr>
+        <td class="px-6 py-4 text-sm">
+          <p class="font-semibold text-gray-900">
+            {if @search != "" or count_active_filters(@filters) > 0,
+              do: "No nurse procedures match the current filters",
+              else: "No nurse procedures available"}
+          </p>
+          <p class="mt-1 text-sm text-gray-400">—</p>
+        </td>
+        <td class="px-6 py-4 text-sm">
+          <span class="inline-flex rounded-full bg-[#f0f0ff] px-2 py-1 text-xs font-medium text-gray-400">
+            —
+          </span>
+        </td>
+        <td class="px-6 py-4 text-sm">
+          <span class="inline-flex rounded-full bg-[#f0f0ff] px-2 py-1 text-xs font-medium text-gray-400">
+            —
+          </span>
+        </td>
+        <td class="px-6 py-4 text-sm">
+          <span class="inline-flex rounded-full bg-[#f0f0ff] px-2 py-1 text-xs font-medium text-gray-400">
+            —
+          </span>
+        </td>
+        <td class="px-6 py-4 text-sm text-gray-400">—</td>
+        <td class="px-6 py-4 text-sm text-gray-400">—</td>
+      </tr>
+    </:empty_state>
+
+    <:col :let={nurse_procedure} label="Patient">
+      <div class="flex items-center py-3">
+        <div class="h-8 w-8 rounded-full bg-[#e7e7ff] flex items-center justify-center text-[#373896] font-medium mr-2 text-sm">
+          {String.first(nurse_procedure.patient.first_name || "")}
+        </div>
+        <span class="font-medium text-gray-900">
+          {[
+            nurse_procedure.patient.first_name,
+            nurse_procedure.patient.middle_name
+          ]
+          |> Enum.filter(&(&1 != nil))
+          |> Enum.join(" ")}
+        </span>
+      </div>
+    </:col>
+
+    <:col :let={nurse_procedure} label="Procedure">
+      <div class="flex items-center py-3">
+        <span class="px-2 py-1 text-xs rounded-full bg-[#f0f0ff] text-[#373896]">
+          <%= if nurse_procedure.procedure do %>
+            {nurse_procedure.procedure.name}
+          <% else %>
+            {nurse_procedure.subsidized_procedure.name}
+          <% end %>
+        </span>
+      </div>
+    </:col>
+
+    <:col :let={nurse_procedure} label="Payment type">
+      <div class="flex items-center py-3">
+        <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+          {nurse_procedure.payment_type}
+        </span>
+      </div>
+    </:col>
+
+    <:col :let={nurse_procedure} label="Payment Status">
+      <div class="flex items-center py-3">
+        <%= if nurse_procedure.has_paid do %>
+          <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 font-medium">
+            Paid
+          </span>
+        <% else %>
+          <.link patch={~p"/nurse/nurse_procedures/#{nurse_procedure.id}/trigger_payment"}>
+            <.button class="bg-[#6667ab] hover:bg-[#5556a0] py-1 px-2 text-xs">
+              Prompt Patient
+            </.button>
+          </.link>
+        <% end %>
+      </div>
+    </:col>
+
+    <:col :let={nurse_procedure} label="Amount paid">
+      <div class="flex items-center py-3">
+        <span class="font-medium text-gray-900">
+          KES {nurse_procedure.total_amount_paid} /=
+        </span>
+      </div>
+    </:col>
+
+    <:col :let={nurse_procedure}>
+      <div class="flex items-center justify-center">
+        <.link
+          :if={nurse_procedure.has_paid == false && nurse_procedure.payment_type == "Mpesa"}
+          phx-click={JS.push("delete", value: %{id: nurse_procedure.id}) |> hide("#nurse_procedures-#{nurse_procedure.id}")}
+          data-confirm="Are you sure?"
+          class="flex items-center text-red-600 hover:text-red-800"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 mr-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+          Delete
+        </.link>
+      </div>
+    </:col>
+  </.table>
+  <.pagination
+    page={@page}
+    total_pages={@total_pages}
+    total_count={@total_count}
+    per_page={@per_page}
+  />
+</div>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="nurse_procedure-modal"
+  show
+  on_cancel={JS.patch(~p"/nurse/nurse_procedures")}
+>
+  <.live_component
+    module={MedcampWeb.NurseProcedureLive.FormComponent}
+    id={@nurse_procedure.id || :new}
+    title={@page_title}
+    action={@live_action}
+    current_user={@current_user}
+    selected_patient={nil}
+    nurse_procedure={@nurse_procedure}
+    patch={~p"/nurse/nurse_procedures"}
+  />
+</.modal>
+
+<.modal
+  :if={@live_action in [:trigger_payment]}
+  id="patient_visit-modal"
+  show
+  on_cancel={JS.patch(~p"/nurse/nurse_procedures")}
+>
+  <.live_component
+    module={MedcampWeb.TriggerPayment}
+    id={@nurse_procedure.id || :new}
+    title={@page_title}
+    action={@live_action}
+    action_to_perform="create_nurse_procedure"
+    return_url="/nurse/nurse_procedures"
+    actionable_type={@nurse_procedure}
+    patient={@nurse_procedure.patient}
+    current_user={@current_user}
+    patient_id={@nurse_procedure.patient_id}
+    patch={~p"/nurse/nurse_procedures"}
+  />
+</.modal>

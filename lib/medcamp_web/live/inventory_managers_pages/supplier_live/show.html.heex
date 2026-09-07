@@ -1,0 +1,373 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+  <.header class="text-[#373896] border-b border-gray-100 pb-4 mb-4">
+    <div class="flex items-center">
+      <.back navigate={~p"/inventory_manager/suppliers"}>
+        Back to suppliers
+      </.back>
+    </div>
+    <:actions>
+      <.link patch={~p"/inventory_manager/suppliers/#{@supplier}/edit"} class="mr-2">
+        <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+          Edit Supplier
+        </.button>
+      </.link>
+    </:actions>
+  </.header>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-gray-50 rounded-lg border border-gray-100 p-4">
+      <h3 class="text-lg font-semibold text-[#373896] mb-4">Supplier Details</h3>
+      <div class="space-y-3">
+        <div>
+          <p class="text-sm text-gray-500 uppercase font-semibold">Name</p>
+          <p class="font-medium text-gray-900">{@supplier.name}</p>
+        </div>
+        <div :if={@supplier.gln}>
+          <p class="text-sm text-gray-500 uppercase font-semibold">GLN</p>
+          <p class="font-medium text-gray-900">{@supplier.gln}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500 uppercase font-semibold">Email</p>
+          <p class="font-medium text-gray-900">{@supplier.email}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500 uppercase font-semibold">Contact</p>
+          <p class="font-medium text-gray-900">{@supplier.contact}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500 uppercase font-semibold">Location</p>
+          <p class="font-medium text-gray-900">{@supplier.location}</p>
+        </div>
+        <div :if={@supplier.description}>
+          <p class="text-sm text-gray-500 uppercase font-semibold">Description</p>
+          <p class="text-gray-900">{@supplier.description}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-lg border border-gray-100 p-4">
+      <h3 class="text-lg font-semibold text-[#373896] mb-2">Total Remaining (batches)</h3>
+      <p class="text-2xl font-bold text-[#373896]">{@total_remaining} units</p>
+    </div>
+  </div>
+
+  <%!-- Documents section --%>
+  <div class="mb-8">
+    <h3 class="text-lg font-semibold text-[#373896] mb-4">Documents</h3>
+    <div class="bg-gray-50 rounded-lg border border-gray-100 p-4 space-y-4">
+      <form
+        phx-change="set-document-type"
+        phx-submit="save-document"
+        id="supplier-document-form"
+        class="flex flex-wrap items-end gap-4"
+      >
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Document type</label>
+          <select name="type" class="rounded-lg border-gray-300 text-sm">
+            <option value="cr12" selected={@document_type == "cr12"}>CR12</option>
+            <option
+              value="letter_of_incorporation"
+              selected={@document_type == "letter_of_incorporation"}
+            >
+              Letter of Incorporation
+            </option>
+            <option value="license_certificate" selected={@document_type == "license_certificate"}>
+              License Certificate
+            </option>
+            <option value="other" selected={@document_type == "other"}>Other</option>
+          </select>
+        </div>
+        <div phx-drop-target={@uploads.document.ref} class="flex items-center gap-2">
+          <.live_file_input upload={@uploads.document} class="text-sm" />
+          <.button type="submit" class="bg-[#6667ab] hover:bg-[#5556a0]">Upload</.button>
+        </div>
+      </form>
+      <div :for={entry <- @uploads.document.entries} class="flex items-center gap-2 text-sm">
+        <span>{entry.client_name}</span>
+        <button
+          type="button"
+          phx-click="cancel-upload"
+          phx-value-ref={entry.ref}
+          class="text-red-600"
+        >
+          Cancel
+        </button>
+      </div>
+      <ul class="divide-y divide-gray-200">
+        <li
+          :for={doc <- @supplier.supplier_documents}
+          class="py-2 flex items-center justify-between"
+        >
+          <a
+            href={doc.file_path}
+            target="_blank"
+            rel="noopener"
+            class="text-[#6667ab] hover:underline"
+          >
+            {document_type_label(doc.document_type)} — {doc.original_filename ||
+              Path.basename(doc.file_path)}
+          </a>
+          <button
+            type="button"
+            phx-click="delete-document"
+            phx-value-id={doc.id}
+            data-confirm="Delete this document?"
+            class="text-red-600 hover:text-red-800 text-sm"
+          >
+            Delete
+          </button>
+        </li>
+      </ul>
+      <p :if={Enum.empty?(@supplier.supplier_documents)} class="text-gray-500 text-sm">
+        No documents uploaded yet.
+      </p>
+    </div>
+  </div>
+
+  <%!-- Batches (supplier link is at batch level) --%>
+  <div class="mb-8">
+    <h3 class="text-lg font-semibold text-[#373896] mb-4">Batches (from this supplier)</h3>
+    <p class="text-sm text-gray-500 mb-3">
+      Supplier is linked at batch level. Each batch below is received from this supplier.
+    </p>
+    <%= if Enum.empty?(@batches) do %>
+      <p class="text-gray-500">No batches for this supplier yet.</p>
+    <% else %>
+      <div class="border border-gray-200 rounded-lg overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Item (inventory received)
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Batch
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Expiry
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Quantity
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Remaining
+              </th>
+              <th class="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr :for={batch <- @batches}>
+              <td class="px-4 py-2 text-sm text-gray-900">
+                <%= if batch.inventory_received do %>
+                  {batch.inventory_received.brand_name}
+                <% else %>
+                  —
+                <% end %>
+              </td>
+              <td class="px-4 py-2 text-sm text-gray-700">{batch.batch}</td>
+              <td class="px-4 py-2 text-sm text-gray-700">{batch.expiry || "—"}</td>
+              <td class="px-4 py-2 text-sm text-gray-700">{batch.quantity} units</td>
+              <td class="px-4 py-2 text-sm text-gray-700">{batch.remaining_quantity} units</td>
+              <td class="px-4 py-2">
+                <.link
+                  :if={batch.inventory_received_id}
+                  navigate={
+                    ~p"/inventory_manager/inventories_received/#{batch.inventory_received_id}/batches"
+                  }
+                  class="text-[#6667ab] hover:underline text-sm"
+                >
+                  View batches
+                </.link>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+
+  <%!-- Inventories received (distinct items that have batches from this supplier) --%>
+  <div class="mb-8">
+    <h3 class="text-lg font-semibold text-[#373896] mb-4">
+      Inventories received (items with batches from this supplier)
+    </h3>
+    <p class="text-sm text-gray-500 mb-3">
+      Distinct inventory items that have at least one batch linked to this supplier.
+    </p>
+    <%= if Enum.empty?(@inventories_received) do %>
+      <p class="text-gray-500">No inventory items with batches from this supplier.</p>
+    <% else %>
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Brand / Generic
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                GTIN
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Category
+              </th>
+              <th class="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr :for={ir <- @inventories_received}>
+              <td class="px-4 py-2 text-sm text-gray-900">{ir.brand_name} / {ir.generic_name}</td>
+              <td class="px-4 py-2 text-sm text-gray-700">{ir.gtin}</td>
+              <td class="px-4 py-2 text-sm text-gray-700">{ir.category || "—"}</td>
+              <td class="px-4 py-2">
+                <.link
+                  navigate={~p"/inventory_manager/inventories_received/#{ir.id}/batches"}
+                  class="text-[#6667ab] hover:underline text-sm"
+                >
+                  View batches
+                </.link>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+
+  <%!-- Drugs (from this supplier) --%>
+  <div class="mb-8">
+    <h3 class="text-lg font-semibold text-[#373896] mb-4">Drugs (from this supplier)</h3>
+    <%= if Enum.empty?(@drugs) do %>
+      <p class="text-gray-500">No drugs linked to this supplier.</p>
+    <% else %>
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Brand / Generic
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Category
+              </th>
+              <th class="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr :for={drug <- @drugs}>
+              <td class="px-4 py-2 text-sm text-gray-900">
+                {drug.brand_name} / {drug.generic_name}
+              </td>
+              <td class="px-4 py-2 text-sm text-gray-700">
+                {(drug.inventory_received && drug.inventory_received.category) || "—"}
+              </td>
+              <td class="px-4 py-2">
+                <%= if drug.inventory_received_id do %>
+                  <.link
+                    navigate={
+                      ~p"/inventory_manager/inventories_received/#{drug.inventory_received_id}"
+                    }
+                    class="text-[#6667ab] hover:underline text-sm"
+                  >
+                    View
+                  </.link>
+                <% else %>
+                  <span class="text-gray-400 text-sm">—</span>
+                <% end %>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+
+  <%!-- Nurse allocations --%>
+  <div class="mb-8">
+    <h3 class="text-lg font-semibold text-[#373896] mb-4">Nurse allocations</h3>
+    <%= if Enum.empty?(@nursing_allocations) do %>
+      <p class="text-gray-500">No nursing allocations for inventory from this supplier.</p>
+    <% else %>
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Item
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Allocated
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Remaining
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Allocated to
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr :for={na <- @nursing_allocations}>
+              <td class="px-4 py-2 text-sm text-gray-900">
+                <%= if na.inventory_issued && na.inventory_issued.inventory_received do %>
+                  {na.inventory_issued.inventory_received.brand_name}
+                <% else %>
+                  —
+                <% end %>
+              </td>
+              <td class="px-4 py-2 text-sm text-gray-700">{na.allocated_quantity}</td>
+              <td class="px-4 py-2 text-sm text-gray-700">{na.remaining_quantity}</td>
+              <td class="px-4 py-2 text-sm text-gray-700">
+                {(na.allocated_to_user && na.allocated_to_user.email) || "—"}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+
+  <%!-- Lab allocations --%>
+  <div class="mb-8">
+    <h3 class="text-lg font-semibold text-[#373896] mb-4">Lab allocations</h3>
+    <%= if Enum.empty?(@lab_allocations) do %>
+      <p class="text-gray-500">No lab allocations for inventory from this supplier.</p>
+    <% else %>
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Item
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Allocated
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Remaining
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Allocated to
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr :for={la <- @lab_allocations}>
+              <td class="px-4 py-2 text-sm text-gray-900">
+                <%= if la.inventory_issued && la.inventory_issued.inventory_received do %>
+                  {la.inventory_issued.inventory_received.brand_name}
+                <% else %>
+                  —
+                <% end %>
+              </td>
+              <td class="px-4 py-2 text-sm text-gray-700">{la.allocated_quantity}</td>
+              <td class="px-4 py-2 text-sm text-gray-700">{la.remaining_quantity}</td>
+              <td class="px-4 py-2 text-sm text-gray-700">
+                {(la.allocated_to_user && la.allocated_to_user.email) || "—"}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+</div>

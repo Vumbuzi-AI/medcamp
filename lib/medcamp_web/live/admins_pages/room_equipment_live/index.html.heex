@@ -1,0 +1,82 @@
+<.header>
+  <div class="flex gap-4 items-center">
+    <.back navigate={~p"/admin/rooms"}>
+      Back to {@room.name}
+    </.back>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-5 w-5 mr-2 text-[#6667ab]"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+      />
+    </svg>
+  </div>
+  Listing Equipment for {@room.name}
+
+  <:actions>
+    <.link patch={~p"/admin/rooms/#{@room.id}/room_equipments/new"}>
+      <.button>New Room equipment</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.blank_state
+  :if={@total_count == 0}
+  icon_path="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+  title="No equipment found"
+  description="No equipment has been added to this room yet."
+/>
+
+<.table :if={@total_count > 0} id="room_equipments" rows={@room_equipments}
+  row_id={&"room_equipments-#{&1.id}"}
+>
+  <:col :let={room_equipment} label="Name">{room_equipment.name}</:col>
+  <:col :let={room_equipment} label="Description">{room_equipment.description}</:col>
+  <:col :let={room_equipment} label="Image">
+    <img src={room_equipment.image} class="h-[200px] w-[200px]" />
+  </:col>
+  <:action :let={room_equipment}>
+    <.link patch={~p"/admin/rooms/#{@room.id}/room_equipments/#{room_equipment}/edit"}>
+      Edit
+    </.link>
+  </:action>
+  <:action :let={room_equipment}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: room_equipment.id}) |> hide("#room_equipments-#{room_equipment.id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.pagination
+  page={@page}
+  total_pages={@total_pages}
+  total_count={@total_count}
+  per_page={@per_page}
+/>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="room_equipment-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/rooms/#{@room.id}/room_equipments")}
+>
+  <.live_component
+    module={MedcampWeb.RoomEquipmentLive.FormComponent}
+    id={@room_equipment.id || :new}
+    title={@page_title}
+    action={@live_action}
+    room={@room}
+    room_equipment={@room_equipment}
+    patch={~p"/admin/rooms/#{@room.id}/room_equipments"}
+  />
+</.modal>

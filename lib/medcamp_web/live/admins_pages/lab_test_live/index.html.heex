@@ -1,0 +1,110 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
+  <.page_header
+    icon_path="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082M9.75 3.104a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"
+    title="Lab Tests & Rates"
+    subtitle="Search, filter and manage lab test rates."
+  >
+    <:actions>
+      <.link patch={~p"/lab_tests/new"}>
+        <.button>New Lab test</.button>
+      </.link>
+    </:actions>
+  </.page_header>
+
+  <div class="flex flex-wrap items-center gap-3">
+    <form phx-change="apply_filters" class="flex-1">
+      <.search_input name="filters[search]" value={@filters.search} placeholder="Search by name" />
+    </form>
+
+    <.filter_drawer
+      id="lab-tests-filters"
+      title="Filter lab tests"
+      apply_event="apply_filters"
+      active_count={count_active_filters(@filters)}
+    >
+      <:group label="Date Range">
+        <.date_range_fields
+          from_name="filters[date_from]"
+          to_name="filters[date_to]"
+          from_value={@filters.date_from || ""}
+          to_value={@filters.date_to || ""}
+        />
+      </:group>
+
+      <:group label="Subsidy">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Subsidy Status</label>
+          <select
+            name="filters[subsidy]"
+            class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+          >
+            <option value="">All</option>
+            <option value="subsidized" selected={@filters.subsidy == "subsidized"}>
+              Subsidized
+            </option>
+            <option value="standard" selected={@filters.subsidy == "standard"}>Standard</option>
+          </select>
+        </div>
+      </:group>
+
+      <:chip
+        :for={chip <- filter_chips(@filters)}
+        label={chip.label}
+        clear={JS.push("clear_chip", value: %{"field" => chip.field})}
+      />
+    </.filter_drawer>
+  </div>
+</div>
+
+<.blank_state
+  :if={@total_count == 0}
+  icon_path="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082M9.75 3.104a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"
+  title="No lab tests found"
+  description="No lab tests match the current filters."
+/>
+
+<.table :if={@total_count > 0} id="lab_tests" rows={@lab_tests}
+  row_id={&"lab_tests-#{&1.id}"}
+>
+  <:col :let={lab_test} label="Name">{lab_test.name}</:col>
+  <:col :let={lab_test} label="Desription">{lab_test.desription}</:col>
+  <:col :let={lab_test} label="Standard rate (KES)">{lab_test.price}</:col>
+  <:col :let={lab_test} label="Subsidized rate (KES)">
+    {lab_test.subsidized_price || (lab_test.price && round(lab_test.price * 0.7)) || "—"}
+  </:col>
+  <:action :let={lab_test}>
+    <.link patch={~p"/lab_tests/#{lab_test}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={lab_test}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: lab_test.id}) |> hide("#lab_tests-#{lab_test.id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.pagination
+  page={@page}
+  total_pages={@total_pages}
+  total_count={@total_count}
+  per_page={@per_page}
+/>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="lab_test-modal"
+  show
+  on_cancel={JS.patch(~p"/lab_tests")}
+>
+  <.live_component
+    module={MedcampWeb.LabTestLive.NewFormComponent}
+    id={@lab_test.id || :new}
+    title={@page_title}
+    action={@live_action}
+    current_user={@current_user}
+    lab_test={@lab_test}
+    patch={~p"/lab_tests"}
+  />
+</.modal>

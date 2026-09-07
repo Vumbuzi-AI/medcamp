@@ -1,0 +1,1943 @@
+[
+  {
+    "id": "moh_643b",
+    "code": "MOH 643B",
+    "title": "FACILITY CONSUMPTION DATA REPORT AND REQUEST (F-CDRR) FOR HIV TESTING AND ART MONITORING COMMODITIES",
+    "version": "MoH 643B Ver. July 2023",
+    "description": "Facility consumption data report and request for HIV testing, ART monitoring, viral load, EID and related commodities.",
+    "image": "/images/ministry_reporting/moh_643b_fcddr_hiv_testing_art_commodities.png",
+    "layout": {
+      "orientation": "portrait",
+      "pages": [
+        {"id": "page_1", "label": "Page 1", "image": "/images/ministry_reporting/moh_643b_fcddr_hiv_testing_art_commodities.png", "width": 1188, "height": 1620}
+      ]
+    },
+    "meta_fields": [
+      {"id": "facility_name", "label": "Name of Facility", "type": "text"},
+      {"id": "mfl_code", "label": "Facility MFL Code", "type": "text"},
+      {"id": "county", "label": "County", "type": "text"},
+      {"id": "sub_county", "label": "Sub County", "type": "text"},
+      {"id": "report_month", "label": "Report for Month", "type": "text"},
+      {"id": "period_beginning", "label": "Beginning", "type": "date"},
+      {"id": "period_ending", "label": "Ending", "type": "date"}
+    ],
+    "sections": [
+      {
+        "title": "Rapid Test Kits (Indicate the name of the Kit)",
+        "micro": true,
+        "fields": [
+          {"id": "rtk_name", "label": "Name of kit used", "type": "text"}
+        ],
+        "columns": ["Commodity Name", "Unit of Issue", "Beginning Balance", "Total Quantity Received This Month- from Central Warehouses (eg KEMSA)", "Total Quantity Received- from other sources (e.g. local suppliers)", "Total Quantity Used (including tests QC and Repeats)", "Adjustments Positive", "Adjustments Negative", "Losses and wastage", "Quantity expiring within the next 6 months", "Number of Days out of Stock this month", "End of Month Physical Stock Count", "Quantity Required/Re-supply"],
+        "rows": [
+          {"label": "Rapid HIV 1+2 Test 1", "cell_codes": ["Test"]},
+          {"label": "Rapid HIV 1+2 Test 2", "cell_codes": ["Test"]},
+          {"label": "Rapid HIV 1+2 Test 3", "cell_codes": ["Test"]},
+          {"label": "HIV/Syphilis Dual Test", "cell_codes": ["Test"]},
+          {"label": "HIV Self Test - Oral", "cell_codes": ["Test"]},
+          {"label": "HIV Self Test - Blood Based", "cell_codes": ["Test"]},
+          {"label": "HIV Recency Testing", "cell_codes": ["Test"]},
+          {"label": "Rapid HBV screening test", "cell_codes": ["Test"]}
+        ]
+      },
+      {
+        "title": "CD4 TESTS (Indicate the name of the kit/platform)",
+        "micro": true,
+        "fields": [{"id": "cd4_platform", "label": "Kit/platform", "type": "text"}],
+        "columns": ["Commodity Name", "Unit of Issue", "Beginning Balance", "Received Central", "Received Other", "Total Quantity Used", "Positive Adjustment", "Negative Adjustment", "Losses/Wastage", "Expiring within 6 months", "Days out of Stock", "Physical Stock Count", "Quantity Required"],
+        "rows": [
+          {"label": "Partec CD3/CD4", "cell_codes": ["Test"]},
+          {"label": "PIMA", "cell_codes": ["Test"]},
+          {"label": "CD4 RDT", "cell_codes": ["Test"]}
+        ]
+      },
+      {
+        "title": "Viral load and EID Testing reagents (Indicate the name of the kit/platform for Viral Load/EID Testing Laboratory Units)",
+        "micro": true,
+        "columns": ["Commodity Name", "Unit of Issue", "Beginning Balance", "Received Central", "Received Other", "Total Quantity Used", "Positive Adjustment", "Negative Adjustment", "Losses/Wastage", "Expiring within 6 months", "Days out of Stock", "Physical Stock Count", "Quantity Required"],
+        "rows": [
+          {"label": "Abbott RealTime HIV-1 Quantitative 1x24 CE-IVD", "cell_codes": ["Test"]},
+          {"label": "Abbott m2000sp/m2000rt HIV-1 Qualitative CE-IVD", "cell_codes": ["Test"]},
+          {"label": "Roche HIV-1 Qualitative Dx Assay CE-IVD, 100 Tests", "cell_codes": ["Test"]},
+          {"label": "COBAS TaqMan Test Kit", "cell_codes": ["Test"]},
+          {"label": "Abbott mSample Preparation System DNA", "cell_codes": ["Test"]}
+        ]
+      },
+      {
+        "title": "Viral load and EID Point of Care (POC) (Indicate the name of the cartridge)",
+        "micro": true,
+        "columns": ["Commodity Name", "Unit of Issue", "Beginning Balance", "Received Central", "Received Other", "Total Quantity Used", "Positive Adjustment", "Negative Adjustment", "Losses/Wastage", "Expiring within 6 months", "Days out of Stock", "Physical Stock Count", "Quantity Required"],
+        "rows": [
+          {"label": "GeneXpert Quantitative", "cell_codes": ["Test"]},
+          {"label": "m-PIMA Quantitative", "cell_codes": ["Test"]},
+          {"label": "GeneXpert Qualitative", "cell_codes": ["Test"]},
+          {"label": "m-PIMA Qualitative", "cell_codes": ["Test"]}
+        ]
+      },
+      {
+        "title": "Viral Load and EID Sample Collection",
+        "micro": true,
+        "columns": ["Commodity Name", "Unit of Issue", "Beginning Balance", "Received Central", "Received Other", "Total Quantity Used", "Positive Adjustment", "Negative Adjustment", "Losses/Wastage", "Expiring within 6 months", "Days out of Stock", "Physical Stock Count", "Quantity Required"],
+        "rows": [
+          {"label": "DBS Bundles", "cell_codes": ["Bundles"]},
+          {"label": "EDTA", "cell_codes": ["Piece"]},
+          {"label": "Vacutainer Needles", "cell_codes": ["Piece"]}
+        ]
+      },
+      {
+        "title": "Other HIV Related Tests",
+        "micro": true,
+        "columns": ["Commodity Name", "Unit of Issue", "Beginning Balance", "Received Central", "Received Other", "Total Quantity Used", "Positive Adjustment", "Negative Adjustment", "Losses/Wastage", "Expiring within 6 months", "Days out of Stock", "Physical Stock Count", "Quantity Required"],
+        "rows": [
+          {"label": "HBV test", "cell_codes": ["Test"]},
+          {"label": "CrAg test", "cell_codes": ["Test"]},
+          {"label": "Other", "cell_codes": ["Test"]},
+          {"label": "HPV", "cell_codes": ["Test"]}
+        ]
+      },
+      {
+        "title": "Haematology - Indicate the type of equipment in your facility",
+        "micro": true,
+        "fields": [
+          {"id": "haematology_equipment", "label": "Equipment (e.g. CellTac 640, Coulter, Sysmex KX-21)", "type": "text"}
+        ],
+        "columns": ["Commodity Name", "Unit of Issue", "Beginning Balance", "Received Central", "Received Other", "Total Quantity Used", "Positive Adjustment", "Negative Adjustment", "Losses/Wastage", "Expiring within 6 months", "Days out of Stock", "Physical Stock Count", "Quantity Required"],
+        "rows": [
+          {"label": "Full Haemogram", "cell_codes": ["Test"]},
+          {"label": "Haemoglobin", "cell_codes": ["Test"]}
+        ]
+      },
+      {
+        "title": "Biochemistry - Indicate the type of equipment in your facility",
+        "micro": true,
+        "fields": [
+          {"id": "biochemistry_equipment", "label": "Equipment (e.g. BTS 330/310/305, Urolyser, Humalyzer 2000/3000, C777)", "type": "text"}
+        ],
+        "columns": ["Commodity Name", "Unit of Issue", "Beginning Balance", "Received Central", "Received Other", "Total Quantity Used", "Positive Adjustment", "Negative Adjustment", "Losses/Wastage", "Expiring within 6 months", "Days out of Stock", "Physical Stock Count", "Quantity Required"],
+        "rows": [
+          {"label": "Albumin", "cell_codes": ["Test"]},
+          {"label": "Alkaline Phosphatase", "cell_codes": ["Test"]},
+          {"label": "ALAT (SGPT)", "cell_codes": ["Test"]},
+          {"label": "ASAT (SGOT)", "cell_codes": ["Test"]},
+          {"label": "Creatinine", "cell_codes": ["Test"]},
+          {"label": "Electrolytes", "cell_codes": ["Test"]},
+          {"label": "Gamma GT", "cell_codes": ["Test"]},
+          {"label": "Glucose (Blood & CSF)", "cell_codes": ["Test"]},
+          {"label": "HDL Cholesterol", "cell_codes": ["Test"]},
+          {"label": "Pregnancy test single", "cell_codes": ["Test"]},
+          {"label": "Serum Amylase test", "cell_codes": ["Test"]},
+          {"label": "Serum protein", "cell_codes": ["Test"]},
+          {"label": "Total Cholesterol", "cell_codes": ["Test"]},
+          {"label": "Triglycerides", "cell_codes": ["Test"]},
+          {"label": "Urea", "cell_codes": ["Test"]},
+          {"label": "Uric acid", "cell_codes": ["Test"]}
+        ]
+      },
+      {
+        "title": "Comments (Explain ALL Losses and Adjustments)",
+        "fields": [
+          {"id": "comments", "label": "Comments", "type": "text"}
+        ]
+      },
+      {
+        "title": "Authorization",
+        "fields": [
+          {"id": "compiled_by", "label": "Filled by", "type": "text"},
+          {"id": "compiled_date", "label": "Date Filled", "type": "date"},
+          {"id": "compiled_signature", "label": "Signature", "type": "text"},
+          {"id": "approved_by", "label": "Approved by", "type": "text"},
+          {"id": "approved_signature", "label": "Signature", "type": "text"},
+          {"id": "approved_designation", "label": "Designation", "type": "text"},
+          {"id": "approved_telephone", "label": "Telephone/Mobile", "type": "text"},
+          {"id": "approved_email", "label": "Email", "type": "text"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "moh_747a",
+    "code": "MOH 747A",
+    "title": "Facility Contraceptives Consumption Data Report and Request (FCDRR - FP) Form",
+    "version": "Revised September 2020",
+    "description": "Facility contraceptives consumption data report and request form.",
+    "footer": "Send the original and duplicate copies to the Sub County Medical Officer of Health (SCMOH) for the attention of the Sub County Pharmacist & Sub County Reproductive Health Coordinator. Leave the triplicate copy in the CDRR booklet at your facility.",
+    "image": "/images/ministry_reporting/moh_747a_fcddr_family_planning_commodities.png",
+    "layout": {
+      "orientation": "portrait",
+      "pages": [
+        {"id": "page_1", "label": "Page 1", "image": "/images/ministry_reporting/moh_747a_fcddr_family_planning_commodities.png", "width": 1188, "height": 1620}
+      ]
+    },
+    "meta_fields": [
+      {"id": "county", "label": "County", "type": "text"},
+      {"id": "sub_county", "label": "Sub County", "type": "text"},
+      {"id": "facility", "label": "Facility", "type": "text"},
+      {"id": "khmfl_no", "label": "KHMFL No", "type": "text"},
+      {"id": "reporting_month", "label": "Reporting Month", "type": "text"},
+      {"id": "period_beginning", "label": "Beginning", "type": "date"},
+      {"id": "period_ending", "label": "Ending", "type": "date"}
+    ],
+    "sections": [
+      {
+        "title": "Facility Type and Managing Agency",
+        "fields": [
+          {"id": "facility_type_disp", "label": "Disp", "type": "checkbox"},
+          {"id": "facility_type_hc", "label": "H/C", "type": "checkbox"},
+          {"id": "facility_type_sch", "label": "SC Hosp", "type": "checkbox"},
+          {"id": "facility_type_crh", "label": "CRH", "type": "checkbox"},
+          {"id": "facility_type_national_rh", "label": "National RH", "type": "checkbox"},
+          {"id": "facility_type_other", "label": "Other (Specify)", "type": "text"},
+          {"id": "managing_agency_gok", "label": "GOK", "type": "checkbox"},
+          {"id": "managing_agency_fbo", "label": "FBO", "type": "checkbox"},
+          {"id": "managing_agency_ngo", "label": "NGO", "type": "checkbox"},
+          {"id": "managing_agency_private", "label": "Private", "type": "checkbox"},
+          {"id": "managing_agency_other", "label": "Other (Specify)", "type": "text"}
+        ]
+      },
+      {
+        "title": "Contraceptive Method",
+        "compact": true,
+        "columns": ["Contraceptive Method", "Unit of Issue", "Beginning Balance (A)", "Received This Month (B)", "Dispensed (C)", "Losses (D)", "Adjustments Positive", "Adjustments Negative", "Ending Balance (E)", "Quantity to Order (F)"],
+        "rows": [
+          {"label": "Combined Oral contraceptive Pills", "cell_codes": ["Cycles"]},
+          {"label": "Progestin only pills", "cell_codes": ["Cycles"]},
+          {"label": "DMPA-IM", "cell_codes": ["Vials"]},
+          {"label": "DMPA-SC", "cell_codes": ["Vials"]},
+          {"label": "Implant (1-Rod) - ENG 68mg", "cell_codes": ["Sets"]},
+          {"label": "Implant (2-Rod) - LNG 75mg (3 years)", "cell_codes": ["Sets"]},
+          {"label": "Implant (2-Rod) - LNG 75mg (5 years)", "cell_codes": ["Sets"]},
+          {"label": "IUCD", "cell_codes": ["Sets"]},
+          {"label": "LNG IUS", "cell_codes": ["Sets"]},
+          {"label": "Emergency Contraceptive", "cell_codes": ["Doses"]},
+          {"label": "Male Condoms", "cell_codes": ["Pieces"]},
+          {"label": "Female Condoms", "cell_codes": ["Pieces"]},
+          {"label": "Cycle Beads", "cell_codes": ["Sets"]},
+          {"label": "Other (Specify)", "cell_codes": [""]}
+        ]
+      },
+      {
+        "title": "Service statistics (Indicate only the number of Clients issued with Contraceptives)",
+        "compact": true,
+        "columns": ["Method", "New client", "Revisits"],
+        "rows": ["Combined Oral contraceptive pills", "Progestin only pills", "DMPA-IM", "DMPA-SC", "Implants (1-Rod) ENG 68mg", "Implants (2-Rod) - LNG 75mg (3years)", "Implants (2-Rod) - LNG 75mg (5years)", "IUCD", "LNG IUS", "Emergency Contraceptive pills", "Male condoms", "Female condoms", "Cycle beads", "Other (Specify)", "Total"]
+      },
+      {
+        "title": "Comments: (Logistics & Clinical)",
+        "fields": [
+          {"id": "comments", "label": "Comments", "type": "text"}
+        ]
+      },
+      {
+        "title": "Submitted by",
+        "fields": [
+          {"id": "submitted_name", "label": "Name", "type": "text"},
+          {"id": "submitted_designation", "label": "Designation", "type": "text"},
+          {"id": "submitted_date", "label": "Date", "type": "date"},
+          {"id": "submitted_signature", "label": "Signature", "type": "text"},
+          {"id": "submitted_telephone", "label": "Telephone", "type": "text"},
+          {"id": "submitted_email", "label": "Email address", "type": "text"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "moh_731",
+    "code": "MOH 731",
+    "title": "Comprehensive HIV/ AIDS reporting form",
+    "version": "Ver. July 2023",
+    "description": "NASCOP monthly HIV/AIDS reporting form.",
+    "image": "/images/ministry_reporting/moh_731_hiv_aids_reporting_form_page_1.png",
+    "layout": {
+      "orientation": "portrait",
+      "pages": [
+        {"id": "page_1", "label": "Page 1", "image": "/images/ministry_reporting/moh_731_hiv_aids_reporting_form_page_1.png", "width": 1230, "height": 1790}
+      ]
+    },
+    "meta_fields": [
+      {"id": "county", "label": "County", "type": "text"},
+      {"id": "sub_county", "label": "Sub County", "type": "text"},
+      {"id": "facility", "label": "Facility", "type": "text"},
+      {"id": "mfl", "label": "MFL", "type": "text"},
+      {"id": "month", "label": "Month", "type": "text"},
+      {"id": "year", "label": "Year", "type": "text"}
+    ],
+    "sections": [
+      {
+        "title": "1.1 HIV Tests",
+        "column_start": 1,
+        "column_span": 4,
+        "grid_row": "1",
+        "compact": true,
+        "columns": ["Indicator", "Male", "Female"],
+        "rows": [
+          {"label": "Tests", "cell_codes": ["HV01-06", "HV01-07"]},
+          {"label": "Tests_Facility", "cell_codes": ["HV01-02", ""]},
+          {"label": "Tests_Community", "cell_codes": ["HV01-03", ""]},
+          {"label": "Tested KVP", "cell_codes": ["HV01-04", "HV01-05"]}
+        ]
+      },
+      {
+        "title": "1.2 HIV Positive Results",
+        "column_start": 5,
+        "column_span": 4,
+        "grid_row": "1",
+        "compact": true,
+        "columns": ["Indicator", "Male", "Female (including PMTCT)"],
+        "rows": [
+          {"label": "Positive_2-<10", "cell_codes": ["HV01-01", ""]},
+          {"label": "Positive_10-14", "cell_codes": ["HV01-08", "HV01-09"]},
+          {"label": "Positive_15-19", "cell_codes": ["HV01-10", "HV01-11"]},
+          {"label": "Positive_20-24", "cell_codes": ["HV01-12", "HV01-13"]},
+          {"label": "Positive_25+", "cell_codes": ["HV01-14", "HV01-15"]},
+          {"label": "Positive_KVP", "cell_codes": ["HV01-16", ""]},
+          {"label": "Discordant", "cell_codes": ["HV01-17", "HV01-18"]},
+          {"label": "Inconclusive Test Results", "cell_codes": ["HV01-46", ""]}
+        ]
+      },
+      {
+        "title": "1.3. No. initiated on PrEP (NEW)",
+        "column_start": 9,
+        "column_span": 4,
+        "grid_row": "1",
+        "compact": true,
+        "columns": ["Indicator", "Male", "Female"],
+        "rows": [
+          {"label": "General popn", "cell_codes": ["HV01-19", "HV01-20"]},
+          {"label": "MSM/MSW", "cell_codes": ["HV01-21", ""]},
+          {"label": "FSW", "cell_codes": ["HV01-22", ""]},
+          {"label": "PWID/PWUD", "cell_codes": ["HV01-23", ""]},
+          {"label": "Discordant Couple", "cell_codes": ["HV01-25", "HV01-26"]},
+          {"label": "Vulnerable Pop.", "cell_codes": ["HV01-27", "HV01-28"]},
+          {"label": "AYP (10-24yrs)", "cell_codes": ["HV01-29", "HV01-30"]},
+          {"label": "Pregnant and breastfeeding women", "cell_codes": ["", "HV01-31"]}
+        ]
+      },
+      {
+        "title": "1.4. No. on PrEP Diagnosed with STI",
+        "column_start": 9,
+        "column_span": 4,
+        "grid_row": "2",
+        "compact": true,
+        "columns": ["Indicator", "Male", "Female"],
+        "rows": [
+          {"label": "General popn", "cell_codes": ["HV01-32", "HV01-33"]},
+          {"label": "MSM/MSW", "cell_codes": ["HV01-34", ""]},
+          {"label": "FSW", "cell_codes": ["HV01-35", ""]},
+          {"label": "PWID/PWUD", "cell_codes": ["HV01-36", "HV01-37"]},
+          {"label": "Discordant Couple", "cell_codes": ["HV01-38", "HV01-39"]},
+          {"label": "Vulnerable Pop.", "cell_codes": ["HV01-40", "HV01-41"]},
+          {"label": "AYP (10-24 yrs)", "cell_codes": ["HV01-42", "HV01-43"]},
+          {"label": "Pregnant and breastfeeding women", "cell_codes": ["", "HV01-44"]}
+        ]
+      },
+      {
+        "title": "1.5. No. Seroconverted while on PrEP",
+        "column_start": 9,
+        "column_span": 4,
+        "grid_row": "3",
+        "compact": true,
+        "columns": ["Indicator", "Male", "Female"],
+        "rows": [
+          {"label": "HIV Positive", "cell_codes": ["HV01-45", ""]}
+        ]
+      },
+      {
+        "title": "2.1 Maternal HIV Testing",
+        "column_start": 1,
+        "column_span": 4,
+        "grid_row": "2",
+        "compact": true,
+        "columns": ["Indicator", "Initial", "Retest"],
+        "rows": [
+          {"label": "Known Positive at 1st ANC", "cell_codes": ["HV02-01", ""]},
+          {"label": "Tested at ANC", "cell_codes": ["HV02-02", "HV02-03"]},
+          {"label": "Tested at L&D", "cell_codes": ["HV02-04", "HV02-05"]},
+          {"label": "Tested at PNC_<=6 weeks", "cell_codes": ["HV02-06", "HV02-07"]},
+          {"label": "Tested at PNC_>6 weeks", "cell_codes": ["HV02-08", "HV02-09"]}
+        ]
+      },
+      {
+        "title": "2.2 HIV Positive Results",
+        "column_start": 1,
+        "column_span": 4,
+        "grid_row": "3",
+        "compact": true,
+        "columns": ["Indicator", "Total"],
+        "rows": [
+          {"label": "Positive Results_ANC", "cell_codes": ["HV02-10"]},
+          {"label": "Positive Results_L&D", "cell_codes": ["HV02-11"]},
+          {"label": "Positive Results_PNC <=6weeks", "cell_codes": ["HV02-12"]},
+          {"label": "Positive PNC >6weeks", "cell_codes": ["HV02-13"]}
+        ]
+      },
+      {
+        "title": "2.3 Maternal HAART",
+        "column_start": 1,
+        "column_span": 4,
+        "grid_row": "4",
+        "compact": true,
+        "columns": ["Indicator", "Total"],
+        "rows": [
+          {"label": "On HAART at 1st ANC", "cell_codes": ["HV02-14"]},
+          {"label": "Start HAART_ANC", "cell_codes": ["HV02-15"]},
+          {"label": "Start HAART_L&D", "cell_codes": ["HV02-16"]},
+          {"label": "Start HAART_PNC <= 6 weeks", "cell_codes": ["HV02-17"]},
+          {"label": "Start HAART_PNC>6weeks", "cell_codes": ["HV02-18"]}
+        ]
+      },
+      {
+        "title": "2.4 HBV Screening at ANC",
+        "column_start": 5,
+        "column_span": 4,
+        "grid_row": "2",
+        "compact": true,
+        "columns": ["Indicator", "Total"],
+        "rows": [
+          {"label": "Screened_HBV_ANC", "cell_codes": ["HV02-19"]},
+          {"label": "HBV Screened_Positive", "cell_codes": ["HV02-20"]}
+        ]
+      },
+      {
+        "title": "2.5 Adolescents girls & Young Women (10-24 Yrs) testing & results",
+        "column_start": 5,
+        "column_span": 4,
+        "grid_row": "3",
+        "compact": true,
+        "columns": ["Indicator", "10-19yrs", "20-24yrs"],
+        "rows": [
+          {"label": "1st ANC KP", "cell_codes": ["HV02-21", "HV02-22"]},
+          {"label": "New HIV Positive", "cell_codes": ["HV02-23", "HV02-24"]},
+          {"label": "On HAART 1st ANC KP", "cell_codes": ["HV02-25", "HV02-26"]},
+          {"label": "Started HAART New", "cell_codes": ["HV02-27", "HV02-28"]}
+        ]
+      },
+      {
+        "title": "2.6 Infant Prophylaxis",
+        "column_start": 5,
+        "column_span": 4,
+        "grid_row": "4",
+        "compact": true,
+        "columns": ["Indicator", "Total"],
+        "rows": [
+          {"label": "Infant ARV Prophylaxis_ANC", "cell_codes": ["HV02-29"]},
+          {"label": "Infant ARV Prophylaxis_L&D", "cell_codes": ["HV02-30"]},
+          {"label": "Infant ARV Prophylaxis_PNC", "cell_codes": ["HV02-31"]}
+        ]
+      },
+      {
+        "title": "2.7 Infant Feeding",
+        "column_start": 5,
+        "column_span": 4,
+        "grid_row": "5",
+        "compact": true,
+        "columns": ["Indicator", "Total"],
+        "rows": [
+          {"label": "Exclusive Breastfeeding (EBF) - Below 6 months", "cell_codes": ["HV02-32"]},
+          {"label": "Breastfeeding (BF) - 6 to 24 months", "cell_codes": ["HV02-33"]},
+          {"label": "Not Breastfeeding (NBF)", "cell_codes": ["HV02-34"]}
+        ]
+      },
+      {
+        "title": "3.1 Starting ART",
+        "column_start": 1,
+        "column_span": 4,
+        "grid_row": "6",
+        "compact": true,
+        "columns": ["Indicator", "Male", "Female"],
+        "rows": [
+          {"label": "Start ART_<1", "cell_codes": ["HV03-01", "HV03-02"]},
+          {"label": "Start ART_1-4", "cell_codes": ["HV03-03", "HV03-04"]},
+          {"label": "Start ART_5-9", "cell_codes": ["HV03-05", "HV03-06"]},
+          {"label": "Start ART_10-14", "cell_codes": ["HV03-07", "HV03-08"]},
+          {"label": "Start ART_15-19", "cell_codes": ["HV03-09", "HV03-10"]},
+          {"label": "Start ART_20-24", "cell_codes": ["HV03-11", "HV03-12"]},
+          {"label": "Start ART_25+", "cell_codes": ["HV03-013", "HV03-014"]}
+        ]
+      },
+      {
+        "title": "3.2 Currently on ART (All)",
+        "column_start": 1,
+        "column_span": 4,
+        "grid_row": "7",
+        "compact": true,
+        "columns": ["Indicator", "Male", "Female"],
+        "rows": [
+          {"label": "On ART_<1", "cell_codes": ["HV03-015", "HV03-016"]},
+          {"label": "On ART_1-4", "cell_codes": ["HV03-017", "HV03-018"]},
+          {"label": "On ART_5-9", "cell_codes": ["HV03-019", "HV03-020"]},
+          {"label": "On ART_10-14", "cell_codes": ["HV03-021", "HV03-022"]},
+          {"label": "On ART_15-19", "cell_codes": ["HV03-023", "HV03-024"]},
+          {"label": "On ART_20-24", "cell_codes": ["HV03-025", "HV03-026"]},
+          {"label": "On ART_25+", "cell_codes": ["HV03-027", "HV03-028"]}
+        ]
+      },
+      {
+        "title": "3.3 TB Screening / 3.4 Starting TPT / 3.5 Differentiated Service Delivery",
+        "column_start": 1,
+        "column_span": 4,
+        "grid_row": "8",
+        "compact": true,
+        "columns": ["Indicator", "Total"],
+        "rows": [
+          {"label": "Screen for TB_<1", "cell_codes": ["HV03-029"]},
+          {"label": "Screen for TB_15+", "cell_codes": ["HV03-030"]},
+          {"label": "Start TPT_<15", "cell_codes": ["HV03-031"]},
+          {"label": "Start TPT_15+", "cell_codes": ["HV03-032"]},
+          {"label": "Established", "cell_codes": ["HV03-033"]},
+          {"label": "Not Established", "cell_codes": ["HV03-034"]},
+          {"label": "Community", "cell_codes": ["HV03-035"]},
+          {"label": "Facility", "cell_codes": ["HV03-036"]}
+        ]
+      },
+      {
+        "title": "3.6 Nutrition and HIV",
+        "column_start": 5,
+        "column_span": 4,
+        "grid_row": "6 / span 3",
+        "compact": true,
+        "columns": ["Indicator", "Total"],
+        "rows": [
+          {"label": "Number SAM + 0-5Months", "cell_codes": ["HV03-037"]},
+          {"label": "Number SAM + 6-59Months", "cell_codes": ["HV03-038"]},
+          {"label": "Number SAM + 5-9Years", "cell_codes": ["HV03-039"]},
+          {"label": "Number SAM + 10-17years", "cell_codes": ["HV03-040"]},
+          {"label": "Number SAM + 18+Years", "cell_codes": ["HV03-041"]},
+          {"label": "Number SAM + Pregnant & Lactating", "cell_codes": ["HV03-042"]},
+          {"label": "Number MAM + 0-5Months", "cell_codes": ["HV03-043"]},
+          {"label": "Number MAM + 6-59Months", "cell_codes": ["HV03-044"]},
+          {"label": "Number MAM + 5-9Years", "cell_codes": ["HV03-045"]},
+          {"label": "Number MAM + 10-17years", "cell_codes": ["HV03-046"]},
+          {"label": "Number MAM + 18+Years", "cell_codes": ["HV03-047"]},
+          {"label": "Number MAM + Pregnant & Lactating", "cell_codes": ["HV03-048"]},
+          {"label": "SAM + receiving therapeutic 0-5Months", "cell_codes": ["HV03-049"]},
+          {"label": "SAM + receiving therapeutic 6-59Months", "cell_codes": ["HV03-050"]},
+          {"label": "SAM + receiving therapeutic 5-9Years", "cell_codes": ["HV03-051"]},
+          {"label": "SAM + receiving therapeutic 10-17years", "cell_codes": ["HV03-052"]},
+          {"label": "SAM + receiving therapeutic 18+Years", "cell_codes": ["HV03-053"]},
+          {"label": "SAM + receiving therapeutic Pregnant & Lactating", "cell_codes": ["HV03-054"]},
+          {"label": "MAM + receiving Supplemental foods 0-5Months", "cell_codes": ["HV03-055"]},
+          {"label": "MAM + receiving Supplemental foods 6-59Months", "cell_codes": ["HV03-056"]},
+          {"label": "MAM + receiving Supplemental foods 5-9Years", "cell_codes": ["HV03-057"]},
+          {"label": "MAM + receiving Supplemental foods 10-17years", "cell_codes": ["HV03-058"]},
+          {"label": "MAM + receiving Supplemental foods 18+Years", "cell_codes": ["HV03-059"]},
+          {"label": "MAM + receiving Supplemental foods Pregnant & Lactating", "cell_codes": ["HV03-060"]}
+        ]
+      },
+      {
+        "title": "3.7 HIV in TB Clinic",
+        "column_start": 9,
+        "column_span": 4,
+        "grid_row": "6",
+        "compact": true,
+        "columns": ["Indicator", "Total"],
+        "rows": [
+          {"label": "TB cases_New", "cell_codes": ["HV03-061"]},
+          {"label": "TB New_Known HIV Positive", "cell_codes": ["HV03-062"]},
+          {"label": "TB_New HIV Positive", "cell_codes": ["HV03-063"]},
+          {"label": "TB_New_Known HIV Positive(KP) on HAART", "cell_codes": ["HV03-064"]},
+          {"label": "TB New_start_HAART", "cell_codes": ["HV03-065"]}
+        ]
+      },
+      {
+        "title": "4. Medical Male Circumcision",
+        "column_start": 9,
+        "column_span": 4,
+        "grid_row": "7",
+        "compact": true,
+        "columns": ["Indicator", "Total"],
+        "rows": [
+          {"label": "Circumcised_0-60 days", "cell_codes": ["HV04-01"]},
+          {"label": "Circumcised_61 days -9 yrs", "cell_codes": ["HV04-02"]},
+          {"label": "Circumcised_10-14", "cell_codes": ["HV04-03"]},
+          {"label": "Circumcised_15 +", "cell_codes": ["HV04-04"]},
+          {"label": "Tested_HIV+", "cell_codes": ["HV04-05"]},
+          {"label": "Tested_HIV-", "cell_codes": ["HV04-06"]},
+          {"label": "Surgical", "cell_codes": ["HV04-07"]},
+          {"label": "Devices", "cell_codes": ["HV04-08"]},
+          {"label": "AE_During_Moderate", "cell_codes": ["HV04-09"]},
+          {"label": "AE_During_Severe", "cell_codes": ["HV04-10"]},
+          {"label": "AE_Post_Moderate", "cell_codes": ["HV04-11"]},
+          {"label": "AE_Post_Severe", "cell_codes": ["HV04-12"]},
+          {"label": "Follow up visit <14d", "cell_codes": ["HV04-13"]}
+        ]
+      },
+      {
+        "title": "5. Post Exposure Prophylaxis",
+        "column_start": 9,
+        "column_span": 4,
+        "grid_row": "8",
+        "compact": true,
+        "columns": ["Indicator", "Total"],
+        "rows": [
+          {"label": "Exposed_Occupational", "cell_codes": ["HV05-01"]},
+          {"label": "Exposed_Other", "cell_codes": ["HV05-02"]},
+          {"label": "PEP_Occupational", "cell_codes": ["HV05-03"]},
+          {"label": "PEP_Other", "cell_codes": ["HV05-04"]}
+        ]
+      },
+      {
+        "title": "Reviewed by",
+        "column_start": 1,
+        "column_span": 12,
+        "grid_row": "9",
+        "compact": true,
+        "columns": ["", "Name", "Designation", "Signature", "Date"],
+        "rows": ["Reviewed by:"]
+      }
+    ]
+  },
+  {
+    "id": "moh_711",
+    "code": "MOH 711",
+    "title": "INTEGRATED PROGRAMME SUMMARY REPORT FORM: REPRODUCTIVE & CHILD HEALTH, MEDICAL & REHABILITATION SERVICES",
+    "version": "Revised Jul-2015",
+    "description": "Reproductive and child health, medical and rehabilitation services summary.",
+    "image": "/images/ministry_reporting/moh_711_integrated_programme_summary_reproductive_child_health.png",
+    "layout": {
+      "orientation": "portrait",
+      "pages": [
+        {"id": "page_1", "label": "Page 1", "image": "/images/ministry_reporting/moh_711_integrated_programme_summary_reproductive_child_health.png", "width": 1230, "height": 1666}
+      ]
+    },
+    "meta_fields": [
+      {"id": "facility_name", "label": "Facility Name", "type": "text"},
+      {"id": "county", "label": "County", "type": "text"},
+      {"id": "sub_county", "label": "Sub County", "type": "text"},
+      {"id": "month", "label": "Month", "type": "text"},
+      {"id": "year", "label": "Year", "type": "text"}
+    ],
+    "sections": [
+      {
+        "title": "A. ANC / PMCT",
+        "flow_column": 1,
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Indicator", "Total"],
+        "rows": [
+          {"code": "1", "label": "No. of ANC Clients - New"},
+          {"code": "2", "label": "No. of ANC Clients - Re-visit"},
+          {"code": "3", "label": "No. of Clients given IPT (1st dose)"},
+          {"code": "4", "label": "No. of Clients given IPT (2nd dose)"},
+          {"code": "5", "label": "No. of Clients given IPT (3rd dose)"},
+          {"code": "6", "label": "No. of Clients with Hb < 11 g/dl"},
+          {"code": "7", "label": "No. of clients with pregnancy at 1st ANC contact at 12 or Less weeks"},
+          {"code": "8", "label": "No. of Clients completed 4th ANC Contacts"},
+          {"code": "9", "label": "No. of Clients completed 8th ANC Contacts"},
+          {"code": "10", "label": "No. of LLINs distributed to under 1 year"},
+          {"code": "11", "label": "No. of LLINs distributed to ANC clients"},
+          {"code": "12", "label": "No. of clients Tested for Syphilis"},
+          {"code": "13", "label": "No. of clients Positive (+ve)"},
+          {"code": "14", "label": "Total women done breast examination"},
+          {"code": "15", "label": "No. of adolescents (10-14 years) presenting with pregnancy at 1st ANC contact"},
+          {"code": "16", "label": "No. of adolescents (15-19 years) presenting with pregnancy at 1st ANC contact"},
+          {"code": "17", "label": "No. of youth (20-24 years) presenting with pregnancy at 1st ANC contact"},
+          {"code": "18", "label": "No. of clients issued with Iron"},
+          {"code": "19", "label": "No. of clients issued with Folic"},
+          {"code": "20", "label": "No. of clients issued with Combined Ferrous Folate"},
+          {"code": "21", "label": "No. of pregnant women presenting in ANC with complication associated with FGM"}
+        ]
+      },
+      {
+        "title": "C. Sexual and Gender Based Violence (SGBV)",
+        "flow_column": 1,
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Indicator", "0-9 yrs", "10-17 yrs", "18-49yrs", "50+yrs"],
+        "rows": [
+          {"code": "1", "label": "Total SGBV survivors seen (Rape, attempted rape, defilement and assault)"},
+          {"code": "2", "label": "No. of SGBV survivors presenting within 72 hrs"},
+          {"code": "3", "label": "No. of eligible survivors initiating PEP"},
+          {"code": "4", "label": "No. of eligible survivors Completed PEP"},
+          {"code": "5", "label": "No. of SGBV survivors seroconverting 3 months after exposure"},
+          {"code": "6", "label": "No. of SGBV survivors eligible for ECP"},
+          {"code": "7", "label": "No. of eligible survivors who received ECP"},
+          {"code": "8", "label": "No. of rape/defilement Survivors Pregnant after 4weeks"},
+          {"code": "9", "label": "No of RC/IPV clients seen"},
+          {"code": "10", "label": "No. of survivors with disability"}
+        ]
+      },
+      {
+        "title": "D. Family Planning (Number of clients Issued with contraceptives)",
+        "flow_column": 1,
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Indicator", "NEW", "RE-VISITS"],
+        "rows": [
+          {"code": "1", "label": "No. of 1st ever users of contraceptive"},
+          {"code": "2", "label": "Pills - Progestin only pills"},
+          {"code": "3", "label": "Pills - Combined Oral Contraceptive pills"},
+          {"code": "4", "label": "Pills - Emergency contraceptive pill"},
+          {"code": "5", "label": "Injectables - DMPA-IM"},
+          {"code": "6", "label": "Injectables - DMPA-SC"},
+          {"code": "7", "label": "Condoms - No. of clients received (Male condoms)"},
+          {"code": "8", "label": "Condoms - No. of clients received (Female condoms)"},
+          {"code": "9", "label": "Condoms - No. of clients received (Both Male and Female condoms)"},
+          {"code": "10", "label": "Natural FP - No. of clients counselled on Natural FP"},
+          {"code": "11", "label": "Natural FP - No. of clients given cycle beads"},
+          {"code": "12", "label": "Implants - 1 Rod"},
+          {"code": "13", "label": "Implants - 2 Rods"},
+          {"code": "14", "label": "I.U.C.D insertion - Hormonal"},
+          {"code": "15", "label": "I.U.C.D insertion - Non-Hormonal"},
+          {"code": "16", "label": "Voluntary surgical contraception - BTL"},
+          {"code": "17", "label": "Voluntary surgical contraception - Vasectomy"},
+          {"code": "18", "label": "Removals - I.U.C.D."},
+          {"code": "19", "label": "Removals - Implants"},
+          {"code": "20", "label": "Adolescent clients (10-14 Years) receiving FP Services"},
+          {"code": "21", "label": "Adolescent clients (15-19 Years) receiving FP Services"},
+          {"code": "22", "label": "Youth clients (20-24 Years) receiving FP Services"},
+          {"code": "23", "label": "Adults 25+ Years"},
+          {"code": "24", "label": "No. of clients receiving immediate post partum FP Method - within 48 Hours"},
+          {"code": "25", "label": "No. of clients receiving immediate post partum FP Method - 3 days to 6 weeks"},
+          {"code": "26", "label": "No. of clients receiving post abortion FP Method"}
+        ]
+      },
+      {
+        "title": "G. Cervical cancer screening",
+        "flow_column": 1,
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Indicator", "<25yrs", "25-49yrs", "50+yrs"],
+        "rows": [
+          {"code": "1", "label": "No. of Client receiving VIA /VILI /HPV VILI / HPV"},
+          {"code": "2", "label": "No.Screened for Pap smear"},
+          {"code": "3", "label": "No.Screened for HPV test"},
+          {"code": "4", "label": "Number of clients with Positive VIA/VILI result"},
+          {"code": "5", "label": "Number of clients with Positive Cytology result"},
+          {"code": "6", "label": "Number of clients with Positive HPV result"},
+          {"code": "7", "label": "Number of clients with suspicious cancer lesions"},
+          {"code": "8", "label": "Number of clients treated using Cryotherapy"},
+          {"code": "9", "label": "Number of clients treated using LEEP"},
+          {"code": "10", "label": "Number of HIV positive clients screened"}
+        ]
+      },
+      {
+        "title": "H. Post Natal Care (PNC)",
+        "flow_column": 1,
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Indicator", "Total"],
+        "rows": [
+          {"code": "1", "label": "No. of PNC Clients - New"},
+          {"code": "2", "label": "No. of PNC Clients - Revisit"},
+          {"code": "3", "label": "No of Women counselled on Post Partum FP"},
+          {"code": "4", "label": "No of clients who received Post Partum FP"},
+          {"code": "5", "label": "No. of Mothers received Postpartum Care - Within 48 hours"},
+          {"code": "5", "label": "No. of Mothers received Postpartum Care - Between 3 days to 6 weeks"},
+          {"code": "5", "label": "No. of Mothers received Postpartum Care - After 6 weeks"},
+          {"code": "6", "label": "No. of Babies received Postpartum Care - Within 48 hours"},
+          {"code": "6", "label": "No. of Babies received Postpartum Care - Between 3 days to 6 weeks"},
+          {"code": "6", "label": "No. of Babies received Postpartum Care - After 6 weeks"},
+          {"code": "7", "label": "Number of Cases of Fistula"},
+          {"code": "8", "label": "No Referred from the community unit for PNC"}
+        ]
+      },
+      {
+        "title": "I. Rehabilitation Services",
+        "flow_column": 1,
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Indicator", "Total"],
+        "rows": [
+          {"code": "1", "label": "Number Assessed"},
+          {"code": "2", "label": "Number Treated"},
+          {"code": "3", "label": "Number Rehabilitated"},
+          {"code": "4", "label": "Number Referred for further Interventions"},
+          {"code": "5", "label": "Number Integrated to Communities"}
+        ]
+      },
+      {
+        "title": "J. MEDICAL SOCIAL WORK / MENTAL HEALTH",
+        "flow_column": 1,
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Indicator", "Total"],
+        "rows": [
+          {"code": "1", "label": "Psycho-Social Counselling"},
+          {"code": "2", "label": "Alcohol and Drug Abuse"},
+          {"code": "3", "label": "Mental Illness"},
+          {"code": "4", "label": "Adolescent issues"},
+          {"code": "5", "label": "Psycho-Social Assessments (psycho, social and economic)"},
+          {"code": "6", "label": "Social Investigations (home visits /Followups)"},
+          {"code": "7", "label": "Social Rehabilitation"},
+          {"code": "8", "label": "Outreach Services / Health Talks"},
+          {"code": "9", "label": "Referrals"}
+        ]
+      },
+      {
+        "title": "Report Compiled by",
+        "flow_column": 1,
+        "fields": [
+          {"id": "compiled_name", "label": "Name", "type": "text"},
+          {"id": "compiled_designation", "label": "Designation", "type": "text"},
+          {"id": "compiled_date", "label": "Date", "type": "date"},
+          {"id": "compiled_signature", "label": "Signature", "type": "text"}
+        ]
+      },
+      {
+        "title": "B. Maternity and Newborn",
+        "flow_column": 2,
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Indicator", "Total"],
+        "rows": [
+          {"code": "1", "label": "Normal Deliveries"},
+          {"code": "2", "label": "Caesarean Sections"},
+          {"code": "3", "label": "Breech Delivery"},
+          {"code": "4", "label": "Assisted Vaginal Deliveries (Vacuum Extraction)"},
+          {"code": "", "label": "Total deliveries", "emphasis": true},
+          {"code": "5", "label": "No. of Mothers given uterotonics within 1 minute - Oxytocin"},
+          {"code": "5", "label": "No. of Mothers given uterotonics within 1 minute - Carbatosin"},
+          {"code": "6", "label": "Live Births"},
+          {"code": "7", "label": "No. of Low Birth Weight Babies (below 2500 grams)"},
+          {"code": "8", "label": "No of Low APGAR Score (5 & at 5 Min)"},
+          {"code": "9", "label": "No. of births with deformities"},
+          {"code": "10", "label": "No. of babies applied chlorhexidine for cord care"},
+          {"code": "11", "label": "No. of neonates given Vit 'K'"},
+          {"code": "12", "label": "No. of babies given tetracycline at birth"},
+          {"code": "13", "label": "Pre-Term babies"},
+          {"code": "14", "label": "No. of babies discharged alive"},
+          {"code": "15", "label": "No. of Infants initiated on breastfeeding within 1 hour after birth"},
+          {"code": "16", "label": "Total Deliveries from HIV +ve women"},
+          {"code": "17", "label": "Perinatal Deaths - Fresh still birth"},
+          {"code": "18", "label": "Perinatal Deaths - Macerated still birth"},
+          {"code": "18", "label": "Perinatal Deaths - Death 0-7 days"},
+          {"code": "20", "label": "Neonatal Deaths 0-28 days"},
+          {"code": "21", "label": "Maternal deaths 10-14 Years"},
+          {"code": "22", "label": "Maternal deaths 15-19 Years"},
+          {"code": "23", "label": "Maternal deaths 20-24 Years"},
+          {"code": "24", "label": "Maternal deaths 25+ Years"},
+          {"code": "25", "label": "Maternal deaths audited within 7 days"},
+          {"code": "26", "label": "No. of neonatal deaths audited within 7 days"},
+          {"code": "27", "label": "A.P.H. (Ante Partum Haemorrhage)"},
+          {"code": "28", "label": "P.P.H. (Post Partum Haemorrhage)"},
+          {"code": "29", "label": "Eclampsia"},
+          {"code": "30", "label": "Ruptured Uterus"},
+          {"code": "31", "label": "Obstructed labour"},
+          {"code": "32", "label": "Sepsis"},
+          {"code": "33", "label": "Number of Mothers with delivery complications associated with FGM"},
+          {"code": "34", "label": "Causes of neonatal deaths - No. of neonatal deaths due to Sepsis"},
+          {"code": "35", "label": "Causes of neonatal deaths - No. of neonatal deaths due to Prematurity"},
+          {"code": "36", "label": "Causes of neonatal deaths - No. of neonatal deaths due to Asphyxia"},
+          {"code": "37", "label": "No. of neonatal initiated on Kangaroo Mother Care"},
+          {"code": "38", "label": "No. of Referrals from Community Unit"}
+        ]
+      },
+      {
+        "title": "E. Post Abortal Care (PAC) Services",
+        "flow_column": 2,
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Indicator", "Total"],
+        "rows": [
+          {"code": "1", "label": "No. of adolescents (10-19 years) receiving PAC Services"},
+          {"code": "2", "label": "No. of youth (20-24 years) receiving PAC Services"},
+          {"code": "3", "label": "No.Receiving PAC (25 Years plus)"}
+        ]
+      },
+      {
+        "title": "F. Child Health and Nutrition Information System (CHANIS)",
+        "flow_column": 2,
+        "micro": true,
+        "columns": ["Indicator", "F", "M", "Total"],
+        "rows": [
+          "Weight for age - 0-<6 months - Normal Weight for Age",
+          "Weight for age - 0-<6 months - Underweight",
+          "Weight for age - 0-<6 months - Severe Underweight",
+          "Weight for age - 0-<6 months - Overweight",
+          "Weight for age - 0-<6 months - Obese",
+          "Weight for age - 0-<6 months - Total Weighed",
+          "Weight for age - 6-23 months - Normal Weight for Age",
+          "Weight for age - 6-23 months - Underweight",
+          "Weight for age - 6-23 months - Severe Underweight",
+          "Weight for age - 6-23 months - Overweight",
+          "Weight for age - 6-23 months - Obese",
+          "Weight for age - 6-23 months - Total Weighed",
+          "Weight for age - 24-59 months - Normal Weight for Age",
+          "Weight for age - 24-59 months - Underweight",
+          "Weight for age - 24-59 months - Severe Underweight",
+          "Weight for age - 24-59 months - Overweight",
+          "Weight for age - 24-59 months - Obese",
+          "Weight for age - 24-59 months - Total Weighed",
+          "MUAC 6-59 months - Normal (Green)",
+          "MUAC 6-59 months - Moderate (Yellow)",
+          "MUAC 6-59 months - Severe (Red)",
+          "Height for Age - 0-<6 Months - Normal Height for Age",
+          "Height for Age - 0-<6 Months - Stunted",
+          "Height for Age - 0-<6 Months - Severely Stunted",
+          "Height for Age - 0-<6 Months - Total Measured",
+          "Height for Age - 6-23 months - Normal Height for Age",
+          "Height for Age - 6-23 months - Stunted",
+          "Height for Age - 6-23 months - Severely Stunted",
+          "Height for Age - 6-23 months - Total Measured",
+          "Height for Age - 24-59 months - Normal Height for Age",
+          "Height for Age - 24-59 months - Stunted",
+          "Height for Age - 24-59 months - Severely Stunted",
+          "Height for Age - 24-59 months - Total Measured",
+          "Others - 0-59 Months - New visits",
+          "Others - 0-59 Months - Kwashiorkor",
+          "Others - 0-59 Months - Marasmus",
+          "Others - 0-59 Months - Faltering Growth",
+          "0-<6 - Exclusive breast feeding",
+          "12-59 months - Dewormed",
+          "6-23 months - MNPs Supplementation",
+          "No of children who have diarrhoea with severe dehydration",
+          "No of children who have diarrhoea with some dehydration",
+          "No of children who have diarrhoea with no dehydration",
+          "No. of children with diarrhea treated with ORS and Zinc (Co-pack)",
+          "No. of children with pneumonia treated with Amoxycillin (DT)",
+          "Under five deaths",
+          "No. of children with any kind of disability",
+          "No. of children with delayed milestones"
+        ]
+      },
+      {
+        "title": "K. PHYSIOTHERAPY SERVICE",
+        "flow_column": 2,
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Indicator", "<5 yrs", "5-19 yrs", "20 yrs +"],
+        "rows": [
+          {"code": "1", "label": "Number of PWIDs identified and received physiotherapy - OPD"},
+          {"code": "2", "label": "Number of PWIDs identified and received physiotherapy - In-patient"},
+          {"code": "3", "label": "Number of other clients /patients receiving physiotherapy - OPD"},
+          {"code": "4", "label": "Number of other clients /patients receiving physiotherapy - In-patient"},
+          {"code": "5", "label": "Total number of treatments"},
+          {"code": "6", "label": "PWDs assessed for registration"}
+        ]
+      },
+      {
+        "title": "L. OTHER",
+        "flow_column": 2,
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Indicator", "Amount"],
+        "rows": [
+          {"code": "1", "label": "Amount of FIF collected"},
+          {"code": "2", "label": "Amount of FIF Waived"},
+          {"code": "3", "label": "Amount of FIF Exempted"},
+          {"code": "4", "label": "Number of Disability committee meetings held"}
+        ]
+      },
+      {
+        "title": "M. TB SCREENING",
+        "flow_column": 2,
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Indicator", "0-14 years", "15 years +", "Total"],
+        "rows": [
+          {"code": "1", "label": "Total Number of people screened"},
+          {"code": "2", "label": "Total Number of presumptive TB cases"},
+          {"code": "3", "label": "Total Number already on TB treatment"},
+          {"code": "4", "label": "Total Number of people not screened"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "moh_717",
+    "code": "MOH 717",
+    "title": "Monthly Service Workload Report for Health Facilities",
+    "version": "Revised April 2019",
+    "description": "Monthly workload report for outpatient, inpatient, special services, pharmacy, mortuary, medical records and finance.",
+    "instructions": "NOTE: Complete every line- leave no blanks. If the health institution does not provide a specific service, write \"NS\" (\"No Service\"). If the institution provides the service, but workload data are unavailable, write \"NR\" (\"Not Recorded\"). At the end of each month, this form should be completed in 2 copies and delivered by the 5th day of the following month. (January statistics should be posted by 5th February, February statistics by 5th March, and so forth) The copies should be distributed as follows: Original Form should be sent to the Sub County Health Records and Information Office; The Copy should be retained by the Facility's Health Records and Information Office.",
+    "image": "/images/ministry_reporting/moh_717_monthly_service_workload_outpatient_services.png",
+    "reference_images": [
+      "/images/ministry_reporting/moh_717_monthly_service_workload_outpatient_services.png",
+      "/images/ministry_reporting/moh_717_monthly_service_workload_inpatient_services.png"
+    ],
+    "layout": {
+      "orientation": "portrait",
+      "pages": [
+        {"id": "page_1", "label": "Outpatient services", "image": "/images/ministry_reporting/moh_717_monthly_service_workload_outpatient_services.png", "width": 1230, "height": 1666},
+        {"id": "page_2", "label": "Inpatient services", "image": "/images/ministry_reporting/moh_717_monthly_service_workload_inpatient_services.png", "width": 1230, "height": 1740, "show_header": false}
+      ]
+    },
+    "meta_fields": [
+      {"id": "county", "label": "County", "type": "text"},
+      {"id": "sub_county", "label": "Sub County", "type": "text"},
+      {"id": "health_facility", "label": "Health Facility", "type": "text"},
+      {"id": "month", "label": "Month", "type": "text"},
+      {"id": "year", "label": "Year", "type": "text"},
+      {"id": "kmhfl_code", "label": "KMHFL Code", "type": "text"}
+    ],
+    "sections": [
+      {
+        "title": "A. OUTPATIENT SERVICES",
+        "page": 1,
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "Services", "NEW", "RE- ATT", "TOTAL"],
+        "rows": [
+          {"code": "A.1", "label": "GENERAL OUTPATIENTS(FILTER CLINICS)", "input": false, "emphasis": true},
+          {"code": "A.1.1", "label": "Over 5 - Male"},
+          {"code": "A.1.2", "label": "Over 5 - Female"},
+          {"code": "A.1.3", "label": "Children Under 5 - Male"},
+          {"code": "A.1.4", "label": "Children Under 5 - Female"},
+          {"code": "A.1.5", "label": "Over 60 years"},
+          {"code": "A.1.5", "label": "TOTAL GENERAL OUTPATIENTS", "emphasis": true},
+          {"code": "A.2", "label": "CASUALTY", "emphasis": true},
+          {"code": "A.3", "label": "SPECIAL CLINICS(if recorded separately from General Filter Clinics)", "input": false, "emphasis": true},
+          {"code": "A.3.1", "label": "E.N.T. Clinic"},
+          {"code": "A.3.2", "label": "Eye Clinic"},
+          {"code": "A.3.3", "label": "TB and Leprosy"},
+          {"code": "A.3.4", "label": "Comprehensive Care Clinic (CCC)"},
+          {"code": "A.3.5", "label": "Psychiatry"},
+          {"code": "A.3.6", "label": "Orthopaedic Clinic"},
+          {"code": "A.3.7", "label": "Occupational Therapy Clinic"},
+          {"code": "A.3.8", "label": "Physiotherapy Clinic"},
+          {"code": "A.3.9", "label": "Medical Clinics"},
+          {"code": "A.3.10", "label": "Surgical Clinics"},
+          {"code": "A.3.11", "label": "Paediatrics"},
+          {"code": "A.3.12", "label": "Obstetrics/Gynaecology"},
+          {"code": "A.3.13", "label": "Nutrition Clinic"},
+          {"code": "A.3.14", "label": "Oncology Clinic"},
+          {"code": "A.3.15", "label": "Renal Clinic"},
+          {"code": "A.3.16", "label": "All other Special Clinics"},
+          {"code": "A.3.8", "label": "TOTAL SPECIAL CLINICS", "emphasis": true},
+          {"code": "A.4", "label": "MCH/FP CLIENTS", "input": false, "emphasis": true},
+          {"code": "A.4.1", "label": "CWC Attendances"},
+          {"code": "A.4.2", "label": "ANC Attendances"},
+          {"code": "A.4.3", "label": "PNC Attendances"},
+          {"code": "A.4.4", "label": "FP Attendances"},
+          {"code": "A.4.5", "label": "TOTAL MCH/FP", "emphasis": true},
+          {"code": "A.5", "label": "DENTAL CLINIC", "input": false, "emphasis": true},
+          {"code": "A.5.1", "label": "Attendances (Excluding fillings and extractions)"},
+          {"code": "A.5.2", "label": "Fillings"},
+          {"code": "A.5.3", "label": "Extractions"},
+          {"code": "A.5.4", "label": "TOTAL DENTAL SERVICES", "emphasis": true},
+          {"code": "A.6", "label": "TOTAL OUTPATIENT SERVICES (= A.1.5 + A.2 + A.3.7 + A.4.5 + A.5.4)", "emphasis": true}
+        ]
+      },
+      {
+        "title": "Other Outpatient Services",
+        "page": 1,
+        "column_start": 1,
+        "column_span": 6,
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "Service", "Number"],
+        "rows": [
+          {"code": "A.7", "label": "MEDICAL EXAMINATIONS (except p3)"},
+          {"code": "A.8", "label": "MEDICAL REPORTS (incl. P3, compensation, insurance, etc.)"},
+          {"code": "A.9", "label": "DRESSINGS"}
+        ]
+      },
+      {
+        "title": "Procedures",
+        "page": 1,
+        "column_start": 7,
+        "column_span": 6,
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "Service", "Number"],
+        "rows": [
+          {"code": "A.10", "label": "REMOVAL OF STITCHES"},
+          {"code": "A.11", "label": "INJECTIONS"},
+          {"code": "A.12", "label": "STITCHING"}
+        ]
+      },
+      {
+        "title": "B.1 INPATIENTS",
+        "page": 2,
+        "column_start": 1,
+        "column_span": 12,
+        "compact": true,
+        "vertical_headers": true,
+        "label_columns": 2,
+        "columns": ["", "", "MEDICAL", "SURGICAL", "OBST/GYN", "PAEDIATRICS", "MATERNITY", "EYE", "NURSERY/NEWBORN", "ORTHOPAEDIC", "ISOLATION", "AMENITY", "PSYCHIATRY", "ICU", "RENAL", "OTHER", "TOTAL"],
+        "rows": [
+          {"code": "B.1.1", "label": "Discharges"},
+          {"code": "B.1.2", "label": "Deaths"},
+          {"code": "B.1.3", "label": "Deaths due to Confirmed Malaria"},
+          {"code": "B.1.4", "label": "Abscondees"},
+          {"code": "B.1.5", "label": "Referrals Out of the Facility"},
+          {"code": "B.1.5", "label": "TOTAL DISCHARGES, DEATHS, etc.", "emphasis": true},
+          {"code": "B.1.6", "label": "Admissions", "input": false, "emphasis": true},
+          {"code": "B.1.7a", "label": "Admission 0-28 days"},
+          {"code": "B.1.7b", "label": "Admission Under Five"},
+          {"code": "B.1.7c", "label": "Admission over Five"},
+          {"code": "B.1.7d", "label": "Under 5's admitted with severe Malaria"},
+          {"code": "B.1.7e", "label": "Over 5's admitted with severe Malaria"},
+          {"code": "B.1.8", "label": "Paroles"},
+          {"code": "B.1.9", "label": "Occupied Bed Days- NHIF Members/ And other Insurers"},
+          {"code": "B.1.10", "label": "Occupied Bed Days- Cash"},
+          {"code": "B.1.11", "label": "Well Persons Days"},
+          {"code": "B.1.12", "label": "Beds- Authorized"},
+          {"code": "B.1.13", "label": "Beds- Actual Physical"},
+          {"code": "B.1.14", "label": "Cots- Authorized"},
+          {"code": "B.1.15", "label": "Cots- Actual Physical"},
+          {"code": "B.1.16", "label": "Incubator- Authorized"},
+          {"code": "B.1.17", "label": "Incubator- Actual Physical"}
+        ]
+      },
+      {
+        "title": "B.2 MATERNITY SERVICES",
+        "page": 2,
+        "column_start": 1,
+        "column_span": 5,
+        "grid_row": "2 / span 2",
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "", "Number"],
+        "rows": [
+          {"code": "B.2.1", "label": "Normal deliveries"},
+          {"code": "B.2.2", "label": "Caesarean sections"},
+          {"code": "B.2.3", "label": "Breech Deliveries"},
+          {"code": "B.2.4", "label": "Assisted Vaginal Delivery"},
+          {"code": "B.2.5a", "label": "BBA (Born before arrival)"},
+          {"code": "B.2.5b", "label": "Maternal deaths"},
+          {"code": "B.2.6", "label": "Maternal deaths audited"},
+          {"code": "B.2.7", "label": "Live births"},
+          {"code": "B.2.8", "label": "Still births"},
+          {"code": "B.2.9", "label": "Neonatal deaths"},
+          {"code": "B.2.10", "label": "Neonatal deaths Audits"},
+          {"code": "B.2.11", "label": "Low Birth weight babies (under 2500gms)"},
+          {"code": "B.2.12", "label": "Total Discharges: new born"}
+        ]
+      },
+      {
+        "title": "B.3 OPERATIONS",
+        "page": 2,
+        "column_start": 6,
+        "column_span": 7,
+        "grid_row": "2",
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "", "No. Booked", "No. Operated"],
+        "rows": [
+          {"code": "B.3.1", "label": "Minor Surgeries (excluding circumcision)"},
+          {"code": "B.3.1.1", "label": "Emergencies"},
+          {"code": "B.3.1.2", "label": "Cold Cases"},
+          {"code": "B.3.2", "label": "Circumcision"},
+          {"code": "B.3.3", "label": "Major Surgeries"}
+        ]
+      },
+      {
+        "title": "B4. ORTHOPAEDIC TRAUMA SERVICES",
+        "page": 2,
+        "column_start": 6,
+        "column_span": 7,
+        "grid_row": "3",
+        "compact": true,
+        "columns": ["Description", "<5years New", "<5years Revisit", "> 5years New", "> 5years Revisit"],
+        "column_groups": [
+          {"label": "", "colspan": 1},
+          {"label": "<5years", "colspan": 2},
+          {"label": "> 5years", "colspan": 2}
+        ],
+        "rows": [
+          "No of Casts fixed",
+          "No of Tractions fixed.",
+          "No of Closed Reductions (Fractures, Dislocation)",
+          "No of Orthopaedic Cases assisted in theatre",
+          "No of club foot seen /corrected (Ponseti method)",
+          "No of Crepe bandages and arm slings applied"
+        ]
+      },
+      {
+        "title": "B4. ORTHOPAEDIC TRAUMA SERVICES - Removals",
+        "page": 2,
+        "column_start": 6,
+        "column_span": 7,
+        "grid_row": "4",
+        "compact": true,
+        "columns": ["Removals", "Casts <5 years", "Casts >5 years", "Tractions <5 years", "Tractions >5 years", "Ex-Fixator >5 years"],
+        "rows": ["No. of Removals done"]
+      },
+      {
+        "title": "C. SPECIAL SERVICES (includes both inpatients and outpatients)",
+        "page": 2,
+        "column_start": 1,
+        "column_span": 9,
+        "grid_row": "5",
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "Services", "Number"],
+        "rows": [
+          {"code": "C.1", "label": "Laboratory- Number of Tests - Routine"},
+          {"code": "C.1", "label": "Laboratory- Number of Tests - Special"},
+          {"code": "C.2", "label": "X-Ray & Imaging- Number of Examinations - Routine"},
+          {"code": "C.2", "label": "X-Ray & Imaging- Number of Examinations - Special"},
+          {"code": "C.2", "label": "Plain X-Ray without contrast enhancement"},
+          {"code": "C.2", "label": "Contrast enhanced examinations"},
+          {"code": "C.2", "label": "Magnetic Resonance Imaging"},
+          {"code": "C.2", "label": "Computerized Tomography"},
+          {"code": "C.2", "label": "Mammography"},
+          {"code": "C.2", "label": "Chest x-ray for PTB with specialist's report"},
+          {"code": "C.3", "label": "Number of ultrasound examinations - General ultrasound"},
+          {"code": "C.3", "label": "Number of ultrasound examinations - Obstetric ultrasound"},
+          {"code": "C.4", "label": "Total routine (X-Ray and Imaging)", "emphasis": true},
+          {"code": "C.4", "label": "Total special exams (X-Ray and Imaging)", "emphasis": true},
+          {"code": "C.5", "label": "Physiotherapy - Number of Treatments"},
+          {"code": "C.6", "label": "Occupational therapy - Number of treatments"},
+          {"code": "C.7", "label": "Orthopaedic Technology (Prosthetist & Orthotist) - Orthopaedic Technology - No of ITEMS Prepared and issued e.g. a pair of crutches, Wheelchair, Prosthesis etc. count as one item"},
+          {"code": "C.8", "label": "Orthopaedic Technology (Prosthetist & Orthotist) - Orthopaedic Technology - No of ITEMS issued e.g. a pair of crutches, Wheelchair, Prosthesis etc. count as one item"}
+        ]
+      },
+      {
+        "title": "D. PHARMACY",
+        "page": 2,
+        "column_start": 1,
+        "column_span": 3,
+        "grid_row": "6",
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "", "No. of Prescriptions"],
+        "rows": [
+          {"code": "D.1", "label": "Common Drugs"},
+          {"code": "D.2", "label": "Antibiotics"},
+          {"code": "D.3", "label": "Special Drugs"},
+          {"code": "D.4", "label": "Drugs For Children"}
+        ]
+      },
+      {
+        "title": "E. MORTUARY",
+        "page": 2,
+        "column_start": 4,
+        "column_span": 3,
+        "grid_row": "6",
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "", "Number"],
+        "rows": [
+          {"code": "E.1", "label": "Body days"},
+          {"code": "E.2", "label": "Embalmment"},
+          {"code": "E.3", "label": "Post-mortem"},
+          {"code": "E.4", "label": "Unclaimed body days"}
+        ]
+      },
+      {
+        "title": "F. MEDICAL RECORDS ISSUED",
+        "page": 2,
+        "column_start": 7,
+        "column_span": 4,
+        "grid_row": "6",
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "", "Number"],
+        "rows": [
+          {"code": "F.1", "label": "New Files/Folders"},
+          {"code": "F.2", "label": "Outpatient Cards/booklets"}
+        ]
+      },
+      {
+        "title": "G. FINANCE",
+        "page": 2,
+        "column_start": 1,
+        "column_span": 10,
+        "grid_row": "7",
+        "compact": true,
+        "columns": ["Service", "Number"],
+        "rows": [
+          "G.1 Total Amount Collected (Ksh)",
+          "G.2 Total Amount Received",
+          "G.3 Clients waived",
+          "G.4 Total waived (Ksh)",
+          "G.5 Clients exempted",
+          "G.6 Total Exempted (Ksh)"
+        ]
+      },
+      {
+        "title": "Authorization",
+        "page": 2,
+        "column_start": 1,
+        "column_span": 10,
+        "grid_row": "8",
+        "compact": true,
+        "columns": ["", "Name", "Designation", "Date", "Signature"],
+        "rows": ["Prepared by:", "Checked by:", "Received by:"]
+      }
+    ]
+  },
+  {
+    "id": "moh_710",
+    "code": "MOH 710",
+    "title": "NATIONAL VACCINES AND IMMUNIZATION PROGRAM (NVIP) - INTEGRATED IMMUNIZATION, VITAMIN A, OPHTHAMOLOGY AND EPI LOGISTICS SUMMARY SHEET (MOH 710)",
+    "description": "NVIP summary sheet and vaccine stock logistics form.",
+    "image": "/images/ministry_reporting/moh_710_integrated_immunization_summary_page_1.png",
+    "reference_images": [
+      "/images/ministry_reporting/moh_710_integrated_immunization_summary_page_1.png",
+      "/images/ministry_reporting/moh_710_vaccine_stock_logistics_page_2.png"
+    ],
+    "layout": {
+      "orientation": "portrait",
+      "pages": [
+        {"id": "page_1", "label": "Immunization summary", "image": "/images/ministry_reporting/moh_710_integrated_immunization_summary_page_1.png", "width": 1230, "height": 1740},
+        {"id": "page_2", "label": "Vaccine stock and logistics", "image": "/images/ministry_reporting/moh_710_vaccine_stock_logistics_page_2.png", "width": 1230, "height": 1740, "show_header": false}
+      ]
+    },
+    "meta_fields": [
+      {"id": "facility_name", "label": "Facility Name", "type": "text"},
+      {"id": "khmfl_code", "label": "KHMFL Code", "type": "text"},
+      {"id": "ward", "label": "Ward", "type": "text"},
+      {"id": "sub_county", "label": "Sub County", "type": "text"},
+      {"id": "county", "label": "County", "type": "text"},
+      {"id": "month", "label": "Month", "type": "text"},
+      {"id": "year", "label": "Year", "type": "text"}
+    ],
+    "sections": [
+      {
+        "title": "SECTION A",
+        "page": 1,
+        "micro": true,
+        "label_columns": 2,
+        "column_groups": [
+          {"label": "", "colspan": 2},
+          {"label": "DATE", "colspan": 18},
+          {"label": "", "colspan": 3}
+        ],
+        "columns": [
+          "Antigen",
+          "Age",
+          {"id": "date_1", "label": ""},
+          {"id": "date_2", "label": ""},
+          {"id": "date_3", "label": ""},
+          {"id": "date_4", "label": ""},
+          {"id": "date_5", "label": ""},
+          {"id": "date_6", "label": ""},
+          {"id": "date_7", "label": ""},
+          {"id": "date_8", "label": ""},
+          {"id": "date_9", "label": ""},
+          {"id": "date_10", "label": ""},
+          {"id": "date_11", "label": ""},
+          {"id": "date_12", "label": ""},
+          {"id": "date_13", "label": ""},
+          {"id": "date_14", "label": ""},
+          {"id": "date_15", "label": ""},
+          {"id": "date_16", "label": ""},
+          {"id": "date_17", "label": ""},
+          {"id": "date_18", "label": ""},
+          "Total Static",
+          "Total outreach",
+          "Grand Total (Total Static + Total Outreach)"
+        ],
+        "rows": [
+          {"code": "BCG", "label": "Under 1 Year"},
+          {"code": "BCG", "label": "Above 1 Year"},
+          {"code": "OPV (Birth dose)", "label": "Within 2 weeks"},
+          {"code": "OPV1", "label": "Under 1 Year"},
+          {"code": "OPV1", "label": "Above 1 Year"},
+          {"code": "OPV2", "label": "Under 1 Year"},
+          {"code": "OPV2", "label": "Above 1 Year"},
+          {"code": "OPV3", "label": "Under 1 Year"},
+          {"code": "OPV3", "label": "Above 1 Year"},
+          {"code": "IPV1", "label": "Under 1 Year"},
+          {"code": "IPV1", "label": "Above 1 Year"},
+          {"code": "IPV2", "label": "Under 1 Year"},
+          {"code": "IPV2", "label": "Above 1 Year"},
+          {"code": "DPT+HIB+HEPB 1", "label": "Under 1 Year"},
+          {"code": "DPT+HIB+HEPB 1", "label": "Above 1 Year"},
+          {"code": "DPT+HIB+HEPB 2", "label": "Under 1 Year"},
+          {"code": "DPT+HIB+HEPB 2", "label": "Above 1 Year"},
+          {"code": "DPT+HIB+HEPB 3", "label": "Under 1 Year"},
+          {"code": "DPT+HIB+HEPB 3", "label": "Above 1 Year"},
+          {"code": "Pneumococcal 1", "label": "Under 1 Year"},
+          {"code": "Pneumococcal 1", "label": "Above 1 Year"},
+          {"code": "Pneumococcal 2", "label": "Under 1 Year"},
+          {"code": "Pneumococcal 2", "label": "Above 1 Year"},
+          {"code": "Pneumococcal 3", "label": "Under 1 Year"},
+          {"code": "Pneumococcal 3", "label": "Above 1 Year"},
+          {"code": "Rota 1", "label": "Under 1 Year"},
+          {"code": "Rota 2", "label": "Under 1 Year"},
+          {"code": "Rota 3", "label": "Under 1 Year"},
+          {"code": "Vitamin A", "label": "At 6 -11 Months (100,000IU)"},
+          {"code": "Malaria Vaccine 1", "label": "Under 1 Year"},
+          {"code": "Malaria Vaccine 1", "label": "Above 1 Year"},
+          {"code": "Malaria Vaccine 2", "label": "Under 1 Year"},
+          {"code": "Malaria Vaccine 2", "label": "Above 1 Year"},
+          {"code": "Malaria Vaccine 3", "label": "Under 1 Year"},
+          {"code": "Malaria Vaccine 3", "label": "Above 1 Year"},
+          {"code": "Malaria Vaccine 4", "label": "At 2-3 years"},
+          {"code": "Malaria Vaccine 4", "label": "Above 3 years"},
+          {"code": "Yellow fever", "label": "Under 1 Year"},
+          {"code": "Yellow fever", "label": "Above 1 Year"},
+          {"code": "MR 1", "label": "Under 1 Year"},
+          {"code": "MR 1", "label": "Above 1 Year"},
+          {"code": "MR 2", "label": "At 1 1/2 - 2 Years"},
+          {"code": "MR 2", "label": "Above 2 Years"},
+          {"code": "Typhoid Conjugate Vaccine", "label": "Under 1 Year"},
+          {"code": "Typhoid Conjugate Vaccine", "label": "Above 1 Year"},
+          {"code": "Fully Immunized Child (FIC) at 1 year", "label": ""},
+          {"code": "Vitamin A", "label": "At 12-59 Months (200,000IU)"},
+          {"code": "Tetanus Diphtheria Containing Vaccine for pregnant women", "label": "1st Dose"},
+          {"code": "Tetanus Diphtheria Containing Vaccine for pregnant women", "label": "2nd Dose"},
+          {"code": "Tetanus Diphtheria Containing Vaccine for pregnant women", "label": "3rd Dose"},
+          {"code": "Tetanus Diphtheria Containing Vaccine for pregnant women", "label": "4th Dose"},
+          {"code": "Tetanus Diphtheria Containing Vaccine for pregnant women", "label": "5th Dose"},
+          {"code": "Tetanus Toxoid Containing Vaccine for Trauma", "label": ""},
+          {"code": "HPV Vaccine", "label": "1st Dose - 10 years"},
+          {"code": "HPV Vaccine", "label": "2nd Dose - At least 6 months after HPV dose 1"},
+          {"code": "Adverse Events Following Immunization", "label": ""},
+          {"code": "Squint/White Eye reflection (Under 1 Year)", "label": ""}
+        ]
+      },
+      {
+        "title": "SECTION B: COLD CHAIN LOGISTICS AND VACCINE STOCK OUTS, FILL MONTHLY 'TOTAL' AT FACILITY LEVEL EVERY COLUMN SHOULD HAVE COLD CHAIN INFORMATION AND VACCINES & VITAMIN A STOCK OUTS",
+        "page": 1,
+        "micro": true,
+        "columns": ["IMMUNIZATION LOGISTICS", "Cold Chain Equipment", "Value"],
+        "rows": ["Type (Freezer or Refrigerator)", "Model", "Serial No:", "Working Status (Y/N)", "Energy Source (E/G/S)", "Equip. age in Yrs", "Vaccines and Vitamin A stockout and type", "Type (Vaccine)", "No. Days", "Type (Vaccine)", "No. Days", "Type (Vitamin A)", "No. Days"]
+      },
+      {
+        "title": "MOH 710 - November 2022 Version - SECTION C: FILL MONTHLY 'TOTAL' AT FACILITY LEVEL. EVERY COLUMN TO HAVE DATA FROM SAME FACILITY AT SUB COUNTY LEVEL",
+        "page": 2,
+        "micro": true,
+        "label_columns": 2,
+        "column_groups": [
+          {"label": "", "colspan": 2},
+          {"label": "FACILITY/DATE", "colspan": 18}
+        ],
+        "columns": [
+          "Antigen",
+          "Stock measure",
+          {"id": "facility_date_1", "label": ""},
+          {"id": "facility_date_2", "label": ""},
+          {"id": "facility_date_3", "label": ""},
+          {"id": "facility_date_4", "label": ""},
+          {"id": "facility_date_5", "label": ""},
+          {"id": "facility_date_6", "label": ""},
+          {"id": "facility_date_7", "label": ""},
+          {"id": "facility_date_8", "label": ""},
+          {"id": "facility_date_9", "label": ""},
+          {"id": "facility_date_10", "label": ""},
+          {"id": "facility_date_11", "label": ""},
+          {"id": "facility_date_12", "label": ""},
+          {"id": "facility_date_13", "label": ""},
+          {"id": "facility_date_14", "label": ""},
+          {"id": "facility_date_15", "label": ""},
+          {"id": "facility_date_16", "label": ""},
+          {"id": "facility_date_17", "label": ""},
+          {"id": "facility_date_18", "label": ""}
+        ],
+        "row_groups": [
+          {"id": "bcg", "label": "BCG"},
+          {"id": "opv", "label": "OPV"},
+          {"id": "ipv", "label": "IPV"},
+          {"id": "dpt_hib_hepb", "label": "DPT+HIB+HEP B"},
+          {"id": "pcv10", "label": "PCV 10 (Pneumococcal)"},
+          {"id": "rota", "label": "Rota"},
+          {"id": "mr", "label": "MR"},
+          {"id": "malaria", "label": "Malaria Vaccine"},
+          {"id": "typhoid", "label": "Typhoid Conjugate Vaccine"},
+          {"id": "yellow_fever", "label": "YELLOW FEVER"},
+          {"id": "ttcv", "label": "TETANUS TOXOID CONTAINING VACCINE"},
+          {"id": "vitamin_a_100", "label": "VITAMIN A 100,000 IU"},
+          {"id": "vitamin_a_200", "label": "VITAMIN A 200,000 IU"},
+          {"id": "hpv", "label": "HPV"}
+        ],
+        "row_templates": [
+          {"id": "a", "label": "[A] Doses in stock at the beginning of the month"},
+          {"id": "b", "label": "[B] Dose received within the month"},
+          {"id": "c", "label": "[C] Total doses stocked in the month (A+B)"},
+          {"id": "d", "label": "[D] Doses remaining at the end of the month"},
+          {"id": "e", "label": "[E] Doses used in the month (C-D)"},
+          {"id": "f", "label": "[F] No. of children vaccinated during the month"},
+          {"id": "g", "label": "[G] Doses wasted in the month (E-F)"},
+          {"id": "h", "label": "[H] Wastage rate in the month (G/E) x 100", "emphasis": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "moh_705a",
+    "code": "MOH 705A",
+    "title": "Outpatient Disease Tally",
+    "description": "Daily outpatient disease tally for new cases.",
+    "image": "/images/ministry_reporting/moh_705a_outpatient_disease_tally.png",
+    "layout": {
+      "orientation": "landscape",
+      "pages": [
+        {"id": "page_1", "label": "Page 1", "image": "/images/ministry_reporting/moh_705a_outpatient_disease_tally.png", "width": 2512, "height": 1740}
+      ]
+    },
+    "meta_fields": [
+      {"id": "facility_name", "label": "Facility Name", "type": "text"},
+      {"id": "ward", "label": "Ward", "type": "text"},
+      {"id": "sub_county", "label": "Sub County", "type": "text"},
+      {"id": "county", "label": "County", "type": "text"},
+      {"id": "mfl_no", "label": "MFL No", "type": "text"},
+      {"id": "month", "label": "Month", "type": "text"},
+      {"id": "year", "label": "Year", "type": "text"}
+    ],
+    "sections": [
+      {
+        "title": "DISEASES ( New Cases Only)",
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Disease", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "Totals"],
+        "rows": [
+          {"code": "1", "label": "Diarrhoea"},
+          {"code": "2", "label": "Cholera"},
+          {"code": "3", "label": "Dysentery (Blood diarrhoea)"},
+          {"code": "4", "label": "Gastroenteritis"},
+          {"code": "5", "label": "Pneumonia"},
+          {"code": "6", "label": "Upper Respiratory Tract Infections"},
+          {"code": "7", "label": "Lower Respiratory Tract Infections"},
+          {"code": "8", "label": "Asthma"},
+          {"code": "9", "label": "Tuberculosis"},
+          {"code": "10", "label": "Suspected Malaria"},
+          {"code": "11", "label": "Confirmed Malaria"},
+          {"code": "12", "label": "Ear Infections"},
+          {"code": "13", "label": "Malnutrition"},
+          {"code": "14", "label": "Anaemia"},
+          {"code": "15", "label": "Meningococcal Meningitis"},
+          {"code": "16", "label": "Other Meningitis"},
+          {"code": "17", "label": "Neonatal Sepsis"},
+          {"code": "18", "label": "Neonatal Tetanus"},
+          {"code": "19", "label": "Poliomyelitis (AFP)"},
+          {"code": "20", "label": "Chicken Pox"},
+          {"code": "21", "label": "Measles"},
+          {"code": "22", "label": "Hepatitis"},
+          {"code": "23", "label": "Amoebiasis"},
+          {"code": "24", "label": "Mumps"},
+          {"code": "25", "label": "Typhoid Fever"},
+          {"code": "26", "label": "Bilharzia ( Schistosomiasis)"},
+          {"code": "27", "label": "Intestinal Worms"},
+          {"code": "28", "label": "Eye Infections"},
+          {"code": "29", "label": "Tonsilitis"},
+          {"code": "30", "label": "Urinary Tract Infections"},
+          {"code": "31", "label": "Mental Disorders"},
+          {"code": "32", "label": "Dental Disorders"},
+          {"code": "33", "label": "Jiggers Infections"},
+          {"code": "34", "label": "Diseases Of The Skin"},
+          {"code": "35", "label": "Down's Syndrome"},
+          {"code": "36", "label": "Poisoning"},
+          {"code": "37", "label": "Road Traffic Injuries"},
+          {"code": "38", "label": "Death due to Road Traffic Injuries"},
+          {"code": "39", "label": "Violence related injuries"},
+          {"code": "40", "label": "Other injuries"},
+          {"code": "41", "label": "Sexual violence"},
+          {"code": "42", "label": "Burns"},
+          {"code": "43", "label": "Snake Bites"},
+          {"code": "44", "label": "Dog Bites"},
+          {"code": "45", "label": "Other Bites"},
+          {"code": "46", "label": "Diabetes"},
+          {"code": "47", "label": "Epilepsy"},
+          {"code": "48", "label": "Other Convulsive Disorders"},
+          {"code": "49", "label": "Rheumatic Fever"},
+          {"code": "50", "label": "Brucellosis"},
+          {"code": "51", "label": "Rickets"},
+          {"code": "52", "label": "Cerebral Palsy"},
+          {"code": "53", "label": "Autism"},
+          {"code": "54", "label": "Tryponosomiasis"},
+          {"code": "55", "label": "Yellow fever"},
+          {"code": "56", "label": "Viral Haemorrhagic Fever"},
+          {"code": "57", "label": "Rift Valley Fever"},
+          {"code": "58", "label": "Chikugunya"},
+          {"code": "59", "label": "Dengue Fever"},
+          {"code": "60", "label": "Leishmaniasis (Kalaazar)"},
+          {"code": "61", "label": "Cutaneous Leishmaniasis"},
+          {"code": "62", "label": "Suspected Anthrax"},
+          {"code": "63", "label": "Suspected Childhood cancers"},
+          {"code": "64", "label": "All other Diseases"},
+          {"id": "blank_65", "code": "65", "label": ""},
+          {"id": "blank_66", "code": "66", "label": ""},
+          {"id": "blank_67", "code": "67", "label": ""},
+          {"id": "blank_68", "code": "68", "label": ""},
+          {"code": "69", "label": "No. of New Attendances"},
+          {"code": "70", "label": "No. of Re- attendances"},
+          {"code": "71", "label": "Referrals from other health facility"},
+          {"code": "72", "label": "Referrals to other health facility"},
+          {"code": "73", "label": "Referrals from community unit"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "moh_705b",
+    "code": "MOH 705B",
+    "title": "MOH 705B_Out Patient Over 5 yr Summary",
+    "version": "REVISION APRIL 2019",
+    "description": "Outpatient over five-year disease summary.",
+    "image": "/images/ministry_reporting/moh_705b_outpatient_over_5_summary.png",
+    "layout": {
+      "orientation": "landscape",
+      "pages": [
+        {"id": "page_1", "label": "Page 1", "image": "/images/ministry_reporting/moh_705b_outpatient_over_5_summary.png", "width": 2512, "height": 1740}
+      ]
+    },
+    "meta_fields": [
+      {"id": "facility_name", "label": "Facility Name", "type": "text"},
+      {"id": "khmfl_no", "label": "KHMFL No", "type": "text"},
+      {"id": "ward", "label": "Ward", "type": "text"},
+      {"id": "sub_county", "label": "Sub County", "type": "text"},
+      {"id": "county", "label": "County", "type": "text"},
+      {"id": "month", "label": "Month", "type": "text"},
+      {"id": "year", "label": "Year", "type": "text"}
+    ],
+    "sections": [
+      {
+        "title": "DISEASES (New Cases Only)",
+        "micro": true,
+        "label_columns": 2,
+        "columns": ["", "Disease", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "Totals"],
+        "rows": [
+          {"code": "1", "label": "Diarrhoea"},
+          {"code": "2", "label": "Tuberculosis"},
+          {"code": "3", "label": "Dysentry (Bloody diarrhoea)"},
+          {"code": "4", "label": "Cholera"},
+          {"code": "5", "label": "Meningococcal Meningitis"},
+          {"code": "6", "label": "Other Meningitis"},
+          {"code": "7", "label": "Tetanus"},
+          {"code": "8", "label": "Poliomyelitis (AFP)"},
+          {"code": "9", "label": "Chicken Pox"},
+          {"code": "10", "label": "Measles"},
+          {"code": "11", "label": "Hepatitis"},
+          {"code": "12", "label": "Mumps"},
+          {"code": "13", "label": "Suspected Malaria"},
+          {"code": "14", "label": "Confirmed Malaria"},
+          {"code": "15", "label": "Malaria in Pregnancy"},
+          {"code": "16", "label": "Amoebiasis"},
+          {"code": "17", "label": "Typhoid fever"},
+          {"code": "18", "label": "Sexually Transmitted Infections"},
+          {"code": "19", "label": "Urinary Tract infections"},
+          {"code": "20", "label": "Bilharzia (Schistosomiasis)"},
+          {"code": "21", "label": "Intestinal worms"},
+          {"code": "22", "label": "Malnutrition"},
+          {"code": "23", "label": "Anaemia"},
+          {"code": "24", "label": "Eye infections/Conditions"},
+          {"code": "25", "label": "Ear infections/ Conditions"},
+          {"code": "26", "label": "Upper Respiratory Tract Infections"},
+          {"code": "27", "label": "Asthma"},
+          {"code": "28", "label": "Pneumonia"},
+          {"code": "29", "label": "Other Lower Respiratory tract infections"},
+          {"code": "30", "label": "Abortion"},
+          {"code": "31", "label": "Dis. of Puerperium & Childbirth"},
+          {"code": "32", "label": "Hypertension"},
+          {"code": "33", "label": "Mental Disorders"},
+          {"code": "34", "label": "Dental Disorders"},
+          {"code": "35", "label": "Jiggers Infestation"},
+          {"code": "36", "label": "Diseases of the skin"},
+          {"code": "37", "label": "Arthritis, Joint pains etc."},
+          {"code": "38", "label": "Poisoning"},
+          {"code": "39", "label": "Road Traffic Injuries"},
+          {"code": "40", "label": "Deaths due to Road Traffic Injuries"},
+          {"code": "41", "label": "Other injuries"},
+          {"code": "42", "label": "Sexual Violence"},
+          {"code": "43", "label": "Violence related injuries"},
+          {"code": "44", "label": "Burns"},
+          {"code": "45", "label": "Snake Bites"},
+          {"code": "46", "label": "Dog Bites"},
+          {"code": "47", "label": "Other Bites"},
+          {"code": "48", "label": "Diabetes"},
+          {"code": "49", "label": "Epilepsy"},
+          {"code": "50", "label": "Brucellosis"},
+          {"code": "51", "label": "Cardiovascular conditions"},
+          {"code": "52", "label": "Central Nervous System Conditions"},
+          {"code": "53", "label": "Overweight (BMI>25)"},
+          {"code": "54", "label": "Muscular skeletal conditions"},
+          {"code": "55", "label": "Fistula (Birth related)"},
+          {"code": "56", "label": "Suspected Neoplams/Cancers"},
+          {"code": "57", "label": "Physical Disability"},
+          {"code": "58", "label": "Trypanosomiasis"},
+          {"code": "59", "label": "Rift valley fever"},
+          {"code": "60", "label": "Yellow Fever"},
+          {"code": "61", "label": "Viral Haemorrhagic Fever"},
+          {"code": "62", "label": "Chikungunya"},
+          {"code": "63", "label": "Dengue fever"},
+          {"code": "64", "label": "Leishmaniasis(Kala-azar)"},
+          {"code": "65", "label": "Cutaneous leishmaniasis"},
+          {"code": "66", "label": "Suspected Anthrax"},
+          {"code": "67", "label": "ALL OTHER DISEASES"},
+          {"code": "68", "label": "Tested for Malaria"},
+          {"id": "blank_69", "code": "69", "label": ""},
+          {"id": "blank_70", "code": "70", "label": ""},
+          {"code": "71", "label": "NO. OF FIRST ATTENDANCES"},
+          {"code": "72", "label": "RE-ATTENDANCES"},
+          {"code": "73", "label": "Referrals from other health facility"},
+          {"code": "74", "label": "Referrals to other health facility"},
+          {"code": "75", "label": "Referrals from community unit"},
+          {"code": "76", "label": "Referrals to community unit"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "moh_706",
+    "code": "MOH 706",
+    "title": "Laboratory Tests Summary Report Form",
+    "version": "Revised Oct 2014",
+    "description": "Monthly laboratory tests summary report form.",
+    "instructions": "N/B: INDICATE 'N/S' Where there is no service",
+    "image": "/images/ministry_reporting/moh_706_laboratory_tests_summary_report.png",
+    "layout": {
+      "orientation": "landscape",
+      "pages": [
+        {"id": "page_1", "label": "Page 1", "image": "/images/ministry_reporting/moh_706_laboratory_tests_summary_report.png", "width": 2512, "height": 1740}
+      ]
+    },
+    "meta_fields": [
+      {"id": "mfl_code", "label": "MFL Code", "type": "text"},
+      {"id": "facility_name", "label": "Facility Name", "type": "text"},
+      {"id": "county", "label": "County", "type": "text"},
+      {"id": "sub_county", "label": "Sub County", "type": "text"},
+      {"id": "report_month", "label": "Report period: Month", "type": "text"},
+      {"id": "year", "label": "Year", "type": "text"}
+    ],
+    "sections": [
+      {
+        "title": "Affiliation (tick ONE)",
+        "column_start": 1,
+        "column_span": 12,
+        "fields": [
+          {"id": "affiliation_gok", "label": "GoK", "type": "checkbox"},
+          {"id": "affiliation_faith_based", "label": "Faith Based", "type": "checkbox"},
+          {"id": "affiliation_private", "label": "Private", "type": "checkbox"},
+          {"id": "affiliation_ngo", "label": "NGO", "type": "checkbox"}
+        ]
+      },
+      {
+        "title": "1. URINE ANALYSIS",
+        "column_start": 1,
+        "column_span": 3,
+        "grid_row": "2",
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "Test", "Total Exam", "Number Positive"],
+        "rows": [
+          {"code": "1.1", "label": "Urine Chemistry", "input": false, "emphasis": true},
+          {"code": "1.2", "label": "Glucose"},
+          {"code": "1.3", "label": "Ketones"},
+          {"code": "1.4", "label": "Proteins"},
+          {"code": "1.5", "label": "Urine Microscopy", "input": false, "emphasis": true},
+          {"code": "1.6", "label": "Pus cells (>5/hpf)"},
+          {"code": "1.7", "label": "S. haematobium"},
+          {"code": "1.8", "label": "T. vaginalis"},
+          {"code": "1.9", "label": "Yeast cells"},
+          {"code": "1.10", "label": "Bacteria"}
+        ]
+      },
+      {
+        "title": "2. BLOOD CHEMISTRY",
+        "column_start": 1,
+        "column_span": 3,
+        "grid_row": "3",
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "Blood Sugar Test", "Total Exam", "Low", "High"],
+        "rows": [
+          {"code": "2.1", "label": "Blood sugar"},
+          {"code": "2.2", "label": "OGTT"},
+          {"code": "2.3", "label": "Renal Function Test", "input": false, "emphasis": true},
+          {"code": "2.4", "label": "Creatinine"},
+          {"code": "2.5", "label": "Urea"},
+          {"code": "2.5", "label": "Sodium"},
+          {"code": "2.6", "label": "Potassium"},
+          {"code": "2.7", "label": "Chlorides"},
+          {"code": "2.8", "label": "Liver Function Test", "input": false, "emphasis": true},
+          {"code": "2.9", "label": "Direct bilirubin"},
+          {"code": "2.10", "label": "Total bilirubin"},
+          {"code": "2.11", "label": "ASAT (SGOT)"},
+          {"code": "2.12", "label": "ALAT (SGPT)"},
+          {"code": "2.13", "label": "Serum Protein"},
+          {"code": "2.14", "label": "Albumin"},
+          {"code": "2.15", "label": "Alkaline Phosphatase"},
+          {"code": "2.16", "label": "Lipid Profile", "input": false, "emphasis": true},
+          {"code": "2.17", "label": "Total cholesterol"},
+          {"code": "2.18", "label": "Triglycerides"},
+          {"code": "2.19", "label": "LDL"},
+          {"code": "", "label": "Hormonal Test", "input": false, "emphasis": true},
+          {"code": "2.20", "label": "T3"},
+          {"code": "2.21", "label": "T4"},
+          {"code": "2.22", "label": "TSH"},
+          {"code": "2.23", "label": "PSA"},
+          {"code": "", "label": "Tumor Markers", "input": false, "emphasis": true},
+          {"code": "2.24", "label": "CEA"},
+          {"code": "2.25", "label": "CA15-3"},
+          {"code": "", "label": "CSF Chemistry", "input": false, "emphasis": true},
+          {"code": "2.26", "label": "Proteins"},
+          {"code": "2.27", "label": "Glucose"}
+        ]
+      },
+      {
+        "title": "3. PARASITOLOGY",
+        "column_start": 4,
+        "column_span": 3,
+        "grid_row": "2",
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "Malaria Test", "Total Exam", "Number Positive"],
+        "rows": [
+          {"code": "3.1", "label": "Malaria BS (Under five years)"},
+          {"code": "3.2", "label": "Malaria BS (5 years and above)"},
+          {"code": "3.3", "label": "Malaria Rapid Diagnostic Tests"},
+          {"code": "", "label": "Stool Examination", "input": false, "emphasis": true},
+          {"code": "3.4", "label": "Taenia spp."},
+          {"code": "3.5", "label": "Hymenolepis nana"},
+          {"code": "3.6", "label": "Hookworm"},
+          {"code": "3.7", "label": "Roundworms"},
+          {"code": "3.8", "label": "S. mansoni"},
+          {"code": "3.9", "label": "Trichuris trichura"},
+          {"code": "3.10", "label": "Amoeba"}
+        ]
+      },
+      {
+        "title": "4. HAEMATOLOGY",
+        "column_start": 4,
+        "column_span": 3,
+        "grid_row": "3",
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "Haematology tests", "Total Exam", "Number"],
+        "rows": [
+          {"code": "4.1", "label": "Full blood count"},
+          {"code": "4.2", "label": "HB estimation tests(other techniques)"},
+          {"code": "4.3", "label": "CD4 count"},
+          {"code": "4.4", "label": "Sickling test"},
+          {"code": "4.5", "label": "Peripheral blood films"},
+          {"code": "4.6", "label": "BMA"},
+          {"code": "4.7", "label": "Coagulation profile"},
+          {"code": "4.8", "label": "Reticulocyte Count"},
+          {"code": "4.9", "label": "Erythrocyte Sedimentation rate"},
+          {"code": "", "label": "Blood Grouping", "input": false, "emphasis": true},
+          {"code": "4.10", "label": "Total blood group tests"},
+          {"code": "4.11", "label": "Blood units grouped"},
+          {"code": "", "label": "Blood safety", "input": false, "emphasis": true},
+          {"code": "4.12", "label": "Blood units received from blood transfusion centres"},
+          {"code": "4.13", "label": "Blood units collected at facility"},
+          {"code": "4.14", "label": "Blood units transfused"},
+          {"code": "4.15", "label": "Transfusion reactions reported and investigated"},
+          {"code": "4.16", "label": "Blood grouping and cross matched"},
+          {"code": "4.17", "label": "Blood units discarded"},
+          {"code": "", "label": "Blood Screening at facility", "input": false, "emphasis": true},
+          {"code": "4.18", "label": "HIV"},
+          {"code": "4.19", "label": "Hepatitis B"},
+          {"code": "4.20", "label": "Hepatitis C"},
+          {"code": "4.21", "label": "Syphilis"}
+        ]
+      },
+      {
+        "title": "5. BACTERIOLOGY",
+        "column_start": 7,
+        "column_span": 3,
+        "grid_row": "2",
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "Bacteriological Sample", "Total Exam", "Cultures Positive"],
+        "rows": [
+          {"code": "5.1", "label": "Urine"},
+          {"code": "5.2", "label": "Pus swabs"},
+          {"code": "5.3", "label": "High Vaginal Swabs"},
+          {"code": "5.4", "label": "Throat swab"},
+          {"code": "5.5", "label": "Rectal swab"},
+          {"code": "5.6", "label": "Blood"},
+          {"code": "5.7", "label": "Water"},
+          {"code": "5.8", "label": "Food"},
+          {"code": "5.9", "label": "Urethral swabs"},
+          {"code": "5.10", "label": "Stool Cultures"},
+          {"code": "5.11", "label": "Salmonella typhi"},
+          {"code": "5.12", "label": "Shigella - dysenteriae type"},
+          {"code": "5.13", "label": "E. coli O 157:H7"},
+          {"code": "5.14", "label": "V. cholerae O1"},
+          {"code": "5.15", "label": "V. cholerae O139"},
+          {"code": "5.16", "label": "CSF"},
+          {"code": "5.17", "label": "Neisseria meningitidis A"},
+          {"code": "5.18", "label": "Neisseria meningitidis B"},
+          {"code": "5.19", "label": "Neisseria meningitidis C"},
+          {"code": "5.20", "label": "Neisseria meningitidis W135"},
+          {"code": "5.21", "label": "Neisseria meningitidis X"},
+          {"code": "5.22", "label": "Neisseria meningitidis Y"},
+          {"code": "5.23", "label": "N. meningitidis (indeterminate)"},
+          {"code": "5.24", "label": "Streptococcus pneumoniae"},
+          {"code": "5.25", "label": "Haemophilus influenzae (type b)"},
+          {"code": "5.26", "label": "Cryptococcal Meningitis"},
+          {"code": "5.27", "label": "B. anthracis"},
+          {"code": "5.28", "label": "Y. pestis"},
+          {"code": "5.29", "label": "Total TB smears"},
+          {"code": "5.30", "label": "TB new suspects"},
+          {"code": "5.31", "label": "TB Follow up"},
+          {"code": "5.32", "label": "Rifampicin Resistant TB"},
+          {"code": "5.33", "label": "MDR TB"}
+        ]
+      },
+      {
+        "title": "6. HISTOLOGY AND CYTOLOGY",
+        "column_start": 10,
+        "column_span": 3,
+        "grid_row": "2",
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "Test", "Total Exam", "Malignant"],
+        "rows": [
+          {"code": "6.1", "label": "PAP smear"},
+          {"code": "6.2", "label": "Touch preparations"},
+          {"code": "6.3", "label": "Tissue impressions"},
+          {"code": "6.4", "label": "Thyroid"},
+          {"code": "6.5", "label": "Lymph nodes"},
+          {"code": "6.6", "label": "Liver"},
+          {"code": "6.7", "label": "Breast"},
+          {"code": "6.8", "label": "Soft tissue masses"},
+          {"code": "6.9", "label": "Ascitic fluid"},
+          {"code": "6.10", "label": "CSF"},
+          {"code": "6.11", "label": "Pleural fluid"},
+          {"code": "6.12", "label": "Urine"},
+          {"code": "6.13", "label": "Cervix"},
+          {"code": "6.14", "label": "Prostrate"},
+          {"code": "6.15", "label": "Breast tissue"},
+          {"code": "6.16", "label": "Ovary"},
+          {"code": "6.17", "label": "Uterus"},
+          {"code": "6.18", "label": "Skin"},
+          {"code": "6.19", "label": "Head and Neck"},
+          {"code": "6.20", "label": "Dental"},
+          {"code": "6.21", "label": "GIT"},
+          {"code": "6.22", "label": "Lymph nodes tissue"},
+          {"code": "6.23", "label": "Bone marrow aspirate"},
+          {"code": "6.24", "label": "Trephine biopsy"}
+        ]
+      },
+      {
+        "title": "7. SEROLOGY",
+        "column_start": 7,
+        "column_span": 3,
+        "grid_row": "3",
+        "compact": true,
+        "label_columns": 2,
+        "columns": ["", "Serological Test", "Total Exam", "Number Positive"],
+        "rows": [
+          {"code": "7.1", "label": "VDRL"},
+          {"code": "7.2", "label": "TPHA"},
+          {"code": "7.3", "label": "ASOT"},
+          {"code": "7.4", "label": "HIV"},
+          {"code": "7.5", "label": "Brucella"},
+          {"code": "7.6", "label": "Rheumatoid factor"},
+          {"code": "7.7", "label": "Helicobacter pylori"},
+          {"code": "7.8", "label": "Hepatitis A test"},
+          {"code": "7.9", "label": "Hepatitis B test"},
+          {"code": "7.10", "label": "Hepatitis C test"},
+          {"code": "7.11", "label": "HCG"},
+          {"code": "7.12", "label": "CRAG Test"}
+        ]
+      },
+      {
+        "title": "8. SPECIMEN REFERRAL TO HIGHER LEVELS",
+        "column_start": 10,
+        "column_span": 3,
+        "grid_row": "3",
+        "compact": true,
+        "columns": ["Specimen referral", "No. of specimens", "No. of results received"],
+        "rows": ["8.1 CD4", "8.2 Viral load", "8.3 EID", "8.4 Discordant/discrepant", "8.5 TB Culture", "8.6 Virological", "8.7 Clinical Chemistry", "8.8 Histology/cytology", "8.9 Haematological", "8.10 Parasitological", "8.11 Blood samples for transfusion screening"]
+      },
+      {
+        "title": "9. Drug Susceptibility testing",
+        "column_start": 1,
+        "column_span": 12,
+        "grid_row": "4",
+        "micro": true,
+        "columns": ["Drug Sensitivity Pattern", "Ampicillin S", "Ampicillin R", "Chloramphenicol S", "Chloramphenicol R", "Ceftriaxone S", "Ceftriaxone R", "Penicillin S", "Penicillin R", "Oxacillin S", "Oxacillin R", "Ciprofloxacin S", "Ciprofloxacin R", "Nalidixic acid S", "Nalidixic acid R", "Trimethoprim-sulphamethoxazole S", "Trimethoprim-sulphamethoxazole R", "Tetracycline S", "Tetracycline R", "Augumentin S", "Augumentin R"],
+        "rows": ["9.1 Haemophilus influenzae", "9.2 Neisseria meningitidis", "9.3 Streptococcus pneumoniae", "9.4 Salmonella serotype Typhi", "9.5 Shigella", "9.6 Vibrio cholerae", "9.7 B. anthracis", "9.8 Y. pestis"]
+      },
+      {
+        "title": "Report authorization",
+        "column_start": 1,
+        "column_span": 12,
+        "grid_row": "5",
+        "fields": [
+          {"id": "report_compiled_by", "label": "Report compiled by", "type": "text"},
+          {"id": "designation", "label": "Designation", "type": "text"},
+          {"id": "report_date", "label": "Date", "type": "date"},
+          {"id": "signature", "label": "Signature", "type": "text"}
+        ]
+      }
+    ]
+  }
+]

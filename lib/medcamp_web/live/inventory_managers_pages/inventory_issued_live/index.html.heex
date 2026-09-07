@@ -1,0 +1,378 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+  <.page_header
+    icon_path="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+    title="Inventories Issued"
+    subtitle="Search, filter and manage issued inventory."
+  >
+    <:actions>
+      <.link patch={~p"/inventory_manager/inventories_issued/new"}>
+        <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+          <div class="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Issue Inventory
+          </div>
+        </.button>
+      </.link>
+
+      <.link patch={~p"/inventory_manager/inventories_issued/scan"}>
+        <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+          <div class="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Scan To Add
+          </div>
+        </.button>
+      </.link>
+    </:actions>
+  </.page_header>
+
+  <div class="flex flex-wrap items-center gap-3 mb-4">
+    <form phx-change="filter" class="flex-1">
+      <.search_input
+        name="filters[item_search]"
+        value={@filters[:item_search]}
+        placeholder="Search by brand, generic name, GTIN, or batch"
+      />
+    </form>
+
+    <.filter_drawer
+      id="inventories-issued-filters"
+      title="Filter inventories issued"
+      apply_event="filter"
+      clear_event="clear_filters"
+      active_count={count_active_filters(@filters)}
+    >
+      <:group label="Department">
+        <div class="col-span-2">
+          <label class="block text-xs font-medium text-gray-600 mb-1">
+            Department (Location)
+          </label>
+          <select
+            name="filters[location]"
+            class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+          >
+            <option value="">All departments</option>
+            <%= for loc <- @location_options do %>
+              <option value={loc} selected={@filters[:location] == loc}>{loc}</option>
+            <% end %>
+          </select>
+        </div>
+      </:group>
+
+      <:group label="Quantity Range">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Quantity Min</label>
+          <input
+            type="number"
+            name="filters[quantity_min]"
+            value={@filters[:quantity_min]}
+            min="0"
+            placeholder="Min"
+            class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Quantity Max</label>
+          <input
+            type="number"
+            name="filters[quantity_max]"
+            value={@filters[:quantity_max]}
+            min="0"
+            placeholder="Max"
+            class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+          />
+        </div>
+      </:group>
+
+      <:chip
+        :for={chip <- filter_chips(@filters)}
+        label={chip.label}
+        clear={JS.push("clear_chip", value: %{"field" => chip.field})}
+      />
+    </.filter_drawer>
+  </div>
+
+  <%= if Enum.empty?(@inventories_issued) do %>
+    <.blank_state
+      icon_path="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+      title="No inventories issued"
+      description={
+        if @filters[:item_search] != "" or count_active_filters(@filters) > 0,
+          do: "No inventory items match the current filters.",
+          else: "Get started by issuing inventory items."
+      }
+    >
+      <:actions :if={@filters[:item_search] != "" or count_active_filters(@filters) > 0}>
+        <button phx-click="clear_filters" class="text-xs text-[#6667ab] hover:underline">
+          Clear filters
+        </button>
+      </:actions>
+    </.blank_state>
+  <% else %>
+    <.table
+      id="inventories_issued"
+      rows={@inventories_issued}
+      row_id={fn ii -> "inventory-issued-#{ii.id}" end}
+      row_item={fn ii -> {ii.id, ii} end}
+    >
+      <:col :let={{_id, inventory_issued}} label="Brand Name">
+        <div class="flex items-center py-3">
+          <span class="font-medium text-gray-900">
+            {inventory_issued.inventory_received && inventory_issued.inventory_received.brand_name}
+          </span>
+        </div>
+      </:col>
+
+      <:col :let={{_id, inventory_issued}} label="Batch">
+        <div class="flex items-center py-3">
+          <span class="px-2 py-1 text-xs rounded-full bg-[#f0f0ff] text-[#373896]">
+            {inventory_issued.batch && inventory_issued.batch.batch}
+          </span>
+        </div>
+      </:col>
+
+      <:col :let={{_id, inventory_issued}} label="GTIN">
+        <div class="flex items-center py-3">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 mr-1 text-[#6667ab]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+            />
+          </svg>
+          <span class="text-gray-700">{inventory_issued.gtin}</span>
+        </div>
+      </:col>
+
+      <:col :let={{_id, inventory_issued}} label="Quantity">
+        <div class="flex items-center py-3">
+          <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 font-medium">
+            {inventory_issued.quantity} units
+          </span>
+        </div>
+      </:col>
+
+      <:col :let={{_id, inventory_issued}} label="Description">
+        <div class="max-w-xs py-3">
+          <span class="text-gray-700 line-clamp-2">{inventory_issued.description}</span>
+        </div>
+      </:col>
+
+      <:col :let={{_id, inventory_issued}} label="Location">
+        <div class="flex items-center py-3">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 mr-1 text-[#6667ab]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+            />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
+          <span class="text-gray-700">{inventory_issued.location}</span>
+        </div>
+      </:col>
+
+      <:col :let={{_id, inventory_issued}} label="Added At">
+        <div class="flex items-center py-3">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 mr-1 text-[#6667ab]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+            />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
+          <span class="text-gray-700">
+            {inventory_issued.inserted_at &&
+              Timex.format!(
+                Timex.shift(inventory_issued.inserted_at, hours: 3),
+                "%b %d, %Y %H:%M",
+                :strftime
+              )}
+          </span>
+        </div>
+      </:col>
+
+      <:col :let={{_id, inventory_issued}} label="Assigned To">
+        <div class="flex items-center py-3">
+          <%= if inventory_issued.assigned_to && inventory_issued.assigned_to.email do %>
+            <div class="flex items-center">
+              <div class="h-7 w-7 rounded-full bg-[#e7e7ff] flex items-center justify-center text-[#373896] font-medium mr-2 text-xs">
+                {String.first(inventory_issued.assigned_to.email || "")}
+              </div>
+              <span class="text-gray-700">{inventory_issued.assigned_to.email}</span>
+            </div>
+          <% else %>
+            <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-500">
+              Unassigned
+            </span>
+          <% end %>
+        </div>
+      </:col>
+
+      <:col :let={{_id, inventory_issued}} label="Assigned By">
+        <div class="flex items-center py-3">
+          <%= if inventory_issued.inventory_manager && inventory_issued.inventory_manager.email do %>
+            <div class="flex items-center">
+              <div class="h-7 w-7 rounded-full bg-[#e7e7ff] flex items-center justify-center text-[#373896] font-medium mr-2 text-xs">
+                {String.first(inventory_issued.inventory_manager.email || "")}
+              </div>
+              <span class="text-gray-700">{inventory_issued.inventory_manager.email}</span>
+            </div>
+          <% else %>
+            <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-500">
+              Unassigned
+            </span>
+          <% end %>
+        </div>
+      </:col>
+
+      <:col :let={{_id, inventory_issued}}>
+        <div class="flex items-center justify-center">
+          <.link
+            patch={~p"/inventory_manager/inventories_issued/#{inventory_issued}/edit"}
+            class="flex items-center text-[#6667ab] hover:text-[#373896]"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+            Edit
+          </.link>
+        </div>
+      </:col>
+    </.table>
+
+    <%= if @total_pages > 1 do %>
+      <div class="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
+        <p class="text-sm text-gray-700">
+          Showing {min((@page - 1) * @per_page + 1, @total_count)}–{min(
+            @page * @per_page,
+            @total_count
+          )} of {@total_count}
+        </p>
+        <div class="flex gap-2">
+          <.link
+            :if={@page > 1}
+            patch={pagination_path(@filters, @page - 1)}
+            class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Previous
+          </.link>
+          <span class="rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-700">
+            Page {@page} of {@total_pages}
+          </span>
+          <.link
+            :if={@page < @total_pages}
+            patch={pagination_path(@filters, @page + 1)}
+            class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Next
+          </.link>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+
+  <.modal
+    :if={@live_action in [:new, :edit]}
+    id="inventory_issued-modal"
+    show
+    on_cancel={JS.patch(~p"/inventory_manager/inventories_issued")}
+  >
+    <.live_component
+      module={MedcampWeb.InventoryIssuedLive.FormComponent}
+      id={@inventory_issued.id || :new}
+      title={@page_title}
+      current_user={@current_user}
+      action={@live_action}
+      inventory_issued={@inventory_issued}
+      prefill_requisition={@prefill_requisition}
+      drug_batch_id={@drug_batch_id}
+      patch={~p"/inventory_manager/inventories_issued"}
+    />
+  </.modal>
+
+  <.modal
+    :if={@live_action in [:scan]}
+    id="inventory_issued-modal"
+    show
+    on_cancel={JS.patch(~p"/inventory_manager/inventories_issued")}
+  >
+    <.live_component
+      module={MedcampWeb.InventoryIssuedLive.ScanComponent}
+      id={@inventory_issued.id || :new}
+      title={@page_title}
+      current_user={@current_user}
+      action={@live_action}
+      inventory_issued={@inventory_issued}
+      patch={~p"/inventory_manager/inventories_issued"}
+    />
+  </.modal>
+</div>

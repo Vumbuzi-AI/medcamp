@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Error - Glocal Health Centre</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <script>
+      tailwind.config = {
+          theme: {
+              extend: {
+                  colors: {
+                      'brand-primary': '#373896',
+                      'brand-secondary': '#6667ab',
+                      'brand-light': '#f8f8ff',
+                      'brand-accent': '#f0f0ff',
+                      'brand-border': '#e7e7ff'
+                  }
+              }
+          }
+      }
+    </script>
+  </head>
+  <body class="bg-brand-light min-h-screen flex items-center justify-center p-4">
+    <div
+      id="error-500"
+      class="w-full max-w-2xl bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden "
+    >
+      <!-- Header -->
+      <div class="bg-brand-primary px-6 py-4">
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-white text-2xl font-bold">Server Error</h1>
+            <p class="text-blue-100 text-sm">Glocal Health Centre</p>
+          </div>
+          <div class="text-right">
+            <div class="bg-red-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+              ERROR 500
+            </div>
+          </div>
+        </div>
+      </div>
+      
+<!-- Main Content -->
+      <div class="p-6 text-center">
+        <!-- Error Icon -->
+        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-50 border-2 border-red-200 mb-6">
+          <svg
+            class="h-10 w-10 text-red-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+            />
+          </svg>
+        </div>
+
+        <h2 class="text-4xl font-bold text-brand-primary mb-2">500</h2>
+        <h3 class="text-xl text-gray-600 mb-4">Internal Server Error</h3>
+        <p class="text-gray-600 mb-6 max-w-md mx-auto">
+          Something went wrong on our end. We're working to fix the issue. Please try again in a few minutes.
+        </p>
+        
+<!-- Error Details -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6 text-left">
+          <h4 class="text-red-800 font-semibold mb-3 flex items-center">
+            <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            What happened:
+          </h4>
+          <ul class="text-red-700 space-y-2 text-sm">
+            <li class="flex items-start">
+              <span class="text-red-500 mr-2">•</span>
+              Our servers encountered an unexpected condition
+            </li>
+            <li class="flex items-start">
+              <span class="text-red-500 mr-2">•</span>
+              The technical team has been automatically notified
+            </li>
+            <li class="flex items-start">
+              <span class="text-red-500 mr-2">•</span>
+              We're working to resolve this issue as quickly as possible
+            </li>
+          </ul>
+        </div>
+        
+<!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center mb-6">
+          <button
+            onclick="location.reload()"
+            class="inline-flex items-center justify-center px-6 py-3 bg-brand-primary text-white font-medium rounded-lg hover:bg-brand-secondary transition-colors"
+          >
+            <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            Try Again
+          </button>
+          <a
+            href="/"
+            class="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              />
+            </svg>
+            Go to Homepage
+          </a>
+        </div>
+        
+<!-- Contact Information -->
+        <div class="bg-gray-50 rounded-lg p-4">
+          <h4 class="text-sm font-medium text-gray-900 mb-2">Still Having Issues?</h4>
+          <p class="text-sm text-gray-600 mb-3">
+            If the problem persists, please contact our technical support team with the error details.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center text-sm">
+            <a
+              href="tel:+254700000000"
+              class="text-brand-primary hover:text-brand-secondary flex items-center justify-center"
+            >
+              <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                />
+              </svg>
+              Emergency Support
+            </a>
+            <a
+              href="mailto:info@glocalhealthcentre.org"
+              class="text-brand-primary hover:text-brand-secondary flex items-center justify-center"
+            >
+              <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+              info@glocalhealthcentre.org
+            </a>
+          </div>
+        </div>
+      </div>
+      
+<!-- Footer -->
+      <div class="bg-brand-light px-6 py-4 border-t border-gray-100">
+        <div class="text-center text-sm text-gray-500">
+          <p>&copy; <span id="year-500"></span> Glocal Health Centre. All Rights Reserved.</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

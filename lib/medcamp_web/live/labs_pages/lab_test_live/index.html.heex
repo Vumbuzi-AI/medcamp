@@ -1,0 +1,54 @@
+<.header>
+  Lab tests & rates
+  <:actions>
+    <.link patch={~p"/lab_tests/new"}>
+      <.button>New Lab test</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.blank_state
+  :if={@lab_tests_count == 0}
+  icon_path="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+  title="No lab tests found"
+  description="No lab tests or rates have been configured yet."
+/>
+
+<.table :if={@lab_tests_count > 0} id="lab_tests" rows={@lab_tests}
+  row_id={&"lab_tests-#{&1.id}"}
+>
+  <:col :let={lab_test} label="Name">{lab_test.name}</:col>
+  <:col :let={lab_test} label="Desription">{lab_test.desription}</:col>
+  <:col :let={lab_test} label="Standard rate (KES)">{lab_test.price}</:col>
+  <:col :let={lab_test} label="Subsidized rate (KES)">
+    {lab_test.subsidized_price || (lab_test.price && round(lab_test.price * 0.7)) || "—"}
+  </:col>
+  <:action :let={lab_test}>
+    <.link patch={~p"/lab_tests/#{lab_test}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={lab_test}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: lab_test.id}) |> hide("#lab_tests-#{lab_test.id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="lab_test-modal"
+  show
+  on_cancel={JS.patch(~p"/lab_tests")}
+>
+  <.live_component
+    module={MedcampWeb.LabTestLive.FormComponent}
+    id={@lab_test.id || :new}
+    title={@page_title}
+    action={@live_action}
+    current_user={@current_user}
+    lab_test={@lab_test}
+    patch={~p"/lab_tests"}
+  />
+</.modal>
