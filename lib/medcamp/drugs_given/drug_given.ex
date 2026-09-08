@@ -1,12 +1,14 @@
 defmodule Medcamp.DrugsGiven.DrugGiven do
   use Ecto.Schema
   use Medcamp.Tenancy.Schema
+  use Medcamp.Camps.Schema
   import Ecto.Changeset
   alias Medcamp.DrugBatches
   alias Medcamp.DrugsGiven.BatchAllocation
 
   schema "drugs_given" do
     tenant_field()
+    camp_field()
 
     field :quantity, :integer
     field :price, :integer
@@ -31,6 +33,7 @@ defmodule Medcamp.DrugsGiven.DrugGiven do
     |> validate_drug_batch_quantity()
     |> cast_embed(:batch_allocations)
     |> put_org_id()
+    |> put_camp_id()
   end
 
   defp validate_drug_batch_quantity(changeset) do

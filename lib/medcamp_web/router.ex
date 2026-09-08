@@ -350,6 +350,10 @@ defmodule MedcampWeb.Router do
     get "/admin/medical_camp/export/diagnoses", MedicalCampExportController, :diagnoses
     get "/admin/users/:email", UsersController, :index
 
+    # The camp switcher in the admin layout: a session write, so it cannot be
+    # a LiveView event.
+    post "/admin/camps/filter", CampSessionController, :update
+
     live_session :admin_current_user,
       on_mount: [
         {MedcampWeb.UserAuth, :mount_current_user},
@@ -378,6 +382,10 @@ defmodule MedcampWeb.Router do
 
       live "/admin/settings", AdminSettingsLive.Index, :index
       live "/admin/organisation", AdminOrganisationLive.Index, :index
+
+      live "/admin/camps", AdminCampsLive.Index, :index
+      live "/admin/camps/new", AdminCampsLive.Index, :new
+      live "/admin/camps/:id/edit", AdminCampsLive.Index, :edit
     end
 
     live_session :admin_users_permission,

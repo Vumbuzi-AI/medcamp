@@ -1,10 +1,12 @@
 defmodule Medcamp.DrugAllocations.DrugAllocation do
   use Ecto.Schema
   use Medcamp.Tenancy.Schema
+  use Medcamp.Camps.Schema
   import Ecto.Changeset
 
   schema "drug_allocations" do
     tenant_field()
+    camp_field()
 
     field :quantity, :integer
     field :prescription, :string
@@ -53,5 +55,6 @@ defmodule Medcamp.DrugAllocations.DrugAllocation do
       end
     )
     |> put_org_id()
+    |> put_camp_id()
   end
 end

@@ -52,7 +52,16 @@ defmodule Medcamp.DataCase do
   def setup_tenant do
     organisation = Medcamp.OrganisationsFixtures.organisation_fixture()
     Medcamp.Tenancy.put_org_id(organisation.id)
-    on_exit(fn -> Medcamp.Tenancy.clear_org_id() end)
+
+    # No camp by default: records land with `camp_id` nil and the camp filter
+    # unset, which is exactly the "all camps" view every existing test assumes.
+    Medcamp.Camps.Scope.clear()
+
+    on_exit(fn ->
+      Medcamp.Tenancy.clear_org_id()
+      Medcamp.Camps.Scope.clear()
+    end)
+
     organisation
   end
 
