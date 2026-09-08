@@ -242,10 +242,13 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
           <h1 class="text-xl font-semibold text-[#373896]">Drug Allocation</h1>
         </div>
 
-        <.button :if={@drug_allocation.has_been_assigned} class="bg-green-500 hover:bg-green-600">
+        <.button
+          :if={@drug_allocation.has_been_assigned}
+          class="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 mr-2"
+            class="h-4 w-4 shrink-0"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

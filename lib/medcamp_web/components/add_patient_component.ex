@@ -53,11 +53,6 @@ defmodule MedcampWeb.AddPatientComponent do
             required
           />
           <.input field={@form[:national_id]} type="text" label="National ID" />
-          <.input
-            field={@form[:birth_certificate_number]}
-            type="text"
-            label="Birth Certificate Number"
-          />
 
           <.input
             field={@form[:home_address]}
@@ -111,32 +106,6 @@ defmodule MedcampWeb.AddPatientComponent do
             upload={@uploads.birth_certificate_document}
             upload_key="birth_certificate_document"
             myself={@myself}
-          />
-        </div>
-        
-    <!-- ================= INSURANCE ================= -->
-
-        <div class="mt-6">
-          <.input
-            field={@form[:has_insurance]}
-            type="checkbox"
-            label="Does the patient have insurance?"
-          />
-        </div>
-
-        <div :if={@form[:has_insurance].value == true} class="grid grid-cols-2 gap-4 mt-4">
-          <.input field={@form[:insurance_company]} type="text" label="Insurance Company" />
-          <.input field={@form[:insurance_scheme]} type="text" label="Insurance Scheme" />
-          <.input field={@form[:insurance_number]} type="text" label="Insurance Number" />
-          <.input field={@form[:insurance_cover_limit]} type="number" label="Insurance Cover Limit" />
-        </div>
-
-        <div class="mt-6">
-          <.input
-            field={@form[:consent_agreement]}
-            type="checkbox"
-            label="I agree to the terms and conditions"
-            required
           />
         </div>
 
@@ -419,7 +388,10 @@ defmodule MedcampWeb.AddPatientComponent do
   defp delete_replaced_document(old_path, new_path)
        when is_binary(old_path) and is_binary(new_path) and old_path != new_path do
     relative_path = String.trim_leading(old_path, "/uploads/")
-    full_path = Path.join([to_string(:code.priv_dir(:medcamp)), "static", "uploads", relative_path])
+
+    full_path =
+      Path.join([to_string(:code.priv_dir(:medcamp)), "static", "uploads", relative_path])
+
     File.rm(full_path)
     :ok
   end

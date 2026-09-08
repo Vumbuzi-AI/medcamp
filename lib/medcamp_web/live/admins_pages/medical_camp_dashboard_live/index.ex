@@ -242,7 +242,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
   end
 
   defp load_all_data(socket) do
-    patients = Patients.list_medical_camp_patients_for_dates([@day1, @day2])
+    patients = Patients.list_patients()
     stats = patients |> Patients.compute_camp_stats_for_patients()
     load_from_patients(socket, patients, stats)
   end
@@ -348,14 +348,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               <p class="text-blue-100 text-sm mt-1">
                 {@stats.total} patients ·
                 <span class="font-semibold">
-                  <%= case @active_day_tab do %>
-                    <% :all  -> %>
-                      All Days (Mar 28 – 29)
-                    <% :day1 -> %>
-                      Day 1 — 28 March 2026
-                    <% :day2 -> %>
-                      Day 2 — 29 March 2026
-                  <% end %>
+                  All medical-camp patients
                 </span>
               </p>
             </div>
@@ -366,48 +359,6 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               >
                 <Heroicons.icon name="document-text" type="outline" class="h-4 w-4" /> View Report
               </.link>
-
-              <div class="flex items-center gap-2">
-                <button
-                  phx-click="set_day_tab"
-                  phx-value-tab="all"
-                  class={[
-                    "px-4 py-1.5 rounded-full text-sm font-semibold transition-colors",
-                    if(@active_day_tab == :all,
-                      do: "bg-white text-[#373896]",
-                      else: "bg-white/20 text-white hover:bg-white/30"
-                    )
-                  ]}
-                >
-                  All
-                </button>
-                <button
-                  phx-click="set_day_tab"
-                  phx-value-tab="day1"
-                  class={[
-                    "px-4 py-1.5 rounded-full text-sm font-semibold transition-colors",
-                    if(@active_day_tab == :day1,
-                      do: "bg-white text-[#373896]",
-                      else: "bg-white/20 text-white hover:bg-white/30"
-                    )
-                  ]}
-                >
-                  Day 1 · Mar 28
-                </button>
-                <button
-                  phx-click="set_day_tab"
-                  phx-value-tab="day2"
-                  class={[
-                    "px-4 py-1.5 rounded-full text-sm font-semibold transition-colors",
-                    if(@active_day_tab == :day2,
-                      do: "bg-white text-[#373896]",
-                      else: "bg-white/20 text-white hover:bg-white/30"
-                    )
-                  ]}
-                >
-                  Day 2 · Mar 29
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -922,15 +873,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between gap-3 flex-wrap">
               <h3 class="text-base font-semibold text-slate-800">
-                All Camp Patients —
-                <%= case @active_day_tab do %>
-                  <% :all  -> %>
-                    All Days
-                  <% :day1 -> %>
-                    Day 1 · Mar 28
-                  <% :day2 -> %>
-                    Day 2 · Mar 29
-                <% end %>
+                All Camp Patients
               </h3>
               <div class="flex items-center gap-2">
                 <span class="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
@@ -1709,15 +1652,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                     Medical Camp
                   </p>
                   <h2 class="text-xl font-bold">
-                    Lab Tests Revenue —
-                    <%= case @active_day_tab do %>
-                      <% :all  -> %>
-                        All Days (Mar 28 – 29)
-                      <% :day1 -> %>
-                        Day 1 · 28 March
-                      <% :day2 -> %>
-                        Day 2 · 29 March
-                    <% end %>
+                    Lab Tests Revenue — All Patients
                   </h2>
                 </div>
                 <div class="text-right">
@@ -2923,7 +2858,13 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
       group_counts_by_date(Enum.filter(test_entries, & &1.report_complete), & &1.date)
 
     dates =
-      [@day1, @day2]
+      (Enum.map(patients, &date_from_datetime(&1.inserted_at)) ++
+         Enum.map(triages, &date_from_record/1) ++
+         Enum.map(doctor_notes, &date_from_record/1) ++
+         Enum.map(test_entries, & &1.date))
+      |> Enum.reject(&is_nil/1)
+      |> Enum.uniq()
+      |> Enum.sort()
 
     Enum.map(dates, fn date ->
       %{
@@ -2956,11 +2897,10 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
       end)
       |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
 
-    hours_day1 = Map.get(by_day, @day1, [])
-    hours_day2 = Map.get(by_day, @day2, [])
-
     all_hours =
-      (hours_day1 ++ hours_day2)
+      by_day
+      |> Map.values()
+      |> List.flatten()
       |> Enum.uniq()
       |> Enum.sort()
 
@@ -2976,8 +2916,8 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     %{
       labels:
         Enum.map(hour_range, fn h -> :io_lib.format("~2..0B:00", [h]) |> IO.iodata_to_binary() end),
-      day1: count_by_hour.(hours_day1),
-      day2: count_by_hour.(hours_day2)
+      day1: count_by_hour.(all_hours),
+      day2: []
     }
   end
 
@@ -3186,7 +3126,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
         labels: labels,
         datasets: [
           %{
-            label: "Day 1 · Mar 28",
+            label: "All registrations",
             data: day1,
             borderColor: "rgba(55, 56, 150, 0.9)",
             backgroundColor: "rgba(55, 56, 150, 0.12)",
@@ -3197,7 +3137,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
             fill: true
           },
           %{
-            label: "Day 2 · Mar 29",
+            label: "",
             data: day2,
             borderColor: "rgba(20, 184, 166, 0.9)",
             backgroundColor: "rgba(20, 184, 166, 0.10)",

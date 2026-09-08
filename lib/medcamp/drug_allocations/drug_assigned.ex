@@ -40,7 +40,8 @@ defmodule Medcamp.DrugAllocations.DrugAssigned do
       :inventory_received_id,
       :quantity,
       :frequency,
-      :duration_in_days
+      :duration_in_days,
+      :route_of_administration
     ])
     |> maybe_validate_available_quantity(opts)
   end

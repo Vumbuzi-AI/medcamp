@@ -205,9 +205,7 @@ defmodule MedcampWeb.PatientComponents do
       :if={@count > 0}
       id="patients"
       rows={@patients}
-      row_click={
-        fn patient -> JS.navigate("#{@route_prefix}/#{patient.id}/patient_overview") end
-      }
+      row_click={fn patient -> JS.navigate("#{@route_prefix}/#{patient.id}/patient_overview") end}
       row_id={&"patients-#{&1.id}"}
     >
       <:col :let={patient} label="">
@@ -256,6 +254,10 @@ defmodule MedcampWeb.PatientComponents do
     </.table>
     """
   end
+
+  attr :show_birth_certificate, :boolean, default: true
+  attr :show_insurance_details, :boolean, default: true
+  attr :new_triage_url, :string, default: nil
 
   def patient_overview(assigns) do
     ~H"""
@@ -400,7 +402,7 @@ defmodule MedcampWeb.PatientComponents do
               </a>
             </div>
 
-            <div>
+            <div :if={@show_birth_certificate}>
               <p class="text-sm text-gray-500 mb-1">Birth Certificate Number</p>
               <p class="font-medium">{@patient.birth_certificate_number || "—"}</p>
               <a
@@ -447,56 +449,58 @@ defmodule MedcampWeb.PatientComponents do
           <div class="border-t border-gray-200 my-4"></div>
 
           <div>
-            <h3 class="mb-2 text-md font-semibold text-[#373896]">
-              Insurance Details
-            </h3>
+            <div :if={@show_insurance_details}>
+              <h3 class="mb-2 text-md font-semibold text-[#373896]">
+                Insurance Details
+              </h3>
 
-            <div class="grid grid-cols-1 gap-2">
-              <div>
-                <p class="mb-1 text-sm text-gray-500">
-                  Insurance Status
-                </p>
+              <div class="grid grid-cols-1 gap-2">
+                <div>
+                  <p class="mb-1 text-sm text-gray-500">
+                    Insurance Status
+                  </p>
 
-                <p class="font-medium">
-                  <%= if @patient.has_insurance do %>
-                    <span class="text-green-600">Insured</span>
-                  <% else %>
-                    <span class="text-gray-600">Not Insured</span>
-                  <% end %>
-                </p>
+                  <p class="font-medium">
+                    <%= if @patient.has_insurance do %>
+                      <span class="text-green-600">Insured</span>
+                    <% else %>
+                      <span class="text-gray-600">Not Insured</span>
+                    <% end %>
+                  </p>
+                </div>
+
+                <%= if @patient.has_insurance do %>
+                  <div>
+                    <p class="mb-1 text-sm text-gray-500">
+                      Insurance Scheme
+                    </p>
+
+                    <p class="font-medium">
+                      {@patient.insurance_scheme}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p class="mb-1 text-sm text-gray-500">
+                      Insurance Number
+                    </p>
+
+                    <p class="font-medium">
+                      {@patient.insurance_number}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p class="mb-1 text-sm text-gray-500">
+                      Cover Limit
+                    </p>
+
+                    <p class="font-medium">
+                      KSh {@patient.insurance_cover_limit}
+                    </p>
+                  </div>
+                <% end %>
               </div>
-
-              <%= if @patient.has_insurance do %>
-                <div>
-                  <p class="mb-1 text-sm text-gray-500">
-                    Insurance Scheme
-                  </p>
-
-                  <p class="font-medium">
-                    {@patient.insurance_scheme}
-                  </p>
-                </div>
-
-                <div>
-                  <p class="mb-1 text-sm text-gray-500">
-                    Insurance Number
-                  </p>
-
-                  <p class="font-medium">
-                    {@patient.insurance_number}
-                  </p>
-                </div>
-
-                <div>
-                  <p class="mb-1 text-sm text-gray-500">
-                    Cover Limit
-                  </p>
-
-                  <p class="font-medium">
-                    KSh {@patient.insurance_cover_limit}
-                  </p>
-                </div>
-              <% end %>
             </div>
 
             <div class="my-4 border-t border-gray-200"></div>
@@ -641,7 +645,15 @@ defmodule MedcampWeb.PatientComponents do
             <% end %>
           </div>
 
-          <div class="mt-6 flex justify-end">
+          <div class="mt-6 flex flex-wrap justify-end gap-3">
+            <.link
+              :if={@new_triage_url}
+              id="add-triage-details"
+              navigate={@new_triage_url}
+              class="inline-flex items-center rounded-lg bg-[#373896] px-4 py-2 text-sm font-semibold text-white hover:bg-[#6667ab]"
+            >
+              <Heroicons.icon name="plus" type="outline" class="h-4 w-4 mr-1" /> Add Triage Details
+            </.link>
             <.button type="button" phx-click="edit_patient">
               <div class="flex items-center">
                 <Heroicons.icon name="pencil-square" type="outline" class="h-4 w-4 mr-1" />

@@ -96,7 +96,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteShowTest do
       assert a.lab_results == []
     end
 
-    test "tab=ai_review requires no extra dataset (reads doctor_note.ai_review_* directly)", %{
+    test "removed AI review tab falls back to overview", %{
       conn: conn,
       base_path: base_path,
       patient: patient,
@@ -107,7 +107,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteShowTest do
       {:ok, view, _html} = live(conn, base_path <> "?tab=ai_review")
       a = assigns(view)
 
-      assert a.current_tab == "ai_review"
+      assert a.current_tab == "overview"
       assert a.lab_results == []
     end
   end

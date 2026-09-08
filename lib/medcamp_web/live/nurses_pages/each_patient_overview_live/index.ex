@@ -65,6 +65,9 @@ defmodule MedcampWeb.NursesPages.EachPatientOverviewIndex do
         form={@form}
         most_recent_triage={@most_recent_triage}
         back_url="/nurse/patients"
+        show_birth_certificate={false}
+        show_insurance_details={false}
+        new_triage_url={~p"/nurse/#{@patient.id}/triages/new"}
       />
 
       <.modal

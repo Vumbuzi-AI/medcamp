@@ -16,6 +16,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
      |> assign(:drug, drug)
      |> assign(:editing_batch, nil)
      |> assign(:editing_drug, false)
+     |> assign(:printing_batch, nil)
      |> assign(:error_message, nil)
      |> assign(:batch_tab, :active)
      |> assign(:drug_tab, :batches)
@@ -53,6 +54,41 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
     |> maybe_load_batches_by_tab()
     |> maybe_load_prescriptions_by_status()
     |> maybe_load_drugs_given()
+  end
+
+  defp apply_action(socket, :new_batch, _params) do
+    socket
+    |> assign(:page_title, "Add Drug Batch")
+    |> assign(:drug_batch, nil)
+    |> assign(:printing_batch, nil)
+  end
+
+  defp apply_action(socket, :print_batch, %{"batch_id" => batch_id}) do
+    drug_batch = drug_batch_for_drug!(socket.assigns.drug.id, batch_id)
+
+    socket
+    |> assign(:page_title, "Print Batch DataMatrix")
+    |> assign(:drug_batch, drug_batch)
+    |> assign(:printing_batch, drug_batch)
+  end
+
+  defp apply_action(socket, :edit_batch, %{"batch_id" => batch_id}) do
+    drug_batch = drug_batch_for_drug!(socket.assigns.drug.id, batch_id)
+
+    socket
+    |> assign(:page_title, "Edit Drug Batch")
+    |> assign(:drug_batch, drug_batch)
+    |> assign(:printing_batch, nil)
+  end
+
+  defp drug_batch_for_drug!(drug_id, batch_id) do
+    drug_batch = DrugBatches.get_drug_batch!(batch_id)
+
+    if drug_batch.drug_id == drug_id do
+      drug_batch
+    else
+      raise Ecto.NoResultsError, queryable: Medcamp.DrugBatches.DrugBatch
+    end
   end
 
   defp assign_drug_tab_from_params(socket, params) do
@@ -96,7 +132,11 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
   end
 
   defp assign_drugs_given_page_from_params(socket, params) do
-    assign(socket, :drugs_given_page, Medcamp.Pagination.normalize_page(params["drugs_given_page"]))
+    assign(
+      socket,
+      :drugs_given_page,
+      Medcamp.Pagination.normalize_page(params["drugs_given_page"])
+    )
   end
 
   # Only the currently active tab's data is (re)fetched on every param change
@@ -372,49 +412,8 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
     {:noreply, push_patch(socket, to: path)}
   end
 
-  def handle_event("toggle_otc", _params, socket) do
-    drug = socket.assigns.drug
-    new_value = !drug.is_otc
-
-    case Drugs.update_drug(drug, %{is_otc: new_value}) do
-      {:ok, updated_drug} ->
-        flash_msg = if new_value, do: "Drug marked as OTC", else: "Drug marked as non-OTC"
-
-        {:noreply,
-         socket
-         |> assign(:drug, updated_drug)
-         |> put_flash(:info, flash_msg)}
-
-      {:error, _changeset} ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "Failed to update OTC status")}
-    end
-  end
-
-  def handle_event("toggle_dangerous_drug", _params, socket) do
-    drug = socket.assigns.drug
-    new_value = !drug.is_dangerous_drug
-
-    case Drugs.update_drug(drug, %{is_dangerous_drug: new_value}) do
-      {:ok, updated_drug} ->
-        flash_msg =
-          if new_value do
-            "Drug added to the dangerous drug register"
-          else
-            "Drug removed from the dangerous drug register"
-          end
-
-        {:noreply,
-         socket
-         |> assign(:drug, updated_drug)
-         |> put_flash(:info, flash_msg)}
-
-      {:error, _changeset} ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "Failed to update dangerous drug register status")}
-    end
+  def handle_event("print_batch_label", %{"id" => id}, socket) do
+    {:noreply, push_event(socket, "printDiv", %{id: id})}
   end
 
   @impl true
@@ -472,27 +471,6 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                 Review batches, stock position, and allocation activity for this drug.
               </p>
             </div>
-
-            <div class="mt-4 flex flex-wrap gap-2">
-              <span class={[
-                "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold",
-                if(@drug.is_otc,
-                  do: "bg-green-100 text-green-800",
-                  else: "bg-slate-100 text-slate-600"
-                )
-              ]}>
-                {if @drug.is_otc, do: "OTC", else: "Non-OTC"}
-              </span>
-              <span class={[
-                "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold",
-                if(@drug.is_dangerous_drug,
-                  do: "bg-orange-100 text-orange-800",
-                  else: "bg-slate-100 text-slate-600"
-                )
-              ]}>
-                {if @drug.is_dangerous_drug, do: "In DDA", else: "Not in DDA"}
-              </span>
-            </div>
           </div>
 
           <div class="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap xl:w-auto xl:max-w-2xl xl:justify-end">
@@ -503,10 +481,12 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               <.icon name="hero-pencil-square" class="h-4 w-4" /> Edit Drug
             </.button>
 
-            <button type="button" phx-click="toggle_dangerous_drug" class={dda_button_class(@drug)}>
-              <.icon name="hero-clipboard-document-list" class="h-4 w-4" />
-              {if @drug.is_dangerous_drug, do: "Remove from DDA", else: "Add to DDA"}
-            </button>
+            <.link
+              patch={~p"/pharmacist/drugs/#{@drug.id}/new_batch"}
+              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-lg bg-[#373896] px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2f317f]"
+            >
+              <.icon name="hero-plus" class="h-4 w-4" /> Add Batch
+            </.link>
           </div>
         </div>
       </div>
@@ -616,9 +596,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
         </div>
 
         <div class="overflow-hidden">
-          <.table id="drug_batches" rows={@drug_batches}
-            row_id={&"drug_batches-#{&1.id}"}
-          >
+          <.table id="drug_batches" rows={@drug_batches} row_id={&"drug_batches-#{&1.id}"}>
             <:col :let={drug_batch} label="Brand Name">
               <div class="py-3">
                 <span class="font-medium text-gray-900">
@@ -638,20 +616,6 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                 <span class="px-2 py-1 rounded-full bg-[#e7e7ff] text-[#373896] text-sm font-medium">
                   {if drug_batch.batch, do: drug_batch.batch.batch, else: "—"}
                 </span>
-              </div>
-            </:col>
-
-            <:col :let={drug_batch} label="Status">
-              <div class="py-3">
-                <%= if drug_batch.is_confirmed do %>
-                  <span class="px-2 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
-                    Confirmed
-                  </span>
-                <% else %>
-                  <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-medium">
-                    Pending
-                  </span>
-                <% end %>
               </div>
             </:col>
 
@@ -697,6 +661,20 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
 
             <:col :let={drug_batch} label="Actions">
               <div class="py-3 flex flex-wrap items-center gap-2">
+                <.link
+                  :if={@batch_tab == :active}
+                  patch={~p"/pharmacist/drugs/#{@drug.id}/batches/#{drug_batch.id}/edit"}
+                  class="inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  <.icon name="hero-pencil-square" class="h-4 w-4" /> Edit
+                </.link>
+                <.link
+                  :if={drug_batch.batch}
+                  patch={~p"/pharmacist/drugs/#{@drug.id}/batches/#{drug_batch.id}/print"}
+                  class="inline-flex items-center gap-1 rounded-md border border-[#373896] px-3 py-2 text-sm font-medium text-[#373896] hover:bg-[#f0f0ff]"
+                >
+                  <.icon name="hero-printer" class="h-4 w-4" /> Print DataMatrix
+                </.link>
                 <%= if @batch_tab == :active do %>
                   <.button
                     type="button"
@@ -724,6 +702,110 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
         </div>
       <% end %>
 
+      <.modal
+        :if={@live_action == :new_batch}
+        id="drug-batch-modal"
+        show
+        on_cancel={JS.patch(~p"/pharmacist/drugs/#{@drug.id}")}
+      >
+        <.live_component
+          module={MedcampWeb.PharmacistsLive.DrugBatchFormComponent}
+          id={:new_drug_batch_for_drug}
+          title={@page_title}
+          action={@live_action}
+          drug={@drug}
+          current_user={@current_user}
+          patch={~p"/pharmacist/drugs/#{@drug.id}"}
+        />
+      </.modal>
+
+      <.modal
+        :if={@live_action == :edit_batch && @drug_batch}
+        id="edit-drug-batch-modal"
+        show
+        on_cancel={JS.patch(~p"/pharmacist/drugs/#{@drug.id}")}
+      >
+        <.live_component
+          module={MedcampWeb.PharmacistsLive.DrugBatchFormComponent}
+          id={"edit-drug-batch-#{@drug_batch.id}"}
+          title={@page_title}
+          action={@live_action}
+          drug={@drug}
+          drug_batch={@drug_batch}
+          current_user={@current_user}
+          patch={~p"/pharmacist/drugs/#{@drug.id}"}
+        />
+      </.modal>
+
+      <.modal
+        :if={@live_action == :print_batch && @printing_batch}
+        id="batch-datamatrix-modal"
+        show
+        on_cancel={JS.patch(~p"/pharmacist/drugs/#{@drug.id}")}
+      >
+        <div class="space-y-6">
+          <div>
+            <h2 class="text-xl font-semibold text-slate-900">Print Batch DataMatrix</h2>
+            <p class="mt-1 text-sm text-slate-500">
+              Scan this label to identify the batch.
+            </p>
+          </div>
+
+          <div
+            id={"batch-label-#{@printing_batch.id}"}
+            class="mx-auto w-[340px] border border-slate-300 bg-white p-4 text-black"
+          >
+            <p class="mb-3 border-b-2 border-black pb-2 text-sm font-bold">
+              {Drugs.display_name(@drug)}
+            </p>
+            <div class="flex items-start gap-4">
+              <div class="shrink-0">
+                <div class="mb-1 text-[10px]">GS1®</div>
+                <svg
+                  id={"batch-datamatrix-#{@printing_batch.id}"}
+                  data-value={batch_datamatrix_payload(@printing_batch)}
+                  phx-hook="datamatrix"
+                  phx-update="ignore"
+                  class="datamatrix h-[90px] w-[90px]"
+                >
+                </svg>
+              </div>
+              <div class="min-w-0 space-y-1 font-mono text-[11px] leading-tight">
+                <p><span class="font-sans font-semibold">(01)</span> {batch_gtin(@printing_batch)}</p>
+                <p><span class="font-sans font-semibold">(10)</span> {@printing_batch.batch.batch}</p>
+                <p>
+                  <span class="font-sans font-semibold">(11)</span>
+                  {human_readable_gs1_date(@printing_batch.batch.manufacture_date)}
+                </p>
+                <p>
+                  <span class="font-sans font-semibold">(17)</span>
+                  {human_readable_gs1_date(@printing_batch.batch.expiry)}
+                </p>
+                <p :if={@printing_batch.batch.serial}>
+                  <span class="font-sans font-semibold">(21)</span> {@printing_batch.batch.serial}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <.link
+              patch={~p"/pharmacist/drugs/#{@drug.id}"}
+              class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700"
+            >
+              Close
+            </.link>
+            <.button
+              type="button"
+              phx-click="print_batch_label"
+              phx-value-id={"batch-label-#{@printing_batch.id}"}
+            >
+              <.icon name="hero-printer" class="h-4 w-4" /> Print
+            </.button>
+          </div>
+        </div>
+      </.modal>
+
       <%!-- Drugs Given panel --%>
       <%= if @drug_tab == :allocations do %>
         <.blank_state
@@ -733,7 +815,10 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           description="This drug has not been dispensed to any patient yet."
         />
 
-        <.table :if={@drugs_given_count > 0} id="drugs_given" rows={@drugs_given}
+        <.table
+          :if={@drugs_given_count > 0}
+          id="drugs_given"
+          rows={@drugs_given}
           row_id={&"drugs_given-#{&1.id}"}
         >
           <:col :let={dg} label="Patient">
@@ -1044,18 +1129,38 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
     """
   end
 
-  defp dda_button_class(drug) do
-    base =
-      "inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-lg px-5 py-2 text-sm font-semibold shadow-sm transition-colors"
+  defp batch_datamatrix_payload(drug_batch) do
+    separator = <<29>>
+    batch = drug_batch.batch
 
-    state_class =
-      if drug.is_dangerous_drug do
-        "border border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100"
-      else
-        "border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100"
-      end
+    "01#{batch_gtin(drug_batch)}10#{batch.batch}" <>
+      separator <>
+      "11#{gs1_date(batch.manufacture_date)}17#{gs1_date(batch.expiry)}" <>
+      if(batch.serial, do: separator <> "21" <> batch.serial, else: "")
+  end
 
-    base <> " " <> state_class
+  defp batch_gtin(drug_batch) do
+    (drug_batch.batch.gtin || drug_batch.inventory_received.gtin || "")
+    |> String.replace(~r/\D/, "")
+    |> String.pad_leading(14, "0")
+  end
+
+  defp gs1_date(%Date{} = date), do: Calendar.strftime(date, "%y%m%d")
+
+  defp gs1_date(date) when is_binary(date) do
+    case Date.from_iso8601(date) do
+      {:ok, parsed} -> gs1_date(parsed)
+      _ -> ""
+    end
+  end
+
+  defp gs1_date(_date), do: ""
+
+  defp human_readable_gs1_date(date) do
+    case gs1_date(date) do
+      "" -> "—"
+      formatted -> formatted
+    end
   end
 
   defp batch_expired?(nil), do: false

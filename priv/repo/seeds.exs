@@ -116,6 +116,9 @@ for attrs <- lab_tests do
   end
 end
 
+# Keep the structured result templates aligned with this catalogue.
+Code.require_file(Path.expand("seeds/current_lab_test_templates.exs", __DIR__))
+
 ## Drug stock --------------------------------------------------------------
 
 # Each drug needs an item-master row (`inventories_received`) keyed by GTIN -
@@ -222,9 +225,8 @@ IO.puts("""
 Seeded medical camp:
   #{map_size(users)} staff logins (password: #{password})
   #{length(lab_tests)} lab tests
-  #{length(drug_stock)} drugs, each with one unconfirmed batch
+  #{length(drug_stock)} drugs, each with one active batch
 
 Log in as admin@gmail.com to add the rest of your camp staff.
-Drug batches start unconfirmed - a pharmacist confirms each by scanning its
-DataMatrix under Pharmacist -> Drug Batches.
+New batches are immediately available for prescribing and dispensing.
 """)

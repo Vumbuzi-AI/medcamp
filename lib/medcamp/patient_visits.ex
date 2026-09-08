@@ -199,7 +199,6 @@ defmodule Medcamp.PatientVisits do
     from [pv, _pat, _dn] in query, where: pv.creator_id == ^creator_id
   end
 
-
   @doc """
   Moves `visit` to `status`, rejecting anything outside the camp flow.
 
@@ -285,6 +284,21 @@ defmodule Medcamp.PatientVisits do
       preload: [:patient, :creator, :doctor]
     )
     |> Repo.all()
+  end
+
+  @doc """
+  Returns the patient's most recent visit that can still receive a doctor note.
+  """
+  def latest_visit_without_doctor_note(patient_id) do
+    from(pv in PatientVisit,
+      left_join: dn in Medcamp.DoctorNotes.DoctorNote,
+      on: dn.patient_visit_id == pv.id,
+      where: pv.patient_id == ^patient_id and is_nil(dn.id),
+      order_by: [desc: pv.date, desc: pv.time, desc: pv.inserted_at],
+      limit: 1,
+      preload: [:patient, :creator, :doctor]
+    )
+    |> Repo.one()
   end
 
   @doc """

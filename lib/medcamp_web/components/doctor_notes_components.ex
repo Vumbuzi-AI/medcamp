@@ -565,19 +565,6 @@ defmodule MedcampWeb.DoctorNotesComponents do
           </h2>
         </div>
 
-        <div class="mb-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
-          <Heroicons.icon
-            name="information-circle"
-            type="outline"
-            class="h-5 w-5 flex-shrink-0 text-amber-600"
-          />
-          <p class="text-xs text-amber-800">
-            This note's content may be sent to an AI service for the optional AI Review.
-            Avoid including patient names, phone numbers, national ID numbers, or other
-            identifying details in the fields below — describe findings clinically instead.
-          </p>
-        </div>
-
         <div class="space-y-5">
           <div class="grid grid-cols-1 gap-4">
             <.input

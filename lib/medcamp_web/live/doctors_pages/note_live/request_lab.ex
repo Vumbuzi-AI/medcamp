@@ -22,6 +22,10 @@ defmodule MedcampWeb.RequestLabComponent do
         |> Enum.join(" ")}
       </.header>
 
+      <p class="mb-5 text-sm text-gray-500">
+        Select the tests the laboratory should perform, then set how urgently they are needed.
+      </p>
+
       <.simple_form
         for={@form}
         id="lab_result-form"
@@ -29,55 +33,90 @@ defmodule MedcampWeb.RequestLabComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <div class="flex flex-col gap-0">
+        <div class="flex flex-col gap-1">
           <.input
             field={@form[:query]}
             value={@searched_query}
             phx-change="search_lab_test"
             type="text"
-            label="Search Lab Test"
+            label="Find a lab test"
+            placeholder="Search by test name..."
           />
-          <div :if={@selected_tests != []} class="flex flex-wrap my-4 gap-3">
+
+          <div class="mt-2 flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Selected tests ({length(@selected_tests)})
+            </span>
+            <span :if={@selected_tests == []} class="text-xs text-amber-600">
+              Select at least one test
+            </span>
+          </div>
+
+          <div :if={@selected_tests != []} class="my-2 flex flex-wrap gap-2">
             <%= for test <- @selected_tests do %>
-              <div class="flex flex-row gap-2 rounded-md bg-gray-100 flex justify-center items-center p-2  rounded-md">
+              <div class="flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1.5 text-sm font-medium text-indigo-900 ring-1 ring-indigo-100">
                 {test.name}
-                <p phx-click={"remove_lab_test-#{test.id}"} phx-target={@myself}>
-                  <Heroicons.icon
-                    name="x-mark"
-                    type="outline"
-                    class="h-4 w-4 cursor-pointer text-darkblue"
-                  />
-                </p>
+                <button
+                  type="button"
+                  aria-label={"Remove #{test.name}"}
+                  phx-click={"remove_lab_test-#{test.id}"}
+                  phx-target={@myself}
+                  class="rounded-full text-indigo-500 hover:bg-indigo-100 hover:text-indigo-900"
+                >
+                  <Heroicons.icon name="x-mark" type="outline" class="h-4 w-4" />
+                </button>
               </div>
             <% end %>
           </div>
-          <div :if={@searched_lab_tests != []} class="bg-gray-100 gap-2 p-2 h-[150px] overflow-y-auto">
+
+          <div class="mt-2 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+            <p class="border-b border-gray-200 px-3 py-2 text-xs text-gray-500">
+              Click a test to add it to this request
+            </p>
             <%= for option <- @searched_lab_tests do %>
               <div
                 phx-click="select_lab_test"
                 phx-target={@myself}
                 phx-value-id={option.id}
-                class="p-2 cursor-pointer border-b-[1px] hover:bg-gray-200"
+                class="cursor-pointer border-b border-gray-200 bg-white px-3 py-2.5 text-sm last:border-b-0 hover:bg-indigo-50"
               >
                 {option.name}
               </div>
             <% end %>
+            <p :if={@searched_lab_tests == []} class="px-3 py-4 text-center text-sm text-gray-500">
+              No matching lab tests found. Try a different search.
+            </p>
           </div>
         </div>
-        <.input field={@form[:description]} type="textarea" label="Description" />
+
+        <.input
+          field={@form[:description]}
+          type="textarea"
+          label="Clinical indication"
+          placeholder="Briefly explain why these tests are needed (optional)"
+        />
         <.input
           field={@form[:urgency]}
           type="select"
-          prompt="Select urgency"
+          label="Priority"
+          prompt="Choose priority"
           options={[
             {"High (Red)", "High"},
             {"Medium (Amber)", "Medium"},
             {"Low (Green)", "Low"}
           ]}
         />
+        <p class="-mt-2 text-xs text-gray-500">
+          High: act immediately · Medium: process soon · Low: routine
+        </p>
 
         <:actions>
-          <.button phx-disable-with="Saving...">Request Lab Work</.button>
+          <.button
+            phx-disable-with="Saving..."
+            disabled={@selected_tests == [] or @form[:urgency].value in [nil, ""]}
+          >
+            Request Lab Work
+          </.button>
         </:actions>
       </.simple_form>
     </div>
@@ -90,7 +129,7 @@ defmodule MedcampWeb.RequestLabComponent do
      socket
      |> assign(assigns)
      |> assign(:searched_query, "")
-     |> assign(:searched_lab_tests, [])
+     |> assign(:searched_lab_tests, LabTests.list_lab_tests())
      |> assign(:selected_tests, [])
      |> assign_new(:form, fn ->
        to_form(LabResults.change_lab_result(lab_result))
@@ -139,7 +178,10 @@ defmodule MedcampWeb.RequestLabComponent do
   end
 
   def handle_event("save", %{"lab_result" => lab_result_params}, socket) do
-    tests = Enum.map(socket.assigns.selected_tests, &%{name: &1.name})
+    tests =
+      Enum.map(socket.assigns.selected_tests, fn test ->
+        %{name: test.name, price: test.price || 0}
+      end)
 
     lab_result_params =
       lab_result_params

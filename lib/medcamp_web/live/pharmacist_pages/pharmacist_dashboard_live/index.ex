@@ -183,7 +183,7 @@ defmodule MedcampWeb.PharmacistDashboardLive.Index do
             />
             <.chart_panel
               title="Current Stock Value by Drug"
-              subtitle="Retail value of available confirmed stock, ranked by drug."
+              subtitle="Retail value of available stock, ranked by drug."
               config={revenue_by_reason_chart(@stock_value_breakdown)}
               height="320px"
             />
@@ -215,7 +215,7 @@ defmodule MedcampWeb.PharmacistDashboardLive.Index do
   defp dashboard_cards(assigns) do
     summary_cards_for(assigns.visible_summary_cards, %{
       drug_catalog: {length(assigns.drugs), "Drugs matching the current view"},
-      pharmacy_stock_units: {format_number(assigns.stock_units), "Available confirmed units"},
+      pharmacy_stock_units: {format_number(assigns.stock_units), "Available units"},
       pharmacy_stock_value: {format_money(assigns.stock_value), "Retail value of stock on hand"},
       drug_allocations:
         {length(assigns.allocations), "Allocations created in the selected period"},
@@ -298,7 +298,7 @@ defmodule MedcampWeb.PharmacistDashboardLive.Index do
   end
 
   defp available_batch?(batch) do
-    batch.is_active != false and batch.is_confirmed == true and
+    batch.is_active != false and
       (batch.remaining_quantity || 0) > 0
   end
 

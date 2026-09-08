@@ -1341,9 +1341,9 @@ Hooks.datamatrix = {
   mounted() {
     const codes = document.querySelectorAll(".datamatrix");
     for (var i = 0; i < codes.length; i++) {
-      let txt = codes[i].id;
+      let txt = codes[i].dataset.value || codes[i].id;
 
-      var element2 = document.getElementById(txt);
+      var element2 = codes[i];
       data = {
         msg: txt,
         dim: 70,

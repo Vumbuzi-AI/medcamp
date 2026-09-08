@@ -29,6 +29,7 @@ defmodule MedcampWeb.Router do
     pipe_through [:browser]
 
     live "/8017/:gsrn", UserLive.Profile, :index
+    live "/8018/:gsrn", PatientCardLive, :index
 
     post "/8018/:gsrn/medical-camp/session", MedicalCampSessionController, :create
     post "/admin/medical_camp/access/session", AdminMedicalCampPinSessionController, :create
@@ -270,20 +271,17 @@ defmodule MedcampWeb.Router do
       live "/pharmacist/drugs", PharmacistsLive.DrugsIndex, :index
       live "/pharmacist/drugs/new", PharmacistsLive.DrugsIndex, :new
       live "/pharmacist/drugs/:id/edit", PharmacistsLive.DrugsIndex, :edit
-      live "/pharmacist/drugs/:id", PharmacistsLive.DrugsShow, :index
       live "/pharmacist/drugs/:id/new_batch", PharmacistsLive.DrugsShow, :new_batch
 
-      live "/pharmacist/pending_drug_batches",
-           PharmacistsLive.PendingDrugBatchesIndex,
-           :index
+      live "/pharmacist/drugs/:id/batches/:batch_id/edit",
+           PharmacistsLive.DrugsShow,
+           :edit_batch
 
-      live "/pharmacist/pending_drug_batches/new",
-           PharmacistsLive.PendingDrugBatchesIndex,
-           :new
+      live "/pharmacist/drugs/:id/batches/:batch_id/print",
+           PharmacistsLive.DrugsShow,
+           :print_batch
 
-      live "/pharmacist/pending_drug_batches/:id/scan",
-           PharmacistsLive.PendingDrugBatchesIndex,
-           :scan
+      live "/pharmacist/drugs/:id", PharmacistsLive.DrugsShow, :index
 
       live "/pharmacist/drug_allocations", PharmacistsLive.DrugAllocationsIndex, :index
 

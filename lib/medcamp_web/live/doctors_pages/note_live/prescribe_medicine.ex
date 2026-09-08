@@ -72,16 +72,37 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
         phx-submit="save"
       >
         <div class="mb-4">
-          <div class="flex justify-between items-center mb-2">
-            <h3 class="text-lg font-medium">Selected Drugs</h3>
+          <div class="flex flex-wrap justify-between items-center gap-3 mb-3">
+            <div>
+              <h3 class="text-lg font-semibold text-zinc-900">Selected medicines</h3>
+              <p class="mt-1 text-sm text-zinc-500">
+                Add one or more medicines and set the instructions for each.
+              </p>
+            </div>
             <.button type="button" phx-click="open_drug_modal" phx-target={@myself}>
-              <.icon name="hero-plus" class="mr-1 h-4 w-4" /> Add Drug
+              <.icon name="hero-plus" class="mr-1 h-4 w-4" /> Add medicine
             </.button>
           </div>
 
-          <div class="bg-gray-50 rounded-md p-3">
+          <div class="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-6">
             <%= if Enum.empty?(@selected_drugs) do %>
-              <p class="text-gray-500 italic">No drugs selected yet</p>
+              <div class="flex flex-col items-center text-center">
+                <div class="flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#1D3557] shadow-sm ring-1 ring-zinc-200">
+                  <.icon name="hero-beaker" class="h-5 w-5" />
+                </div>
+                <p class="mt-3 font-medium text-zinc-800">No medicines added yet</p>
+                <p class="mt-1 max-w-sm text-sm text-zinc-500">
+                  Search the medicine catalogue to start building this prescription.
+                </p>
+                <button
+                  type="button"
+                  phx-click="open_drug_modal"
+                  phx-target={@myself}
+                  class="mt-4 text-sm font-semibold text-[#1D3557] hover:underline"
+                >
+                  Add the first medicine <span aria-hidden="true">→</span>
+                </button>
+              </div>
             <% else %>
               <div class="space-y-3">
                 <%= for {drug, index} <- Enum.with_index(@selected_drugs) do %>
@@ -123,7 +144,8 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
         <.input
           field={@form[:prescription]}
           type="textarea"
-          label="Prescription note to pharmacist.."
+          label="Note to pharmacist (optional)"
+          placeholder="Add any instructions the pharmacist should see"
         />
 
         <:actions>
@@ -137,7 +159,10 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
           show={@show_drug_modal}
           on_cancel={JS.push("close_drug_modal", target: @myself)}
         >
-          <.header>Add Drug</.header>
+          <.header class="pr-8">Add medicine</.header>
+          <p class="mt-1 text-sm text-zinc-500">
+            Search the catalogue, then add dosage instructions.
+          </p>
           <.simple_form
             for={@drug_form}
             id="drug-form"
@@ -145,33 +170,51 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
             phx-submit="add_drug"
             class="flex flex-col gap-2"
           >
-            <div :if={@selected_drug == nil} class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Search For Drugssd</label>
-              <.input
-                type="select"
-                field={@form[:query]}
-                options={@drug_categories}
-                prompt="Filter by category"
-                label="Filter by category"
-                phx-change="filter_drugs"
-              />
-              <input
-                type="text"
-                name="query"
-                value={@searched_query}
-                phx-change="search_drugs"
-                phx-target={@myself}
-                class="block mt-4 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              />
+            <div :if={@selected_drug == nil} class="mb-4 space-y-4">
+              <div>
+                <label for="drug-search" class="block text-sm font-medium text-gray-700 mb-1">
+                  Search medicines
+                </label>
+                <input
+                  id="drug-search"
+                  type="text"
+                  name="query"
+                  value={@searched_query}
+                  placeholder="Search by brand or generic name"
+                  phx-change="search_drugs"
+                  phx-target={@myself}
+                  autocomplete="off"
+                  class="block w-full rounded-lg border-zinc-300 shadow-sm focus:border-[#1D3557] focus:ring-[#1D3557] sm:text-sm"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Or browse by category
+                </label>
+                <.input
+                  type="select"
+                  field={@form[:query]}
+                  options={@drug_categories}
+                  prompt="Filter by category"
+                  label="Filter by category"
+                  phx-change="filter_drugs"
+                />
+              </div>
             </div>
+
+            <%= if @selected_drug == nil && @searched_query == "" && @searched_drugs == [] do %>
+              <div class="rounded-lg bg-zinc-50 px-4 py-5 text-center text-sm text-zinc-500">
+                Start typing to see available medicines.
+              </div>
+            <% end %>
 
             <%= if @searched_drugs && length(@searched_drugs) > 0 && @selected_drug == nil  do %>
               <div class="mt-2 mb-4">
                 <label class="block text-sm font-medium mb-1">Select a drug</label>
-                <div class="max-h-48 overflow-y-auto border rounded-md">
+                <div class="max-h-64 overflow-y-auto rounded-lg border border-zinc-200">
                   <%= for {drug, index} <- Enum.with_index(@searched_drugs) do %>
                     <div
-                      class="p-2 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
+                      class="p-3 hover:bg-zinc-50 cursor-pointer border-b last:border-b-0 focus-within:bg-zinc-50"
                       phx-click="select_drug"
                       phx-target={@myself}
                       phx-value-id={drug.id}
@@ -196,10 +239,18 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
             <% end %>
 
             <%= if @selected_drug do %>
-              <div>
-                Only {Medcamp.DrugBatches.check_available_quantity(@selected_drug.inventory_received_id)} units available
+              <%= if @drug_form.errors != [] do %>
+                <div class="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  <.icon name="hero-exclamation-circle" class="mt-0.5 h-5 w-5 shrink-0" />
+                  <span>Please complete the highlighted fields before adding this medicine.</span>
+                </div>
+              <% end %>
+
+              <div class="mb-4 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+                <.icon name="hero-check-circle" class="h-4 w-4" />
+                {Medcamp.DrugBatches.check_available_quantity(@selected_drug.inventory_received_id)} units available
               </div>
-              <div class="bg-blue-50 p-3 rounded-md mb-4">
+              <div class="bg-blue-50 p-3 rounded-lg mb-4">
                 <p class="font-medium">{@selected_drug.brand_name}</p>
                 <p class="text-sm">{@selected_drug.generic_name}</p>
               </div>
@@ -225,6 +276,11 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
                   <option value="As needed">As needed</option>
                   <option value="Stat dose">Stat dose</option>
                 </select>
+                <%= if @drug_form[:frequency].errors != [] do %>
+                  <p class="mt-1 text-sm text-red-600">
+                    {error_message(@drug_form[:frequency].errors)}
+                  </p>
+                <% end %>
               </div>
 
               <div class="mb-4">
@@ -242,6 +298,11 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
                   value={@drug_form[:duration_in_days] && @drug_form[:duration_in_days].value}
                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
+                <%= if @drug_form[:duration_in_days].errors != [] do %>
+                  <p class="mt-1 text-sm text-red-600">
+                    {error_message(@drug_form[:duration_in_days].errors)}
+                  </p>
+                <% end %>
               </div>
               <div class="mb-4">
                 <label
@@ -271,6 +332,11 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
                   <option value="Transdermal">Transdermal</option>
                   <option value="Nasal">Nasal</option>
                 </select>
+                <%= if @drug_form[:route_of_administration].errors != [] do %>
+                  <p class="mt-1 text-sm text-red-600">
+                    {error_message(@drug_form[:route_of_administration].errors)}
+                  </p>
+                <% end %>
               </div>
               <div class="mb-4">
                 <label for="drug_form_quantity" class="block text-sm font-medium text-gray-700 mb-1">
@@ -312,26 +378,24 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
-              <p class="text-red-500">
-                Fill in all fields to add the drug to the prescription.
-              </p>
+              <p class="text-xs text-zinc-500">Complete the required fields to add this medicine.</p>
             <% end %>
 
-            <div class="flex justify-end space-x-2 mt-4">
+            <div class="flex flex-col-reverse gap-2 border-t border-zinc-100 pt-5 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 phx-click="close_drug_modal"
                 phx-target={@myself}
-                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-md text-gray-800"
+                class="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-200"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white"
+                class="rounded-lg bg-[#1D3557] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1D3557]/90 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={is_nil(@selected_drug)}
               >
-                Add Drug
+                Add medicine
               </button>
             </div>
           </.simple_form>
@@ -359,7 +423,10 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
      end)
      |> assign_new(:drug_form, fn ->
        to_form(
-         Medcamp.DrugAllocations.DrugAssigned.changeset(%Medcamp.DrugAllocations.DrugAssigned{}, %{})
+         Medcamp.DrugAllocations.DrugAssigned.changeset(
+           %Medcamp.DrugAllocations.DrugAssigned{},
+           %{}
+         )
        )
      end)}
   end
@@ -414,7 +481,10 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
      |> assign(:show_drug_modal, true)
      |> assign_new(:drug_form, fn ->
        to_form(
-         Medcamp.DrugAllocations.DrugAssigned.changeset(%Medcamp.DrugAllocations.DrugAssigned{}, %{})
+         Medcamp.DrugAllocations.DrugAssigned.changeset(
+           %Medcamp.DrugAllocations.DrugAssigned{},
+           %{}
+         )
        )
      end)}
   end
@@ -446,7 +516,10 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
       |> Map.put("inventory_received_id", socket.assigns.selected_drug.inventory_received_id)
 
     changeset =
-      Medcamp.DrugAllocations.DrugAssigned.changeset(%Medcamp.DrugAllocations.DrugAssigned{}, params)
+      Medcamp.DrugAllocations.DrugAssigned.changeset(
+        %Medcamp.DrugAllocations.DrugAssigned{},
+        params
+      )
 
     if changeset.valid? do
       # Get the drug data
@@ -491,7 +564,7 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
           {:noreply, assign(socket, :drug_form, to_form(changeset, action: :validate))}
       end
     else
-      {:noreply, socket}
+      {:noreply, assign(socket, :drug_form, to_form(changeset, action: :validate))}
     end
   end
 
@@ -520,7 +593,6 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
   end
 
   def handle_event("validate", %{"drug_allocation" => drug_allocation_params}, socket) do
-
     changeset =
       DrugAllocations.change_drug_allocation(
         socket.assigns.drug_allocation,
@@ -555,6 +627,7 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
       |> Map.put("doctor_note_id", socket.assigns.doctor_note.id)
       |> Map.put("drugs_assigned", drugs_assigned)
       |> Map.put("patient_id", socket.assigns.patient.id)
+      |> Map.put("has_been_assigned", false)
 
     case DrugAllocations.create_drug_allocation(drug_allocation_params) do
       {:ok, _drug_allocation} ->
@@ -564,7 +637,10 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
          |> push_navigate(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, form: to_form(changeset))}
+        {:noreply,
+         socket
+         |> assign(form: to_form(changeset, action: :validate))
+         |> put_flash(:error, "Please correct the highlighted fields before continuing")}
     end
   end
 

@@ -413,8 +413,8 @@ defmodule MedcampWeb.DrugAllocationComponents do
                   </span>
                 </div>
 
-                <div class="p-4">
-                  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="p-5 sm:p-6">
+                  <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
                       <p class="text-xs text-gray-500 uppercase font-semibold">Quantity</p>
                       <p class="font-medium text-gray-900">
@@ -436,31 +436,29 @@ defmodule MedcampWeb.DrugAllocationComponents do
                       <p class="text-xs text-gray-500 uppercase font-semibold">Price</p>
                       <p class="font-medium text-gray-900">KSh {drug_assigned.price}</p>
                     </div>
-                    <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-semibold">Quantity</p>
-                      <p class="font-medium text-gray-900">
-                        {drug_assigned.quantity} {drug_assigned.unit_of_measurement}
-                      </p>
-                    </div>
                   </div>
 
-                  <div class="grid mt-4 grid-cols-2 gap-8">
-                    <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-semibold">Doctor Note</p>
-                      <p class="font-medium text-gray-900">
+                  <div class="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                      <p class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                        Doctor note
+                      </p>
+                      <p class="mt-2 text-sm text-slate-800">
                         {drug_assigned.prescription_note || "None"}
                       </p>
                     </div>
 
-                    <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-semibold">Pharmacist Note</p>
-                      <p class="font-medium text-gray-900">
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                      <p class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                        Pharmacist note
+                      </p>
+                      <p class="mt-2 text-sm text-slate-800">
                         {drug_assigned.pharmacist_note || "None"}
                       </p>
                     </div>
                   </div>
 
-                  <div class="mt-4 flex justify-end space-x-2">
+                  <div class="mt-5 flex flex-wrap justify-end gap-2 border-t border-slate-200 pt-4">
                     <%= if !drug_assigned.has_been_given do %>
                       <.link
                         navigate={"/pharmacist/drug_allocations/#{@drug_allocation.id}/give_drug/#{drug_assigned.id}"}
@@ -514,8 +512,8 @@ defmodule MedcampWeb.DrugAllocationComponents do
 
   def drugs_given_to_patient_card(assigns) do
     ~H"""
-    <div>
-      <div class="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
+    <div class="space-y-5">
+      <div class="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -531,16 +529,19 @@ defmodule MedcampWeb.DrugAllocationComponents do
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
             />
           </svg>
-          <h2 class="text-lg font-semibold text-[#373896]">
-            Drugs To be Given to Patient
-          </h2>
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Dispensing summary</h2>
+            <p class="mt-1 text-sm text-slate-500">
+              Review the prescription and issue the allocated medicines.
+            </p>
+          </div>
         </div>
 
         <.link
           :if={!@drug_allocation.has_been_assigned}
           navigate={"/pharmacist/drug_allocations/#{@drug_allocation.id}/confirm"}
         >
-          <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+          <.button class="bg-[#373896] px-4 py-2.5 shadow-sm hover:bg-[#2d2f7d]">
             <div class="flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -556,28 +557,28 @@ defmodule MedcampWeb.DrugAllocationComponents do
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              Confirm And Prompt Patient
+              Confirm and dispense
             </div>
           </.button>
         </.link>
       </div>
       <div class="space-y-4">
         <%= for item <- @complete_drugs_info do %>
-          <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-            <div class="px-4 py-5 sm:px-6 bg-blue-50">
+          <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50 px-5 py-5 sm:px-6">
               <div class="flex justify-between items-center">
-                <h3 class="text-lg font-medium text-blue-800">
+                <h3 class="text-lg font-bold text-[#373896]">
                   {item.complete_info.brand_name}
                   <span class="text-sm text-blue-600">({item.complete_info.generic_name})</span>
                 </h3>
-                <span class="px-2 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
+                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
                   {item.complete_info.route_of_administration}
                 </span>
               </div>
             </div>
 
-            <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
-              <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+            <div class="px-5 py-5 sm:p-6">
+              <dl class="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div>
                   <dt class="text-sm font-medium text-gray-500">Quantity</dt>
                   <dd class="mt-1 text-sm text-gray-900">
@@ -653,8 +654,6 @@ defmodule MedcampWeb.DrugAllocationComponents do
                       </svg>
                       Print
                     </.link>
-                    {item.drug_given.id}
-
                     <button
                       phx-click="undo_drug_given"
                       data-confirm="Are you sure you want to undo this drug given?"
@@ -682,8 +681,10 @@ defmodule MedcampWeb.DrugAllocationComponents do
               </div>
             </div>
 
-            <div class="bg-gray-50 px-4 py-4 sm:px-6">
-              <h4 class="text-sm font-medium text-gray-500 mb-2">Batch Allocations</h4>
+            <div class="border-t border-slate-100 bg-slate-50 px-5 py-5 sm:px-6">
+              <h4 class="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">
+                Batch allocations
+              </h4>
               <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                   <thead class="bg-gray-100">

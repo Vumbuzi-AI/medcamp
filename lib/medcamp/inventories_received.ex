@@ -22,18 +22,16 @@ defmodule Medcamp.InventoriesReceived do
   def list_inventories_received do
     from(ir in InventoryReceived, order_by: [desc: ir.inserted_at])
     |> Repo.all()
-    |> Repo.preload(:room)
   end
 
   @doc """
-  Returns filtered inventories_received by item (brand/generic/gtin), category, supplier, type, and room.
+  Returns filtered inventories_received by item (brand/generic/gtin), category, supplier, and type.
 
   Filters:
   - :item_search - search in brand_name, generic_name, or gtin
   - :category - partial match on category
   - :supplier - partial match on supplier
   - :type - partial match on type
-  - :room_id - exact match on room_id
   - :expiry_status - keeps items with at least one batch expiring in that
     window (see `Medcamp.ExpiryFilter`)
   """
@@ -41,7 +39,6 @@ defmodule Medcamp.InventoriesReceived do
     filters
     |> build_inventories_received_query()
     |> Repo.all()
-    |> Repo.preload(:room)
   end
 
   @doc """
@@ -56,7 +53,6 @@ defmodule Medcamp.InventoriesReceived do
     |> limit(^per_page)
     |> offset(^offset)
     |> Repo.all()
-    |> Repo.preload(:room)
   end
 
   @doc """
@@ -98,7 +94,6 @@ defmodule Medcamp.InventoriesReceived do
     base =
       from ir in InventoryReceived,
         as: :inventory_received,
-        left_join: r in assoc(ir, :room),
         order_by: [desc: ir.inserted_at]
 
     base
@@ -106,7 +101,6 @@ defmodule Medcamp.InventoriesReceived do
     |> apply_category_filter(filters["category"] || filters[:category])
     |> apply_supplier_filter(filters["supplier"] || filters[:supplier])
     |> apply_type_filter(filters["type"] || filters[:type])
-    |> apply_room_filter(filters["room_id"] || filters[:room_id])
     |> apply_expiry_filter(filters)
   end
 
@@ -137,7 +131,7 @@ defmodule Medcamp.InventoriesReceived do
           |> maybe_batch_expiry_from(from_date)
           |> maybe_batch_expiry_to(to_date)
 
-        from [_ir, _r] in query, where: exists(batches)
+        from [_ir] in query, where: exists(batches)
     end
   end
 
@@ -156,7 +150,7 @@ defmodule Medcamp.InventoriesReceived do
   end
 
   defp apply_item_search_filter_term(query, pattern) do
-    from [ir, r] in query,
+    from [ir] in query,
       where:
         ilike(ir.brand_name, ^pattern) or
           ilike(ir.generic_name, ^pattern) or
@@ -169,7 +163,7 @@ defmodule Medcamp.InventoriesReceived do
 
   defp apply_category_filter(query, category) do
     pattern = "%#{String.trim(category)}%"
-    from [ir, r] in query, where: ilike(ir.category, ^pattern)
+    from [ir] in query, where: ilike(ir.category, ^pattern)
   end
 
   defp apply_supplier_filter(query, nil), do: query
@@ -177,7 +171,7 @@ defmodule Medcamp.InventoriesReceived do
 
   defp apply_supplier_filter(query, supplier) do
     pattern = "%#{String.trim(supplier)}%"
-    from [ir, r] in query, where: ilike(ir.supplier, ^pattern)
+    from [ir] in query, where: ilike(ir.supplier, ^pattern)
   end
 
   defp apply_type_filter(query, nil), do: query
@@ -185,24 +179,8 @@ defmodule Medcamp.InventoriesReceived do
 
   defp apply_type_filter(query, type) do
     pattern = "%#{String.trim(type)}%"
-    from [ir, r] in query, where: ilike(ir.type, ^pattern)
+    from [ir] in query, where: ilike(ir.type, ^pattern)
   end
-
-  defp apply_room_filter(query, nil), do: query
-  defp apply_room_filter(query, ""), do: query
-
-  defp apply_room_filter(query, room_id) when is_binary(room_id) do
-    case Integer.parse(room_id) do
-      {id, _} -> from [ir, r] in query, where: ir.room_id == ^id
-      _ -> query
-    end
-  end
-
-  defp apply_room_filter(query, room_id) when is_integer(room_id) do
-    from [ir, r] in query, where: ir.room_id == ^room_id
-  end
-
-  defp apply_room_filter(query, _), do: query
 
   def list_inventories_received_for_select do
     Repo.all(
@@ -226,7 +204,6 @@ defmodule Medcamp.InventoriesReceived do
     |> or_where([ir], ilike(ir.supplier, ^"%#{query}%"))
     |> or_where([ir], ilike(ir.description, ^"%#{query}%"))
     |> Repo.all()
-    |> Repo.preload(:room)
   end
 
   @doc """
@@ -244,9 +221,7 @@ defmodule Medcamp.InventoriesReceived do
 
   """
   def get_inventory_received!(id),
-    do:
-      Repo.get!(InventoryReceived, id)
-      |> Repo.preload(:room)
+    do: Repo.get!(InventoryReceived, id)
 
   @doc """
   Creates a inventory_received.

@@ -444,6 +444,7 @@ defmodule MedcampWeb.SidebarCatalog do
       }
     ]
   end
+
   defp admin_tab_groups do
     [
       %{
@@ -546,6 +547,7 @@ defmodule MedcampWeb.SidebarCatalog do
       }
     ]
   end
+
   defp nurse_tab_groups do
     [
       %{
@@ -566,6 +568,7 @@ defmodule MedcampWeb.SidebarCatalog do
       }
     ]
   end
+
   defp pharmacist_tab_groups do
     [
       %{
@@ -580,12 +583,6 @@ defmodule MedcampWeb.SidebarCatalog do
             tab_name: :scan
           },
           %{name: "Drugs", icon: "folder-plus", url: "/pharmacist/drugs", tab_name: :drugs},
-          %{
-            name: "Drug Batches",
-            icon: "clock",
-            url: "/pharmacist/pending_drug_batches",
-            tab_name: :pending_drug_batches
-          },
           %{
             name: "Drug Allocations",
             icon: "clock",
@@ -609,6 +606,7 @@ defmodule MedcampWeb.SidebarCatalog do
       }
     ]
   end
+
   defp lab_tab_groups do
     [
       %{
@@ -635,6 +633,7 @@ defmodule MedcampWeb.SidebarCatalog do
       }
     ]
   end
+
   defp nurse_patient_tabs(patient) do
     [
       %{
@@ -669,6 +668,7 @@ defmodule MedcampWeb.SidebarCatalog do
       }
     ]
   end
+
   defp pharmacist_patient_tabs(patient) do
     [
       %{
@@ -685,6 +685,7 @@ defmodule MedcampWeb.SidebarCatalog do
       }
     ]
   end
+
   defp lab_patient_tabs(patient) do
     [
       %{

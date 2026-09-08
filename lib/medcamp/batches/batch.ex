@@ -13,6 +13,7 @@ defmodule Medcamp.Batches.Batch do
     field :received_date, :date, default: Date.utc_today()
     field :remaining_quantity, :integer
     field :quantity, :integer
+    field :price_per_unit, :integer, default: 0
     belongs_to :inventory_received, Medcamp.InventoriesReceived.InventoryReceived
     field :inventory_manager_id, :id
     field :manufacture_date, :date
@@ -34,6 +35,7 @@ defmodule Medcamp.Batches.Batch do
       :weight,
       :quantity,
       :remaining_quantity,
+      :price_per_unit,
       :manufacture_date,
       :inventory_received_id,
       :inventory_manager_id

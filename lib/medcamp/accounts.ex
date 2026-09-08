@@ -54,12 +54,8 @@ defmodule Medcamp.Accounts do
   """
   def list_housekeeping_staff do
     User
-    |> join(:left, [u], department in assoc(u, :department))
     |> where([u], u.is_active == true)
-    |> where(
-      [u, department],
-      u.role in ["housekeeping", "cleaner", "staff"] or department.name == "Housekeeping"
-    )
+    |> where([u], u.role in ["housekeeping", "cleaner", "staff"])
     |> order_by([u], asc: u.name)
     |> Repo.all()
   end
@@ -172,8 +168,6 @@ defmodule Medcamp.Accounts do
     |> apply_active_filter(filters[:is_active])
     |> apply_search_filter(filters[:search])
     |> apply_role_filter(filters[:role])
-    |> apply_department_filter(filters[:department_id])
-    |> preload([:department])
   end
 
   defp users_count_query(filters) do
@@ -181,7 +175,6 @@ defmodule Medcamp.Accounts do
     |> apply_active_filter(filters[:is_active])
     |> apply_search_filter(filters[:search])
     |> apply_role_filter(filters[:role])
-    |> apply_department_filter(filters[:department_id])
   end
 
   defp users_base_query do
@@ -219,22 +212,6 @@ defmodule Medcamp.Accounts do
   end
 
   defp apply_role_filter(query, _), do: query
-
-  defp apply_department_filter(query, nil), do: query
-  defp apply_department_filter(query, ""), do: query
-
-  defp apply_department_filter(query, department_id) when is_integer(department_id) do
-    where(query, [u], u.department_id == ^department_id)
-  end
-
-  defp apply_department_filter(query, department_id) when is_binary(department_id) do
-    case Integer.parse(department_id) do
-      {id, _} -> where(query, [u], u.department_id == ^id)
-      :error -> query
-    end
-  end
-
-  defp apply_department_filter(query, _), do: query
 
   def get_user_by_gsrn(gsrn) when is_binary(gsrn) do
     Repo.all(from u in User, where: u.gsrn == ^gsrn)
@@ -342,7 +319,7 @@ defmodule Medcamp.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id) |> Repo.preload(:department)
+  def get_user!(id), do: Repo.get!(User, id)
 
   ## User registration
 

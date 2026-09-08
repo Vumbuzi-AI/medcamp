@@ -189,6 +189,12 @@ defmodule Medcamp.ConsumptionAnalysis do
     end)
   end
 
+  # Non-pharmaceutical consumption tracked inventory issued to departments,
+  # which went with the deleted stores chain. Kept as a defined function
+  # (rather than removed) so the "both"/"non_pharmaceuticals" category
+  # options in the UI degrade to an empty result instead of crashing.
+  defp non_pharmaceuticals_consumption(_date_range, _search), do: []
+
   defp average_unit_price(nil, _quantity), do: nil
   defp average_unit_price(_amount, nil), do: nil
   defp average_unit_price(_amount, 0), do: nil

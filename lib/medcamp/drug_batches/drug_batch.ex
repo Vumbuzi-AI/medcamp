@@ -6,7 +6,8 @@ defmodule Medcamp.DrugBatches.DrugBatch do
     field :remaining_quantity, :integer
     belongs_to :drug, Medcamp.Drugs.Drug
     belongs_to :batch, Medcamp.Batches.Batch
-    field :is_confirmed, :boolean, default: false
+    # Kept for backwards-compatible data, but batches are confirmed on intake.
+    field :is_confirmed, :boolean, default: true
     field :is_active, :boolean, default: true
     belongs_to :confirmed_by_user, Medcamp.Accounts.User, foreign_key: :confirmed_by
     belongs_to :inventory_received, Medcamp.InventoriesReceived.InventoryReceived

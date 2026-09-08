@@ -122,7 +122,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteShow do
   defp valid_tab(nil), do: "overview"
 
   defp valid_tab(tab)
-       when tab in ~w(overview ai_review lab_work medication),
+       when tab in ~w(overview medication lab_work),
        do: tab
 
   defp valid_tab(_), do: "overview"
@@ -428,14 +428,13 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteShow do
         current_tab={@current_tab}
         tabs={[
           %{id: "overview", label: "Overview", icon_name: "document-text"},
-          %{id: "lab_work", label: "Lab Work", icon_name: "beaker"},
-          %{id: "ai_review", label: "AI Review", icon_name: "sparkles"},
           %{
             id: "medication",
             label: "Medication",
             icon_markup: "<i class=\"fa fa-diamond\" aria-hidden=\"true\"></i>",
             icon_name: nil
-          }
+          },
+          %{id: "lab_work", label: "Lab Work", icon_name: "beaker"}
         ]}
       />
 

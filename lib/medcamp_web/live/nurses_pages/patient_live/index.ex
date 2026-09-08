@@ -300,7 +300,15 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
           icon_path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
           title="Patients"
           subtitle="Search, filter and manage registered patients."
-        />
+        >
+          <:actions>
+            <.link patch={~p"/nurse/patients/new"}>
+              <.button class="inline-flex items-center gap-2 bg-[#373896] hover:bg-[#2f317f]">
+                <.icon name="hero-user-plus" class="h-4 w-4" /> Add Patient
+              </.button>
+            </.link>
+          </:actions>
+        </.page_header>
 
         <div class="flex flex-wrap items-center gap-3">
           <form phx-change="filter" class="flex-1">

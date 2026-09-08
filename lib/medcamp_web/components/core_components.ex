@@ -114,7 +114,7 @@ defmodule MedcampWeb.CoreComponents do
     >
       <div
         id={"#{@id}-bg"}
-        class="bg-zinc-50/90 fixed inset-0 transition-opacity print:hidden"
+        class="bg-zinc-950/40 fixed inset-0 transition-opacity print:hidden"
         aria-hidden="true"
       />
       <div
@@ -132,7 +132,7 @@ defmodule MedcampWeb.CoreComponents do
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
               phx-key="escape"
               phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
-              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-2xl bg-white p-14 shadow-lg ring-1 transition print:rounded-none print:p-0 print:shadow-none print:ring-0"
+              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl bg-white p-6 shadow-lg ring-1 transition sm:p-8 print:rounded-none print:p-0 print:shadow-none print:ring-0"
             >
               <div class="absolute top-6 right-5 print:hidden">
                 <button

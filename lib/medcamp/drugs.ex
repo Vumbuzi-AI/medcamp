@@ -18,10 +18,7 @@ defmodule Medcamp.Drugs do
                         )
 
   @available_batches_query from(db in DrugBatch,
-                             where:
-                               db.is_active != false and
-                                 db.is_confirmed == true and
-                                 db.remaining_quantity > 0,
+                             where: db.is_active != false and db.remaining_quantity > 0,
                              order_by: [desc: db.inserted_at]
                            )
 
@@ -60,7 +57,7 @@ defmodule Medcamp.Drugs do
       left_join: ir in assoc(d, :inventory_received),
       join: db in DrugBatch,
       on:
-        db.drug_id == d.id and db.is_confirmed == true and db.is_active != false and
+        db.drug_id == d.id and db.is_active != false and
           db.remaining_quantity > 0,
       where:
         ilike(d.generic_name, ^"%#{query}%") or
@@ -124,7 +121,7 @@ defmodule Medcamp.Drugs do
       join: ir in assoc(d, :inventory_received),
       join: db in DrugBatch,
       on:
-        db.drug_id == d.id and db.is_confirmed == true and db.is_active != false and
+        db.drug_id == d.id and db.is_active != false and
           db.remaining_quantity > 0,
       where: ilike(ir.category, ^"%#{category}%"),
       distinct: true

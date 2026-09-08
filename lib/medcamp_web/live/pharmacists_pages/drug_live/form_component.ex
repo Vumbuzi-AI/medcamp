@@ -41,13 +41,6 @@ defmodule MedcampWeb.PharmacistsLive.DrugFormComponent do
         <.input field={@form[:brand_name]} type="text" label="Brand name" />
         <.input field={@form[:strength]} type="text" label="Strength" />
         <.input field={@form[:uom]} type="text" label="Unit of measure" />
-        <.input field={@form[:is_otc]} type="checkbox" label="Over the counter?" />
-        <.input
-          field={@form[:is_dangerous_drug]}
-          type="checkbox"
-          label="Controlled / dangerous drug?"
-        />
-
         <p :if={@error} class="text-red-500 text-sm">{@error}</p>
 
         <:actions>
@@ -77,9 +70,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugFormComponent do
       "generic_name" => drug.generic_name,
       "brand_name" => drug.brand_name,
       "strength" => item && item.strength,
-      "uom" => item && item.uom,
-      "is_otc" => drug.is_otc,
-      "is_dangerous_drug" => drug.is_dangerous_drug
+      "uom" => item && item.uom
     }
   end
 
@@ -99,8 +90,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugFormComponent do
   end
 
   defp save_drug(socket, :edit, drug_params) do
-    attrs =
-      Map.take(drug_params, ["generic_name", "brand_name", "is_otc", "is_dangerous_drug"])
+    attrs = Map.take(drug_params, ["generic_name", "brand_name"])
 
     case Drugs.update_drug(socket.assigns.drug, attrs) do
       {:ok, _drug} ->
