@@ -62,7 +62,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormComponent do
               name="lab_test_template[field_definitions_json]"
               rows="20"
               phx-debounce="500"
-              class="mt-2 block w-full rounded-lg border-gray-300 focus:border-[#6667ab] focus:ring-[#6667ab] text-sm font-mono"
+              class="mt-2 block w-full rounded-lg border-gray-300 focus:border-brand-accent focus:ring-brand-accent text-sm font-mono"
             >{@field_definitions_json}</textarea>
           </div>
 
@@ -93,7 +93,10 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormComponent do
         </div>
 
         <:actions>
-          <.button phx-disable-with="Saving..." class="w-full bg-[#6667ab] hover:bg-[#5556a0]">
+          <.button
+            phx-disable-with="Saving..."
+            class="w-full bg-brand-accent hover:bg-brand-accent-dark"
+          >
             Save Template
           </.button>
         </:actions>

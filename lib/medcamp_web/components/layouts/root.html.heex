@@ -8,15 +8,20 @@
       name="user-authenticated"
       content={if assigns[:current_user], do: "true", else: "false"}
     />
-    <.live_title default="GHC Excellence" suffix=" · GS1 Kenya">
+    <.live_title default={organisation_name(assigns)} suffix=" · GS1 Kenya">
       {assigns[:page_title]}
     </.live_title>
-    <meta name="title" content="GHC Excellence" />
+    <meta name="title" content={organisation_name(assigns)} />
     <meta name="robots" content="index, follow" />
-    <meta name="twitter:image" content="/images/logo.png" />
-    <meta property="og:image" content="/images/logo.png" />
-    <link rel="icon" type="image/svg+xml" href="/images/logo.png" />
+    <meta name="twitter:image" content={organisation_logo(assigns)} />
+    <meta property="og:image" content={organisation_logo(assigns)} />
+    <link rel="icon" type="image/svg+xml" href={organisation_logo(assigns)} />
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <%!-- The current organisation's palette. Overrides the --brand-* defaults
+          in app.css, which is what every brand-* Tailwind class reads. --%>
+    <style>
+      :root { <%= Phoenix.HTML.raw(Medcamp.Organisations.brand_css(assigns[:current_organisation])) %> }
+    </style>
     {Phoenix.HTML.raw(assigns[:head_html] || "")}
 
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>

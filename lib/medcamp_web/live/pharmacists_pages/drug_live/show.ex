@@ -16,6 +16,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
      |> assign(:drug, drug)
      |> assign(:editing_batch, nil)
      |> assign(:editing_drug, false)
+     |> assign(:printing_batch, nil)
      |> assign(:error_message, nil)
      |> assign(:batch_tab, :active)
      |> assign(:drug_tab, :batches)
@@ -45,7 +46,6 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
     socket
     |> assign(:page_title, "Listing Drug batches")
     |> assign(:drug_batch, nil)
-    |> assign(:requisition_prefill, nil)
     |> assign_drug_tab_from_params(params)
     |> assign_batch_tab_from_params(params)
     |> assign_prescriptions_status_from_params(params)
@@ -56,32 +56,39 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
     |> maybe_load_drugs_given()
   end
 
-  defp apply_action(socket, :requisition, params) do
-    ir_id =
-      case params["inventory_received_id"] do
-        "" ->
-          nil
+  defp apply_action(socket, :new_batch, _params) do
+    socket
+    |> assign(:page_title, "Add Drug Batch")
+    |> assign(:drug_batch, nil)
+    |> assign(:printing_batch, nil)
+  end
 
-        nil ->
-          nil
-
-        id when is_binary(id) ->
-          case Integer.parse(id) do
-            {n, _} -> n
-            _ -> nil
-          end
-
-        _ ->
-          nil
-      end
+  defp apply_action(socket, :print_batch, %{"batch_id" => batch_id}) do
+    drug_batch = drug_batch_for_drug!(socket.assigns.drug.id, batch_id)
 
     socket
-    |> assign(:page_title, "Listing Drug batches")
-    |> assign(:requisition_prefill, %{
-      inventory_received_id: ir_id,
-      item_title: params["item_title"] || "Requisition",
-      item_description: params["item_description"] || ""
-    })
+    |> assign(:page_title, "Print Batch DataMatrix")
+    |> assign(:drug_batch, drug_batch)
+    |> assign(:printing_batch, drug_batch)
+  end
+
+  defp apply_action(socket, :edit_batch, %{"batch_id" => batch_id}) do
+    drug_batch = drug_batch_for_drug!(socket.assigns.drug.id, batch_id)
+
+    socket
+    |> assign(:page_title, "Edit Drug Batch")
+    |> assign(:drug_batch, drug_batch)
+    |> assign(:printing_batch, nil)
+  end
+
+  defp drug_batch_for_drug!(drug_id, batch_id) do
+    drug_batch = DrugBatches.get_drug_batch!(batch_id)
+
+    if drug_batch.drug_id == drug_id do
+      drug_batch
+    else
+      raise Ecto.NoResultsError, queryable: Medcamp.DrugBatches.DrugBatch
+    end
   end
 
   defp assign_drug_tab_from_params(socket, params) do
@@ -125,7 +132,11 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
   end
 
   defp assign_drugs_given_page_from_params(socket, params) do
-    assign(socket, :drugs_given_page, Medcamp.Pagination.normalize_page(params["drugs_given_page"]))
+    assign(
+      socket,
+      :drugs_given_page,
+      Medcamp.Pagination.normalize_page(params["drugs_given_page"])
+    )
   end
 
   # Only the currently active tab's data is (re)fetched on every param change
@@ -283,18 +294,6 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
   end
 
   @impl true
-  def handle_event("open_requisition_modal", params, socket) do
-    path =
-      "/pharmacist/drugs/#{socket.assigns.drug.id}/requisition?" <>
-        URI.encode_query(%{
-          "inventory_received_id" => params["inventory_received_id"] || "",
-          "item_title" => params["item_title"] || "Requisition",
-          "item_description" => params["item_description"] || ""
-        })
-
-    {:noreply, push_patch(socket, to: path)}
-  end
-
   def handle_event("open_edit_drug_modal", _params, socket) do
     {:noreply, assign(socket, :editing_drug, true)}
   end
@@ -413,49 +412,8 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
     {:noreply, push_patch(socket, to: path)}
   end
 
-  def handle_event("toggle_otc", _params, socket) do
-    drug = socket.assigns.drug
-    new_value = !drug.is_otc
-
-    case Drugs.update_drug(drug, %{is_otc: new_value}) do
-      {:ok, updated_drug} ->
-        flash_msg = if new_value, do: "Drug marked as OTC", else: "Drug marked as non-OTC"
-
-        {:noreply,
-         socket
-         |> assign(:drug, updated_drug)
-         |> put_flash(:info, flash_msg)}
-
-      {:error, _changeset} ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "Failed to update OTC status")}
-    end
-  end
-
-  def handle_event("toggle_dangerous_drug", _params, socket) do
-    drug = socket.assigns.drug
-    new_value = !drug.is_dangerous_drug
-
-    case Drugs.update_drug(drug, %{is_dangerous_drug: new_value}) do
-      {:ok, updated_drug} ->
-        flash_msg =
-          if new_value do
-            "Drug added to the dangerous drug register"
-          else
-            "Drug removed from the dangerous drug register"
-          end
-
-        {:noreply,
-         socket
-         |> assign(:drug, updated_drug)
-         |> put_flash(:info, flash_msg)}
-
-      {:error, _changeset} ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "Failed to update dangerous drug register status")}
-    end
+  def handle_event("print_batch_label", %{"id" => id}, socket) do
+    {:noreply, push_event(socket, "printDiv", %{id: id})}
   end
 
   @impl true
@@ -496,7 +454,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           <div class="min-w-0 flex-1">
             <.link
               navigate="/pharmacist/drugs"
-              class="inline-flex items-center gap-2 text-sm font-medium text-[#373896] transition hover:text-[#6667ab]"
+              class="inline-flex items-center gap-2 text-sm font-medium text-brand-primary transition hover:text-brand-accent"
             >
               <Heroicons.icon name="arrow-left" type="outline" class="h-5 w-5" />
               <span>Back to drugs</span>
@@ -506,61 +464,29 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
                 Drug inventory
               </p>
-              <h1 class="mt-2 text-2xl font-semibold leading-tight text-[#373896]">
+              <h1 class="mt-2 text-2xl font-semibold leading-tight text-brand-primary">
                 {Drugs.display_name(@drug)}
               </h1>
               <p class="mt-2 text-sm text-slate-500">
                 Review batches, stock position, and allocation activity for this drug.
               </p>
             </div>
-
-            <div class="mt-4 flex flex-wrap gap-2">
-              <span class={[
-                "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold",
-                if(@drug.is_otc,
-                  do: "bg-green-100 text-green-800",
-                  else: "bg-slate-100 text-slate-600"
-                )
-              ]}>
-                {if @drug.is_otc, do: "OTC", else: "Non-OTC"}
-              </span>
-              <span class={[
-                "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold",
-                if(@drug.is_dangerous_drug,
-                  do: "bg-orange-100 text-orange-800",
-                  else: "bg-slate-100 text-slate-600"
-                )
-              ]}>
-                {if @drug.is_dangerous_drug, do: "In DDA", else: "Not in DDA"}
-              </span>
-            </div>
           </div>
 
           <div class="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap xl:w-auto xl:max-w-2xl xl:justify-end">
             <.button
               phx-click="open_edit_drug_modal"
-              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 bg-[#373896] px-5 text-sm shadow-sm hover:bg-[#2f317f]"
+              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 bg-brand-primary px-5 text-sm shadow-sm hover:bg-[#2f317f]"
             >
               <.icon name="hero-pencil-square" class="h-4 w-4" /> Edit Drug
             </.button>
 
-            <.button
-              type="button"
-              phx-click="open_requisition_modal"
-              phx-value-inventory_received_id={@drug.inventory_received_id}
-              phx-value-item_title={"#{@drug.generic_name || @drug.inventory_received.generic_name}"}
-              phx-value-item_description={
-                @drug.brand_name || @drug.inventory_received.brand_name || ""
-              }
-              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 bg-[#23395d] px-5 text-sm shadow-sm hover:bg-[#1b2f4d]"
+            <.link
+              patch={~p"/pharmacist/drugs/#{@drug.id}/new_batch"}
+              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-lg bg-brand-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2f317f]"
             >
-              <.icon name="hero-document-plus" class="h-4 w-4" /> Make requisition
-            </.button>
-
-            <button type="button" phx-click="toggle_dangerous_drug" class={dda_button_class(@drug)}>
-              <.icon name="hero-clipboard-document-list" class="h-4 w-4" />
-              {if @drug.is_dangerous_drug, do: "Remove from DDA", else: "Add to DDA"}
-            </button>
+              <.icon name="hero-plus" class="h-4 w-4" /> Add Batch
+            </.link>
           </div>
         </div>
       </div>
@@ -572,7 +498,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "inline-flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium -mb-px transition-colors",
               if(@drug_tab == :batches,
-                do: "border-[#373896] text-[#373896]",
+                do: "border-brand-primary text-brand-primary",
                 else: "border-transparent text-gray-500 hover:text-gray-700"
               )
             ]}
@@ -584,7 +510,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "inline-flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium -mb-px transition-colors",
               if(@drug_tab == :allocations,
-                do: "border-[#373896] text-[#373896]",
+                do: "border-brand-primary text-brand-primary",
                 else: "border-transparent text-gray-500 hover:text-gray-700"
               )
             ]}
@@ -596,7 +522,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "inline-flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium -mb-px transition-colors",
               if(@drug_tab == :prescriptions,
-                do: "border-[#373896] text-[#373896]",
+                do: "border-brand-primary text-brand-primary",
                 else: "border-transparent text-gray-500 hover:text-gray-700"
               )
             ]}
@@ -623,7 +549,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@batch_tab == :active,
-                do: "bg-[#373896] text-white",
+                do: "bg-brand-primary text-white",
                 else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )
             ]}
@@ -636,7 +562,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@batch_tab == :discarded,
-                do: "bg-[#373896] text-white",
+                do: "bg-brand-primary text-white",
                 else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )
             ]}
@@ -670,9 +596,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
         </div>
 
         <div class="overflow-hidden">
-          <.table id="drug_batches" rows={@drug_batches}
-            row_id={&"drug_batches-#{&1.id}"}
-          >
+          <.table id="drug_batches" rows={@drug_batches} row_id={&"drug_batches-#{&1.id}"}>
             <:col :let={drug_batch} label="Brand Name">
               <div class="py-3">
                 <span class="font-medium text-gray-900">
@@ -689,23 +613,9 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
 
             <:col :let={drug_batch} label="Batch">
               <div class="py-3">
-                <span class="px-2 py-1 rounded-full bg-[#e7e7ff] text-[#373896] text-sm font-medium">
+                <span class="px-2 py-1 rounded-full bg-brand-100 text-brand-primary text-sm font-medium">
                   {if drug_batch.batch, do: drug_batch.batch.batch, else: "—"}
                 </span>
-              </div>
-            </:col>
-
-            <:col :let={drug_batch} label="Status">
-              <div class="py-3">
-                <%= if drug_batch.is_confirmed do %>
-                  <span class="px-2 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
-                    Confirmed
-                  </span>
-                <% else %>
-                  <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-medium">
-                    Pending
-                  </span>
-                <% end %>
               </div>
             </:col>
 
@@ -751,6 +661,20 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
 
             <:col :let={drug_batch} label="Actions">
               <div class="py-3 flex flex-wrap items-center gap-2">
+                <.link
+                  :if={@batch_tab == :active}
+                  patch={~p"/pharmacist/drugs/#{@drug.id}/batches/#{drug_batch.id}/edit"}
+                  class="inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  <.icon name="hero-pencil-square" class="h-4 w-4" /> Edit
+                </.link>
+                <.link
+                  :if={drug_batch.batch}
+                  patch={~p"/pharmacist/drugs/#{@drug.id}/batches/#{drug_batch.id}/print"}
+                  class="inline-flex items-center gap-1 rounded-md border border-brand-primary px-3 py-2 text-sm font-medium text-brand-primary hover:bg-brand-50"
+                >
+                  <.icon name="hero-printer" class="h-4 w-4" /> Print DataMatrix
+                </.link>
                 <%= if @batch_tab == :active do %>
                   <.button
                     type="button"
@@ -778,6 +702,110 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
         </div>
       <% end %>
 
+      <.modal
+        :if={@live_action == :new_batch}
+        id="drug-batch-modal"
+        show
+        on_cancel={JS.patch(~p"/pharmacist/drugs/#{@drug.id}")}
+      >
+        <.live_component
+          module={MedcampWeb.PharmacistsLive.DrugBatchFormComponent}
+          id={:new_drug_batch_for_drug}
+          title={@page_title}
+          action={@live_action}
+          drug={@drug}
+          current_user={@current_user}
+          patch={~p"/pharmacist/drugs/#{@drug.id}"}
+        />
+      </.modal>
+
+      <.modal
+        :if={@live_action == :edit_batch && @drug_batch}
+        id="edit-drug-batch-modal"
+        show
+        on_cancel={JS.patch(~p"/pharmacist/drugs/#{@drug.id}")}
+      >
+        <.live_component
+          module={MedcampWeb.PharmacistsLive.DrugBatchFormComponent}
+          id={"edit-drug-batch-#{@drug_batch.id}"}
+          title={@page_title}
+          action={@live_action}
+          drug={@drug}
+          drug_batch={@drug_batch}
+          current_user={@current_user}
+          patch={~p"/pharmacist/drugs/#{@drug.id}"}
+        />
+      </.modal>
+
+      <.modal
+        :if={@live_action == :print_batch && @printing_batch}
+        id="batch-datamatrix-modal"
+        show
+        on_cancel={JS.patch(~p"/pharmacist/drugs/#{@drug.id}")}
+      >
+        <div class="space-y-6">
+          <div>
+            <h2 class="text-xl font-semibold text-slate-900">Print Batch DataMatrix</h2>
+            <p class="mt-1 text-sm text-slate-500">
+              Scan this label to identify the batch.
+            </p>
+          </div>
+
+          <div
+            id={"batch-label-#{@printing_batch.id}"}
+            class="mx-auto w-[340px] border border-slate-300 bg-white p-4 text-black"
+          >
+            <p class="mb-3 border-b-2 border-black pb-2 text-sm font-bold">
+              {Drugs.display_name(@drug)}
+            </p>
+            <div class="flex items-start gap-4">
+              <div class="shrink-0">
+                <div class="mb-1 text-[10px]">GS1®</div>
+                <svg
+                  id={"batch-datamatrix-#{@printing_batch.id}"}
+                  data-value={batch_datamatrix_payload(@printing_batch)}
+                  phx-hook="datamatrix"
+                  phx-update="ignore"
+                  class="datamatrix h-[90px] w-[90px]"
+                >
+                </svg>
+              </div>
+              <div class="min-w-0 space-y-1 font-mono text-[11px] leading-tight">
+                <p><span class="font-sans font-semibold">(01)</span> {batch_gtin(@printing_batch)}</p>
+                <p><span class="font-sans font-semibold">(10)</span> {@printing_batch.batch.batch}</p>
+                <p>
+                  <span class="font-sans font-semibold">(11)</span>
+                  {human_readable_gs1_date(@printing_batch.batch.manufacture_date)}
+                </p>
+                <p>
+                  <span class="font-sans font-semibold">(17)</span>
+                  {human_readable_gs1_date(@printing_batch.batch.expiry)}
+                </p>
+                <p :if={@printing_batch.batch.serial}>
+                  <span class="font-sans font-semibold">(21)</span> {@printing_batch.batch.serial}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <.link
+              patch={~p"/pharmacist/drugs/#{@drug.id}"}
+              class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700"
+            >
+              Close
+            </.link>
+            <.button
+              type="button"
+              phx-click="print_batch_label"
+              phx-value-id={"batch-label-#{@printing_batch.id}"}
+            >
+              <.icon name="hero-printer" class="h-4 w-4" /> Print
+            </.button>
+          </div>
+        </div>
+      </.modal>
+
       <%!-- Drugs Given panel --%>
       <%= if @drug_tab == :allocations do %>
         <.blank_state
@@ -787,7 +815,10 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           description="This drug has not been dispensed to any patient yet."
         />
 
-        <.table :if={@drugs_given_count > 0} id="drugs_given" rows={@drugs_given}
+        <.table
+          :if={@drugs_given_count > 0}
+          id="drugs_given"
+          rows={@drugs_given}
           row_id={&"drugs_given-#{&1.id}"}
         >
           <:col :let={dg} label="Patient">
@@ -810,7 +841,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
 
           <:col :let={dg} label="Qty Given">
             <div class="py-2">
-              <span class="text-sm font-semibold text-[#373896]">&times;{dg.quantity}</span>
+              <span class="text-sm font-semibold text-brand-primary">&times;{dg.quantity}</span>
             </div>
           </:col>
 
@@ -823,7 +854,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           <:col :let={dg} label="Batches">
             <div class="py-2 flex flex-wrap gap-1">
               <%= for ba <- dg.batch_allocations do %>
-                <span class="px-2 py-0.5 bg-[#e7e7ff] text-[#373896] text-xs rounded-full font-medium">
+                <span class="px-2 py-0.5 bg-brand-100 text-brand-primary text-xs rounded-full font-medium">
                   Batch #{ba.batch_id} &times;{ba.quantity}
                 </span>
               <% end %>
@@ -840,7 +871,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             <div class="py-2">
               <.link
                 navigate={~p"/pharmacist/drug_allocations/#{dg.drug_allocation_id}"}
-                class="text-[#373896] hover:text-[#6667ab] text-sm font-medium"
+                class="text-brand-primary hover:text-brand-accent text-sm font-medium"
               >
                 <.icon name="hero-eye" class="h-4 w-4 inline mr-1" /> View Allocation
               </.link>
@@ -866,7 +897,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@prescriptions_status == nil,
-                do: "bg-[#373896] text-white",
+                do: "bg-brand-primary text-white",
                 else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )
             ]}
@@ -879,7 +910,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@prescriptions_status == "pending",
-                do: "bg-[#373896] text-white",
+                do: "bg-brand-primary text-white",
                 else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )
             ]}
@@ -892,7 +923,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@prescriptions_status == "given",
-                do: "bg-[#373896] text-white",
+                do: "bg-brand-primary text-white",
                 else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )
             ]}
@@ -954,7 +985,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             <div class="py-2">
               <.link
                 navigate={~p"/pharmacist/drug_allocations/#{da.id}"}
-                class="text-[#373896] hover:text-[#6667ab] text-sm font-medium"
+                class="text-brand-primary hover:text-brand-accent text-sm font-medium"
               >
                 <.icon name="hero-eye" class="h-4 w-4 inline mr-1" /> View Allocation
               </.link>
@@ -991,7 +1022,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                   type="text"
                   name="generic_name"
                   value={@drug.generic_name || @drug.inventory_received.generic_name || ""}
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#373896] focus:border-transparent"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                   placeholder="e.g. Paracetamol"
                 />
               </div>
@@ -1001,14 +1032,14 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                   type="text"
                   name="brand_name"
                   value={@drug.brand_name || @drug.inventory_received.brand_name || ""}
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#373896] focus:border-transparent"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                   placeholder="e.g. Panadol"
                 />
               </div>
               <div class="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  class="flex-1 px-4 py-2 bg-[#373896] text-white rounded-lg hover:bg-[#6667ab] font-medium transition-colors"
+                  class="flex-1 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-accent font-medium transition-colors"
                 >
                   Save Changes
                 </button>
@@ -1058,7 +1089,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                   Current Quantity:
-                  <span class="text-[#373896] font-semibold">
+                  <span class="text-brand-primary font-semibold">
                     {@editing_batch.remaining_quantity}
                   </span>
                 </label>
@@ -1068,7 +1099,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                   value={@editing_batch.remaining_quantity}
                   min="0"
                   required
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#373896] focus:border-transparent text-lg"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent text-lg"
                   placeholder="Enter new quantity"
                   autofocus
                 />
@@ -1078,7 +1109,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               <div class="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  class="flex-1 px-4 py-2 bg-[#373896] text-white rounded-lg hover:bg-[#6667ab] font-medium transition-colors"
+                  class="flex-1 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-accent font-medium transition-colors"
                 >
                   Save Changes
                 </button>
@@ -1095,40 +1126,41 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
         </div>
       </div>
     <% end %>
-
-    <%!-- Make requisition modal --%>
-    <%= if @requisition_prefill do %>
-      <.modal
-        id="requisition-for-item-modal"
-        show
-        on_cancel={JS.patch(~p"/pharmacist/drugs/#{@drug.id}")}
-      >
-        <.live_component
-          module={MedcampWeb.RequisitionLive.RequisitionForItemComponent}
-          id="requisition-for-item"
-          inventory_received_id={@requisition_prefill.inventory_received_id}
-          item_title={@requisition_prefill.item_title}
-          item_description={@requisition_prefill.item_description}
-          current_user={@current_user}
-          patch={~p"/pharmacist/drugs/#{@drug.id}"}
-        />
-      </.modal>
-    <% end %>
     """
   end
 
-  defp dda_button_class(drug) do
-    base =
-      "inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-lg px-5 py-2 text-sm font-semibold shadow-sm transition-colors"
+  defp batch_datamatrix_payload(drug_batch) do
+    separator = <<29>>
+    batch = drug_batch.batch
 
-    state_class =
-      if drug.is_dangerous_drug do
-        "border border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100"
-      else
-        "border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100"
-      end
+    "01#{batch_gtin(drug_batch)}10#{batch.batch}" <>
+      separator <>
+      "11#{gs1_date(batch.manufacture_date)}17#{gs1_date(batch.expiry)}" <>
+      if(batch.serial, do: separator <> "21" <> batch.serial, else: "")
+  end
 
-    base <> " " <> state_class
+  defp batch_gtin(drug_batch) do
+    (drug_batch.batch.gtin || drug_batch.inventory_received.gtin || "")
+    |> String.replace(~r/\D/, "")
+    |> String.pad_leading(14, "0")
+  end
+
+  defp gs1_date(%Date{} = date), do: Calendar.strftime(date, "%y%m%d")
+
+  defp gs1_date(date) when is_binary(date) do
+    case Date.from_iso8601(date) do
+      {:ok, parsed} -> gs1_date(parsed)
+      _ -> ""
+    end
+  end
+
+  defp gs1_date(_date), do: ""
+
+  defp human_readable_gs1_date(date) do
+    case gs1_date(date) do
+      "" -> "—"
+      formatted -> formatted
+    end
   end
 
   defp batch_expired?(nil), do: false

@@ -199,6 +199,7 @@ defmodule Medcamp.Triages do
     %Triage{}
     |> Triage.changeset(attrs)
     |> Repo.insert()
+    |> Medcamp.CampFlow.advance("triaged")
   end
 
   @doc """

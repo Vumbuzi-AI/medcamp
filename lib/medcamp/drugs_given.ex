@@ -633,7 +633,7 @@ defmodule Medcamp.DrugsGiven do
       from db in Medcamp.DrugBatches.DrugBatch,
         where:
           db.inventory_received_id == ^inventory_received_id and db.remaining_quantity > 0 and
-            db.is_confirmed == true and db.is_active != false,
+            db.is_active != false,
         join: b in Medcamp.Batches.Batch,
         on: db.batch_id == b.id,
         preload: [batch: b]

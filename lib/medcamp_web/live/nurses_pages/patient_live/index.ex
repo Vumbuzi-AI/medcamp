@@ -13,6 +13,8 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
      |> assign(:page, 1)
      |> assign(:per_page, 10)
      |> assign(:show_figures, false)
+     |> assign(:show_patient_code, false)
+     |> assign(:code_patient, nil)
      |> assign_patients(Patients.list_patients())}
   end
 
@@ -33,6 +35,31 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
   @impl true
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  end
+
+  def handle_event("show_patient_code", %{"patient_id" => id}, socket) do
+    {:noreply,
+     socket
+     |> assign(:code_patient, Patients.get_patient!(id))
+     |> assign(:show_patient_code, true)}
+  end
+
+  def handle_event("close_patient_code", _params, socket) do
+    {:noreply, assign(socket, show_patient_code: false, code_patient: nil)}
+  end
+
+  def handle_event("send_pin", %{"patient_id" => patient_id}, socket) do
+    case Patients.get_patient(patient_id) do
+      nil ->
+        {:noreply, put_flash(socket, :error, "That patient could not be found.")}
+
+      patient ->
+        # Delivery can involve both email and SMS providers. Queue it so the
+        # table stays responsive while confirming the request immediately.
+        Task.start(fn -> Patients.send_pin(patient) end)
+
+        {:noreply, put_flash(socket, :info, "PIN delivery queued for #{patient_name(patient)}.")}
+    end
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -121,6 +148,18 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
       params[:age_group] || params[:gender] || (params[:diagnosis] && params[:diagnosis] != "") ||
       params[:visit_type]
   end
+
+  defp patient_name(patient) do
+    [patient.first_name, patient.middle_name, patient.last_name]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
+  end
+
+  defp patient_age(%{date_of_birth: %Date{} = date_of_birth}),
+    do: Date.diff(Date.utc_today(), date_of_birth) |> div(365)
+
+  defp patient_age(%{age: age}) when is_integer(age), do: age
+  defp patient_age(_patient), do: "—"
 
   defp build_filter_params(filters) do
     %{
@@ -300,7 +339,15 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
           icon_path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
           title="Patients"
           subtitle="Search, filter and manage registered patients."
-        />
+        >
+          <:actions>
+            <.link patch={~p"/nurse/patients/new"}>
+              <.button class="inline-flex items-center gap-2 bg-brand-primary hover:bg-[#2f317f]">
+                <.icon name="hero-user-plus" class="h-4 w-4" /> Add Patient
+              </.button>
+            </.link>
+          </:actions>
+        </.page_header>
 
         <div class="flex flex-wrap items-center gap-3">
           <form phx-change="filter" class="flex-1">
@@ -359,7 +406,7 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
             type="checkbox"
             phx-click="toggle_figures"
             checked={@show_figures}
-            class="h-4 w-4 rounded border-slate-300 text-[#373896] focus:ring-[#373896]"
+            class="h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
           /> Show figures in table
         </label>
       </div>
@@ -371,6 +418,8 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
       <.patients_table_for_receptionists
         show_header={false}
         route_prefix="/nurse"
+        row_click={nil}
+        show_print_code={true}
         new_patient_url="/nurse/patients/new"
         patients={@patients}
         count={@patients_count}
@@ -385,6 +434,66 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
         total_count={@total_count}
         per_page={@per_page}
       />
+
+      <.modal
+        :if={@show_patient_code}
+        id="nurse-patient-code-modal"
+        show
+        on_cancel={JS.push("close_patient_code")}
+      >
+        <div class="col-span-full">
+          <h3>GS1 GSRN</h3>
+          <p>Print Data Matrix below for {patient_name(@code_patient)}</p>
+          <hr class="h-[2px] bg-black" />
+        </div>
+        <div
+          id="nurse-patient-code-print"
+          phx-hook="DownloadableDiv"
+          class="mt-5 flex flex-col gap-5 md:flex-row"
+        >
+          <div class="flex w-full items-center justify-center md:w-4/5">
+            <div
+              class="flex flex-col items-start gap-3 p-4"
+              id={"nurse-code-card-#{@code_patient.gsrn}"}
+            >
+              <div class="flex items-start gap-2">
+                <svg
+                  id={"https://glocalhealthcentre.org/8018/#{@code_patient.gsrn}"}
+                  phx-hook="datamatrix"
+                  class="datamatrix h-[70px] w-[70px]"
+                >
+                </svg>
+                <div class="flex flex-col gap-0 text-sm">
+                  <p>{patient_name(@code_patient)}</p>
+                  <p>{@code_patient.date_of_birth || "—"}</p>
+                  <p>{patient_age(@code_patient)} | {@code_patient.gender || "—"}</p>
+                </div>
+              </div>
+              <p class="mt-3 w-full border-b-2 border-black"></p>
+              <p class="text-xs font-bold">(8018) {@code_patient.gsrn}</p>
+            </div>
+          </div>
+          <div class="flex w-full items-start gap-2 md:w-2/5">
+            <button
+              type="button"
+              data-download-trigger
+              data-target-div={"#nurse-code-card-#{@code_patient.gsrn}"}
+              data-filename={"patient-code-#{@code_patient.gsrn}.png"}
+              class="rounded bg-green-500 px-4 py-2 text-sm font-bold text-white hover:bg-green-400"
+            >
+              Download
+            </button>
+            <button
+              type="button"
+              data-print-trigger
+              data-target-div={"#nurse-code-card-#{@code_patient.gsrn}"}
+              class="rounded bg-[#1f3b64] px-4 py-2 text-sm font-bold text-white hover:bg-[#173050]"
+            >
+              Print
+            </button>
+          </div>
+        </div>
+      </.modal>
 
       <.modal
         :if={@live_action in [:new, :edit]}

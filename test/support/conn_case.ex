@@ -33,7 +33,8 @@ defmodule MedcampWeb.ConnCase do
 
   setup tags do
     Medcamp.DataCase.setup_sandbox(tags)
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+    organisation = Medcamp.DataCase.setup_tenant()
+    {:ok, conn: Phoenix.ConnTest.build_conn(), organisation: organisation}
   end
 
   @doc """

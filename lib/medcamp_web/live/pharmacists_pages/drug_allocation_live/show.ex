@@ -239,13 +239,16 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
               />
             </svg>
           </.link>
-          <h1 class="text-xl font-semibold text-[#373896]">Drug Allocation</h1>
+          <h1 class="text-xl font-semibold text-brand-primary">Drug Allocation</h1>
         </div>
 
-        <.button :if={@drug_allocation.has_been_assigned} class="bg-green-500 hover:bg-green-600">
+        <.button
+          :if={@drug_allocation.has_been_assigned}
+          class="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 mr-2"
+            class="h-4 w-4 shrink-0"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -271,7 +274,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
             class={[
               "px-6 py-3 text-sm font-medium border-b-2 transition-colors",
               if(@view_tab == :prescription,
-                do: "border-[#6667ab] text-[#6667ab]",
+                do: "border-brand-accent text-brand-accent",
                 else: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               )
             ]}
@@ -302,7 +305,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
             class={[
               "px-6 py-3 text-sm font-medium border-b-2 transition-colors",
               if(@view_tab == :doctor_notes,
-                do: "border-[#6667ab] text-[#6667ab]",
+                do: "border-brand-accent text-brand-accent",
                 else: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               ),
               if(@drug_allocation.doctor_note == nil, do: "opacity-50 cursor-not-allowed")

@@ -43,8 +43,6 @@ defmodule Medcamp.MixProject do
       {:phoenix_live_view, "~> 1.0.0"},
       {:floki, ">= 0.30.0", only: :test},
       {:timex, "~> 3.0"},
-      {:poison, "~> 6.0"},
-      {:httpotion, "~> 3.1.0"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
@@ -65,14 +63,11 @@ defmodule Medcamp.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:live_select, "~> 1.0"},
       {:sentry, "~> 10.2.0"},
       {:hackney, "~> 1.8"},
       {:ex_heroicons, "~> 3.1.0"},
       {:ex_gtin, "~> 1.1.0"},
-      {:csv, "~> 3.0"},
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:httpoison, "~> 2.1"}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -87,7 +82,7 @@ defmodule Medcamp.MixProject do
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": [&blocked_task/1],
-      "ecto.drop": [&blocked_task/1],
+      # "ecto.drop": [&blocked_task/1],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind medcamp", "esbuild medcamp"],

@@ -33,7 +33,7 @@ defmodule MedcampWeb.UserSessionController do
 
     case LoginOtp.verify(challenge, code) do
       {:ok, challenge} ->
-        user = Accounts.get_user!(challenge["user_id"])
+        user = Accounts.get_login_user!(challenge["user_id"])
         remember_me = to_string(challenge["remember_me"])
 
         conn
@@ -60,7 +60,7 @@ defmodule MedcampWeb.UserSessionController do
   def resend_otp(conn, _params) do
     with %{"user_id" => user_id, "remember_me" => remember_me} <-
            get_session(conn, :login_otp_challenge),
-         user <- Accounts.get_user!(user_id),
+         user <- Accounts.get_login_user!(user_id),
          {:ok, challenge} <- LoginOtp.issue(user, remember_me) do
       conn
       |> put_session(:login_otp_challenge, challenge)
@@ -78,7 +78,7 @@ defmodule MedcampWeb.UserSessionController do
   def create_with_token(conn, %{"token" => token}) do
     case Phoenix.Token.verify(MedcampWeb.Endpoint, "user login", token, max_age: 300) do
       {:ok, %{user_id: user_id, remember_me: remember_me}} ->
-        user = Accounts.get_user!(user_id)
+        user = Accounts.get_login_user!(user_id)
         UserAuth.log_in_user(conn, user, %{"remember_me" => to_string(remember_me)})
 
       {:error, _} ->

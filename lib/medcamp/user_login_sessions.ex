@@ -47,11 +47,11 @@ defmodule Medcamp.UserLoginSessions do
   def count_sessions(filters \\ %{}) do
     sessions_base_query(filters)
     |> exclude(:order_by)
-    |> select([s, _u, _d], count(s.id))
+    |> select([s, _u], count(s.id))
     |> Repo.one()
   end
 
-  @doc "Filters sessions by name, email, active status, or department."
+  @doc "Filters sessions by name, email, or active status."
   def list_sessions(filters) when is_map(filters) do
     sessions_query(filters)
     |> Repo.all()
@@ -59,30 +59,20 @@ defmodule Medcamp.UserLoginSessions do
 
   defp sessions_query(filters) do
     sessions_base_query(filters)
-    |> preload(user: :department)
+    |> preload([_s, u], user: u)
   end
 
   defp sessions_base_query(filters) do
     query =
       UserLoginSession
       |> join(:inner, [s], u in assoc(s, :user))
-      |> join(:left, [s, u], d in assoc(u, :department))
       |> order_by([s], desc: s.logged_in_at)
 
     query =
       case filters[:search] do
         term when is_binary(term) and term != "" ->
           like = "%#{term}%"
-          where(query, [s, u, d], ilike(u.name, ^like) or ilike(u.email, ^like))
-
-        _ ->
-          query
-      end
-
-    query =
-      case filters[:department_id] do
-        id when is_binary(id) and id != "" ->
-          where(query, [s, u, _d], u.department_id == ^id)
+          where(query, [_s, u], ilike(u.name, ^like) or ilike(u.email, ^like))
 
         _ ->
           query

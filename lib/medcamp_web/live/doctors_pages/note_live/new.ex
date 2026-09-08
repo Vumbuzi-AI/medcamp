@@ -17,6 +17,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteNew do
   @impl true
   def handle_params(%{"id" => id} = params, _url, socket) do
     patient = Patients.get_patient!(id)
+    params = put_latest_visit_id(params, patient.id)
     {doctor_note, form} = build_initial_note(patient.id, params)
 
     {:noreply,
@@ -26,6 +27,15 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteNew do
      |> assign(:doctor_note, doctor_note)
      |> assign(:patient_visit, safe_get_patient_visit(params["patient_visit_id"]))
      |> apply_action(socket.assigns.live_action, params)}
+  end
+
+  defp put_latest_visit_id(%{"patient_visit_id" => _} = params, _patient_id), do: params
+
+  defp put_latest_visit_id(params, patient_id) do
+    case PatientVisits.latest_visit_without_doctor_note(patient_id) do
+      nil -> params
+      visit -> Map.put(params, "patient_visit_id", to_string(visit.id))
+    end
   end
 
   defp build_initial_note(patient_id, params) do
@@ -143,10 +153,10 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteNew do
   def render(assigns) do
     ~H"""
     <div class="w-full">
-      <h1 class="text-xl font-semibold text-[#373896] mb-4 flex items-center">
+      <h1 class="text-xl font-semibold text-brand-primary mb-4 flex items-center">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5 mr-2 text-[#6667ab]"
+          class="h-5 w-5 mr-2 text-brand-accent"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

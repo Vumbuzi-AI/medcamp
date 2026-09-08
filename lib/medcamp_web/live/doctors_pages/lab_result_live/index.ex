@@ -82,11 +82,11 @@ defmodule MedcampWeb.DoctorsPagePatientLive.LabResultIndex do
   def render(assigns) do
     ~H"""
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      <.header class="text-[#373896] border-b border-gray-100 pb-4 mb-4">
+      <.header class="text-brand-primary border-b border-gray-100 pb-4 mb-4">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -138,7 +138,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.LabResultIndex do
         >
           <:col :let={lab_result} label="Patient">
             <div class="flex items-center py-3">
-              <span class="px-2 py-1 text-xs rounded-full bg-[#e7e7ff] text-[#373896] font-medium">
+              <span class="px-2 py-1 text-xs rounded-full bg-brand-100 text-brand-primary font-medium">
                 {[
                   lab_result.patient.first_name,
                   lab_result.patient.middle_name,
@@ -210,7 +210,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.LabResultIndex do
           <:col :let={lab_result} label="Action">
             <.link
               navigate={~p"/doctor/patients/#{@patient.id}/lab_results/#{lab_result}"}
-              class="flex items-center text-[#6667ab] hover:text-[#373896]"
+              class="flex items-center text-brand-accent hover:text-brand-primary"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

@@ -30,7 +30,13 @@ defmodule MedcampWeb.AdminMedicalCampExternalAuth do
         user_id -> fetch_external_admin(user_id)
       end
 
-    assign(socket, :external_admin_user, user)
+    # This page is reached with a PIN rather than a login, so the admin found
+    # here is what establishes the tenant for everything the page queries.
+    if user, do: MedcampWeb.PublicTenant.enter(user.organisation_id)
+
+    socket
+    |> assign(:external_admin_user, user)
+    |> assign(:current_organisation, Medcamp.Organisations.get_user_organisation(user))
   end
 
   defp fetch_external_admin(user_id) when is_integer(user_id) do
@@ -49,7 +55,7 @@ defmodule MedcampWeb.AdminMedicalCampExternalAuth do
   defp fetch_external_admin(_), do: nil
 
   defp get_active_admin(user_id) do
-    case Accounts.get_user!(user_id) do
+    case Accounts.get_user_across_organisations(user_id) do
       %{role: "admin", is_active: true} = user -> user
       _ -> nil
     end

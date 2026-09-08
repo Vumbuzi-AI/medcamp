@@ -350,7 +350,15 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
         icon_path="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
         title="Drugs"
         subtitle="Search, filter and manage the drug inventory."
-      />
+      >
+        <:actions>
+          <.link patch={~p"/pharmacist/drugs/new"}>
+            <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2d2d7a]">
+              <Heroicons.icon name="plus" type="outline" class="h-4 w-4" /> Add Drug
+            </button>
+          </.link>
+        </:actions>
+      </.page_header>
 
       <div class="flex flex-wrap items-center gap-3 mb-4">
         <form phx-change="filter" class="flex-1">
@@ -372,7 +380,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
               <label class="block text-xs font-medium text-gray-600 mb-1">Category</label>
               <select
                 name="filters[category]"
-                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="" selected={@filters[:category] in [nil, ""]}>All</option>
                 <option
@@ -388,7 +396,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
               <label class="block text-xs font-medium text-gray-600 mb-1">Supplier</label>
               <select
                 name="filters[supplier]"
-                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="" selected={@filters[:supplier] in [nil, ""]}>All</option>
                 <option
@@ -404,7 +412,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
               <label class="block text-xs font-medium text-gray-600 mb-1">Type</label>
               <select
                 name="filters[type]"
-                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="" selected={@filters[:type] in [nil, ""]}>All</option>
                 <option :for={type <- @types} value={type} selected={@filters[:type] == type}>
@@ -427,7 +435,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
               <label class="block text-xs font-medium text-gray-600 mb-1">Stock Status</label>
               <select
                 name="filters[stock_filter]"
-                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="all" selected={@stock_filter == :all}>All</option>
                 <option value="in_stock" selected={@stock_filter == :in_stock}>In Stock</option>
@@ -441,7 +449,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
               <label class="block text-xs font-medium text-gray-600 mb-1">DDA Register</label>
               <select
                 name="filters[dda_filter]"
-                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="all" selected={@filters[:dda_filter] == :all}>All Drugs</option>
                 <option value="dda" selected={@filters[:dda_filter] == :dda}>DDA Only</option>
@@ -489,7 +497,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
             <% end %>
           </:description_slot>
           <:actions :if={@search_query != "" or count_active_filters(@filters) > 0}>
-            <button phx-click="clear_filters" class="text-xs text-[#6667ab] hover:underline">
+            <button phx-click="clear_filters" class="text-xs text-brand-accent hover:underline">
               Clear filters
             </button>
           </:actions>
@@ -602,7 +610,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
 
           <:col :let={drug} label="Batches">
             <div class="flex items-center py-3">
-              <span class="px-2 py-1 text-xs rounded-full bg-[#f0f0ff] text-[#373896] font-medium">
+              <span class="px-2 py-1 text-xs rounded-full bg-brand-50 text-brand-primary font-medium">
                 {length(drug.drug_batches)} batches
               </span>
             </div>
@@ -612,7 +620,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
             <div class="flex items-center justify-center">
               <.link
                 navigate={~p"/pharmacist/drugs/#{drug}"}
-                class="flex items-center text-[#6667ab] hover:text-[#373896]"
+                class="flex items-center text-brand-accent hover:text-brand-primary"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

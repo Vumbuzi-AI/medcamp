@@ -1,28 +1,15 @@
 defmodule Medcamp.Accounts.User do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
-  @non_procurement_roles [
-    "admin",
-    "doctor",
-    "nurse",
-    "labtechnician",
-    "reception",
-    "pharmacist",
-    "radiologist",
-    "support staff",
-    "inventory_manager",
-    "housekeeping",
-    "cleaner",
-    "staff"
-  ]
-  @procurement_roles ~w(supplier procurement_officer stores_officer finance_officer admin)
-  @roles Enum.uniq(@non_procurement_roles ++ @procurement_roles)
+  @roles ~w(admin doctor nurse pharmacist labtechnician)
 
-  def procurement_roles, do: @procurement_roles
   def roles, do: @roles
 
   schema "users" do
+    tenant_field()
+
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
@@ -37,14 +24,13 @@ defmodule Medcamp.Accounts.User do
     field :id_number, :string
     field :license_number, :string
     field :role, :string, default: "doctor"
+    field :is_superadmin, :boolean, default: false
     field :is_active, :boolean, default: true
     field :is_for_medical_camp, :boolean, default: false
     field :last_logged_in_at, :utc_datetime
     field :last_logged_out_at, :utc_datetime
 
     field :gsrn, :string
-    belongs_to :department, Medcamp.Departments.Department
-    belongs_to :supplier, Medcamp.Suppliers.Supplier
 
     timestamps(type: :utc_datetime)
   end
@@ -80,6 +66,7 @@ defmodule Medcamp.Accounts.User do
     |> validate_otp_pin_if_changed()
     |> validate_required([:name])
     |> validate_role()
+    |> put_org_id()
   end
 
   def changeset(user, attrs, opts \\ []) do
@@ -98,14 +85,13 @@ defmodule Medcamp.Accounts.User do
       :hashed_password,
       :otp,
       :otp_expires_at,
-      :inserted_at,
-      :department_id,
-      :supplier_id
+      :inserted_at
     ])
     |> validate_email(opts)
     |> validate_otp_pin_if_changed()
     |> validate_required([:name, :role])
     |> validate_role()
+    |> put_org_id()
   end
 
   defp normalize_inserted_at(attrs) when is_map(attrs) do

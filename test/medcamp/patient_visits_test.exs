@@ -13,9 +13,7 @@ defmodule Medcamp.PatientVisitsTest do
       reason: nil,
       date: nil,
       patient_id: nil,
-      creator_id: nil,
-      payment_type: nil,
-      has_paid: nil
+      creator_id: nil
     }
 
     test "list_patient_visits/0 returns all patient_visits" do
@@ -36,9 +34,7 @@ defmodule Medcamp.PatientVisitsTest do
         reason: "some reason",
         date: ~D[2025-02-24],
         patient_id: patient.id,
-        creator_id: creator.id,
-        payment_type: "some payment_type",
-        has_paid: true
+        creator_id: creator.id
       }
 
       assert {:ok, %PatientVisit{} = patient_visit} =
@@ -114,27 +110,18 @@ defmodule Medcamp.PatientVisitsTest do
       assert PatientVisits.count_repeat_patients() == 0
     end
 
-    test "does not count a patient with exactly one paid visit" do
+    test "does not count a patient with exactly one visit" do
       patient = patient_fixture()
-      patient_visit_fixture(%{patient: patient, has_paid: true})
+      patient_visit_fixture(%{patient: patient})
 
       assert PatientVisits.count_repeat_patients() == 0
     end
 
-    test "does not count a patient with multiple visits if fewer than 2 are paid" do
+    test "counts a patient with more than one visit exactly once" do
       patient = patient_fixture()
-      patient_visit_fixture(%{patient: patient, has_paid: true})
-      patient_visit_fixture(%{patient: patient, has_paid: false})
-      patient_visit_fixture(%{patient: patient, has_paid: false})
-
-      assert PatientVisits.count_repeat_patients() == 0
-    end
-
-    test "counts a patient with 2+ paid visits exactly once" do
-      patient = patient_fixture()
-      patient_visit_fixture(%{patient: patient, has_paid: true})
-      patient_visit_fixture(%{patient: patient, has_paid: true})
-      patient_visit_fixture(%{patient: patient, has_paid: true})
+      patient_visit_fixture(%{patient: patient})
+      patient_visit_fixture(%{patient: patient})
+      patient_visit_fixture(%{patient: patient})
 
       assert PatientVisits.count_repeat_patients() == 1
     end
@@ -142,16 +129,74 @@ defmodule Medcamp.PatientVisitsTest do
     test "counts multiple distinct repeat patients" do
       patient_a = patient_fixture()
       patient_b = patient_fixture()
-      patient_visit_fixture(%{patient: patient_a, has_paid: true})
-      patient_visit_fixture(%{patient: patient_a, has_paid: true})
-      patient_visit_fixture(%{patient: patient_b, has_paid: true})
-      patient_visit_fixture(%{patient: patient_b, has_paid: true})
+      patient_visit_fixture(%{patient: patient_a})
+      patient_visit_fixture(%{patient: patient_a})
+      patient_visit_fixture(%{patient: patient_b})
+      patient_visit_fixture(%{patient: patient_b})
 
       # a third, non-repeat patient shouldn't affect the count
       patient_c = patient_fixture()
-      patient_visit_fixture(%{patient: patient_c, has_paid: true})
+      patient_visit_fixture(%{patient: patient_c})
 
       assert PatientVisits.count_repeat_patients() == 2
+    end
+  end
+
+  describe "camp flow status" do
+    test "a new visit starts awaiting triage" do
+      assert patient_visit_fixture().status == "triage_pending"
+    end
+
+    test "each transition moves the visit to the next queue" do
+      visit = patient_visit_fixture()
+
+      assert {:ok, visit} = PatientVisits.mark_triaged(visit)
+      assert visit.status == "triaged"
+
+      assert {:ok, visit} = PatientVisits.mark_with_doctor(visit)
+      assert visit.status == "with_doctor"
+
+      assert {:ok, visit} = PatientVisits.mark_lab_pending(visit)
+      assert visit.status == "lab_pending"
+
+      assert {:ok, visit} = PatientVisits.mark_pharmacy_pending(visit)
+      assert visit.status == "pharmacy_pending"
+
+      assert {:ok, visit} = PatientVisits.mark_completed(visit)
+      assert visit.status == "completed"
+    end
+
+    test "a status outside the camp flow is rejected" do
+      visit = patient_visit_fixture()
+
+      assert {:error, changeset} = PatientVisits.update_status(visit, "discharged")
+      assert %{status: ["is invalid"]} = errors_on(changeset)
+    end
+
+    test "list_queue/2 returns only today's visits at that status, oldest first" do
+      today = Date.utc_today()
+      patient = patient_fixture()
+
+      first = patient_visit_fixture(%{patient: patient, date: today})
+      second = patient_visit_fixture(%{patient: patient, date: today})
+      _yesterday = patient_visit_fixture(%{patient: patient, date: Date.add(today, -1)})
+
+      {:ok, _} = PatientVisits.mark_triaged(second)
+
+      queue = PatientVisits.list_queue("triage_pending", today)
+
+      assert Enum.map(queue, & &1.id) == [first.id]
+    end
+
+    test "current_visit_for_patient/2 ignores completed visits" do
+      patient = patient_fixture()
+      visit = patient_visit_fixture(%{patient: patient, date: Date.utc_today()})
+
+      assert PatientVisits.current_visit_for_patient(patient.id).id == visit.id
+
+      {:ok, _} = PatientVisits.mark_completed(visit)
+
+      assert PatientVisits.current_visit_for_patient(patient.id) == nil
     end
   end
 end

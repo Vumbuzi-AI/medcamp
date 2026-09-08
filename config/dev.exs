@@ -19,7 +19,7 @@ config :medcamp, Medcamp.Repo,
 # Binding to loopback ipv4 address prevents access from other machines.
 config :medcamp, MedcampWeb.Endpoint,
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [port: 7700],
+  http: [port: 7710],
   check_origin: false,
   code_reloader: true,
   debug_errors: false,

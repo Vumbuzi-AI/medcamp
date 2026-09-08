@@ -1,80 +1,7 @@
 defmodule MedcampWeb.AdminUsersLive.FormComponent do
   alias Medcamp.Accounts
-  alias Medcamp.Departments
-  alias Medcamp.Suppliers
   alias Medcamp.Postal
   use MedcampWeb, :live_component
-
-  defp blank_to_nil(value) when is_binary(value) do
-    value = String.trim(value)
-    if value == "", do: nil, else: value
-  end
-
-  defp blank_to_nil(_), do: nil
-
-  defp maybe_put_prefill(params, key, value, previous_value) do
-    current = Map.get(params, key)
-
-    if current in [nil, ""] or (previous_value && current == previous_value) do
-      Map.put(params, key, value)
-    else
-      params
-    end
-  end
-
-  defp maybe_prefill_from_supplier(user_params, socket) do
-    supplier_id = blank_to_nil(user_params["supplier_id"])
-    previous_supplier_id = socket.assigns[:prefill_supplier_id]
-    previous_prefill = socket.assigns[:prefill_values] || %{}
-
-    cond do
-      socket.assigns.action != :new ->
-        {user_params, socket}
-
-      is_nil(supplier_id) ->
-        {user_params, socket}
-
-      supplier_id == previous_supplier_id ->
-        {user_params, socket}
-
-      true ->
-        supplier =
-          try do
-            Suppliers.get_supplier!(supplier_id)
-          rescue
-            _ -> nil
-          end
-
-        if is_nil(supplier) do
-          {user_params, socket}
-        else
-          prefill = %{
-            "role" => "supplier",
-            "name" => supplier.name,
-            "email" => supplier.email,
-            "phone_number" => supplier.contact
-          }
-
-          user_params =
-            user_params
-            |> Map.put("role", prefill["role"])
-            |> maybe_put_prefill("name", prefill["name"], previous_prefill["name"])
-            |> maybe_put_prefill("email", prefill["email"], previous_prefill["email"])
-            |> maybe_put_prefill(
-              "phone_number",
-              prefill["phone_number"],
-              previous_prefill["phone_number"]
-            )
-
-          socket =
-            socket
-            |> assign(:prefill_supplier_id, supplier_id)
-            |> assign(:prefill_values, prefill)
-
-          {user_params, socket}
-        end
-    end
-  end
 
   defp datetime_local_value(nil), do: nil
 
@@ -108,13 +35,6 @@ defmodule MedcampWeb.AdminUsersLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input
-          field={@form[:supplier_id]}
-          type="select"
-          options={@suppliers}
-          prompt="Select supplier (required for supplier role)"
-          label="Supplier"
-        />
         <.input field={@form[:name]} required type="text" label="Name" />
         <.input
           field={@form[:email]}
@@ -133,30 +53,9 @@ defmodule MedcampWeb.AdminUsersLive.FormComponent do
           field={@form[:role]}
           required
           type="select"
-          options={[
-            "admin",
-            "doctor",
-            "nurse",
-            "labtechnician",
-            "reception",
-            "pharmacist",
-            "radiologist",
-            "support staff",
-            "inventory_manager",
-            "supplier",
-            "procurement_officer",
-            "stores_officer",
-            "finance_officer"
-          ]}
+          options={Medcamp.Accounts.User.roles()}
           prompt="Select Role"
           label="Role"
-        />
-        <.input
-          field={@form[:department_id]}
-          type="select"
-          options={@departments}
-          prompt="Select department (optional)"
-          label="Department"
         />
         <.input field={@form[:is_active]} type="checkbox" label="Active?" />
 
@@ -170,18 +69,9 @@ defmodule MedcampWeb.AdminUsersLive.FormComponent do
 
   @impl true
   def update(%{user: user} = assigns, socket) do
-    departments = Departments.list_departments_for_selection()
-    suppliers = Suppliers.list_suppliers_for_selection()
-
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(:departments, departments)
-     |> assign(:suppliers, suppliers)
-     |> assign_new(:prefill_supplier_id, fn ->
-       if is_integer(user.supplier_id), do: Integer.to_string(user.supplier_id), else: nil
-     end)
-     |> assign_new(:prefill_values, fn -> %{"role" => user.role} end)
      |> assign_new(:form, fn ->
        to_form(Accounts.change_user(user))
      end)}
@@ -189,7 +79,6 @@ defmodule MedcampWeb.AdminUsersLive.FormComponent do
 
   @impl true
   def handle_event("validate", %{"user" => user_params}, socket) do
-    {user_params, socket} = maybe_prefill_from_supplier(user_params, socket)
     changeset = Accounts.change_user(socket.assigns.user, user_params)
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end

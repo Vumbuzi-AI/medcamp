@@ -1,10 +1,13 @@
 defmodule Medcamp.Patients.Patient do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   alias Medcamp.Patients.PatientDocument
 
   schema "patients" do
+    tenant_field()
+
     field :first_name, :string
     field :middle_name, :string
     field :last_name, :string
@@ -107,6 +110,7 @@ defmodule Medcamp.Patients.Patient do
     )
     |> validate_date_of_birth_not_in_future()
     |> foreign_key_constraint(:creator_id)
+    |> put_org_id()
   end
 
   defp validate_date_of_birth_not_in_future(changeset) do
@@ -167,6 +171,7 @@ defmodule Medcamp.Patients.Patient do
       :email,
       :phone_number
     ])
+    |> put_org_id()
   end
 
   def calculate_age(nil), do: nil

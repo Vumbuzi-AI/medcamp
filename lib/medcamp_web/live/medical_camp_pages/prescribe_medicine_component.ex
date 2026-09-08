@@ -73,7 +73,10 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
      end)
      |> assign_new(:drug_form, fn ->
        to_form(
-         Medcamp.DrugAllocations.DrugAssigned.changeset(%Medcamp.DrugAllocations.DrugAssigned{}, %{})
+         Medcamp.DrugAllocations.DrugAssigned.changeset(
+           %Medcamp.DrugAllocations.DrugAssigned{},
+           %{}
+         )
        )
      end)}
   end
@@ -226,7 +229,9 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
 
             <%= if @selected_drug do %>
               <div>
-                Only {Medcamp.DrugBatches.check_available_quantity(@selected_drug.inventory_received_id)} units available
+                Only {Medcamp.DrugBatches.check_available_quantity(
+                  @selected_drug.inventory_received_id
+                )} units available
               </div>
               <div class="bg-blue-50 p-3 rounded-md mb-4">
                 <p class="font-medium">{@selected_drug.brand_name}</p>
@@ -383,7 +388,10 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
       Map.put(params, "inventory_received_id", socket.assigns.selected_drug.inventory_received_id)
 
     changeset =
-      Medcamp.DrugAllocations.DrugAssigned.changeset(%Medcamp.DrugAllocations.DrugAssigned{}, params)
+      Medcamp.DrugAllocations.DrugAssigned.changeset(
+        %Medcamp.DrugAllocations.DrugAssigned{},
+        params
+      )
 
     if changeset.valid? do
       drug_data = Ecto.Changeset.apply_changes(changeset)

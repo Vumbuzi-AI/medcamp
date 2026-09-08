@@ -36,7 +36,7 @@
           <label class="block text-xs font-medium text-gray-600 mb-1">Subsidy Status</label>
           <select
             name="filters[subsidy]"
-            class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+            class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
           >
             <option value="">All</option>
             <option value="subsidized" selected={@filters.subsidy == "subsidized"}>
@@ -63,9 +63,7 @@
   description="No lab tests match the current filters."
 />
 
-<.table :if={@total_count > 0} id="lab_tests" rows={@lab_tests}
-  row_id={&"lab_tests-#{&1.id}"}
->
+<.table :if={@total_count > 0} id="lab_tests" rows={@lab_tests} row_id={&"lab_tests-#{&1.id}"}>
   <:col :let={lab_test} label="Name">{lab_test.name}</:col>
   <:col :let={lab_test} label="Desription">{lab_test.desription}</:col>
   <:col :let={lab_test} label="Standard rate (KES)">{lab_test.price}</:col>
@@ -77,7 +75,9 @@
   </:action>
   <:action :let={lab_test}>
     <.link
-      phx-click={JS.push("delete", value: %{id: lab_test.id}) |> hide("#lab_tests-#{lab_test.id}")}
+      phx-click={
+        JS.push("delete", value: %{id: lab_test.id}) |> hide("#lab_tests-#{lab_test.id}")
+      }
       data-confirm="Are you sure?"
     >
       Delete

@@ -1121,7 +1121,7 @@ Hooks.QrCameraScanner = {
 
     const btn = document.createElement("button");
     btn.className =
-      "camera-permission-btn mt-3 w-full flex items-center justify-center gap-2 bg-[#373896] hover:bg-[#2e2f7a] text-white text-sm font-medium py-2.5 px-4 rounded-lg transition-colors";
+      "camera-permission-btn mt-3 w-full flex items-center justify-center gap-2 bg-brand-primary hover:bg-brand-accent-dark text-white text-sm font-medium py-2.5 px-4 rounded-lg transition-colors";
     btn.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1341,9 +1341,9 @@ Hooks.datamatrix = {
   mounted() {
     const codes = document.querySelectorAll(".datamatrix");
     for (var i = 0; i < codes.length; i++) {
-      let txt = codes[i].id;
+      let txt = codes[i].dataset.value || codes[i].id;
 
-      var element2 = document.getElementById(txt);
+      var element2 = codes[i];
       data = {
         msg: txt,
         dim: 70,
@@ -1405,6 +1405,21 @@ Hooks.DownloadableDiv = {
           .catch((err) => {
             console.error("Error creating image:", err);
           });
+      } else if (e.target.matches("[data-print-trigger]")) {
+        e.preventDefault();
+        const targetSelector = e.target.getAttribute("data-target-div");
+        const targetDiv = document.querySelector(targetSelector);
+
+        if (!targetDiv) {
+          console.error(`Target div not found: ${targetSelector}`);
+          return;
+        }
+
+        const originalContents = document.body.innerHTML;
+        document.body.innerHTML = targetDiv.innerHTML;
+        window.print();
+        document.body.innerHTML = originalContents;
+        window.liveSocket && window.liveSocket.connect();
       }
     });
   },

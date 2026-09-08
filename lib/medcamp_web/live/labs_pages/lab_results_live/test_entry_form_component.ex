@@ -16,7 +16,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
         <div class="flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-[#6667ab]"
+            class="h-5 w-5 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -88,7 +88,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
         <%= for {section, fields} <- @grouped_fields do %>
           <div class="mb-6">
             <%= if section != "main" do %>
-              <h3 class="text-sm font-semibold text-[#373896] uppercase tracking-wide mb-3 pb-2 border-b border-gray-200">
+              <h3 class="text-sm font-semibold text-brand-primary uppercase tracking-wide mb-3 pb-2 border-b border-gray-200">
                 {section}
               </h3>
             <% end %>
@@ -116,7 +116,11 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
         </div>
 
         <:actions>
-          <.button type="submit" phx-disable-with="Saving..." class="bg-[#6667ab] hover:bg-[#5556a0]">
+          <.button
+            type="submit"
+            phx-disable-with="Saving..."
+            class="bg-brand-accent hover:bg-brand-accent-dark"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-4 w-4 mr-2"
@@ -194,7 +198,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
         step="any"
         name={"results[#{@field_name}]"}
         value={@existing_value}
-        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#6667ab] focus:ring-[#6667ab] sm:text-sm"
+        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
         placeholder={@ref_range}
       />
       <%= if @ref_range do %>
@@ -227,7 +231,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
         type="text"
         name={"results[#{@field_name}]"}
         value={@existing_value}
-        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#6667ab] focus:ring-[#6667ab] sm:text-sm"
+        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
       />
     </div>
     """
@@ -256,7 +260,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
       </label>
       <select
         name={"results[#{@field_name}]"}
-        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#6667ab] focus:ring-[#6667ab] sm:text-sm"
+        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
       >
         <option value="">Select...</option>
         <%= for option <- @options do %>
@@ -283,7 +287,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
         name={"results[#{@field_name}]"}
         value="true"
         checked={@existing_value == "true" || @existing_value == true}
-        class="h-4 w-4 rounded border-gray-300 text-[#6667ab] focus:ring-[#6667ab]"
+        class="h-4 w-4 rounded border-gray-300 text-brand-accent focus:ring-brand-accent"
       />
       <label class="ml-2 block text-sm text-gray-700">
         {@label}

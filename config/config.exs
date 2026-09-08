@@ -12,16 +12,6 @@ config :medcamp,
   generators: [timestamp_type: :utc_datetime],
   login_otp_enabled: false
 
-config :medcamp,
-  mpesa_env: "api",
-  consumer_key: "sGAGY8399D5Ajrfc3FsM8U7yp1KhgSRlUgAGATsEBWdoMrGN",
-  consumer_secret: "6oyus6pR63AyqAUio7CJT80sPO1wPgCZfgQG8XNZ7u1pYzayeZB23pF2cYo90QaN",
-  mpesa_short_code: "4161369",
-  mpesa_code: "4161369",
-  mpesa_passkey: "f620ffb7a62a2b54308009158b745fcd1986e912ac5267e53816e34d26f3bd08",
-  client_id: "AW_NV6YQCMYfBCA0Xi_SHdp585_jI4nDEvTkCUSqzXouUiEM8VtjeOX3-ktBLVVDKup7i8s-WyQ2bpjH",
-  secret: "EPNiDKKdDpt0NGHsgzHa-DobS1eGc4xuwtg6x4I-j0VD6-hBtHZsLhX3vjHT6OZ6smnCPJr0KYqeGok2"
-
 config :sentry,
   dsn:
     "https://7a640afde0052f2f7b93f63037a45e9c@o4511777360314368.ingest.us.sentry.io/4511777366605824",

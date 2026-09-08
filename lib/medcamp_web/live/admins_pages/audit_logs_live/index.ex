@@ -367,7 +367,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
               <label class="block text-xs font-medium text-gray-600 mb-1">Table</label>
               <select
                 name="table"
-                class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="all" selected={@filter_table == "all"}>All Tables</option>
                 <%= for table <- @tables do %>
@@ -381,7 +381,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
               <label class="block text-xs font-medium text-gray-600 mb-1">User</label>
               <select
                 name="user"
-                class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="all" selected={@filter_user == "all"}>All Users</option>
                 <%= for user <- @users do %>
@@ -398,7 +398,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
               <label class="block text-xs font-medium text-gray-600 mb-1">Action</label>
               <select
                 name="action"
-                class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="all" selected={@filter_action == "all"}>All Actions</option>
                 <option value="insert" selected={@filter_action == "insert"}>Created</option>
@@ -430,7 +430,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
         :if={@audit_logs_loading}
         class="my-8 flex items-center justify-center gap-3 text-sm text-gray-500"
       >
-        <span class="h-5 w-5 animate-spin rounded-full border-2 border-gray-200 border-t-[#6667ab]">
+        <span class="h-5 w-5 animate-spin rounded-full border-2 border-gray-200 border-t-brand-accent">
         </span>
         Loading recent audit logs…
       </div>
@@ -445,7 +445,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
         }
       >
         <:actions :if={@search_query != "" or count_active_filters(assigns) > 0}>
-          <button phx-click="clear_filters" class="text-xs text-[#6667ab] hover:underline">
+          <button phx-click="clear_filters" class="text-xs text-brand-accent hover:underline">
             Clear filters
           </button>
         </:actions>
@@ -481,7 +481,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
 
           <:col :let={log} label="User">
             <div class="flex items-center py-3">
-              <div class="flex-shrink-0 h-8 w-8 rounded-full bg-[#6667ab] flex items-center justify-center text-white font-medium text-sm">
+              <div class="flex-shrink-0 h-8 w-8 rounded-full bg-brand-accent flex items-center justify-center text-white font-medium text-sm">
                 <%= if log.user do %>
                   {String.first(log.user.email) |> String.upcase()}
                 <% else %>
@@ -528,7 +528,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
             <div class="flex items-center justify-center">
               <.link
                 navigate={~p"/admin/audit_logs/#{log}"}
-                class="flex items-center text-[#6667ab] hover:text-[#373896]"
+                class="flex items-center text-brand-accent hover:text-brand-primary"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

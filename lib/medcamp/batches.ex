@@ -55,19 +55,19 @@ defmodule Medcamp.Batches do
   """
   def list_batches do
     Repo.all(Batch)
-    |> Repo.preload([:inventory_received, :supplier])
+    |> Repo.preload([:inventory_received])
   end
 
   @doc """
-  Returns batches filtered by item_search (gtin, batch, brand/generic), supplier_id, expiry range.
-  Filters: item_search, supplier_id, expiry_status (see `Medcamp.ExpiryFilter`),
+  Returns batches filtered by item_search (gtin, batch, brand/generic), expiry range.
+  Filters: item_search, expiry_status (see `Medcamp.ExpiryFilter`),
   expiry_from, expiry_to (date strings), inventory_received_id.
   """
   def filter_batches(filters \\ %{}) do
     filters
     |> build_batches_filter_query()
     |> Repo.all()
-    |> Repo.preload([:inventory_received, :supplier])
+    |> Repo.preload([:inventory_received])
   end
 
   @doc """
@@ -81,7 +81,7 @@ defmodule Medcamp.Batches do
     |> limit(^per_page)
     |> offset(^offset)
     |> Repo.all()
-    |> Repo.preload([:inventory_received, :supplier])
+    |> Repo.preload([:inventory_received])
   end
 
   @doc """
@@ -101,7 +101,6 @@ defmodule Medcamp.Batches do
 
     base
     |> apply_batch_item_search(filters["item_search"] || filters[:item_search])
-    |> apply_batch_supplier_filter(filters["supplier_id"] || filters[:supplier_id])
     |> apply_batch_expiry(filters)
     |> apply_batch_inventory_received_filter(
       filters["inventory_received_id"] || filters[:inventory_received_id]
@@ -143,21 +142,6 @@ defmodule Medcamp.Batches do
              (ilike(ir.brand_name, ^pattern) or ilike(ir.generic_name, ^pattern) or
                 ilike(ir.gtin, ^pattern)))
   end
-
-  defp apply_batch_supplier_filter(query, nil), do: query
-  defp apply_batch_supplier_filter(query, ""), do: query
-
-  defp apply_batch_supplier_filter(query, id) when is_binary(id) do
-    case Integer.parse(id) do
-      {n, _} -> from [b, ir] in query, where: b.supplier_id == ^n
-      _ -> query
-    end
-  end
-
-  defp apply_batch_supplier_filter(query, id) when is_integer(id),
-    do: from([b, ir] in query, where: b.supplier_id == ^id)
-
-  defp apply_batch_supplier_filter(query, _), do: query
 
   # Guards against an inverted range (expiry_to before expiry_from) reaching the
   # query — the drawer's client-side min/max only reflects the last applied
@@ -233,7 +217,6 @@ defmodule Medcamp.Batches do
 
   def list_batches_for_inventory_received(inventory_received_id) do
     Repo.all(from b in Batch, where: b.inventory_received_id == ^inventory_received_id)
-    |> Repo.preload(:supplier)
   end
 
   def list_batches_for_inventory_received_paginated(
@@ -245,7 +228,6 @@ defmodule Medcamp.Batches do
     batches_for_inventory_received_query(inventory_received_id, filters)
     |> Repo.paginate(page: page, page_size: per_page)
     |> Map.get(:entries)
-    |> Repo.preload(:supplier)
   end
 
   def count_batches_for_inventory_received(inventory_received_id, filters \\ %{}) do
@@ -328,7 +310,7 @@ defmodule Medcamp.Batches do
       ** (Ecto.NoResultsError)
 
   """
-  def get_batch!(id), do: Repo.get!(Batch, id) |> Repo.preload([:inventory_received, :supplier])
+  def get_batch!(id), do: Repo.get!(Batch, id) |> Repo.preload([:inventory_received])
 
   @doc """
   Creates a batch.

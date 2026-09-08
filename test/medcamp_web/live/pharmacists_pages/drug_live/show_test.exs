@@ -14,6 +14,151 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShowTest do
     %{conn: log_in_user(conn, pharmacist)}
   end
 
+  describe "batch actions" do
+    test "adds a batch for the current drug without selecting the drug again", %{conn: conn} do
+      drug = drug_fixture() |> Medcamp.Repo.preload(:inventory_received)
+
+      {:ok, view, _html} = live(conn, ~p"/pharmacist/drugs/#{drug.id}/new_batch")
+
+      assert has_element?(view, "#drug-batch-form", Medcamp.Drugs.display_name(drug))
+      refute has_element?(view, ~s(select[name="drug_batch[drug_id]"]))
+
+      assert has_element?(
+               view,
+               ~s(input[name="drug_batch[gtin]"][value="#{drug.inventory_received.gtin}"][readonly])
+             )
+
+      view
+      |> form("#drug-batch-form",
+        drug_batch: %{
+          gtin: "06161021090004",
+          batch: "ALB-2605",
+          manufacture_date: "2026-09-01",
+          expiry: "2028-01-31",
+          quantity: "100",
+          price_per_unit: "25",
+          manufacturer: "",
+          serial: ""
+        }
+      )
+      |> render_submit()
+
+      assert_redirect(view, ~p"/pharmacist/drugs/#{drug.id}")
+
+      [drug_batch] = Medcamp.DrugBatches.list_drug_batches_for_drug(drug.id)
+      assert drug_batch.batch.batch == "ALB-2605"
+      assert drug_batch.batch.manufacture_date == ~D[2026-09-01]
+      assert drug_batch.batch.price_per_unit == 25
+    end
+
+    test "opens a printable GS1 DataMatrix for a batch", %{conn: conn} do
+      inventory_received = inventory_received_fixture(%{gtin: "06161021090004"})
+      drug = drug_fixture(%{inventory_received: inventory_received})
+
+      batch =
+        Medcamp.BatchesFixtures.batch_fixture(%{
+          gtin: "06161021090004",
+          batch: "ALB-2604",
+          manufacture_date: ~D[2026-09-01],
+          expiry: "2028-01-31"
+        })
+
+      drug_batch =
+        drug_batch_fixture(%{
+          inventory_received: inventory_received,
+          drug: drug,
+          batch: batch
+        })
+
+      {:ok, view, _html} =
+        live(conn, ~p"/pharmacist/drugs/#{drug.id}/batches/#{drug_batch.id}/print")
+
+      assert has_element?(view, "#batch-datamatrix-#{drug_batch.id}")
+
+      assert has_element?(
+               view,
+               ~s(#batch-datamatrix-#{drug_batch.id}[data-value^="010616102109000410ALB-2604"])
+             )
+
+      assert render(view) =~ "(11)"
+      assert render(view) =~ "260901"
+      assert render(view) =~ "(17)"
+      assert render(view) =~ "280131"
+      assert has_element?(view, ~s([phx-click="print_batch_label"]), "Print")
+    end
+
+    test "edits batch details including production date", %{conn: conn} do
+      inventory_received = inventory_received_fixture(%{gtin: "06161021090004"})
+      drug = drug_fixture(%{inventory_received: inventory_received})
+
+      batch =
+        Medcamp.BatchesFixtures.batch_fixture(%{
+          gtin: "06161021090004",
+          batch: "OLD-LOT",
+          manufacture_date: ~D[2026-01-01],
+          expiry: "2027-01-01",
+          price_per_unit: 10
+        })
+
+      drug_batch =
+        drug_batch_fixture(%{
+          inventory_received: inventory_received,
+          drug: drug,
+          batch: batch,
+          remaining_quantity: 20
+        })
+
+      {:ok, view, _html} =
+        live(conn, ~p"/pharmacist/drugs/#{drug.id}/batches/#{drug_batch.id}/edit")
+
+      assert has_element?(
+               view,
+               ~s(input[name="drug_batch[manufacture_date]"][value="2026-01-01"])
+             )
+
+      view
+      |> form("#drug-batch-form",
+        drug_batch: %{
+          gtin: "06161021090004",
+          batch: "NEW-LOT",
+          manufacture_date: "2026-02-03",
+          expiry: "2028-04-05",
+          quantity: "30",
+          price_per_unit: "15",
+          manufacturer: "Updated Manufacturer",
+          serial: "SER-2"
+        }
+      )
+      |> render_submit()
+
+      assert_redirect(view, ~p"/pharmacist/drugs/#{drug.id}")
+
+      updated = Medcamp.DrugBatches.get_drug_batch!(drug_batch.id)
+      assert updated.remaining_quantity == 30
+      assert updated.batch.remaining_quantity == 30
+      assert updated.batch.batch == "NEW-LOT"
+      assert updated.batch.manufacture_date == ~D[2026-02-03]
+      assert updated.batch.expiry == "2028-04-05"
+      assert updated.batch.price_per_unit == 15
+      assert updated.batch.manufacturer == "Updated Manufacturer"
+      assert updated.batch.serial == "SER-2"
+    end
+
+    test "does not show OTC or DDA controls", %{conn: conn} do
+      drug = drug_fixture()
+
+      {:ok, view, _html} = live(conn, ~p"/pharmacist/drugs/#{drug.id}")
+
+      refute has_element?(view, ~s([phx-click="toggle_otc"]))
+      refute has_element?(view, ~s([phx-click="toggle_dangerous_drug"]))
+      refute render(view) =~ "Add to DDA"
+
+      {:ok, new_view, _html} = live(conn, ~p"/pharmacist/drugs/new")
+      refute has_element?(new_view, ~s(input[name="drug[is_otc]"]))
+      refute has_element?(new_view, ~s(input[name="drug[is_dangerous_drug]"]))
+    end
+  end
+
   describe "Prescriptions tab" do
     test "shows an empty state when the drug has no prescriptions", %{conn: conn} do
       drug = drug_fixture()

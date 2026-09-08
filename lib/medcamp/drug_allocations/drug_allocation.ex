@@ -1,8 +1,11 @@
 defmodule Medcamp.DrugAllocations.DrugAllocation do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   schema "drug_allocations" do
+    tenant_field()
+
     field :quantity, :integer
     field :prescription, :string
     field :payment_type, :string
@@ -49,5 +52,6 @@ defmodule Medcamp.DrugAllocations.DrugAllocation do
         Medcamp.DrugAllocations.DrugAssigned.changeset(drug_assigned, attrs, opts)
       end
     )
+    |> put_org_id()
   end
 end

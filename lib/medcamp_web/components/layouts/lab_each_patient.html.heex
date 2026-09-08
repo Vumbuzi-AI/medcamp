@@ -13,12 +13,14 @@
       <button
         id="sidebar-mobile-open-btn"
         type="button"
-        class="absolute left-3 flex h-10 w-10 items-center justify-center rounded-xl border border-[#e2e6f0] bg-white text-[#373896] transition-colors hover:bg-[#F0F0FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6667AB] focus-visible:ring-offset-2"
+        class="absolute left-3 flex h-10 w-10 items-center justify-center rounded-xl border border-[#e2e6f0] bg-white text-brand-primary transition-colors hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2"
         aria-label="Open sidebar"
       >
         <Heroicons.icon name="bars-3" type="outline" class="h-5 w-5" />
       </button>
-      <span class="text-sm font-bold uppercase tracking-[0.28em] text-[#373896]">GHC</span>
+      <span class="text-sm font-bold uppercase tracking-[0.28em] text-brand-primary">
+        {organisation_initials(@current_organisation)}
+      </span>
     </div>
 
     <div class="flex min-h-screen flex-col p-4 lg:flex-row">

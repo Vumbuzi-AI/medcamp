@@ -214,11 +214,11 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
       <div :if={@live_action not in [:view_results, :print_preview]}>
         <!-- Header -->
-        <.header class="text-[#373896] border-b border-gray-100 pb-4 mb-6">
+        <.header class="text-brand-primary border-b border-gray-100 pb-4 mb-6">
           <div class="flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6 mr-3 text-[#6667ab]"
+              class="h-6 w-6 mr-3 text-brand-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -268,7 +268,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
               
     <!-- Add Test Button -->
               <.link patch={~p"/lab/lab_results/#{@lab_result}/add_test"}>
-                <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+                <.button class="bg-brand-accent hover:bg-brand-accent-dark">
                   <div class="flex items-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -442,9 +442,9 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
         </div>
         
     <!-- AI Interpretation -->
-        <div class="bg-[#f8f8ff] rounded-lg p-4 border border-[#e7e7ff] mb-6">
+        <div class="bg-[#f8f8ff] rounded-lg p-4 border border-brand-100 mb-6">
           <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-semibold text-[#373896] uppercase tracking-wide flex items-center">
+            <h3 class="text-sm font-semibold text-brand-primary uppercase tracking-wide flex items-center">
               <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   stroke-linecap="round"
@@ -470,7 +470,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
                 :if={has_test_entries?(@test_entries)}
                 phx-click="refresh-interpretation"
                 phx-disable-with="Generating..."
-                class="group inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-[#6667ab] rounded-lg hover:bg-[#5556a0] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                class="group inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-brand-accent rounded-lg hover:bg-brand-accent-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <svg
                   class="h-4 w-4 mr-1 group-disabled:animate-spin"
@@ -610,7 +610,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
               <% end %>
 
               <%= if Map.get(payload, "disclaimer") do %>
-                <p class="text-xs italic text-gray-500 pt-2 border-t border-[#e7e7ff]">
+                <p class="text-xs italic text-gray-500 pt-2 border-t border-brand-100">
                   {payload["disclaimer"]}
                 </p>
               <% end %>
@@ -630,7 +630,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
         <div class="mt-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <svg
-              class="h-5 w-5 mr-2 text-[#6667ab]"
+              class="h-5 w-5 mr-2 text-brand-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -666,7 +666,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
               </p>
               <div class="mt-4">
                 <.link patch={~p"/lab/lab_results/#{@lab_result}/add_test"}>
-                  <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+                  <.button class="bg-brand-accent hover:bg-brand-accent-dark">
                     Add First Test
                   </.button>
                 </.link>
@@ -953,7 +953,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
           <%= if @entry.status == "pending" do %>
             <.link
               patch={~p"/lab/lab_results/#{@lab_result}/fill/#{@entry.id}"}
-              class="px-3 py-1.5 text-sm font-medium text-white bg-[#6667ab] rounded-lg hover:bg-[#5556a0] transition-colors flex items-center"
+              class="px-3 py-1.5 text-sm font-medium text-white bg-brand-accent rounded-lg hover:bg-brand-accent-dark transition-colors flex items-center"
             >
               <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -1014,7 +1014,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
             <!-- Edit -->
             <.link
               patch={~p"/lab/lab_results/#{@lab_result}/fill/#{@entry.id}"}
-              class="px-3 py-1.5 text-sm font-medium text-[#6667ab] bg-[#6667ab]/10 rounded-lg hover:bg-[#6667ab]/20 transition-colors flex items-center"
+              class="px-3 py-1.5 text-sm font-medium text-brand-accent bg-brand-accent/10 rounded-lg hover:bg-brand-accent/20 transition-colors flex items-center"
             >
               <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path

@@ -10,7 +10,6 @@ defmodule Medcamp.StockAlerts do
   alias Medcamp.Batches.Batch
   alias Medcamp.DrugBatches.DrugBatch
   alias Medcamp.Drugs.Drug
-  alias Medcamp.Inventories.GeneralInventoryItem
 
   @near_expiry_days 90
   @default_reorder_threshold 20
@@ -117,16 +116,10 @@ defmodule Medcamp.StockAlerts do
   end
 
   @doc """
-  Returns items below minimum reorder level:
-  - Drugs: total stock (sum of drug_batches) < 20
-  - General inventory items: current_quantity < reorder_level
+  Returns drugs below the minimum reorder level - total stock across all of a
+  drug's batches under `@default_reorder_threshold`.
   """
-  def list_below_reorder_items do
-    drug_alerts = list_drugs_below_reorder()
-    general_inventory_alerts = list_general_inventory_below_reorder()
-
-    drug_alerts ++ general_inventory_alerts
-  end
+  def list_below_reorder_items, do: list_drugs_below_reorder()
 
   defp list_drugs_below_reorder do
     from(d in Drug,
@@ -148,35 +141,6 @@ defmodule Medcamp.StockAlerts do
           drug.brand_name || drug.inventory_received.brand_name || drug.generic_name || "Unknown",
         current_quantity: total,
         reorder_level: @default_reorder_threshold
-      }
-    end)
-  end
-
-  defp list_general_inventory_below_reorder do
-    from(i in GeneralInventoryItem,
-      where: not is_nil(i.reorder_level)
-    )
-    |> Repo.all()
-    |> Enum.filter(fn item ->
-      current =
-        (item.current_quantity && Decimal.to_integer(Decimal.round(item.current_quantity))) || 0
-
-      reorder = (item.reorder_level && Decimal.to_integer(Decimal.round(item.reorder_level))) || 0
-      current < reorder
-    end)
-    |> Enum.map(fn item ->
-      current =
-        (item.current_quantity && Decimal.to_integer(Decimal.round(item.current_quantity))) || 0
-
-      reorder = (item.reorder_level && Decimal.to_integer(Decimal.round(item.reorder_level))) || 0
-
-      %{
-        type: :general_inventory,
-        id: item.id,
-        item_name: item.name || "Unknown",
-        current_quantity: current,
-        reorder_level: reorder,
-        unit: item.unit_of_measure
       }
     end)
   end

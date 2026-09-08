@@ -2,68 +2,97 @@
 
 ## User Model
 
-Users are stored in `Medcamp.Accounts.User` (`users`). Important fields include `email`, `hashed_password`, `name`, `role`, `otp`, `is_active`, `is_for_medical_camp`, `department_id`, `supplier_id`, `last_logged_in_at`, and `last_logged_out_at`.
+Users are stored in `Medcamp.Accounts.User` (`users`). Notable fields:
+`email`, `hashed_password`, `name`, `role`, `otp`, `is_active`,
+`is_for_medical_camp`, `gsrn`, `last_logged_in_at`, `last_logged_out_at`.
 
-Valid roles are defined in `lib/medcamp/accounts/user.ex`:
+The camp has five roles, defined in `lib/medcamp/accounts/user.ex`:
 
-- Clinical/operations: `admin`, `doctor`, `nurse`, `labtechnician`, `reception`, `pharmacist`, `radiologist`, `support staff`, `inventory_manager`, `housekeeping`, `cleaner`, `staff`.
-- Procurement: `supplier`, `procurement_officer`, `stores_officer`, `finance_officer`, `admin`.
+```elixir
+@roles ~w(admin doctor nurse pharmacist labtechnician)
+```
+
+There is no self-registration — an admin creates every account at
+`/admin/users`.
 
 ## Browser Session
 
-`MedcampWeb.UserAuth` fetches the current user from the session token or signed remember-me cookie. Email login verification is temporarily disabled by `config :medcamp, login_otp_enabled: false`, so successful password verification creates the authenticated session immediately. Setting that option to `true` restores the existing six-digit, single-use email code flow; codes expire after five minutes and permit five attempts. The code verifier is stored server-side in `users_tokens`, while the pending browser session contains only a random nonce and token reference.
+`MedcampWeb.UserAuth` fetches the current user from the session token or the
+signed remember-me cookie. Email login verification is disabled by
+`config :medcamp, login_otp_enabled: false`, so a correct password creates the
+session immediately. Setting that option to `true` restores the six-digit,
+single-use email code flow; codes expire after five minutes and allow five
+attempts. The verifier lives server-side in `users_tokens`, while the pending
+browser session holds only a nonce and token reference.
 
-Authenticated browser sessions are logged out after five minutes without pointer, keyboard, touch, or scroll activity. The browser synchronizes activity periodically, while `UserAuth` independently rejects a stale session on the next HTTP request. Timeout and explicit logout both delete the database token and remember-me cookie, broadcast the LiveView disconnect, and record logout.
+Sessions are logged out after five minutes without pointer, keyboard, touch or
+scroll activity. The browser reports activity periodically and `UserAuth`
+independently rejects a stale session on the next request. Timeout and
+explicit logout both delete the token and remember-me cookie, disconnect the
+LiveView and record the logout.
 
-## Route Protection
+## Two Layers Of Access Control
 
-The router uses these pipeline plugs:
+**Role** decides which scope you may enter. `UserAuth` generates one
+`require_authenticated_<role>` plug per camp role from a single clause, and a
+signed-in user of another role is bounced to their own landing page.
 
-- `:browser`: HTML, session, flash, CSRF, secure headers, and `fetch_current_user`.
-- `:api`: JSON.
-- `:supplier_auth`: `MedcampWeb.Plugs.RequireProcurementRole` for `supplier`.
-- `:procurement_auth`: `RequireProcurementRole` for `procurement_officer`, `stores_officer`, `finance_officer`, and `admin`.
+**Panel permission** decides which pages within that scope you actually see.
+`Medcamp.Authorization.can?/2` resolves a permission slug for a user, with a
+per-user override winning over the role default and an unknown slug always
+denied — it fails closed.
 
-Role-specific plugs in `UserAuth` protect `/doctor`, `/nurse`, `/reception`, `/pharmacist`, `/lab`, `/radiologist`, `/admin`, `/inventory_manager`, and `/support_staff`. Mismatched users are redirected to their role's default page.
+`MedcampWeb.SidebarCatalog` is the single source of truth for both halves:
 
-Default signed-in redirects:
+* `MedcampWeb.SidebarComponents` renders only the tabs the user can see.
+* `MedcampWeb.Plugs.RequirePanelPermission` refuses the routes behind a tab
+  the user cannot see, so hiding a link also closes the URL.
+
+Because `can?/2` fails closed, the `seed_panel_permissions` migration must
+run — it derives every permission from the catalog via
+`Medcamp.Authorization.PanelSync.sync/1` and grants each role its own panels.
+Without it, every page is refused for everyone.
+
+Admins manage per-user overrides at `/admin/users/:id/permissions`.
+
+## Default Landing Pages
+
+`UserAuth.default_path_for_role/1`:
 
 | Role | Redirect |
 | --- | --- |
-| `admin` | `/admin/users` |
+| `admin` | `/admin/dashboard` |
 | `doctor` | `/doctor/scan` |
-| `reception` | `/reception/scan` |
 | `nurse` | `/nurse/scan` |
 | `labtechnician` | `/lab/scan` |
 | `pharmacist` | `/pharmacist/scan` |
-| `inventory_manager` | `/inventory_manager/inventories_received` |
-| `radiologist` | `/radiologist/scan` |
-| `support staff` | `/support_staff/daily_activities` |
-| procurement roles | `/procurement/dashboard` |
-| `supplier` | `/supplier/dashboard` |
 
 ## LiveView Mount Hooks
 
-- `MedcampWeb.UserAuth`: `:mount_current_user`, `:ensure_authenticated`, and `:redirect_if_user_is_authenticated`.
-- `MedcampWeb.Plugs.RequireProcurementRole`: role checks for procurement and supplier LiveView sessions.
-- `MedcampWeb.ProcurementPortal`: assigns active nav, notifications, PubSub subscriptions, counts, and portal layout state.
-- `MedcampWeb.StockAlertsLive.assign_stock_alerts`: mounted for admin, pharmacist, and inventory manager sessions.
-- `MedcampWeb.MedicalCampAuth`: requires a user session before protected medical camp doctor-note pages.
-- `MedcampWeb.MealEntryAuth`: assigns a support staff user from `meal_entry_user_id` stored by the meal PIN session controller.
-- `MedcampWeb.AdminMedicalCampExternalAuth`: mounts or requires an active admin from the medical camp admin PIN session.
+- `MedcampWeb.UserAuth`: `:mount_current_user`, `:ensure_authenticated`,
+  `:redirect_if_user_is_authenticated`.
+- `MedcampWeb.Plugs.RequirePanelPermission`: `:default`, on every role scope.
+- `MedcampWeb.StockAlertsLive.assign_stock_alerts`: admin and pharmacist
+  sessions, for the near-expiry / low-stock badge.
+- `MedcampWeb.MedicalCampAuth`: gates the camp doctor-note pages.
+- `MedcampWeb.AdminMedicalCampExternalAuth`: the admin camp PIN session.
 
 ## PIN Flows
 
-- User OTP/PIN values are normalized to 4 digits by `Accounts.User`.
+- OTP/PIN values are normalized to four digits by `Accounts.User`.
 - `Accounts.get_admin_by_otp/1` backs admin medical camp access.
-- `Accounts.get_support_staff_by_otp/1` backs mobile staff meal entry.
-- Medical camp patient pages use GSRN routes and protected doctor-note pages check for a session token.
+- Camp patient pages are reached by GSRN; the protected doctor-note pages
+  additionally require a camp session token.
 
 ## Adding A Role
 
-1. Add the role to `@non_procurement_roles` or `@procurement_roles` in `Medcamp.Accounts.User`.
-2. Add or update a route plug in `MedcampWeb.UserAuth` or `RequireProcurementRole`.
-3. Add a router scope/live_session for the new portal.
-4. Update `redirect_to_page_conn_case/2`.
-5. Seed at least one development user and update README/docs.
-6. Add tests for route access and redirect behavior.
+1. Add it to `@roles` in `Medcamp.Accounts.User`.
+2. Add it to `@role_gates` in `MedcampWeb.UserAuth` and give it a landing page
+   in `default_path_for_role/1`.
+3. Add a router scope and `live_session`.
+4. Add its tab groups to `MedcampWeb.SidebarCatalog` (`@roles`,
+   `tab_groups/1`, `panel_role_for_path/1`, and patient tabs if it opens
+   patient records).
+5. Add a migration calling `PanelSync.sync(repo())` so the new panels become
+   grantable.
+6. Add tests for route access and redirect behaviour.

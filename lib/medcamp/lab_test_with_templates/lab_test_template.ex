@@ -21,9 +21,12 @@ defmodule Medcamp.LabTestTemplates.LabTestTemplate do
   - `section` - grouping label (e.g., "Microscopy", "Chemical")
   """
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   schema "lab_test_templates" do
+    tenant_field()
+
     field :name, :string
     field :short_name, :string
     field :description, :string
@@ -46,6 +49,7 @@ defmodule Medcamp.LabTestTemplates.LabTestTemplate do
     |> validate_field_definitions()
     |> unique_constraint(:name)
     |> foreign_key_constraint(:category_id)
+    |> put_org_id()
   end
 
   defp validate_field_definitions(changeset) do

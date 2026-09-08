@@ -107,7 +107,6 @@ defmodule MedcampWeb.AdminUsersLive.PermissionsIndex do
     end)
   end
 
-
   # The per-patient sidebar - the sections a user sees once they open a
   # patient - is a flat list rather than grouped, so it gets one group of
   # its own at the end.
@@ -232,7 +231,7 @@ defmodule MedcampWeb.AdminUsersLive.PermissionsIndex do
                   phx-click="toggle_permission"
                   phx-value-slug={tab.slug}
                   phx-value-granted={to_string(!tab.granted)}
-                  class="h-4 w-4 rounded border-gray-300 text-[#373896] focus:ring-[#6667ab]"
+                  class="h-4 w-4 rounded border-gray-300 text-brand-primary focus:ring-brand-accent"
                 />
                 <label for={"permission-#{tab.slug}"} class="flex-1 min-w-0 cursor-pointer">
                   <p class="text-sm font-medium text-gray-900">{tab.name}</p>

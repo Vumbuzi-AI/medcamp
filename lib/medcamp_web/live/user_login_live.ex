@@ -37,6 +37,13 @@ defmodule MedcampWeb.UserLoginLive do
             </.button>
           </:actions>
         </.simple_form>
+
+        <p class="mt-8 text-sm text-grey">
+          New here?
+          <.link navigate={~p"/organisations/register"} class="font-semibold text-brand-primary">
+            Create your organisation
+          </.link>
+        </p>
       </div>
     </div>
     """

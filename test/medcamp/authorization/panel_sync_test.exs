@@ -31,7 +31,9 @@ defmodule Medcamp.Authorization.PanelSyncTest do
   end
 
   test "each role is granted its per-patient record sections by default" do
-    for role <- SidebarCatalog.roles(), tabs = SidebarCatalog.all_patient_tabs(role), tabs != [] do
+    for role <- SidebarCatalog.roles(),
+        tabs = SidebarCatalog.all_patient_tabs(role),
+        tabs != [] do
       defaults = MapSet.new(Authorization.list_role_permissions(role))
 
       for tab <- tabs do

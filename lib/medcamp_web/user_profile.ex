@@ -13,13 +13,19 @@ defmodule MedcampWeb.UserLive.Profile do
          socket
          |> put_flash(:error, "User not found")
          |> assign(:user, nil)
-         |> assign(:user_id, nil)}
+         |> assign(:user_id, nil)
+         |> assign(:current_organisation, nil)}
 
       user ->
+        # Public page, no session: the scanned staff card is what tells us
+        # which organisation's branding to wear.
+        organisation = MedcampWeb.PublicTenant.enter(user.organisation_id)
+
         {:ok,
          socket
          |> assign(:user, user)
-         |> assign(:user_id, user.id)}
+         |> assign(:user_id, user.id)
+         |> assign(:current_organisation, organisation)}
     end
   end
 
@@ -30,7 +36,7 @@ defmodule MedcampWeb.UserLive.Profile do
       <div class="flex-1 flex items-center justify-center p-4">
         <%= if @user do %>
           <div class="w-full max-w-4xl bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden">
-            <div class="bg-[#373896] px-6 py-4">
+            <div class="bg-brand-primary px-6 py-4">
               <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                   <div>
@@ -55,7 +61,7 @@ defmodule MedcampWeb.UserLive.Profile do
               <div class="flex flex-col lg:flex-row gap-6 mb-6">
                 <!-- Profile Image & Basic Info -->
                 <div class="lg:w-1/3">
-                  <div class="bg-[#f0f0ff] border border-[#e7e7ff] rounded-lg p-6 text-center">
+                  <div class="bg-brand-50 border border-brand-100 rounded-lg p-6 text-center">
                     <div class="mb-4">
                       <%= if @user.image do %>
                         <img
@@ -64,13 +70,13 @@ defmodule MedcampWeb.UserLive.Profile do
                           class="w-24 h-24 rounded-full mx-auto object-cover border-4 border-white shadow-lg"
                         />
                       <% else %>
-                        <div class="w-24 h-24 rounded-full mx-auto bg-[#373896] flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                        <div class="w-24 h-24 rounded-full mx-auto bg-brand-primary flex items-center justify-center text-white text-2xl font-bold shadow-lg">
                           {get_initials(@user.name)}
                         </div>
                       <% end %>
                     </div>
 
-                    <h2 class="text-xl font-bold text-[#373896] mb-1">
+                    <h2 class="text-xl font-bold text-brand-primary mb-1">
                       {@user.name}
                     </h2>
 
@@ -97,8 +103,8 @@ defmodule MedcampWeb.UserLive.Profile do
                 
     <!-- Contact & Professional Details -->
                 <div class="lg:w-2/3">
-                  <div class="bg-[#f0f0ff] border border-[#e7e7ff] rounded-lg p-6">
-                    <h3 class="text-lg font-semibold text-[#373896] mb-4 flex items-center">
+                  <div class="bg-brand-50 border border-brand-100 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-brand-primary mb-4 flex items-center">
                       <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
                           stroke-linecap="round"
@@ -122,7 +128,7 @@ defmodule MedcampWeb.UserLive.Profile do
                           <div class="flex items-center text-gray-900">
                             <a
                               href={"mailto:#{@user.email}"}
-                              class="text-[#373896] hover:text-[#6667ab]"
+                              class="text-brand-primary hover:text-brand-accent"
                             >
                               {@user.email}
                             </a>
@@ -134,7 +140,7 @@ defmodule MedcampWeb.UserLive.Profile do
                             <label class="text-sm text-gray-500 block mb-1">Phone Number</label>
                             <div class="flex items-center text-gray-900">
                               <svg
-                                class="h-4 w-4 mr-2 text-[#373896]"
+                                class="h-4 w-4 mr-2 text-brand-primary"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -148,7 +154,7 @@ defmodule MedcampWeb.UserLive.Profile do
                               </svg>
                               <a
                                 href={"tel:#{@user.phone_number}"}
-                                class="text-[#373896] hover:text-[#6667ab]"
+                                class="text-brand-primary hover:text-brand-accent"
                               >
                                 {format_phone(@user.phone_number)}
                               </a>
@@ -199,7 +205,7 @@ defmodule MedcampWeb.UserLive.Profile do
               <div class="w-[100%] gap-6 mb-6">
                 <!-- Account Status -->
                 <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                  <h3 class="text-lg font-semibold text-[#373896] mb-4 flex items-center">
+                  <h3 class="text-lg font-semibold text-brand-primary mb-4 flex items-center">
                     <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
                         stroke-linecap="round"
@@ -239,7 +245,7 @@ defmodule MedcampWeb.UserLive.Profile do
               <div class="flex justify-center">
                 <a
                   href="/"
-                  class="inline-flex items-center px-6 py-3 bg-[#373896] text-white font-medium rounded-lg hover:bg-[#6667ab] transition-colors"
+                  class="inline-flex items-center px-6 py-3 bg-brand-primary text-white font-medium rounded-lg hover:bg-brand-accent transition-colors"
                 >
                   <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
@@ -287,7 +293,7 @@ defmodule MedcampWeb.UserLive.Profile do
 
             <a
               href="/"
-              class="inline-flex items-center px-4 py-2 bg-[#373896] text-white text-sm font-medium rounded-md hover:bg-[#6667ab] transition-colors"
+              class="inline-flex items-center px-4 py-2 bg-brand-primary text-white text-sm font-medium rounded-md hover:bg-brand-accent transition-colors"
             >
               <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path

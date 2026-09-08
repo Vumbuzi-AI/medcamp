@@ -29,7 +29,7 @@ defmodule Medcamp.DataCase do
 
   setup tags do
     Medcamp.DataCase.setup_sandbox(tags)
-    :ok
+    {:ok, organisation: Medcamp.DataCase.setup_tenant()}
   end
 
   @doc """
@@ -38,6 +38,22 @@ defmodule Medcamp.DataCase do
   def setup_sandbox(tags) do
     pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Medcamp.Repo, shared: not tags[:async])
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+  end
+
+  @doc """
+  Creates an organisation for the test and enters its tenancy.
+
+  Tenant-scoped queries raise without an organisation (see
+  `Medcamp.Repo.prepare_query/3`), so this is what lets the existing fixtures
+  and tests carry on unchanged. A test that wants to prove isolation creates a
+  second organisation with `Medcamp.OrganisationsFixtures.organisation_fixture/1`
+  and switches between them with `Medcamp.Tenancy.with_org/2`.
+  """
+  def setup_tenant do
+    organisation = Medcamp.OrganisationsFixtures.organisation_fixture()
+    Medcamp.Tenancy.put_org_id(organisation.id)
+    on_exit(fn -> Medcamp.Tenancy.clear_org_id() end)
+    organisation
   end
 
   @doc """

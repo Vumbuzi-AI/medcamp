@@ -21,6 +21,6 @@ defmodule Medcamp.BatchesFixtures do
       })
       |> Medcamp.Batches.create_batch()
 
-    Medcamp.Repo.preload(batch, [:inventory_received, :supplier])
+    Medcamp.Repo.preload(batch, [:inventory_received])
   end
 end

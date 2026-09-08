@@ -133,7 +133,7 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
           <:group label="Report Period">
             <select
               name="period"
-              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
             >
               <%= for p <- @period_options do %>
                 <option value={p} selected={@period == p}>{format_period(p)}</option>
@@ -141,7 +141,7 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
             </select>
             <select
               name="category"
-              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
             >
               <%= for c <- @category_options do %>
                 <option value={c} selected={@category == c}>{format_category(c)}</option>
@@ -157,7 +157,7 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
                   type="date"
                   name="date_from"
                   value={@date_from}
-                  class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                  class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                 />
               </div>
               <div>
@@ -166,7 +166,7 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
                   type="date"
                   name="date_to"
                   value={@date_to}
-                  class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                  class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                 />
               </div>
             <% else %>
@@ -181,7 +181,7 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
                   type="date"
                   name="anchor_date"
                   value={@anchor_date}
-                  class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                  class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                 />
               </div>
             <% end %>
@@ -198,13 +198,13 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
       <%!-- Summary stats bar --%>
       <%= if not Enum.empty?(@results) do %>
         <div class="flex flex-wrap gap-4 mb-4">
-          <div class="flex items-center gap-2 px-4 py-2 bg-[#f0f0ff] border border-[#e7e7ff] rounded-lg">
+          <div class="flex items-center gap-2 px-4 py-2 bg-brand-50 border border-brand-100 rounded-lg">
             <span class="text-xs text-gray-500 font-medium">Distinct items</span>
-            <span class="text-lg font-bold text-[#373896]">{length(@results)}</span>
+            <span class="text-lg font-bold text-brand-primary">{length(@results)}</span>
           </div>
-          <div class="flex items-center gap-2 px-4 py-2 bg-[#f0f0ff] border border-[#e7e7ff] rounded-lg">
+          <div class="flex items-center gap-2 px-4 py-2 bg-brand-50 border border-brand-100 rounded-lg">
             <span class="text-xs text-gray-500 font-medium">Total qty consumed</span>
-            <span class="text-lg font-bold text-[#373896]">
+            <span class="text-lg font-bold text-brand-primary">
               {@results |> Enum.map(& &1.total_quantity) |> Enum.sum()}
             </span>
           </div>
@@ -253,7 +253,7 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
           <:description_slot>
             <%= if @search != "" do %>
               No results for "<strong>{@search}</strong>" in the selected period.
-              <button phx-click="clear_search" class="ml-1 text-[#6667ab] underline">
+              <button phx-click="clear_search" class="ml-1 text-brand-accent underline">
                 Clear search
               </button>
             <% else %>
@@ -299,7 +299,7 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
               <%= for {item, idx} <- Enum.with_index(@results, 1) do %>
                 <tr class={if rem(idx, 2) == 0, do: "bg-gray-50", else: "bg-white"}>
                   <td class="px-4 py-3 text-sm text-gray-900">
-                    <span class="px-2 py-0.5 rounded-full bg-[#e7e7ff] text-[#373896] font-medium">
+                    <span class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-primary font-medium">
                       {item.rank}
                     </span>
                   </td>

@@ -7,10 +7,9 @@ defmodule Medcamp.DataMatrixParser do
   Extracts GTIN from datamatrix string (positions 2-15)
   """
   def extract_gtin(datamatrix_string) when is_binary(datamatrix_string) do
-    if String.length(datamatrix_string) >= 16 do
-      String.slice(datamatrix_string, 3..15)
-    else
-      nil
+    case Regex.run(~r/01(\d{14})/, datamatrix_string) do
+      [_, gtin] -> gtin
+      _ -> nil
     end
   end
 
@@ -19,16 +18,19 @@ defmodule Medcamp.DataMatrixParser do
   Starting from position 18 (after "01" + 14-digit GTIN + "10")
   """
   def find_batch_from_datamatrix(datamatrix_string, gtin) do
-    # Skip "01" (2) + GTIN (14) + "10" (2) = 18 characters
-    batch_start = 18
+    marker = "01#{gtin}10"
 
-    if String.length(datamatrix_string) > batch_start do
-      remaining = String.slice(datamatrix_string, batch_start..-1)
+    case :binary.match(datamatrix_string, marker) do
+      {start, marker_length} ->
+        batch_start = start + marker_length
 
-      IO.inspect(remaining, label: "Remaining string for batch extraction")
-      try_batch_combinations(remaining, gtin, 1)
-    else
-      {:error, "Datamatrix too short"}
+        remaining =
+          binary_part(datamatrix_string, batch_start, byte_size(datamatrix_string) - batch_start)
+
+        try_batch_combinations(remaining, gtin, 1)
+
+      :nomatch ->
+        {:error, "Datamatrix does not contain GS1 GTIN and batch identifiers"}
     end
   end
 

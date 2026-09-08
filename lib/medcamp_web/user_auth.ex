@@ -5,6 +5,8 @@ defmodule MedcampWeb.UserAuth do
   import Phoenix.Controller
 
   alias Medcamp.Accounts
+  alias Medcamp.Organisations
+  alias Medcamp.Tenancy
   alias Medcamp.UserLoginSessions
 
   # Make the remember me cookie valid for 60 days.
@@ -29,23 +31,49 @@ defmodule MedcampWeb.UserAuth do
   def log_in_user(conn, user, params \\ %{}) do
     user_return_to = get_session(conn, :user_return_to)
 
-    if user.is_active == true do
-      token = Accounts.generate_user_session_token(user)
+    # Logging in is the moment the tenant becomes known. Everything below -
+    # the login-session record in particular - is written into it.
+    Tenancy.put_org_id(user.organisation_id)
 
-      Accounts.update_user_last_logged_in(user)
-      UserLoginSessions.create_login(user.id)
+    case login_block_reason(user) do
+      nil ->
+        token = Accounts.generate_user_session_token(user)
 
-      conn
-      |> renew_session()
-      |> put_token_in_session(token)
-      |> maybe_write_remember_me_cookie(token, params)
-      |> put_flash(:info, get_session(conn, :login_success_message) || "Welcome back!")
-      |> redirect(to: user_return_to || signed_in_path(conn))
-    else
-      conn
-      |> renew_session()
-      |> redirect(to: ~p"/")
-      |> put_flash(:error, "Your account has been deactivated. Please contact admin.")
+        Accounts.update_user_last_logged_in(user)
+        UserLoginSessions.create_login(user.id)
+
+        conn
+        |> renew_session()
+        |> put_token_in_session(token)
+        |> maybe_write_remember_me_cookie(token, params)
+        |> put_flash(:info, get_session(conn, :login_success_message) || "Welcome back!")
+        |> redirect(to: user_return_to || signed_in_path_for_user(user))
+
+      message ->
+        conn
+        |> renew_session()
+        |> put_flash(:error, message)
+        |> redirect(to: ~p"/")
+    end
+  end
+
+  @pending_message "Your organisation is awaiting approval. We will email you once it is active."
+  @suspended_message "Your organisation is not active. Please contact support."
+  @deactivated_message "Your account has been deactivated. Please contact admin."
+
+  # An organisation that has been deactivated - or a self-serve signup that has
+  # not been approved yet - must not be usable, however the login is reached.
+  # Checking the user's flag alone would have left the superadmin console's
+  # "Deactivate" button doing nothing.
+  defp login_block_reason(user) do
+    organisation = Organisations.get_user_organisation(user)
+
+    cond do
+      is_nil(organisation) -> @suspended_message
+      not organisation.is_active and is_nil(organisation.approved_at) -> @pending_message
+      not organisation.is_active -> @suspended_message
+      not user.is_active -> @deactivated_message
+      true -> nil
     end
   end
 
@@ -95,6 +123,7 @@ defmodule MedcampWeb.UserAuth do
 
     if user_token do
       if user = Accounts.get_user_by_session_token(user_token) do
+        Tenancy.put_org_id(user.organisation_id)
         Accounts.update_user_last_logged_out(user)
         UserLoginSessions.record_logout(user.id)
       end
@@ -116,11 +145,53 @@ defmodule MedcampWeb.UserAuth do
   @doc """
   Authenticates the user by looking into the session
   and remember me token.
+
+  Also establishes the tenant: everything the request does from here on is
+  filtered to this user's organisation by `Medcamp.Repo.prepare_query/3`.
+  Doing it here rather than in a separate plug means it cannot end up ordered
+  before the user is known.
   """
   def fetch_current_user(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
-    user = user_token && Accounts.get_user_by_session_token(user_token)
-    assign(conn, :current_user, user)
+
+    user =
+      user_token
+      |> then(&(&1 && Accounts.get_user_by_session_token(&1)))
+      |> reject_inactive_organisation()
+
+    conn
+    |> assign(:current_user, user)
+    |> assign_organisation(user)
+  end
+
+  @doc """
+  Drops a user whose organisation is no longer active.
+
+  Deactivating an organisation has to end the sessions its staff already hold,
+  not just stop new logins - otherwise a suspended tenant keeps working until
+  everyone happens to log out.
+  """
+  def reject_inactive_organisation(nil), do: nil
+
+  def reject_inactive_organisation(user) do
+    case Organisations.get_user_organisation(user) do
+      %{is_active: true} -> user
+      _ -> nil
+    end
+  end
+
+  @doc """
+  Puts `user`'s organisation into process scope and assigns it for layouts.
+
+  Public for the entry points that resolve a tenant some other way - the
+  GSRN camp routes and the scan API - where there is no session to read.
+  """
+  def assign_organisation(conn, user) do
+    organisation = Organisations.get_user_organisation(user)
+
+    if organisation, do: Tenancy.put_org_id(organisation.id)
+
+    assign(conn, :current_organisation, organisation)
   end
 
   defp ensure_user_token(conn) do
@@ -191,6 +262,20 @@ defmodule MedcampWeb.UserAuth do
     end
   end
 
+  @doc """
+  `on_mount` counterpart to `require_superadmin/2`, for the superadmin
+  LiveViews.
+  """
+  def on_mount(:ensure_superadmin, _params, session, socket) do
+    socket = mount_current_user(socket, session)
+
+    if match?(%{is_superadmin: true}, socket.assigns.current_user) do
+      {:cont, socket}
+    else
+      {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/users/log_in")}
+    end
+  end
+
   def on_mount(:redirect_if_user_is_authenticated, _params, session, socket) do
     socket = mount_current_user(socket, session)
 
@@ -202,16 +287,29 @@ defmodule MedcampWeb.UserAuth do
   end
 
   defp mount_current_user(socket, session) do
-    Phoenix.Component.assign_new(socket, :current_user, fn ->
-      if user_token = session["user_token"] do
-        user = Accounts.get_user_by_session_token(user_token)
-
-        if user do
-          Medcamp.Repo.put_audit_user(user.id)
+    socket =
+      Phoenix.Component.assign_new(socket, :current_user, fn ->
+        if user_token = session["user_token"] do
+          user_token
+          |> Accounts.get_user_by_session_token()
+          |> reject_inactive_organisation()
         end
+      end)
 
-        user
-      end
+    user = socket.assigns.current_user
+
+    # A LiveView owns its own process, so the audit user and the tenant have
+    # to be re-established here - the plug that set them ran in the process
+    # that served the initial HTTP request, not this one. Kept outside
+    # `assign_new/3` so the connected mount sets them too, even when the user
+    # itself came across from the disconnected render.
+    if user, do: Medcamp.Repo.put_audit_user(user.id)
+
+    Phoenix.Component.assign_new(socket, :current_organisation, fn ->
+      Organisations.get_user_organisation(user)
+    end)
+    |> tap(fn socket ->
+      if org = socket.assigns.current_organisation, do: Tenancy.put_org_id(org.id)
     end)
   end
 
@@ -246,175 +344,79 @@ defmodule MedcampWeb.UserAuth do
     end
   end
 
-  def require_authenticated_doctor(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "doctor" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
+  @role_gates [
+    doctor: "doctor",
+    nurse: "nurse",
+    admin: "admin",
+    pharmacist: "pharmacist",
+    lab_technician: "labtechnician"
+  ]
+
+  # One `require_authenticated_<role>` plug per camp role. They were eleven
+  # near-identical copies before the trim; the five that survive differ only
+  # in the role string, so they are generated from one clause.
+  for {name, role} <- @role_gates do
+    def unquote(:"require_authenticated_#{name}")(conn, _opts) do
+      require_role(conn, unquote(role))
     end
   end
 
-  def require_authenticated_nurse(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "nurse" do
+  defp require_role(conn, role) do
+    case conn.assigns[:current_user] do
+      %{is_superadmin: true} ->
+        redirect_to_page_conn(conn, ~p"/superadmin/organisations")
+
+      %{role: ^role} ->
         conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
+
+      %{role: other_role} ->
+        redirect_to_page_conn_case(conn, other_role)
+
+      nil ->
+        conn
+        |> put_flash(:error, "You must log in to access this page.")
+        |> maybe_store_return_to()
+        |> redirect(to: ~p"/users/log_in")
+        |> halt()
     end
   end
 
-  def require_authenticated_inventory_manager(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "inventory_manager" ||
-           conn.assigns[:current_user].role == "admin" ||
-           conn.assigns[:current_user].role == "reception" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
+  @doc """
+  Gates the console that provisions organisations.
 
-  def require_authenticated_reception(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "reception" do
+  A superadmin sits outside every tenant - the flag is set directly in the
+  database, never through the UI, so there is no path for an organisation's
+  own admin to grant it to themselves.
+  """
+  def require_superadmin(conn, _opts) do
+    case conn.assigns[:current_user] do
+      %{is_superadmin: true} ->
         conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
 
-  def require_authenticated_admin(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "admin" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
+      %{role: role} ->
+        redirect_to_page_conn_case(conn, role)
 
-  def require_authenticated_pharmacist(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "pharmacist" do
+      nil ->
         conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
-
-  def require_authenticated_lab_technician(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "labtechnician" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
-
-  def require_authenticated_support_staff(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "support staff" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
-
-  def require_authenticated_radiologist(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "radiologist" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
-    end
-  end
-
-  def require_authenticated_supplier(conn, _opts) do
-    if conn.assigns[:current_user] do
-      if conn.assigns[:current_user].role == "supplier" do
-        conn
-      else
-        redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-      end
-    else
-      conn
-      |> put_flash(:error, "You must log in to access this page.")
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
-      |> halt()
+        |> put_flash(:error, "You must log in to access this page.")
+        |> maybe_store_return_to()
+        |> redirect(to: ~p"/users/log_in")
+        |> halt()
     end
   end
 
   def redirect_to_correct_page(conn, _opts) do
-    if conn.assigns[:current_user] do
-      redirect_to_page_conn_case(conn, conn.assigns[:current_user].role)
-    else
-      conn
+    case conn.assigns[:current_user] do
+      nil -> conn
+      %{is_superadmin: true} -> redirect_to_page_conn(conn, ~p"/superadmin/organisations")
+      %{role: role} -> redirect_to_page_conn_case(conn, role)
     end
   end
+
+  @doc "The correct landing page for a signed-in user."
+  def landing_path_for_user(%{is_superadmin: true}), do: "/superadmin/organisations"
+  def landing_path_for_user(%{role: role}), do: default_path_for_role(role)
+  def landing_path_for_user(_user), do: "/users/log_in"
 
   @doc """
   Each role's default landing page - used both to send a just-logged-in user
@@ -423,41 +425,12 @@ defmodule MedcampWeb.UserAuth do
   """
   def default_path_for_role(role) do
     case role do
-      "admin" ->
-        "/admin/dashboard"
-
-      "doctor" ->
-        "/doctor/scan"
-
-      "reception" ->
-        "/reception/scan"
-
-      "nurse" ->
-        "/nurse/scan"
-
-      "labtechnician" ->
-        "/lab/scan"
-
-      "pharmacist" ->
-        "/pharmacist/scan"
-
-      "inventory_manager" ->
-        "/inventory_manager/inventories_received"
-
-      "radiologist" ->
-        "/radiologist/scan"
-
-      "support staff" ->
-        "/support_staff/daily_activities"
-
-      role when role in ["procurement_officer", "stores_officer", "finance_officer"] ->
-        "/procurement/dashboard"
-
-      "supplier" ->
-        "/supplier/dashboard"
-
-      _ ->
-        "/todos"
+      "admin" -> "/admin/dashboard"
+      "doctor" -> "/doctor/scan"
+      "nurse" -> "/nurse/scan"
+      "labtechnician" -> "/lab/scan"
+      "pharmacist" -> "/pharmacist/scan"
+      _ -> "/users/log_in"
     end
   end
 
@@ -484,5 +457,10 @@ defmodule MedcampWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  defp signed_in_path(_conn), do: ~p"/"
+  defp signed_in_path(%{assigns: assigns}) do
+    signed_in_path_for_user(assigns[:current_user])
+  end
+
+  defp signed_in_path_for_user(%{is_superadmin: true}), do: "/superadmin/organisations"
+  defp signed_in_path_for_user(_user), do: ~p"/"
 end

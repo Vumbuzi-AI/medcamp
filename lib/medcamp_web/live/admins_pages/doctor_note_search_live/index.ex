@@ -117,7 +117,7 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
     <div class="min-h-screen bg-slate-50 -m-4 p-4 sm:-m-6 sm:p-6">
       <div class="mx-auto w-[95%] space-y-6">
         <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <p class="text-sm font-semibold text-[#6667ab]">Clinical documentation</p>
+          <p class="text-sm font-semibold text-brand-accent">Clinical documentation</p>
           <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">
             Doctor Note Master Search
           </h1>
@@ -140,7 +140,7 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
                 value={@filters.query}
                 placeholder="e.g. typhoid"
                 required
-                class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
               />
             </label>
             <label class="block">
@@ -150,7 +150,7 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
                 name="filters[date_from]"
                 value={@filters.date_from}
                 required
-                class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
               />
             </label>
             <label class="block">
@@ -160,7 +160,7 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
                 name="filters[date_to]"
                 value={@filters.date_to}
                 required
-                class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
               />
             </label>
             <div class="grid grid-cols-2 gap-2">
@@ -173,7 +173,7 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
                   min="0"
                   max="130"
                   placeholder="Any"
-                  class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                  class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
                 />
               </label>
               <label class="block">
@@ -185,7 +185,7 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
                   min="0"
                   max="130"
                   placeholder="Any"
-                  class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                  class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
                 />
               </label>
             </div>
@@ -193,7 +193,7 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
               <span class="mb-1 block text-xs font-semibold text-slate-600">Sex</span>
               <select
                 name="filters[sex]"
-                class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
               >
                 <option value="">All</option>
                 <option value="male" selected={@filters.sex == "male"}>Male</option>
@@ -204,7 +204,7 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
             <div class="flex gap-2">
               <button
                 type="submit"
-                class="h-[42px] flex-1 rounded-lg bg-[#6667ab] px-4 text-sm font-semibold text-white hover:bg-[#55569a]"
+                class="h-[42px] flex-1 rounded-lg bg-brand-accent px-4 text-sm font-semibold text-white hover:bg-[#55569a]"
               >
                 Search
               </button>
@@ -275,7 +275,7 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
                   class="flex items-center justify-between gap-3 px-5 py-3 text-sm"
                 >
                   <span class="text-slate-600">{field.label}</span>
-                  <span class="rounded-full bg-[#f0f0ff] px-2.5 py-1 font-bold text-[#373896]">
+                  <span class="rounded-full bg-brand-50 px-2.5 py-1 font-bold text-brand-primary">
                     {field.count}
                   </span>
                 </div>
@@ -299,7 +299,7 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
                     <div>
                       <.link
                         navigate={~p"/admin/patients/#{match.note.patient_id}"}
-                        class="font-semibold text-slate-900 hover:text-[#6667ab] hover:underline"
+                        class="font-semibold text-slate-900 hover:text-brand-accent hover:underline"
                       >
                         {patient_name(match.note.patient)}
                       </.link>
@@ -313,7 +313,7 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
                         Dr. {if match.note.doctor, do: match.note.doctor.name, else: "Unknown"}
                       </p>
                     </div>
-                    <span class="justify-self-start rounded-full bg-[#f0f0ff] px-3 py-1 text-sm font-bold text-[#373896] sm:justify-self-end">
+                    <span class="justify-self-start rounded-full bg-brand-50 px-3 py-1 text-sm font-bold text-brand-primary sm:justify-self-end">
                       {match.occurrence_count} occurrence{if match.occurrence_count == 1,
                         do: "",
                         else: "s"}
@@ -328,7 +328,9 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
                         <p class="text-xs font-bold uppercase tracking-wide text-slate-500">
                           {field.label}
                         </p>
-                        <span class="text-xs font-semibold text-[#6667ab]">{field.count} found</span>
+                        <span class="text-xs font-semibold text-brand-accent">
+                          {field.count} found
+                        </span>
                       </div>
                       <p class="mt-2 text-sm leading-6 text-slate-700">{field.snippet}</p>
                     </div>

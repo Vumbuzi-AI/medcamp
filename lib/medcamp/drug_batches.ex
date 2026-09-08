@@ -25,7 +25,7 @@ defmodule Medcamp.DrugBatches do
 
   def get_drugs_with_active_drug_batch do
     from(db in DrugBatch,
-      where: db.is_confirmed == true and db.is_active != false,
+      where: db.is_active != false,
       join: d in Drug,
       on: d.id == db.drug_id,
       join: b in Batch,
@@ -46,7 +46,7 @@ defmodule Medcamp.DrugBatches do
       from db in DrugBatch,
         where:
           db.inventory_received_id == ^inventory_received_id and db.remaining_quantity > 0 and
-            db.is_confirmed == true and db.is_active != false,
+            db.is_active != false,
         preload: [:batch, :drug]
 
     batches =
@@ -61,7 +61,7 @@ defmodule Medcamp.DrugBatches do
 
   def get_drug_with_active_drug_batch(drug_id) do
     from(db in DrugBatch,
-      where: db.is_confirmed == true and db.is_active != false,
+      where: db.is_active != false,
       join: d in Drug,
       on: d.id == db.drug_id,
       join: b in Batch,
@@ -89,7 +89,6 @@ defmodule Medcamp.DrugBatches do
       where:
         db.inventory_received_id == ^inventory_received_id and
           db.remaining_quantity > 0 and
-          db.is_confirmed == true and
           db.is_active != false,
       preload: [:batch]
     )
@@ -161,55 +160,6 @@ defmodule Medcamp.DrugBatches do
   defp batch_number(%DrugBatch{batch: %Batch{batch: batch_number}}), do: batch_number || ""
   defp batch_number(_), do: ""
 
-  def list_pending_drug_batches(filters \\ %{}) do
-    Repo.all(
-      from(db in DrugBatch,
-        where: db.is_confirmed == false and db.is_active != false,
-        order_by: [desc: db.inserted_at]
-      )
-      |> apply_pending_drug_batch_search(filters[:search])
-    )
-    |> Repo.preload([:drug, :batch, :inventory_received, :inventory_manager])
-  end
-
-  defp apply_pending_drug_batch_search(query, nil), do: query
-  defp apply_pending_drug_batch_search(query, ""), do: query
-
-  defp apply_pending_drug_batch_search(query, term) do
-    term = String.trim(term)
-
-    if term == "" do
-      query
-    else
-      pattern = "%#{term}%"
-
-      from(db in query,
-        left_join: ir in assoc(db, :inventory_received),
-        left_join: b in assoc(db, :batch),
-        where:
-          ilike(ir.brand_name, ^pattern) or ilike(ir.generic_name, ^pattern) or
-            ilike(b.batch, ^pattern)
-      )
-    end
-  end
-
-  def list_pending_drug_batches_paginated(filters \\ %{}, page \\ 1, per_page \\ 10) do
-    from(db in DrugBatch,
-      where: db.is_confirmed == false and db.is_active != false,
-      order_by: [desc: db.inserted_at]
-    )
-    |> apply_pending_drug_batch_search(filters[:search])
-    |> Repo.paginate(page: page, page_size: per_page)
-    |> Map.get(:entries)
-    |> Repo.preload([:drug, :batch, :inventory_received, :inventory_manager])
-  end
-
-  def count_pending_drug_batches(filters \\ %{}) do
-    from(db in DrugBatch, where: db.is_confirmed == false and db.is_active != false)
-    |> apply_pending_drug_batch_search(filters[:search])
-    |> Repo.aggregate(:count, :id)
-  end
-
   def list_drug_batches_for_drug(drug_id) do
     Repo.all(
       from db in DrugBatch,
@@ -263,6 +213,101 @@ defmodule Medcamp.DrugBatches do
     %DrugBatch{}
     |> DrugBatch.changeset(attrs)
     |> Repo.insert()
+  end
+
+  @doc """
+  Takes a batch of a drug into the camp pharmacy in one transaction: creates
+  the physical `Batch` (what is printed on the pack) and the `DrugBatch` that
+  links it to the drug.
+
+  New batches are confirmed immediately and their whole quantity is available.
+
+  `attrs` carries the pack details (`gtin`, `batch`, `expiry`, `quantity`,
+  and optionally `serial`, `manufacturer`, `manufacture_date`, `uom`).
+
+  `inventory_manager_id` is the pharmacist taking the stock in and
+  `inventory_received_id` the item-master row for the product; both keep their
+  pre-camp names because the whole prescribe-and-dispense pipeline is keyed on
+  them (see `Medcamp.InventoriesReceived.InventoryReceived`).
+  """
+  def take_in_batch(
+        %{
+          drug_id: drug_id,
+          inventory_received_id: inventory_received_id,
+          inventory_manager_id: pharmacist_id,
+          quantity: quantity
+        } = attrs
+      ) do
+    batch_attrs =
+      attrs
+      |> Map.take([
+        :gtin,
+        :batch,
+        :expiry,
+        :serial,
+        :manufacturer,
+        :manufacture_date,
+        :uom,
+        :quantity,
+        :price_per_unit
+      ])
+      |> Map.put(:remaining_quantity, quantity)
+      |> Map.put(:inventory_received_id, inventory_received_id)
+      |> Map.put(:inventory_manager_id, pharmacist_id)
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(
+      :batch,
+      Medcamp.Batches.Batch.changeset(%Medcamp.Batches.Batch{}, batch_attrs)
+    )
+    |> Ecto.Multi.insert(:drug_batch, fn %{batch: batch} ->
+      DrugBatch.changeset(%DrugBatch{}, %{
+        drug_id: drug_id,
+        batch_id: batch.id,
+        remaining_quantity: quantity,
+        is_confirmed: true,
+        inventory_received_id: inventory_received_id,
+        inventory_manager_id: pharmacist_id
+      })
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{drug_batch: drug_batch}} -> {:ok, drug_batch}
+      {:error, _step, changeset, _changes} -> {:error, changeset}
+    end
+  end
+
+  @doc "Updates the pack details and stock quantity for a pharmacy batch."
+  def update_taken_in_batch(%DrugBatch{} = drug_batch, attrs) do
+    drug_batch = Repo.preload(drug_batch, :batch)
+    quantity = attrs[:quantity]
+
+    batch_attrs =
+      attrs
+      |> Map.take([
+        :gtin,
+        :batch,
+        :expiry,
+        :serial,
+        :manufacturer,
+        :manufacture_date,
+        :uom,
+        :quantity,
+        :price_per_unit
+      ])
+      |> Map.put(:remaining_quantity, quantity)
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:batch, Medcamp.Batches.Batch.changeset(drug_batch.batch, batch_attrs))
+    |> Ecto.Multi.update(
+      :drug_batch,
+      DrugBatch.changeset(drug_batch, %{remaining_quantity: quantity})
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{drug_batch: updated}} -> {:ok, updated}
+      {:error, _step, changeset, _changes} -> {:error, changeset}
+    end
   end
 
   @doc """

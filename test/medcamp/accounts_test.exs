@@ -118,23 +118,6 @@ defmodule Medcamp.AccountsTest do
       assert_raise Ecto.NoResultsError, fn -> Accounts.get_user!(id) end
       refute Repo.get_by(UserToken, user_id: id)
     end
-
-    test "returns an error when the user has related records" do
-      user = user_fixture()
-      id = user.id
-
-      assert {:ok, _entry} =
-               Medcamp.Visitors.create_visitor_book_entry(%{
-                 "visitor_name" => "Test Visitor",
-                 "message" => "Dropped by reception",
-                 "visited_on" => Date.utc_today(),
-                 "visited_at" => ~T[09:00:00],
-                 "user_id" => user.id
-               })
-
-      assert {:error, :user_has_related_records} = Accounts.delete_user(user)
-      assert %User{id: ^id} = Accounts.get_user!(id)
-    end
   end
 
   describe "register_user/1" do

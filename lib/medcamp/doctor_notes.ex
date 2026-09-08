@@ -159,6 +159,7 @@ defmodule Medcamp.DoctorNotes do
     %DoctorNote{}
     |> DoctorNote.changeset(attrs)
     |> Repo.insert()
+    |> Medcamp.CampFlow.advance("with_doctor")
   end
 
   @doc """

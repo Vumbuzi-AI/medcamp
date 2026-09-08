@@ -14,7 +14,6 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
      socket
      |> assign(:active_tab, :admin_drugs)
      |> assign(:drug_filters, default_drug_filters())
-     |> assign(:quote_request_modal, nil)
      |> assign(:page, 1)
      |> assign(:per_page, @per_page)
      |> assign(:categories, Drugs.list_drug_categories_for_selection())
@@ -118,85 +117,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
     {:noreply, socket |> assign(:page, max(1, String.to_integer(page))) |> load_drugs()}
   end
 
-  def handle_event("open_quote_modal", %{"drug_id" => id}, socket) do
-    drug =
-      Drugs.get_drug!(id)
-      |> Medcamp.Repo.preload([:inventory_received, drug_batches: [batch: :supplier]])
-
-    item_name =
-      drug.brand_name || drug.generic_name ||
-        (drug.inventory_received &&
-           (drug.inventory_received.brand_name || drug.inventory_received.generic_name)) ||
-        "Drug ##{drug.id}"
-
-    supplier = first_supplier_for_drug(drug)
-
-    {:noreply,
-     socket
-     |> assign(:quote_request_modal, %{item_name: item_name, supplier: supplier})}
-  end
-
-  def handle_event("cancel_quote_request", _, socket) do
-    {:noreply, assign(socket, :quote_request_modal, nil)}
-  end
-
   @impl true
-  def handle_info({:submit_quote_request, %{quantity: qty, notes: notes}}, socket) do
-    modal = socket.assigns.quote_request_modal
-
-    result =
-      Postal.send_supplier_quote_request_email(
-        modal.supplier.email,
-        modal.supplier.name,
-        modal.item_name,
-        String.to_integer(qty),
-        notes
-      )
-
-    socket =
-      case result do
-        {:ok, _, _response} ->
-          put_flash(socket, :info, "Quote request sent to #{modal.supplier.name}.")
-
-        {:error, _} ->
-          put_flash(socket, :error, "Failed to send email.")
-      end
-
-    {:noreply, assign(socket, :quote_request_modal, nil)}
-  end
-
-  def handle_info(
-        {:submit_quote_request_no_supplier,
-         %{recipient_email: email, subject: subject, body: body}},
-        socket
-      ) do
-    result = Postal.deliver(email, subject, body)
-
-    socket =
-      case result do
-        {:ok, _, _response} ->
-          put_flash(socket, :info, "Quote request email sent to #{email}.")
-
-        {:error, _} ->
-          put_flash(socket, :error, "Failed to send email.")
-      end
-
-    {:noreply, assign(socket, :quote_request_modal, nil)}
-  end
-
-  def handle_info(:cancel_quote_request, socket) do
-    {:noreply, assign(socket, :quote_request_modal, nil)}
-  end
-
-  defp first_supplier_for_drug(drug) do
-    drug.drug_batches
-    |> Enum.find_value(fn db -> db.batch && db.batch.supplier end)
-    |> case do
-      nil -> nil
-      s -> %{email: s.email, name: s.name}
-    end
-  end
-
   @low_stock_threshold 20
 
   defp total_remaining(drug) do
@@ -325,7 +246,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
                   <label class="block text-xs font-medium text-gray-600 mb-1">Category</label>
                   <select
                     name="filters[category]"
-                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                   >
                     <option value="" selected={@drug_filters[:category] in [nil, ""]}>All</option>
                     <option
@@ -341,7 +262,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
                   <label class="block text-xs font-medium text-gray-600 mb-1">Supplier</label>
                   <select
                     name="filters[supplier]"
-                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                   >
                     <option value="" selected={@drug_filters[:supplier] in [nil, ""]}>All</option>
                     <option
@@ -360,7 +281,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
                   <label class="block text-xs font-medium text-gray-600 mb-1">Type</label>
                   <select
                     name="filters[type]"
-                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                   >
                     <option value="" selected={@drug_filters[:type] in [nil, ""]}>All</option>
                     <option :for={type <- @types} value={type} selected={@drug_filters[:type] == type}>
@@ -372,7 +293,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
                   <label class="block text-xs font-medium text-gray-600 mb-1">OTC</label>
                   <select
                     name="filters[otc_filter]"
-                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                   >
                     <option value="all" selected={@drug_filters[:otc_filter] == "all"}>All</option>
                     <option value="otc" selected={@drug_filters[:otc_filter] == "otc"}>
@@ -415,14 +336,15 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
             <:actions :if={
               @drug_filters[:item_search] != "" or count_active_filters(@drug_filters) > 0
             }>
-              <button phx-click="clear_filters_drugs" class="text-xs text-[#6667ab] hover:underline">
+              <button
+                phx-click="clear_filters_drugs"
+                class="text-xs text-brand-accent hover:underline"
+              >
                 Clear filters
               </button>
             </:actions>
           </.blank_state>
-          <.table :if={@total_count > 0} id="drugs" rows={@drugs}
-            row_id={&"drugs-#{&1.id}"}
-          >
+          <.table :if={@total_count > 0} id="drugs" rows={@drugs} row_id={&"drugs-#{&1.id}"}>
             <:col :let={drug} label="Brand name">{drug.brand_name || "—"}</:col>
             <:col :let={drug} label="Generic name">{drug.generic_name || "—"}</:col>
             <:col :let={drug} label="GTIN">
@@ -443,16 +365,6 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
             <:col :let={drug} label="Batches">
               <.batches_cell drug={drug} />
             </:col>
-            <:action :let={drug}>
-              <button
-                type="button"
-                phx-click="open_quote_modal"
-                phx-value-drug_id={drug.id}
-                class="text-sm text-[#6667ab] hover:text-[#373896] font-medium"
-              >
-                Request quote
-              </button>
-            </:action>
           </.table>
           <.pagination
             page={@page}
@@ -462,20 +374,6 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
           />
         </div>
       </div>
-
-      <.modal
-        :if={@quote_request_modal}
-        id="quote-request-modal"
-        show
-        on_cancel={JS.push("cancel_quote_request")}
-      >
-        <.live_component
-          module={MedcampWeb.AdminQuoteRequestModalComponent}
-          id="quote-request"
-          item_name={@quote_request_modal.item_name}
-          supplier={@quote_request_modal[:supplier]}
-        />
-      </.modal>
     </div>
     """
   end

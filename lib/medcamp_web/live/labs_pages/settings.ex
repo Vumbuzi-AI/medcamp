@@ -28,7 +28,8 @@ defmodule MedcampWeb.LabPages.SettingsIndex do
   def handle_event("save-profile", %{"user" => user_params}, socket) do
     uploaded_files =
       consume_uploaded_entries(socket, :image, fn %{path: path}, _entry ->
-        dest = Path.join(Application.app_dir(:medcamp, "priv/static/uploads"), Path.basename(path))
+        dest =
+          Path.join(Application.app_dir(:medcamp, "priv/static/uploads"), Path.basename(path))
 
         File.cp!(path, dest)
         {:ok, ~p"/uploads/#{Path.basename(dest)}"}

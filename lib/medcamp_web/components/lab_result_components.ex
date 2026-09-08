@@ -194,10 +194,10 @@ defmodule MedcampWeb.LabResultComponents do
       <div class="p-4">
         <!-- Tests Requested -->
         <div class="mb-4">
-          <h5 class="text-sm font-semibold text-[#373896] mb-2">Tests Requested</h5>
+          <h5 class="text-sm font-semibold text-brand-primary mb-2">Tests Requested</h5>
           <div class="flex flex-wrap gap-2">
             <%= for test <- @lab_result.tests do %>
-              <span class="px-2 py-1 text-xs bg-[#f8f8ff] text-[#373896] rounded-full border border-[#e7e7ff]">
+              <span class="px-2 py-1 text-xs bg-[#f8f8ff] text-brand-primary rounded-full border border-brand-100">
                 {test.name}
               </span>
             <% end %>
@@ -214,12 +214,12 @@ defmodule MedcampWeb.LabResultComponents do
     <!-- Attached PDF Report (if uploaded) -->
         <%= if @lab_result.report_complete && @lab_result.lab_report &&
                String.trim(@lab_result.lab_report) != "" do %>
-          <div class="mt-4 bg-[#f8f8ff] rounded-lg p-4 border border-[#e7e7ff]">
+          <div class="mt-4 bg-[#f8f8ff] rounded-lg p-4 border border-brand-100">
             <div class="flex items-center justify-between gap-3">
               <div class="flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5 mr-2 text-[#6667ab]"
+                  class="h-5 w-5 mr-2 text-brand-accent"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -231,12 +231,12 @@ defmodule MedcampWeb.LabResultComponents do
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                <p class="text-sm font-semibold text-[#373896]">Lab Report (PDF)</p>
+                <p class="text-sm font-semibold text-brand-primary">Lab Report (PDF)</p>
               </div>
               <a
                 href={List.first(String.split(@lab_result.lab_report, ","))}
                 target="_blank"
-                class="text-sm font-medium text-[#373896] hover:underline"
+                class="text-sm font-medium text-brand-primary hover:underline"
               >
                 Open in new tab
               </a>
@@ -269,7 +269,7 @@ defmodule MedcampWeb.LabResultComponents do
     <!-- Test Results -->
         <%= if has_test_entries?(@test_entries) do %>
           <div class="mt-4">
-            <h5 class="text-sm font-semibold text-[#373896] mb-3">Lab Results</h5>
+            <h5 class="text-sm font-semibold text-brand-primary mb-3">Lab Results</h5>
             <div class="space-y-3">
               <%= for entry <- @test_entries do %>
                 <%= if entry.status in ["completed", "verified"] do %>
@@ -462,9 +462,9 @@ defmodule MedcampWeb.LabResultComponents do
       |> assign(:note, Map.get(payload, "doctor_note_context", %{}))
 
     ~H"""
-    <div class="bg-[#f8f8ff] rounded-lg p-4 border border-[#e7e7ff] mb-4">
+    <div class="bg-[#f8f8ff] rounded-lg p-4 border border-brand-100 mb-4">
       <div class="flex items-center justify-between mb-3">
-        <h5 class="text-sm font-semibold text-[#373896] uppercase tracking-wide flex items-center">
+        <h5 class="text-sm font-semibold text-brand-primary uppercase tracking-wide flex items-center">
           <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               stroke-linecap="round"
@@ -491,7 +491,7 @@ defmodule MedcampWeb.LabResultComponents do
             phx-click="refresh-interpretation"
             phx-value-id={@lab_result.id}
             phx-disable-with="Generating..."
-            class="group inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-[#6667ab] rounded-lg hover:bg-[#5556a0] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            class="group inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-brand-accent rounded-lg hover:bg-brand-accent-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <svg
               class="h-4 w-4 mr-1 group-disabled:animate-spin"
@@ -620,7 +620,7 @@ defmodule MedcampWeb.LabResultComponents do
 
           <p
             :if={Map.get(@payload, "disclaimer")}
-            class="text-xs italic text-gray-500 pt-2 border-t border-[#e7e7ff]"
+            class="text-xs italic text-gray-500 pt-2 border-t border-brand-100"
           >
             {@payload["disclaimer"]}
           </p>
@@ -716,7 +716,7 @@ defmodule MedcampWeb.LabResultComponents do
   defp patient_overview_card(assigns) do
     ~H"""
     <div>
-      <h2 class="text-lg font-semibold text-[#373896]">Patient Overview</h2>
+      <h2 class="text-lg font-semibold text-brand-primary">Patient Overview</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
           <p class="text-sm text-gray-500 mb-1">Name</p>
@@ -767,7 +767,7 @@ defmodule MedcampWeb.LabResultComponents do
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -779,13 +779,13 @@ defmodule MedcampWeb.LabResultComponents do
               d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
             />
           </svg>
-          <h2 class="text-lg font-semibold text-[#373896]">
+          <h2 class="text-lg font-semibold text-brand-primary">
             Lab Work Requested
           </h2>
         </div>
 
         <.link navigate={"/lab/lab_results/#{@lab_result.id}?complete=true"}>
-          <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+          <.button class="bg-brand-accent hover:bg-brand-accent-dark">
             <div class="flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -809,11 +809,11 @@ defmodule MedcampWeb.LabResultComponents do
 
       <div class="space-y-4">
         <div>
-          <h3 class="text-sm font-semibold text-[#373896] mb-2">Tests Requested</h3>
+          <h3 class="text-sm font-semibold text-brand-primary mb-2">Tests Requested</h3>
           <div class="flex gap-2 items-center flex-wrap">
             <%= for test <- @lab_result.tests do %>
               <div class="border border-gray-200 flex gap-2 rounded-lg  p-4">
-                <span class="px-2 py-1 text-xs items-center justify-center rounded-full bg-[#f0f0ff] text-[#373896]">
+                <span class="px-2 py-1 text-xs items-center justify-center rounded-full bg-brand-50 text-brand-primary">
                   {test.name}
                 </span>
 
@@ -905,7 +905,7 @@ defmodule MedcampWeb.LabResultComponents do
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -917,13 +917,13 @@ defmodule MedcampWeb.LabResultComponents do
               d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
             />
           </svg>
-          <h2 class="text-lg font-semibold text-[#373896]">
+          <h2 class="text-lg font-semibold text-brand-primary">
             Lab Result
           </h2>
         </div>
 
         <.link navigate={"/lab/lab_results/#{@lab_result.id}?complete=true"}>
-          <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+          <.button class="bg-brand-accent hover:bg-brand-accent-dark">
             <div class="flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -948,10 +948,10 @@ defmodule MedcampWeb.LabResultComponents do
       <div class="space-y-4">
         <.patient_overview_card patient={@patient} />
         <div class="mb-4">
-          <h3 class="text-sm font-semibold text-[#373896] mb-2">Tests Requested</h3>
+          <h3 class="text-sm font-semibold text-brand-primary mb-2">Tests Requested</h3>
           <div class="flex flex-wrap gap-2">
             <%= for test <- @lab_result.tests do %>
-              <span class="px-2 py-1 text-xs rounded-full bg-[#f0f0ff] text-[#373896]">
+              <span class="px-2 py-1 text-xs rounded-full bg-brand-50 text-brand-primary">
                 {test.name}
               </span>
               <.link
@@ -1021,7 +1021,7 @@ defmodule MedcampWeb.LabResultComponents do
             <div class="flex items-center mt-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4 mr-1 text-[#6667ab]"
+                class="h-4 w-4 mr-1 text-brand-accent"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -1042,7 +1042,7 @@ defmodule MedcampWeb.LabResultComponents do
             <div class="flex items-center mt-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4 mr-1 text-[#6667ab]"
+                class="h-4 w-4 mr-1 text-brand-accent"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -1063,7 +1063,7 @@ defmodule MedcampWeb.LabResultComponents do
             <div class="flex items-center mt-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4 mr-1 text-[#6667ab]"
+                class="h-4 w-4 mr-1 text-brand-accent"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -1087,10 +1087,10 @@ defmodule MedcampWeb.LabResultComponents do
           can_generate_ai={@can_generate_ai}
         />
 
-        <div class="bg-[#f8f8ff] rounded-lg p-4 border border-[#e7e7ff] flex items-center">
+        <div class="bg-[#f8f8ff] rounded-lg p-4 border border-brand-100 flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -1102,7 +1102,7 @@ defmodule MedcampWeb.LabResultComponents do
               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
-          <a href={@lab_result.lab_report} target="_blank" class="text-[#373896] hover:underline">
+          <a href={@lab_result.lab_report} target="_blank" class="text-brand-primary hover:underline">
             View Lab Report
           </a>
         </div>

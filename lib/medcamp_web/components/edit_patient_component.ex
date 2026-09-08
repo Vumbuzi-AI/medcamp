@@ -174,37 +174,6 @@ defmodule MedcampWeb.EditPatientComponent do
             </div>
           </div>
         </div>
-        
-    <!-- Insurance -->
-
-        <div class="mt-6">
-          <.input
-            field={@form[:has_insurance]}
-            type="checkbox"
-            label="Does the patient have insurance?"
-          />
-        </div>
-
-        <div
-          :if={Phoenix.HTML.Form.normalize_value("checkbox", @form[:has_insurance].value)}
-          class="mt-4 grid grid-cols-2 gap-4"
-        >
-          <.input field={@form[:insurance_company]} type="text" label="Insurance Company" />
-
-          <.input field={@form[:insurance_scheme]} type="text" label="Insurance Scheme" />
-
-          <.input field={@form[:insurance_number]} type="text" label="Insurance Number" />
-
-          <.input field={@form[:insurance_cover_limit]} type="number" label="Insurance Cover Limit" />
-        </div>
-
-        <div class="mt-6">
-          <.input
-            field={@form[:consent_agreement]}
-            type="checkbox"
-            label="I agree to the terms and conditions"
-          />
-        </div>
 
         <:actions>
           <.button phx-disable-with="Updating...">

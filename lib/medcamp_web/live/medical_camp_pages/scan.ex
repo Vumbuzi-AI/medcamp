@@ -1,11 +1,12 @@
 defmodule MedcampWeb.MedicalCampPages.Scan do
   use MedcampWeb, :live_view
-  alias Medcamp.Patients
+
+  alias MedcampWeb.PublicTenant
   alias Medcamp.Accounts
 
   @impl true
   def mount(%{"gsrn" => gsrn}, session, socket) do
-    patient = Patients.get_patient_by_gsrn(gsrn)
+    patient = PublicTenant.resolve_patient!(gsrn)
 
     current_user =
       case session["user_token"] do
@@ -24,7 +25,7 @@ defmodule MedcampWeb.MedicalCampPages.Scan do
   def handle_event("qr_scanned", %{"value" => raw_value}, socket) do
     gsrn = extract_gsrn(raw_value)
 
-    case Patients.get_patient_by_gsrn(gsrn) do
+    case PublicTenant.resolve_patient!(gsrn) do
       nil ->
         {:noreply, put_flash(socket, :error, "Patient not found for scanned QR code")}
 
@@ -84,7 +85,7 @@ defmodule MedcampWeb.MedicalCampPages.Scan do
         <div class="flex items-center mb-4">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6 text-[#6667ab] mr-2"
+            class="h-6 w-6 text-brand-accent mr-2"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -96,7 +97,7 @@ defmodule MedcampWeb.MedicalCampPages.Scan do
               d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
             />
           </svg>
-          <h2 class="text-xl font-semibold text-[#373896]">Scan Next Patient</h2>
+          <h2 class="text-xl font-semibold text-brand-primary">Scan Next Patient</h2>
         </div>
 
         <div id="qr-camera-scanner" phx-hook="QrCameraScanner" class="relative">

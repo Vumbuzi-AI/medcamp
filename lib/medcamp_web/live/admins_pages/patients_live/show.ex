@@ -6,7 +6,6 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
   alias Medcamp.PatientVisits
   alias Medcamp.DoctorNotes
   alias Medcamp.LabResults
-  alias Medcamp.Mpesas
 
   @impl true
   def mount(_params, _session, socket) do
@@ -21,18 +20,12 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
     visits = PatientVisits.list_patient_visits_by_patient_id(id)
     lab_results = LabResults.list_lab_results_for_patient(id)
     doctor_notes = DoctorNotes.doctor_notes_for_patient(id)
-    mpesa_payments = Mpesas.list_successful_payments_by_patient(id)
 
     metrics = %{
       visits_count: length(visits),
       last_visit_date: visits |> List.first() |> then(fn v -> v && v.date end),
       lab_results_count: length(lab_results),
-      doctor_notes_count: length(doctor_notes),
-      total_money_spent:
-        Enum.reduce(mpesa_payments, 0, fn payment, total -> total + (payment.amount || 0) end),
-      mpesa_payments_count: length(mpesa_payments),
-      last_payment_date:
-        mpesa_payments |> List.first() |> then(fn payment -> payment && payment.inserted_at end)
+      doctor_notes_count: length(doctor_notes)
     }
 
     {:noreply,
@@ -40,7 +33,6 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
      |> assign(:page_title, "Patient Overview")
      |> assign(:patient, patient)
      |> assign(:most_recent_triage, most_recent_triage)
-     |> assign(:mpesa_payments, Enum.take(mpesa_payments, 5))
      |> assign(:metrics, metrics)}
   end
 
@@ -80,12 +72,6 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
             tone="amber"
             icon="document"
           />
-          <.metric_card
-            title="Total Money Spent"
-            value={format_currency(@metrics.total_money_spent)}
-            tone="rose"
-            icon="currency"
-          />
         </div>
 
         <.patient_detailed_overview patient={@patient} most_recent_triage={@most_recent_triage} />
@@ -94,7 +80,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
           <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/80">
               <h3 class="text-base font-semibold text-slate-800 flex items-center">
-                <div class="w-8 h-8 rounded-lg bg-[#6667ab] flex items-center justify-center mr-3">
+                <div class="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center mr-3">
                   <svg
                     class="h-4 w-4 text-white"
                     fill="none"
@@ -134,16 +120,6 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
                 value={format_date(@metrics.last_visit_date)}
                 tone="blue"
               />
-              <.activity_row
-                label="Successful Mpesa payments"
-                value={to_string(@metrics.mpesa_payments_count)}
-                tone="rose"
-              />
-              <.activity_row
-                label="Last payment received"
-                value={format_datetime(@metrics.last_payment_date)}
-                tone="emerald"
-              />
             </div>
           </div>
 
@@ -168,75 +144,8 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
               <.info_row label="Phone" value={@patient.phone_number || "—"} />
               <.info_row label="Gender" value={@patient.gender || "—"} />
               <.info_row label="Date of Birth" value={@patient.date_of_birth || "—"} />
-              <.info_row label="Total Paid" value={format_currency(@metrics.total_money_spent)} />
             </div>
           </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between gap-4">
-            <h3 class="text-base font-semibold text-slate-800 flex items-center">
-              <div class="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center mr-3">
-                <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M17 9V7a5 5 0 00-10 0v2m-2 0h14a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2z"
-                  />
-                </svg>
-              </div>
-              Mpesa Payments
-            </h3>
-            <span class="text-sm font-medium text-slate-500">
-              {@metrics.mpesa_payments_count} successful
-            </span>
-          </div>
-
-          <%= if Enum.empty?(@mpesa_payments) do %>
-            <div class="px-5 py-10 text-center text-sm text-slate-500">
-              No successful Mpesa payments recorded for this patient.
-            </div>
-          <% else %>
-            <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-50">
-                  <tr>
-                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Receipt
-                    </th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Service
-                    </th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Phone
-                    </th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Date
-                    </th>
-                    <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Amount
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 bg-white">
-                  <%= for payment <- @mpesa_payments do %>
-                    <tr class="hover:bg-slate-50 transition-colors">
-                      <td class="px-5 py-4 font-medium text-slate-800">{payment.receipt || "—"}</td>
-                      <td class="px-5 py-4 text-slate-600">
-                        {payment.actionable_label || payment.reason || "—"}
-                      </td>
-                      <td class="px-5 py-4 text-slate-600">{payment.phone || "—"}</td>
-                      <td class="px-5 py-4 text-slate-600">{format_datetime(payment.inserted_at)}</td>
-                      <td class="px-5 py-4 text-right font-semibold text-slate-900">
-                        {format_currency(payment.amount)}
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          <% end %>
         </div>
       </div>
     </div>
@@ -248,7 +157,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
       <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
         <h3 class="text-base font-semibold text-slate-800 mb-4 flex items-center">
-          <div class="w-8 h-8 rounded-lg bg-[#6667ab] flex items-center justify-center mr-3">
+          <div class="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center mr-3">
             <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 stroke-linecap="round"
@@ -479,7 +388,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
   defp metric_card_tone("rose"), do: "bg-gradient-to-br from-rose-50 to-white border-rose-200"
   defp metric_card_tone(_), do: "bg-white border-slate-200"
 
-  defp metric_icon_tone("indigo"), do: "bg-[#6667ab]"
+  defp metric_icon_tone("indigo"), do: "bg-brand-accent"
   defp metric_icon_tone("blue"), do: "bg-blue-500"
   defp metric_icon_tone("emerald"), do: "bg-emerald-500"
   defp metric_icon_tone("amber"), do: "bg-amber-500"
@@ -502,12 +411,4 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
   defp format_datetime(datetime) do
     Calendar.strftime(datetime, "%B %d, %Y at %I:%M %p")
   end
-
-  defp format_currency(nil), do: "KES 0"
-  defp format_currency(amount) when is_integer(amount), do: "KES #{amount}"
-
-  defp format_currency(amount) when is_float(amount),
-    do: "KES #{:erlang.float_to_binary(amount, decimals: 2)}"
-
-  defp format_currency(amount), do: "KES #{amount}"
 end

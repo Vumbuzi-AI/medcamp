@@ -19,30 +19,19 @@ defmodule MedcampWeb.SidebarCatalog do
   """
 
   alias Medcamp.Authorization
-  alias Medcamp.QualityAssurance
 
   @roles [
     "admin",
     "doctor",
     "nurse",
     "labtechnician",
-    "reception",
-    "pharmacist",
-    "radiologist",
-    "support staff",
-    "inventory_manager",
-    "supplier"
+    "pharmacist"
   ]
 
-  # Sidebars a role gets in full on top of its own. Reception and admin
-  # both work the inventory manager's pages (`require_authenticated_
-  # inventory_manager` lets them in), and once there they are shown that
-  # sidebar - so they need its panels granted by default, or every tab in
-  # it renders hidden and every URL under it is refused.
-  @shared_panel_roles %{
-    "reception" => ["inventory_manager"],
-    "admin" => ["inventory_manager"]
-  }
+  # No camp role borrows another's sidebar; each of the five works only its
+  # own pages. Kept as an empty map so the sharing machinery below stays
+  # intact if that ever changes again.
+  @shared_panel_roles %{}
 
   @doc """
   The other roles' sidebars `role` is given in full, in addition to its
@@ -67,7 +56,6 @@ defmodule MedcampWeb.SidebarCatalog do
     end)
   end
 
-  defp role_label("inventory_manager"), do: "Inventory Manager"
   defp role_label("labtechnician"), do: "Lab Technician"
   defp role_label(role), do: String.capitalize(role)
 
@@ -84,12 +72,7 @@ defmodule MedcampWeb.SidebarCatalog do
   def tab_groups("doctor"), do: doctor_tab_groups()
   def tab_groups("nurse"), do: nurse_tab_groups()
   def tab_groups("labtechnician"), do: lab_tab_groups()
-  def tab_groups("reception"), do: reception_tab_groups()
   def tab_groups("pharmacist"), do: pharmacist_tab_groups()
-  def tab_groups("radiologist"), do: radiologist_tab_groups()
-  def tab_groups("support staff"), do: support_staff_tab_groups()
-  def tab_groups("inventory_manager"), do: inventory_manager_tab_groups()
-  def tab_groups("supplier"), do: supplier_tab_groups()
   def tab_groups(_role), do: []
 
   @doc """
@@ -97,14 +80,13 @@ defmodule MedcampWeb.SidebarCatalog do
   `permission_slug("doctor", :lab_results)` -> `"doctor.lab_results"`.
 
   The role segment is normalised to match the slug style already in use
-  (`labtechnician` -> `lab`, `support staff` -> `support_staff`).
+  (`labtechnician` -> `lab`).
   """
   def permission_slug(role, tab_name) do
     "#{slug_role(role)}.#{tab_name}"
   end
 
   defp slug_role("labtechnician"), do: "lab"
-  defp slug_role("support staff"), do: "support_staff"
   defp slug_role(role) when is_binary(role), do: role
 
   @doc """
@@ -298,10 +280,8 @@ defmodule MedcampWeb.SidebarCatalog do
 
   defp patient_tabs("doctor", patient), do: doctor_patient_tabs(patient)
   defp patient_tabs("nurse", patient), do: nurse_patient_tabs(patient)
-  defp patient_tabs("reception", patient), do: reception_patient_tabs(patient)
   defp patient_tabs("pharmacist", patient), do: pharmacist_patient_tabs(patient)
   defp patient_tabs("labtechnician", patient), do: lab_patient_tabs(patient)
-  defp patient_tabs("radiologist", patient), do: radiologist_patient_tabs(patient)
   defp patient_tabs(_role, _patient), do: []
 
   @doc """
@@ -315,16 +295,11 @@ defmodule MedcampWeb.SidebarCatalog do
   `inventory_manager.in_store`, the same slug their sidebar link is
   hidden by.
   """
-  def panel_role_for_path("/inventory_manager/" <> _), do: "inventory_manager"
   def panel_role_for_path("/admin/" <> _), do: "admin"
   def panel_role_for_path("/doctor/" <> _), do: "doctor"
   def panel_role_for_path("/nurse/" <> _), do: "nurse"
   def panel_role_for_path("/lab/" <> _), do: "labtechnician"
-  def panel_role_for_path("/reception/" <> _), do: "reception"
   def panel_role_for_path("/pharmacist/" <> _), do: "pharmacist"
-  def panel_role_for_path("/radiologist/" <> _), do: "radiologist"
-  def panel_role_for_path("/support_staff/" <> _), do: "support staff"
-  def panel_role_for_path("/supplier/" <> _), do: "supplier"
   def panel_role_for_path(_path), do: nil
 
   @doc """
@@ -426,57 +401,6 @@ defmodule MedcampWeb.SidebarCatalog do
     path == url or String.starts_with?(path, url <> "/")
   end
 
-  defp quality_assurance_badge_count do
-    QualityAssurance.count_charts()
-  rescue
-    _ -> nil
-  end
-
-  defp supplier_tab_groups do
-    [
-      %{
-        key: "documents-trade",
-        name: "Documents & Trade",
-        icon: "folder-open",
-        tabs: [
-          %{
-            name: "Documents",
-            icon: "folder-open",
-            url: "/supplier/documents",
-            tab_name: :documents
-          },
-          %{name: "Invoices", icon: "banknotes", url: "/supplier/invoices", tab_name: :invoices},
-          %{
-            name: "Quotes",
-            icon: "clipboard-document-list",
-            url: "/supplier/quotes",
-            tab_name: :quotes
-          },
-          %{
-            name: "Delivery Notes",
-            icon: "truck",
-            url: "/supplier/delivery_notes",
-            tab_name: :delivery_notes
-          }
-        ]
-      },
-      %{
-        key: "compliance",
-        name: "Compliance & Forms",
-        icon: "shield-check",
-        tabs: [
-          %{
-            name: "Recalls",
-            icon: "exclamation-triangle",
-            url: "/supplier/recalls",
-            tab_name: :recalls
-          },
-          %{name: "Forms", icon: "clipboard-document-list", url: "/forms", tab_name: :forms}
-        ]
-      }
-    ]
-  end
-
   defp doctor_tab_groups do
     [
       %{
@@ -498,12 +422,6 @@ defmodule MedcampWeb.SidebarCatalog do
             tab_name: :visits
           },
           %{
-            name: "My Appointments",
-            icon: "clock",
-            url: "/doctor/appointments",
-            tab_name: :appointments
-          },
-          %{
             name: "Pending Cases",
             icon: "calculator",
             url: "/doctor/pending_patient_visits",
@@ -517,40 +435,11 @@ defmodule MedcampWeb.SidebarCatalog do
         icon: "document-text",
         tabs: [
           %{
-            name: "My Procedures",
-            icon: "rectangle-stack",
-            url: "/doctor/doctor_procedures",
-            tab_name: :doctor_procedures
-          },
-          %{
             name: "Lab Results",
             icon: "document",
             url: "/doctor/lab_results",
             tab_name: :lab_results
-          },
-          %{name: "Blogs", icon: "newspaper", url: "/doctor/blogs", tab_name: :blogs}
-        ]
-      },
-      %{
-        key: "admin-comms",
-        name: "Admin & Communication",
-        icon: "clipboard-document-list",
-        tabs: [
-          %{name: "Duty Rota", icon: "calendar-days", url: "/duty_rota", tab_name: :duty_rota},
-          %{
-            name: "Shift Handover",
-            icon: "users",
-            url: "/shift_handovers",
-            tab_name: :shift_handovers
-          },
-          %{
-            name: "Requisitions",
-            icon: "document-text",
-            url: "/requisitions",
-            tab_name: :requisitions
-          },
-          %{name: "Forms", icon: "clipboard-document-list", url: "/forms", tab_name: :forms},
-          %{name: "Todos", icon: "clipboard-document-check", url: "/todos", tab_name: :todos}
+          }
         ]
       }
     ]
@@ -559,53 +448,15 @@ defmodule MedcampWeb.SidebarCatalog do
   defp admin_tab_groups do
     [
       %{
-        key: "admin-operations",
-        name: "Admin Operations",
-        icon: "cog-6-tooth",
+        key: "camp",
+        name: "Medical Camp",
+        icon: "heart",
         tabs: [
-          %{name: "Duty Rota", icon: "calendar-days", url: "/duty_rota", tab_name: :duty_rota},
-          %{name: "System Users", icon: "users", url: "/admin/users", tab_name: :users},
           %{
-            name: "Support Staff Activities",
-            icon: "clipboard-document-list",
-            url: "/admin/daily_activities",
-            tab_name: :daily_activities
-          },
-          %{
-            name: "Login Sessions",
-            icon: "arrow-right-on-rectangle",
-            url: "/admin/login_sessions",
-            tab_name: :login_sessions
-          },
-          %{
-            name: "Audit Logs",
-            icon: "shield-check",
-            url: "/admin/audit_logs",
-            tab_name: :audit_logs
-          },
-          %{
-            name: "Reporting",
-            icon: "document-text",
-            url: "/admin/reporting",
-            tab_name: :ministry_reporting
-          },
-          %{
-            name: "Lab Surveillance",
-            icon: "chart-bar-square",
-            url: "/admin/lab_surveillance",
-            tab_name: :lab_surveillance
-          },
-          %{
-            name: "Sentry Webhooks",
-            icon: "bug-ant",
-            url: "/admin/sentry-webhooks",
-            tab_name: :sentry_webhooks
-          },
-          %{
-            name: "Todos",
-            icon: "clipboard-document-check",
-            url: "/todos",
-            tab_name: :todos
+            name: "Camp Overview",
+            icon: "heart",
+            url: "/admin/medical_camp",
+            tab_name: :medical_camp
           }
         ]
       },
@@ -632,44 +483,14 @@ defmodule MedcampWeb.SidebarCatalog do
             icon: "document-magnifying-glass",
             url: "/admin/doctor-note-search",
             tab_name: :doctor_note_search
-          },
-          %{
-            name: "Appointments",
-            icon: "clock",
-            url: "/admin/appointments",
-            tab_name: :appointments
-          },
-          %{
-            name: "Procedures",
-            icon: "document",
-            url: "/admin/procedure",
-            tab_name: :nurse_procedures
-          },
-          %{
-            name: "Subsidized Procedures",
-            icon: "currency-dollar",
-            url: "/admin/subsidized_procedures",
-            tab_name: :subsidized_procedures
-          },
-          %{
-            name: "Medical Camp",
-            icon: "heart",
-            url: "/admin/medical_camp",
-            tab_name: :medical_camp
           }
         ]
       },
       %{
-        key: "inventories",
-        name: "Inventories",
-        icon: "inbox-arrow-down",
+        key: "pharmacy",
+        name: "Pharmacy",
+        icon: "beaker",
         tabs: [
-          %{
-            name: "Inventories",
-            icon: "inbox-arrow-down",
-            url: "/inventory_manager/inventories_received",
-            tab_name: :inventories
-          },
           %{name: "Drugs", icon: "beaker", url: "/admin/drugs", tab_name: :admin_drugs},
           %{
             name: "Drug Allocations",
@@ -678,72 +499,18 @@ defmodule MedcampWeb.SidebarCatalog do
             tab_name: :drug_allocation_report
           },
           %{
-            name: "In Store",
-            icon: "archive-box",
-            url: "/inventory_manager/in_store",
-            tab_name: :in_store
-          },
-          %{
-            name: "General Inventories",
-            icon: "clipboard-document-list",
-            url: "/admin/general_inventory",
-            tab_name: :general_inventory
-          },
-          %{
-            name: "Stock Takes",
-            icon: "clipboard-document-check",
-            url: "/admin/stock_takes",
-            tab_name: :stock_takes
-          },
-          %{
-            name: "Donations & Expiry",
-            icon: "arrow-up-tray",
-            url: "/admin/inventory_disposals",
-            tab_name: :inventory_disposals
-          },
-          %{
             name: "Consumption Analysis",
             icon: "chart-bar",
             url: "/admin/consumption_analysis",
             tab_name: :consumption_analysis
-          },
-          %{
-            name: "Shift Handover",
-            icon: "users",
-            url: "/shift_handovers",
-            tab_name: :shift_handovers
-          },
-          %{
-            name: "Requisitions",
-            icon: "document-text",
-            url: "/requisitions",
-            tab_name: :requisitions
-          },
-          %{
-            name: "Forms",
-            icon: "clipboard-document-list",
-            url: "/forms",
-            tab_name: :forms
           }
         ]
       },
       %{
-        key: "clinical-services",
-        name: "Clinical Services",
-        icon: "beaker",
+        key: "laboratory",
+        name: "Laboratory",
+        icon: "document-magnifying-glass",
         tabs: [
-          %{
-            name: "Lab Allocations",
-            icon: "beaker",
-            url: "/admin/lab_allocations",
-            tab_name: :admin_lab_allocations
-          },
-          %{
-            name: "Nurse Allocations",
-            icon: "beaker",
-            url: "/admin/nurse_allocations",
-            tab_name: :admin_nurse_allocations
-          },
           %{
             name: "Lab Tests",
             icon: "document-magnifying-glass",
@@ -751,62 +518,36 @@ defmodule MedcampWeb.SidebarCatalog do
             tab_name: :lab_tests
           },
           %{
-            name: "Radiology Tests",
-            icon: "document-plus",
-            url: "/admin/radiology_tests",
-            tab_name: :radiology_tests
+            name: "Lab Surveillance",
+            icon: "chart-bar-square",
+            url: "/admin/lab_surveillance",
+            tab_name: :lab_surveillance
           }
         ]
       },
       %{
-        key: "finance-insurance",
-        name: "Finance & Insurance",
-        icon: "banknotes",
+        key: "admin-operations",
+        name: "Admin Operations",
+        icon: "cog-6-tooth",
         tabs: [
-          %{name: "Payments", icon: "banknotes", url: "/admin/payments", tab_name: :payments},
           %{
-            name: "M-Pesa Reconciliation",
-            icon: "arrow-path",
-            url: "/admin/mpesa_reconciliation",
-            tab_name: :mpesa_reconciliation
+            name: "Organisation",
+            icon: "building-office-2",
+            url: "/admin/organisation",
+            tab_name: :organisation
+          },
+          %{name: "System Users", icon: "users", url: "/admin/users", tab_name: :users},
+          %{
+            name: "Login Sessions",
+            icon: "arrow-right-on-rectangle",
+            url: "/admin/login_sessions",
+            tab_name: :login_sessions
           },
           %{
-            name: "Costings",
-            icon: "currency-dollar",
-            url: "/admin/costings",
-            tab_name: :costings
-          },
-          %{
-            name: "Insurance",
+            name: "Audit Logs",
             icon: "shield-check",
-            url: "/admin/insurance",
-            tab_name: :insurance
-          },
-          %{
-            name: "Insurance Survey",
-            icon: "clipboard-document-check",
-            url: "/admin/community_health_survey",
-            tab_name: :community_health_survey
-          }
-        ]
-      },
-      %{
-        key: "facility-experience",
-        name: "Facility & Experience",
-        icon: "building-office-2",
-        tabs: [
-          %{name: "Rooms", icon: "home-modern", url: "/admin/rooms", tab_name: :rooms},
-          %{
-            name: "Feedback",
-            icon: "chat-bubble-left-ellipsis",
-            url: "/admin/feedback",
-            tab_name: :feedback
-          },
-          %{
-            name: "Visitors Books",
-            icon: "book-open",
-            url: "/admin/visitors_books",
-            tab_name: :visitors_books
+            url: "/admin/audit_logs",
+            tab_name: :audit_logs
           }
         ]
       }
@@ -828,90 +569,7 @@ defmodule MedcampWeb.SidebarCatalog do
           },
           %{name: "Patients", icon: "users", url: "/nurse/patients", tab_name: :patients},
           %{name: "Triages", icon: "computer-desktop", url: "/nurse/triages", tab_name: :triages},
-          %{name: "Visits", icon: "home-modern", url: "/nurse/visits", tab_name: :visits},
-          %{
-            name: "Room Allocations",
-            icon: "calculator",
-            url: "/nurse/room_allocations",
-            tab_name: :room_allocations
-          }
-        ]
-      },
-      %{
-        key: "clinical-work",
-        name: "Clinical Work",
-        icon: "document-text",
-        tabs: [
-          %{
-            name: "My Notes",
-            icon: "pencil-square",
-            url: "/nurse/nurse_notes",
-            tab_name: :nurse_notes
-          },
-          %{
-            name: "My Procedures",
-            icon: "rectangle-stack",
-            url: "/nurse/nurse_procedures",
-            tab_name: :nurse_procedures
-          },
-          %{
-            name: "Nursing Allocations",
-            icon: "archive-box",
-            url: "/nurse/allocations",
-            tab_name: :nurse_allocations
-          },
-          %{
-            name: "Stock Requests",
-            icon: "arrow-up-tray",
-            url: "/nurse/stock_requests",
-            tab_name: :stock_requests
-          },
-          %{
-            name: "All Procedures",
-            icon: "rectangle-stack",
-            url: "/nurse/all_procedures",
-            tab_name: :all_procedures
-          }
-        ]
-      },
-      %{
-        key: "records-reports",
-        name: "Records & Reports",
-        icon: "book-open",
-        tabs: [
-          %{
-            name: "New Visitor Book Note",
-            icon: "book-open",
-            url: "/visitor_book/new",
-            tab_name: :new_visitor_book_note
-          },
-          %{
-            name: "Add Feedback",
-            icon: "chat-bubble-left-ellipsis",
-            url: "/feedback",
-            tab_name: :add_feedback
-          }
-        ]
-      },
-      %{
-        key: "admin",
-        name: "Admin",
-        icon: "cog-6-tooth",
-        tabs: [
-          %{name: "Duty Rota", icon: "calendar-days", url: "/duty_rota", tab_name: :duty_rota},
-          %{
-            name: "Shift Handover",
-            icon: "users",
-            url: "/shift_handovers",
-            tab_name: :shift_handovers
-          },
-          %{
-            name: "Requisitions",
-            icon: "document-text",
-            url: "/requisitions",
-            tab_name: :requisitions
-          },
-          %{name: "Forms", icon: "clipboard-document-list", url: "/forms", tab_name: :forms}
+          %{name: "Visits", icon: "home-modern", url: "/nurse/visits", tab_name: :visits}
         ]
       }
     ]
@@ -932,270 +590,24 @@ defmodule MedcampWeb.SidebarCatalog do
           },
           %{name: "Drugs", icon: "folder-plus", url: "/pharmacist/drugs", tab_name: :drugs},
           %{
-            name: "Stock Requests",
-            icon: "arrow-up-tray",
-            url: "/pharmacist/stock_requests",
-            tab_name: :stock_requests
-          },
-          %{
             name: "Drug Allocations",
             icon: "clock",
             url: "/pharmacist/drug_allocations",
             tab_name: :drug_allocations
-          },
-          %{
-            name: "Pending Drugs",
-            icon: "clock",
-            url: "/pharmacist/pending_drug_batches",
-            tab_name: :pending_drug_batches
           }
         ]
       },
       %{
-        key: "analytics-compliance",
-        name: "Analytics & Compliance",
+        key: "analytics",
+        name: "Analytics",
         icon: "chart-bar",
         tabs: [
-          %{
-            name: "Consumption Analysis",
-            icon: "chart-bar",
-            url: "/pharmacist/consumption_analysis",
-            tab_name: :consumption_analysis
-          },
           %{
             name: "Drug Allocation Report",
             icon: "chart-bar",
             url: "/pharmacist/drug_allocations/report",
             tab_name: :drug_allocation_report
-          },
-          %{
-            name: "Temp & Humidity Logs",
-            icon: "chart-bar",
-            url: "/pharmacist/pharmacy_logs",
-            tab_name: :pharmacy_logs
-          },
-          %{
-            name: "Dangerous Drug Register",
-            icon: "clipboard-document-list",
-            url: "/pharmacist/dangerous_drug_registers",
-            tab_name: :dangerous_drug_registers
           }
-        ]
-      },
-      %{
-        key: "admin",
-        name: "Admin",
-        icon: "cog-6-tooth",
-        tabs: [
-          %{name: "Duty Rota", icon: "calendar-days", url: "/duty_rota", tab_name: :duty_rota},
-          %{
-            name: "Requisitions",
-            icon: "document-text",
-            url: "/requisitions",
-            tab_name: :requisitions
-          },
-          %{name: "Todos", icon: "clipboard-document-check", url: "/todos", tab_name: :todos},
-          %{
-            name: "Shift Handover",
-            icon: "users",
-            url: "/shift_handovers",
-            tab_name: :shift_handovers
-          }
-        ]
-      }
-    ]
-  end
-
-  defp inventory_manager_tab_groups do
-    [
-      %{
-        key: "stock-management",
-        name: "Stock Management",
-        icon: "archive-box",
-        tabs: [
-          %{
-            name: "In Store",
-            icon: "archive-box",
-            url: "/inventory_manager/in_store",
-            tab_name: :in_store
-          },
-          %{
-            name: "All Batches",
-            icon: "beaker",
-            url: "/inventory_manager/batches",
-            tab_name: :all_batches
-          },
-          %{
-            name: "Inventories Received",
-            icon: "inbox-arrow-down",
-            url: "/inventory_manager/inventories_received",
-            tab_name: :inventories_received
-          },
-          %{
-            name: "Inventories Issued",
-            icon: "inbox-stack",
-            url: "/inventory_manager/inventories_issued",
-            tab_name: :inventories_issued
-          },
-          %{
-            name: "Stock Requests",
-            icon: "document-text",
-            url: "/inventory_manager/stock_requests",
-            tab_name: :stock_requests
-          }
-        ]
-      },
-      %{
-        key: "suppliers-analysis",
-        name: "Suppliers & Analysis",
-        icon: "chart-bar",
-        tabs: [
-          %{
-            name: "Suppliers",
-            icon: "users",
-            url: "/inventory_manager/suppliers",
-            tab_name: :suppliers
-          },
-          %{
-            name: "Consumption Analysis",
-            icon: "chart-bar",
-            url: "/inventory_manager/consumption_analysis",
-            tab_name: :consumption_analysis
-          }
-        ]
-      },
-      %{
-        key: "admin",
-        name: "Admin",
-        icon: "cog-6-tooth",
-        tabs: [
-          %{name: "Duty Rota", icon: "calendar-days", url: "/duty_rota", tab_name: :duty_rota},
-          %{
-            name: "Requisitions",
-            icon: "document-text",
-            url: "/requisitions",
-            tab_name: :requisitions
-          }
-        ]
-      }
-    ]
-  end
-
-  defp reception_tab_groups do
-    [
-      %{
-        key: "patient-management",
-        name: "Patient Management",
-        icon: "users",
-        tabs: [
-          %{
-            name: "Scan Patient",
-            icon: "magnifying-glass-circle",
-            url: "/reception/scan",
-            tab_name: :scan
-          },
-          %{
-            name: "All Patients",
-            icon: "user-group",
-            url: "/reception/patients",
-            tab_name: :patients
-          },
-          %{name: "Visits", icon: "home-modern", url: "/reception/visits", tab_name: :visits},
-          %{
-            name: "Appointments",
-            icon: "clock",
-            url: "/reception/appointments",
-            tab_name: :appointments
-          }
-        ]
-      },
-      %{
-        key: "records-surveys",
-        name: "Records & Surveys",
-        icon: "book-open",
-        tabs: [
-          %{
-            name: "M-Pesa Reconciliation",
-            icon: "arrow-path",
-            url: "/reception/mpesa_reconciliation",
-            tab_name: :mpesa_reconciliation
-          },
-          %{
-            name: "Visitors Books",
-            icon: "book-open",
-            url: "/reception/visitors_books",
-            tab_name: :visitors_books
-          },
-          %{
-            name: "New Visitor Book Note",
-            icon: "book-open",
-            url: "/visitor_book/new",
-            tab_name: :new_visitor_book_note
-          },
-          %{
-            name: "Add Feedback",
-            icon: "chat-bubble-left-ellipsis",
-            url: "/feedback",
-            tab_name: :add_feedback
-          },
-          %{
-            name: "Insurance Survey",
-            icon: "clipboard-document-check",
-            url: "/reception/community_health_survey",
-            tab_name: :community_health_survey
-          }
-        ]
-      },
-      %{
-        key: "inventories",
-        name: "Inventories",
-        icon: "inbox-arrow-down",
-        tabs: [
-          %{
-            name: "Medical Inventories",
-            icon: "inbox-arrow-down",
-            url: "/inventory_manager/inventories_received",
-            tab_name: :medical_inventory
-          },
-          %{
-            name: "General Inventories",
-            icon: "inbox-arrow-down",
-            url: "/reception/general_inventory",
-            tab_name: :general_inventory
-          },
-          %{
-            name: "Stock Requests",
-            icon: "arrow-up-tray",
-            url: "/reception/stock_requests",
-            tab_name: :stock_requests
-          }
-        ]
-      },
-      %{
-        key: "admin",
-        name: "Admin",
-        icon: "cog-6-tooth",
-        tabs: [
-          %{name: "Duty Rota", icon: "calendar-days", url: "/duty_rota", tab_name: :duty_rota},
-          %{
-            name: "Staff Meals",
-            icon: "cake",
-            url: "/reception/staff_meals",
-            tab_name: :staff_meals
-          },
-          %{
-            name: "Shift Handover",
-            icon: "users",
-            url: "/shift_handovers",
-            tab_name: :shift_handovers
-          },
-          %{
-            name: "Requisitions",
-            icon: "document-text",
-            url: "/requisitions",
-            tab_name: :requisitions
-          },
-          %{name: "Todos", icon: "clipboard-document-check", url: "/todos", tab_name: :todos}
         ]
       }
     ]
@@ -1218,144 +630,11 @@ defmodule MedcampWeb.SidebarCatalog do
           },
           %{name: "Lab Tests", icon: "beaker", url: "/lab/lab_tests", tab_name: :lab_tests},
           %{
-            name: "Lab Allocations",
-            icon: "clipboard-document-list",
-            url: "/lab/lab_allocations",
-            tab_name: :lab_allocations
-          },
-          %{
-            name: "Stock Requests",
-            icon: "arrow-up-tray",
-            url: "/lab/stock_requests",
-            tab_name: :stock_requests
-          },
-          %{
             name: "Lab Test Templates",
             icon: "code-bracket-square",
             url: "/lab/lab_test_templates",
             tab_name: :lab_test_templates
-          },
-          %{
-            name: "Quality Assurance",
-            icon: "shield-check",
-            url: "/lab/quality_assurance",
-            tab_name: :quality_assurance,
-            count: quality_assurance_badge_count()
           }
-        ]
-      },
-      %{
-        key: "admin",
-        name: "Admin",
-        icon: "cog-6-tooth",
-        tabs: [
-          %{name: "Duty Rota", icon: "calendar-days", url: "/duty_rota", tab_name: :duty_rota},
-          %{
-            name: "Shift Handover",
-            icon: "arrow-path",
-            url: "/shift_handovers",
-            tab_name: :shift_handovers
-          },
-          %{
-            name: "Requisitions",
-            icon: "shopping-cart",
-            url: "/requisitions",
-            tab_name: :requisitions
-          },
-          %{name: "Forms", icon: "document-text", url: "/forms", tab_name: :forms},
-          %{name: "Todos", icon: "check-circle", url: "/todos", tab_name: :todos}
-        ]
-      }
-    ]
-  end
-
-  defp support_staff_tab_groups do
-    [
-      %{
-        key: "daily-work",
-        name: "Daily Work",
-        icon: "clipboard-document-list",
-        tabs: [
-          %{
-            name: "Daily Activities",
-            icon: "clipboard-document-list",
-            url: "/support_staff/daily_activities",
-            tab_name: :daily_activities
-          },
-          %{
-            name: "Staff Meals",
-            icon: "cake",
-            url: "/support_staff/staff_meals",
-            tab_name: :staff_meals
-          }
-        ]
-      },
-      %{
-        key: "admin",
-        name: "Admin",
-        icon: "cog-6-tooth",
-        tabs: [
-          %{name: "Duty Rota", icon: "calendar-days", url: "/duty_rota", tab_name: :duty_rota},
-          %{
-            name: "Shift Handover",
-            icon: "users",
-            url: "/shift_handovers",
-            tab_name: :shift_handovers
-          },
-          %{
-            name: "Requisitions",
-            icon: "document-text",
-            url: "/requisitions",
-            tab_name: :requisitions
-          },
-          %{name: "Forms", icon: "clipboard-document-list", url: "/forms", tab_name: :forms},
-          %{name: "Todos", icon: "clipboard-document-check", url: "/todos", tab_name: :todos}
-        ]
-      }
-    ]
-  end
-
-  defp radiologist_tab_groups do
-    [
-      %{
-        key: "clinical-work",
-        name: "Clinical Work",
-        icon: "briefcase",
-        tabs: [
-          %{
-            name: "Scan Patient",
-            icon: "magnifying-glass-circle",
-            url: "/radiologist/scan",
-            tab_name: :scan
-          },
-          %{
-            name: "Radiology Tests",
-            icon: "briefcase",
-            url: "/radiologist/radiology_results",
-            tab_name: :radiology_results
-          }
-        ]
-      },
-      %{
-        key: "admin",
-        name: "Admin",
-        icon: "cog-6-tooth",
-        tabs: [
-          %{name: "Duty Rota", icon: "calendar-days", url: "/duty_rota", tab_name: :duty_rota},
-          %{
-            name: "Shift Handover",
-            icon: "users",
-            url: "/shift_handovers",
-            tab_name: :shift_handovers
-          },
-          %{
-            name: "Requisitions",
-            icon: "document-text",
-            url: "/requisitions",
-            tab_name: :requisitions
-          },
-          %{name: "Forms", icon: "clipboard-document-list", url: "/forms", tab_name: :forms},
-          %{name: "Todos", icon: "clipboard-document-check", url: "/todos", tab_name: :todos}
         ]
       }
     ]
@@ -1376,22 +655,10 @@ defmodule MedcampWeb.SidebarCatalog do
         tab_name: :patient_overview
       },
       %{
-        name: "MCH (Mother & Child)",
-        icon: "heart",
-        url: "/nurse/#{patient.id}/mch",
-        tab_name: :mch
-      },
-      %{
         name: "Patient Triages",
         icon: "computer-desktop",
         url: "/nurse/#{patient.id}/triages",
         tab_name: :triages
-      },
-      %{
-        name: "Doctor's Notes",
-        icon: "pencil-square",
-        url: "/nurse/#{patient.id}/doctor_notes",
-        tab_name: :doctor_notes
       },
       %{
         name: "Patient Visits",
@@ -1400,52 +667,10 @@ defmodule MedcampWeb.SidebarCatalog do
         tab_name: :visits
       },
       %{
-        name: "My Notes For Patient",
+        name: "Doctor's Notes",
         icon: "pencil-square",
-        url: "/nurse/#{patient.id}/nurse_notes",
-        tab_name: :nurse_notes
-      },
-      %{
-        name: "CaDex Notes",
-        icon: "clipboard-document-list",
-        url: "/nurse/#{patient.id}/cadex_notes",
-        tab_name: :cadex_notes
-      },
-      %{
-        name: "Procedures For Patient",
-        icon: "rectangle-stack",
-        url: "/nurse/#{patient.id}/nurse_procedures",
-        tab_name: :nurse_procedures
-      },
-      %{
-        name: "Admission Requests",
-        icon: "home-modern",
-        url: "/nurse/#{patient.id}/admission_requests",
-        tab_name: :admission_requests
-      },
-      %{
-        name: "Room Allocations",
-        icon: "calculator",
-        url: "/nurse/#{patient.id}/room_allocations",
-        tab_name: :room_allocations
-      },
-      %{
-        name: "Shift Handover",
-        icon: "users",
-        url: "/shift_handovers",
-        tab_name: :shift_handovers
-      },
-      %{
-        name: "Requisitions",
-        icon: "document-text",
-        url: "/requisitions",
-        tab_name: :requisitions
-      },
-      %{
-        name: "Forms",
-        icon: "clipboard-document-list",
-        url: "/nurse/#{patient.id}/forms",
-        tab_name: :forms
+        url: "/nurse/#{patient.id}/doctor_notes",
+        tab_name: :doctor_notes
       }
     ]
   end
@@ -1459,81 +684,10 @@ defmodule MedcampWeb.SidebarCatalog do
         tab_name: :drugs
       },
       %{
-        name: "Inventories",
-        icon: "inbox-arrow-down",
-        url: "/inventory_manager/inventories_received",
-        tab_name: :inventories
-      },
-      %{
         name: "Patient Drug Allocations",
         icon: "users",
         url: "/pharmacist/#{patient.id}/drug_allocations",
         tab_name: :drug_allocations
-      },
-      %{
-        name: "Shift Handover",
-        icon: "users",
-        url: "/shift_handovers",
-        tab_name: :shift_handovers
-      },
-      %{
-        name: "Requisitions",
-        icon: "document-text",
-        url: "/requisitions",
-        tab_name: :requisitions
-      },
-      %{
-        name: "Forms",
-        icon: "clipboard-document-list",
-        url: "/forms",
-        tab_name: :forms
-      },
-      %{
-        name: "Todos",
-        icon: "clipboard-document-check",
-        url: "/todos",
-        tab_name: :todos
-      }
-    ]
-  end
-
-  defp reception_patient_tabs(patient) do
-    [
-      %{
-        name: "All Patients",
-        icon: "backward",
-        url: "/reception/patients",
-        tab_name: :patients
-      },
-      %{
-        name: "Patient Overview",
-        icon: "user",
-        url: "/reception/#{patient.id}/patient_overview",
-        tab_name: :patient_overview
-      },
-      %{
-        name: "Patient Visits",
-        icon: "home-modern",
-        url: "/reception/#{patient.id}/visits",
-        tab_name: :visits
-      },
-      %{
-        name: "Appointments",
-        icon: "clock",
-        url: "/reception/#{patient.id}/appointments",
-        tab_name: :appointments
-      },
-      %{
-        name: "Deposits",
-        icon: "currency-dollar",
-        url: "/reception/#{patient.id}/wallet_deposits",
-        tab_name: :wallet_deposits
-      },
-      %{
-        name: "Receipts",
-        icon: "banknotes",
-        url: "/reception/#{patient.id}/payments",
-        tab_name: :payments
       }
     ]
   end
@@ -1555,41 +709,6 @@ defmodule MedcampWeb.SidebarCatalog do
     ]
   end
 
-  defp radiologist_patient_tabs(patient) do
-    [
-      %{
-        name: "Back",
-        icon: "backward",
-        url: "/radiologist/radiology_results",
-        tab_name: :all_radiology_results
-      },
-      %{
-        name: "Radiology Tests",
-        icon: "briefcase",
-        url: "/radiologist/#{patient.id}/radiology_results",
-        tab_name: :radiology_results
-      },
-      %{
-        name: "Shift Handover",
-        icon: "users",
-        url: "/shift_handovers",
-        tab_name: :shift_handovers
-      },
-      %{
-        name: "Requisitions",
-        icon: "document-text",
-        url: "/requisitions",
-        tab_name: :requisitions
-      },
-      %{
-        name: "Forms",
-        icon: "clipboard-document-list",
-        url: "/forms",
-        tab_name: :forms
-      }
-    ]
-  end
-
   defp doctor_patient_tabs(patient) do
     [
       %{
@@ -1603,12 +722,6 @@ defmodule MedcampWeb.SidebarCatalog do
         icon: "user",
         url: "/doctor/patients/#{patient.id}",
         tab_name: :overview
-      },
-      %{
-        name: "MCH (Mother & Child)",
-        icon: "heart",
-        url: "/doctor/patients/#{patient.id}/mch",
-        tab_name: :mch
       },
       %{
         name: "Doctor's Notes",
@@ -1629,40 +742,16 @@ defmodule MedcampWeb.SidebarCatalog do
         tab_name: :triages
       },
       %{
-        name: "Appointments",
-        icon: "clock",
-        url: "/doctor/patients/#{patient.id}/appointments",
-        tab_name: :appointments
-      },
-      %{
-        name: "Doctor Procedures Done",
-        icon: "rectangle-stack",
-        url: "/doctor/#{patient.id}/doctor_procedures",
-        tab_name: :doctor_procedures
-      },
-      %{
-        name: "Nurse Procedures Done",
-        icon: "rectangle-stack",
-        url: "/doctor/patients/#{patient.id}/nurse_procedures",
-        tab_name: :nurse_procedures
-      },
-      %{
         name: "Lab Results",
         icon: "clipboard-document-list",
         url: "/doctor/patients/#{patient.id}/lab_results",
         tab_name: :lab_results
       },
       %{
-        name: "Referrals",
-        icon: "home-modern",
-        url: "/doctor/patients/#{patient.id}/referrals",
-        tab_name: :referrals
-      },
-      %{
-        name: "Forms",
-        icon: "clipboard-document-list",
-        url: "/doctor/#{patient.id}/forms",
-        tab_name: :forms
+        name: "Drug Allocations",
+        icon: "beaker",
+        url: "/doctor/patients/#{patient.id}/drug_allocations",
+        tab_name: :drug_allocations
       }
     ]
   end

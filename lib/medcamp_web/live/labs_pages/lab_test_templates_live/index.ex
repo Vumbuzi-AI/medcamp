@@ -107,7 +107,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
     <div class="bg-white rounded-lg shadow-sm border border-gray-100">
       <.header class="p-6 border-b border-gray-100">
         <div class="flex items-center">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#6667ab] to-[#8384c9] flex items-center justify-center mr-4">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-accent to-[#8384c9] flex items-center justify-center mr-4">
             <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 stroke-linecap="round"
@@ -118,13 +118,13 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
             </svg>
           </div>
           <div>
-            <h1 class="text-2xl font-bold text-[#373896]">Lab Test Templates</h1>
+            <h1 class="text-2xl font-bold text-brand-primary">Lab Test Templates</h1>
             <p class="text-sm text-gray-600 mt-1">Manage laboratory test templates and parameters</p>
           </div>
         </div>
         <:actions>
           <.link patch={~p"/lab/lab_test_templates/new"}>
-            <.button class="bg-[#6667ab] flex gap-1 items-center hover:bg-[#5556a0]">
+            <.button class="bg-brand-accent flex gap-1 items-center hover:bg-brand-accent-dark">
               <svg
                 class="w-5 h-5 mr-2"
                 fill="none"
@@ -161,7 +161,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
               name="query"
               value={@search_query}
               placeholder="Search templates by name or short name (e.g., FBC, HIV, Urinalysis)..."
-              class="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-[#6667ab] focus:border-[#6667ab]"
+              class="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-brand-accent focus:border-brand-accent"
               phx-debounce="300"
             />
           </div>
@@ -186,7 +186,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
             <p class="mt-2 text-sm text-gray-500">Get started by creating a new test template.</p>
             <div class="mt-6">
               <.link patch={~p"/lab/lab_test_templates/new"}>
-                <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+                <.button class="bg-brand-accent hover:bg-brand-accent-dark">
                   <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       stroke-linecap="round"
@@ -231,9 +231,9 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
                 >
                   <td class="px-6 py-4">
                     <div class="flex items-center">
-                      <div class="w-10 h-10 rounded-lg bg-[#6667ab]/10 flex items-center justify-center mr-3">
+                      <div class="w-10 h-10 rounded-lg bg-brand-accent/10 flex items-center justify-center mr-3">
                         <svg
-                          class="w-5 h-5 text-[#6667ab]"
+                          class="w-5 h-5 text-brand-accent"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -310,7 +310,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
                       </.link>
                       <.link
                         patch={~p"/lab/lab_test_templates/#{template}/edit"}
-                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-[#6667ab] bg-[#6667ab]/10 rounded-lg hover:bg-[#6667ab]/20 transition-colors"
+                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-brand-accent bg-brand-accent/10 rounded-lg hover:bg-brand-accent/20 transition-colors"
                       >
                         <svg
                           class="w-4 h-4 mr-1"
@@ -363,9 +363,9 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
             >
               <div class="flex items-start justify-between mb-3">
                 <div class="flex items-center flex-1">
-                  <div class="w-12 h-12 rounded-xl bg-[#6667ab]/10 flex items-center justify-center mr-3">
+                  <div class="w-12 h-12 rounded-xl bg-brand-accent/10 flex items-center justify-center mr-3">
                     <svg
-                      class="w-6 h-6 text-[#6667ab]"
+                      class="w-6 h-6 text-brand-accent"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -430,7 +430,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
                 </.link>
                 <.link
                   patch={~p"/lab/lab_test_templates/#{template}/edit"}
-                  class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-[#6667ab] bg-[#6667ab]/10 rounded-lg hover:bg-[#6667ab]/20 transition-colors"
+                  class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-brand-accent bg-brand-accent/10 rounded-lg hover:bg-brand-accent/20 transition-colors"
                 >
                   <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path

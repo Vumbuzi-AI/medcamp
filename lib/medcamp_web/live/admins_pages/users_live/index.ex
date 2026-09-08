@@ -1,12 +1,11 @@
 defmodule MedcampWeb.AdminUsersLive.Index do
   use MedcampWeb, :admin_live_view
   alias Medcamp.Accounts
-  alias Medcamp.Departments
   alias Medcamp.Notify
 
   @per_page 10
 
-  @default_filters %{is_active: "", role: "", department_id: "", search: ""}
+  @default_filters %{is_active: "", role: "", search: ""}
 
   @impl true
   def mount(_params, _session, socket) do
@@ -15,30 +14,11 @@ defmodule MedcampWeb.AdminUsersLive.Index do
      |> assign(:active_tab, :users)
      |> assign(:reset_link, "")
      |> assign(:filters, @default_filters)
-     |> assign(:departments, Departments.list_departments_for_selection())
-     |> assign(:roles, roles_for_filter())
+     |> assign(:roles, Accounts.User.roles())
      |> assign(:selected_user, nil)
      |> assign(:page, 1)
      |> assign(:per_page, @per_page)
      |> load_users()}
-  end
-
-  defp roles_for_filter do
-    [
-      "admin",
-      "doctor",
-      "nurse",
-      "labtechnician",
-      "reception",
-      "pharmacist",
-      "radiologist",
-      "support staff",
-      "inventory_manager",
-      "supplier",
-      "procurement_officer",
-      "stores_officer",
-      "finance_officer"
-    ]
   end
 
   @impl true
@@ -109,7 +89,6 @@ defmodule MedcampWeb.AdminUsersLive.Index do
     filter_params = %{
       is_active: nilify(filters["is_active"]),
       role: nilify(filters["role"]),
-      department_id: nilify(filters["department_id"]),
       search: nilify(filters["search"])
     }
 
@@ -118,7 +97,6 @@ defmodule MedcampWeb.AdminUsersLive.Index do
      |> assign(:filters, %{
        is_active: filters["is_active"] || "",
        role: filters["role"] || "",
-       department_id: filters["department_id"] || "",
        search: filters["search"] || ""
      })
      |> assign(:page, 1)
@@ -176,20 +154,15 @@ defmodule MedcampWeb.AdminUsersLive.Index do
 
   defp count_active_filters(filters) do
     filters
-    |> Map.take([:is_active, :role, :department_id])
+    |> Map.take([:is_active, :role])
     |> Map.values()
     |> Enum.count(&(&1 not in [nil, ""]))
   end
 
-  defp filter_chips(filters, departments) do
+  defp filter_chips(filters) do
     [
       filter_chip(filters.is_active, "is_active", is_active_label(filters.is_active)),
-      filter_chip(filters.role, "role", filters.role),
-      filter_chip(
-        filters.department_id,
-        "department_id",
-        department_name(filters.department_id, departments)
-      )
+      filter_chip(filters.role, "role", filters.role)
     ]
     |> Enum.reject(&is_nil/1)
   end
@@ -197,13 +170,6 @@ defmodule MedcampWeb.AdminUsersLive.Index do
   defp is_active_label("true"), do: "Active"
   defp is_active_label("false"), do: "Inactive"
   defp is_active_label(other), do: other
-
-  defp department_name(id, departments) do
-    case Enum.find(departments, fn {_name, dept_id} -> to_string(dept_id) == to_string(id) end) do
-      {name, _id} -> name
-      nil -> id
-    end
-  end
 
   @impl true
   def render(assigns) do
@@ -217,7 +183,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
         >
           <:actions>
             <.link patch="/admin/users/new">
-              <button class="inline-flex items-center gap-2 rounded-lg bg-[#373896] px-4 py-2 text-sm font-medium text-white hover:bg-[#2d2d7a]">
+              <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2d2d7a]">
                 <Heroicons.icon name="plus" type="outline" class="h-4 w-4" /> Add User
               </button>
             </.link>
@@ -244,7 +210,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                 <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
                 <select
                   name="filters[is_active]"
-                  class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                  class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
                 >
                   <option value="">All statuses</option>
                   <option value="true" selected={@filters.is_active == "true"}>Active</option>
@@ -255,7 +221,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                 <label class="block text-xs font-medium text-gray-600 mb-1">Role</label>
                 <select
                   name="filters[role]"
-                  class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                  class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
                 >
                   <option value="">All roles</option>
                   <%= for role <- @roles do %>
@@ -265,25 +231,8 @@ defmodule MedcampWeb.AdminUsersLive.Index do
               </div>
             </:group>
 
-            <:group label="Department">
-              <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Department</label>
-                <select
-                  name="filters[department_id]"
-                  class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
-                >
-                  <option value="">All departments</option>
-                  <%= for {name, id} <- @departments do %>
-                    <option value={id} selected={@filters.department_id == to_string(id)}>
-                      {name}
-                    </option>
-                  <% end %>
-                </select>
-              </div>
-            </:group>
-
             <:chip
-              :for={chip <- filter_chips(@filters, @departments)}
+              :for={chip <- filter_chips(@filters)}
               label={chip.label}
               clear={JS.push("clear_chip", value: %{"field" => chip.field})}
             />
@@ -304,7 +253,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
             }
           >
             <:actions :if={@filters.search != "" or count_active_filters(@filters) > 0}>
-              <button phx-click="clear_filters" class="text-xs text-[#6667ab] hover:underline">
+              <button phx-click="clear_filters" class="text-xs text-brand-accent hover:underline">
                 Clear filters
               </button>
             </:actions>
@@ -318,9 +267,6 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                 </th>
                 <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                   Role
-                </th>
-                <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Department
                 </th>
                 <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                   Status
@@ -350,7 +296,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                       <%= if user.image do %>
                         <img src={user.image} class="h-9 w-9 rounded-full object-cover shrink-0" />
                       <% else %>
-                        <div class="h-9 w-9 rounded-full bg-[#e7e7ff] flex items-center justify-center text-[#373896] font-semibold text-sm shrink-0">
+                        <div class="h-9 w-9 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-semibold text-sm shrink-0">
                           {String.first(user.name || "?")}
                         </div>
                       <% end %>
@@ -362,13 +308,9 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                   </td>
                   <%!-- Role --%>
                   <td class="px-5 py-3">
-                    <span class="inline-flex items-center rounded-full bg-[#f0f0ff] px-2.5 py-0.5 text-xs font-medium text-[#373896]">
+                    <span class="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-primary">
                       {user.role}
                     </span>
-                  </td>
-                  <%!-- Department --%>
-                  <td class="px-5 py-3 text-sm text-gray-700">
-                    {if user.department, do: user.department.name, else: "—"}
                   </td>
                   <%!-- Status --%>
                   <td class="px-5 py-3">
@@ -401,7 +343,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                     <div class="flex items-center justify-end gap-2">
                       <.link
                         navigate={~p"/admin/users/#{user}/edit"}
-                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-[#6667ab] hover:bg-[#f0f0ff]"
+                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-brand-accent hover:bg-brand-50"
                         phx-click=""
                       >
                         <Heroicons.icon name="pencil-square" type="outline" class="h-3.5 w-3.5" />
@@ -409,14 +351,14 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                       </.link>
                       <.link
                         navigate={~p"/admin/users/#{user}/permissions"}
-                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-[#6667ab] hover:bg-[#f0f0ff]"
+                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-brand-accent hover:bg-brand-50"
                         phx-click=""
                       >
                         <Heroicons.icon name="key" type="outline" class="h-3.5 w-3.5" /> Panels
                       </.link>
                       <.link
                         navigate={~p"/admin/users/#{user.email}"}
-                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-white bg-[#373896] hover:bg-[#2d2d7a]"
+                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-white bg-brand-primary hover:bg-[#2d2d7a]"
                         phx-click=""
                       >
                         Access
@@ -449,7 +391,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
           phx-click=""
         >
           <%!-- Header bar --%>
-          <div class="bg-[#373896] px-6 py-5 flex items-center gap-4">
+          <div class="bg-brand-primary px-6 py-5 flex items-center gap-4">
             <%= if u.image do %>
               <img
                 src={u.image}
@@ -488,12 +430,6 @@ defmodule MedcampWeb.AdminUsersLive.Index do
 
           <%!-- Detail grid --%>
           <div class="px-6 py-5 grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
-            <div>
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">
-                Department
-              </p>
-              <p class="text-gray-800">{if u.department, do: u.department.name, else: "—"}</p>
-            </div>
             <div>
               <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Phone</p>
               <p class="text-gray-800">{u.phone_number || "—"}</p>
@@ -562,7 +498,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
             </button>
             <.link
               navigate={~p"/admin/users/#{u.email}"}
-              class="inline-flex items-center gap-1.5 rounded-lg bg-[#373896] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#2d2d7a]"
+              class="inline-flex items-center gap-1.5 rounded-lg bg-brand-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-[#2d2d7a]"
             >
               <Heroicons.icon name="arrow-right-on-rectangle" type="outline" class="h-4 w-4" />
               Access Account

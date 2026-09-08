@@ -410,6 +410,7 @@ defmodule Medcamp.DrugAllocations do
     %DrugAllocation{}
     |> DrugAllocation.changeset(attrs)
     |> Repo.insert()
+    |> Medcamp.CampFlow.advance("pharmacy_pending")
   end
 
   @doc """

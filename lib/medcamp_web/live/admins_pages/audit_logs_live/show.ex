@@ -19,11 +19,11 @@ defmodule MedcampWeb.AuditLogLive.Show do
   def render(assigns) do
     ~H"""
     <div>
-      <.header class="text-[#373896] border-b border-gray-100 pb-4 mb-6">
+      <.header class="text-brand-primary border-b border-gray-100 pb-4 mb-6">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -40,7 +40,7 @@ defmodule MedcampWeb.AuditLogLive.Show do
       </.header>
       
     <!-- Overview Card -->
-      <div class="bg-gradient-to-r from-[#6667ab] to-[#373896] rounded-lg p-6 mb-6 text-white">
+      <div class="bg-gradient-to-r from-brand-accent to-brand-primary rounded-lg p-6 mb-6 text-white">
         <div class="flex items-start justify-between">
           <div>
             <div class="flex items-center mb-2">
@@ -71,7 +71,7 @@ defmodule MedcampWeb.AuditLogLive.Show do
         <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -87,7 +87,7 @@ defmodule MedcampWeb.AuditLogLive.Show do
         </h3>
         <%= if @audit_log.user do %>
           <div class="flex items-center">
-            <div class="flex-shrink-0 h-12 w-12 rounded-full bg-[#6667ab] flex items-center justify-center text-white font-bold text-lg">
+            <div class="flex-shrink-0 h-12 w-12 rounded-full bg-brand-accent flex items-center justify-center text-white font-bold text-lg">
               {String.first(@audit_log.user.email) |> String.upcase()}
             </div>
             <div class="ml-4">
@@ -118,7 +118,7 @@ defmodule MedcampWeb.AuditLogLive.Show do
           <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5 mr-2 text-[#6667ab]"
+              class="h-5 w-5 mr-2 text-brand-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -148,7 +148,7 @@ defmodule MedcampWeb.AuditLogLive.Show do
           <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5 mr-2 text-[#6667ab]"
+              class="h-5 w-5 mr-2 text-brand-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -286,7 +286,7 @@ defmodule MedcampWeb.AuditLogLive.Show do
         <summary class="text-lg font-semibold text-gray-900 cursor-pointer flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

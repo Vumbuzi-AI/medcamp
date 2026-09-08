@@ -43,11 +43,6 @@ defmodule MedcampWeb.DoctorsPagePatientLive.VisitsIndex do
   end
 
   @impl true
-  def handle_info({MedcampWeb.PatientVisitLive.FormComponent, {:saved, _patient_visit}}, socket) do
-    {:noreply, assign_visits(socket, socket.assigns.page)}
-  end
-
-  @impl true
   def handle_event("paginate", %{"page" => page}, socket) do
     {:noreply, assign_visits(socket, page)}
   end
@@ -131,7 +126,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.VisitsIndex do
         }
       >
         <:actions :if={@search != ""}>
-          <button phx-click="clear_search" class="text-xs text-[#6667ab] hover:underline">
+          <button phx-click="clear_search" class="text-xs text-brand-accent hover:underline">
             Clear search
           </button>
         </:actions>
@@ -140,7 +135,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.VisitsIndex do
       <.table :if={@patient_visits != []} id="patient_visits" rows={@patient_visits}>
         <:col :let={patient_visit} label="Patient">
           <div class="flex items-center py-3">
-            <div class="h-8 w-8 rounded-full bg-[#e7e7ff] flex items-center justify-center text-[#373896] font-medium mr-2 text-sm">
+            <div class="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-medium mr-2 text-sm">
               {String.first(patient_visit.patient.first_name || "")}
             </div>
             <span class="font-medium text-gray-900">
@@ -158,7 +153,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.VisitsIndex do
           <div class="flex items-center py-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-4 w-4 mr-1 text-[#6667ab]"
+              class="h-4 w-4 mr-1 text-brand-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -189,7 +184,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.VisitsIndex do
         <:col :let={patient_visit} label="Doctor">
           <div class="flex items-center py-3">
             <%= if patient_visit.doctor && patient_visit.doctor.name do %>
-              <span class="px-2 py-1 text-xs rounded-full bg-[#e7e7ff] text-[#373896]">
+              <span class="px-2 py-1 text-xs rounded-full bg-brand-100 text-brand-primary">
                 Dr. {patient_visit.doctor.name}
               </span>
             <% else %>

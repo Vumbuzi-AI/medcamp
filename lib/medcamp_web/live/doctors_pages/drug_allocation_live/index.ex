@@ -99,7 +99,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DrugAllocationIndex do
     ~H"""
     <div>
       <.header>
-        Listing Drugs Given to {@patient.name}
+        Drug allocations for {patient_name(@patient)}
       </.header>
 
       <.blank_state
@@ -120,7 +120,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DrugAllocationIndex do
         }
       >
         <:col :let={drug_allocation} label="Prescription">{drug_allocation.prescription}</:col>
-        <:col :let={drug_allocation} label="Patient">{drug_allocation.patient.name}</:col>
+        <:col :let={drug_allocation} label="Patient">{patient_name(drug_allocation.patient)}</:col>
         <:col :let={drug_allocation} label="Doctor">
           {drug_allocation.doctor && drug_allocation.doctor.name}
         </:col>
@@ -140,5 +140,11 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DrugAllocationIndex do
       />
     </div>
     """
+  end
+
+  defp patient_name(%{first_name: first_name, middle_name: middle_name, last_name: last_name}) do
+    [first_name, middle_name, last_name]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
   end
 end
