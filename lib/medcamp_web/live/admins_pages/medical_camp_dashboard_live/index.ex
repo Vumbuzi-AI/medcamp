@@ -341,7 +341,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
       <div class="w-[90%] mx-auto  space-y-6">
         
     <!-- Header -->
-        <div class="bg-gradient-to-r from-[#373896] to-[#5556a0] rounded-2xl p-6 text-white shadow-lg">
+        <div class="bg-gradient-to-r from-brand-primary to-brand-accent-dark rounded-2xl p-6 text-white shadow-lg">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 class="text-2xl font-bold">Medical Camp Dashboard</h1>
@@ -355,7 +355,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
             <div class="flex flex-col items-stretch gap-3 sm:items-end">
               <.link
                 navigate={@report_path}
-                class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#373896] transition hover:bg-blue-50"
+                class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-primary transition hover:bg-blue-50"
               >
                 <Heroicons.icon name="document-text" type="outline" class="h-4 w-4" /> View Report
               </.link>
@@ -373,7 +373,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 class={[
                   "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :overview,
-                    do: "border-[#373896] text-[#373896] bg-indigo-50/60",
+                    do: "border-brand-primary text-brand-primary bg-indigo-50/60",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                   )
                 ]}
@@ -394,7 +394,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 class={[
                   "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :patient_data,
-                    do: "border-[#373896] text-[#373896] bg-indigo-50/60",
+                    do: "border-brand-primary text-brand-primary bg-indigo-50/60",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                   )
                 ]}
@@ -415,7 +415,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 class={[
                   "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :ai_analysis,
-                    do: "border-[#373896] text-[#373896] bg-indigo-50/60",
+                    do: "border-brand-primary text-brand-primary bg-indigo-50/60",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                   )
                 ]}
@@ -436,7 +436,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 class={[
                   "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :financials,
-                    do: "border-[#373896] text-[#373896] bg-indigo-50/60",
+                    do: "border-brand-primary text-brand-primary bg-indigo-50/60",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                   )
                 ]}
@@ -457,7 +457,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 class={[
                   "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :downloads,
-                    do: "border-[#373896] text-[#373896] bg-indigo-50/60",
+                    do: "border-brand-primary text-brand-primary bg-indigo-50/60",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                   )
                 ]}
@@ -1030,7 +1030,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 phx-click-away="close_patient"
               >
                 <!-- Modal Header -->
-                <div class="px-6 py-5 bg-gradient-to-r from-[#373896] to-[#5556a0] rounded-t-2xl text-white flex items-center justify-between shrink-0">
+                <div class="px-6 py-5 bg-gradient-to-r from-brand-primary to-brand-accent-dark rounded-t-2xl text-white flex items-center justify-between shrink-0">
                   <div class="flex items-center gap-3">
                     <div class="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center font-bold text-lg">
                       {String.first(@selected_patient.first_name || "?")}
@@ -1375,7 +1375,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                             rows="4"
                             value={@patient_ai_question}
                             placeholder="Ask for a case summary, likely disease pattern, missing documentation, red flags, or follow-up advice."
-                            class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-[#373896] focus:ring-2 focus:ring-indigo-100"
+                            class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-indigo-100"
                           ></textarea>
 
                           <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -1386,7 +1386,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                             <button
                               type="submit"
                               phx-disable-with="Analyzing..."
-                              class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#373896] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2e307a]"
+                              class="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2e307a]"
                             >
                               Analyze with AI
                             </button>
@@ -1437,7 +1437,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                   </button>
                   <a
                     href={"/admin/patients/#{@selected_patient.id}"}
-                    class="flex items-center gap-2 text-sm font-semibold text-white bg-[#373896] hover:bg-[#2e307a] px-4 py-2 rounded-xl transition-colors"
+                    class="flex items-center gap-2 text-sm font-semibold text-white bg-brand-primary hover:bg-[#2e307a] px-4 py-2 rounded-xl transition-colors"
                   >
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
@@ -1482,13 +1482,13 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                   rows="5"
                   value={@camp_ai_question}
                   placeholder="Ask: how many had respiratory disease patterns, what were the most common diagnoses, which age groups carried most burden, what follow-up gaps exist, or summarize the whole camp."
-                  class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-[#373896] focus:ring-2 focus:ring-indigo-100"
+                  class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-indigo-100"
                 ></textarea>
 
                 <button
                   type="submit"
                   phx-disable-with="Analyzing..."
-                  class="flex w-fit items-center gap-2 rounded-xl bg-[#373896] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2e307a]"
+                  class="flex w-fit items-center gap-2 rounded-xl bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2e307a]"
                 >
                   Analyze with AI
                 </button>
@@ -1645,7 +1645,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             
     <!-- Invoice-style header -->
-            <div class="bg-gradient-to-r from-[#373896] to-[#5556a0] px-8 py-6 text-white">
+            <div class="bg-gradient-to-r from-brand-primary to-brand-accent-dark px-8 py-6 text-white">
               <div class="flex items-start justify-between">
                 <div>
                   <p class="text-xs font-medium uppercase tracking-widest text-blue-200 mb-1">
@@ -1693,7 +1693,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                   <!-- Patient header -->
                   <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-3">
-                      <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#373896] text-white font-bold text-xs">
+                      <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-primary text-white font-bold text-xs">
                         {idx + 1}
                       </div>
                       <div>
@@ -1815,7 +1815,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               <% end %>
               
     <!-- Grand total footer -->
-              <div class="border-t-2 border-[#373896] bg-gradient-to-r from-[#373896] to-[#5556a0] px-8 py-5 text-white">
+              <div class="border-t-2 border-brand-primary bg-gradient-to-r from-brand-primary to-brand-accent-dark px-8 py-5 text-white">
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="text-sm font-medium text-blue-100">
@@ -2404,7 +2404,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
       class={[
         "flex-1 px-3 py-3 text-xs font-medium transition-colors border-b-2",
         if(@tab == @active,
-          do: "border-[#373896] text-[#373896] bg-white",
+          do: "border-brand-primary text-brand-primary bg-white",
           else: "border-transparent text-slate-500 hover:text-slate-700"
         )
       ]}

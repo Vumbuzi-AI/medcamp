@@ -10,7 +10,7 @@ defmodule MedcampWeb.ScanComponents do
         <div class="flex items-center mb-4">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6 text-[#6667ab] mr-2"
+            class="h-6 w-6 text-brand-accent mr-2"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -22,7 +22,7 @@ defmodule MedcampWeb.ScanComponents do
               d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
             />
           </svg>
-          <h2 class="text-xl font-semibold text-[#373896]">Patient QR Code Scanner</h2>
+          <h2 class="text-xl font-semibold text-brand-primary">Patient QR Code Scanner</h2>
         </div>
 
         <.input
@@ -31,13 +31,13 @@ defmodule MedcampWeb.ScanComponents do
           label="Scan QR Code for Patient"
           placeholder="Position the QR code in front of your camera..."
           rows={4}
-          class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+          class="focus:border-brand-accent focus:ring-brand-accent"
         />
 
         <div class="text-sm text-gray-500 flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 mr-1 text-[#6667ab]"
+            class="h-4 w-4 mr-1 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

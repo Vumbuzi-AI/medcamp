@@ -530,6 +530,12 @@ defmodule MedcampWeb.SidebarCatalog do
         name: "Admin Operations",
         icon: "cog-6-tooth",
         tabs: [
+          %{
+            name: "Organisation",
+            icon: "building-office-2",
+            url: "/admin/organisation",
+            tab_name: :organisation
+          },
           %{name: "System Users", icon: "users", url: "/admin/users", tab_name: :users},
           %{
             name: "Login Sessions",

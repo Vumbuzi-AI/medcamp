@@ -296,7 +296,10 @@ defmodule MedcampWeb.NewDrugAssignedComponent do
      end)
      |> assign_new(:drug_form, fn ->
        to_form(
-         Medcamp.DrugAllocations.DrugAssigned.changeset(%Medcamp.DrugAllocations.DrugAssigned{}, %{})
+         Medcamp.DrugAllocations.DrugAssigned.changeset(
+           %Medcamp.DrugAllocations.DrugAssigned{},
+           %{}
+         )
        )
      end)}
   end
@@ -327,7 +330,10 @@ defmodule MedcampWeb.NewDrugAssignedComponent do
      |> assign(:show_drug_modal, true)
      |> assign_new(:drug_form, fn ->
        to_form(
-         Medcamp.DrugAllocations.DrugAssigned.changeset(%Medcamp.DrugAllocations.DrugAssigned{}, %{})
+         Medcamp.DrugAllocations.DrugAssigned.changeset(
+           %Medcamp.DrugAllocations.DrugAssigned{},
+           %{}
+         )
        )
      end)}
   end
@@ -358,7 +364,10 @@ defmodule MedcampWeb.NewDrugAssignedComponent do
       Map.put(params, "inventory_received_id", socket.assigns.selected_drug.inventory_received_id)
 
     changeset =
-      Medcamp.DrugAllocations.DrugAssigned.changeset(%Medcamp.DrugAllocations.DrugAssigned{}, params)
+      Medcamp.DrugAllocations.DrugAssigned.changeset(
+        %Medcamp.DrugAllocations.DrugAssigned{},
+        params
+      )
 
     if changeset.valid? do
       # Get the drug data

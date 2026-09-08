@@ -83,7 +83,7 @@ defmodule MedcampWeb.LabSurveillanceLive do
               type="date"
               value={@filters.date_from}
               required
-              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
             />
           </div>
           <div>
@@ -96,7 +96,7 @@ defmodule MedcampWeb.LabSurveillanceLive do
               type="date"
               value={@filters.date_to}
               required
-              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
             />
           </div>
           <div>
@@ -106,7 +106,7 @@ defmodule MedcampWeb.LabSurveillanceLive do
             <select
               id="surveillance-test-name"
               name="filters[test_name]"
-              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
             >
               <option value="">All tests</option>
               <option
@@ -125,7 +125,7 @@ defmodule MedcampWeb.LabSurveillanceLive do
             <select
               id="surveillance-age-group"
               name="filters[age_group]"
-              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
             >
               <option value="">All ages</option>
               <option value="under_five" selected={@filters.age_group == "under_five"}>
@@ -142,7 +142,7 @@ defmodule MedcampWeb.LabSurveillanceLive do
           <div class="flex gap-2">
             <button
               type="submit"
-              class="h-10 flex-1 rounded-md bg-[#6667ab] px-4 text-sm font-semibold text-white hover:bg-[#5556a0]"
+              class="h-10 flex-1 rounded-md bg-brand-accent px-4 text-sm font-semibold text-white hover:bg-brand-accent-dark"
             >
               Apply filters
             </button>
@@ -168,7 +168,7 @@ defmodule MedcampWeb.LabSurveillanceLive do
           <button
             type="button"
             onclick="window.print()"
-            class="no-print inline-flex h-9 items-center rounded-md border border-[#cdd0ff] bg-[#f0f0ff] px-3 text-sm font-semibold text-[#373896] hover:bg-[#e7e7ff]"
+            class="no-print inline-flex h-9 items-center rounded-md border border-[#cdd0ff] bg-brand-50 px-3 text-sm font-semibold text-brand-primary hover:bg-brand-100"
           >
             Print summary
           </button>
@@ -235,7 +235,7 @@ defmodule MedcampWeb.LabSurveillanceLive do
               </tr>
             </tbody>
             <tfoot :if={@report.rows != []}>
-              <tr class="bg-[#f0f0ff] font-bold text-[#373896]">
+              <tr class="bg-brand-50 font-bold text-brand-primary">
                 <td class="border-r border-t border-[#d9dcff] px-4 py-3">All tests</td>
                 <.number_cell value={@report.totals.under_five_tested} footer />
                 <.number_cell value={@report.totals.under_five_positive} footer />

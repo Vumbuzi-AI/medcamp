@@ -1,6 +1,8 @@
 defmodule MedcampWeb.MedicalCampReportComponents do
   use Phoenix.Component
 
+  import MedcampWeb.OrganisationComponents, only: [brand_mark: 1]
+
   use Gettext, backend: MedcampWeb.Gettext
 
   attr :report, :map, required: true
@@ -19,13 +21,7 @@ defmodule MedcampWeb.MedicalCampReportComponents do
     <div class="space-y-0" id="medical-camp-report-sheet">
       <div class="mx-auto max-w-4xl space-y-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm print:border-0 print:shadow-none">
         <div class="flex items-center justify-between border-b border-gray-200 bg-white px-8 py-4">
-          <div class="flex items-center gap-3">
-            <img src="/images/logo.png" alt="GHCE Logo" class="h-12 w-auto" />
-            <div>
-              <p class="font-medium text-gray-900">Glocal Health Centre of Excellence</p>
-              <p class="text-xs uppercase tracking-wide text-gray-500">{@report.cohort_name}</p>
-            </div>
-          </div>
+          <.brand_mark subtitle={@report.cohort_name} />
           <div class="text-right text-xs text-gray-400">
             <p class="text-sm font-semibold text-gray-700">Medical Camp Claim Statement</p>
             <p>Generated: {format_generated_at(@report.generated_at)}</p>

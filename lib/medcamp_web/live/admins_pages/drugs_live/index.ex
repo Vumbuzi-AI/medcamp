@@ -246,7 +246,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
                   <label class="block text-xs font-medium text-gray-600 mb-1">Category</label>
                   <select
                     name="filters[category]"
-                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                   >
                     <option value="" selected={@drug_filters[:category] in [nil, ""]}>All</option>
                     <option
@@ -262,7 +262,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
                   <label class="block text-xs font-medium text-gray-600 mb-1">Supplier</label>
                   <select
                     name="filters[supplier]"
-                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                   >
                     <option value="" selected={@drug_filters[:supplier] in [nil, ""]}>All</option>
                     <option
@@ -281,7 +281,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
                   <label class="block text-xs font-medium text-gray-600 mb-1">Type</label>
                   <select
                     name="filters[type]"
-                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                   >
                     <option value="" selected={@drug_filters[:type] in [nil, ""]}>All</option>
                     <option :for={type <- @types} value={type} selected={@drug_filters[:type] == type}>
@@ -293,7 +293,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
                   <label class="block text-xs font-medium text-gray-600 mb-1">OTC</label>
                   <select
                     name="filters[otc_filter]"
-                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                   >
                     <option value="all" selected={@drug_filters[:otc_filter] == "all"}>All</option>
                     <option value="otc" selected={@drug_filters[:otc_filter] == "otc"}>
@@ -336,14 +336,15 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
             <:actions :if={
               @drug_filters[:item_search] != "" or count_active_filters(@drug_filters) > 0
             }>
-              <button phx-click="clear_filters_drugs" class="text-xs text-[#6667ab] hover:underline">
+              <button
+                phx-click="clear_filters_drugs"
+                class="text-xs text-brand-accent hover:underline"
+              >
                 Clear filters
               </button>
             </:actions>
           </.blank_state>
-          <.table :if={@total_count > 0} id="drugs" rows={@drugs}
-            row_id={&"drugs-#{&1.id}"}
-          >
+          <.table :if={@total_count > 0} id="drugs" rows={@drugs} row_id={&"drugs-#{&1.id}"}>
             <:col :let={drug} label="Brand name">{drug.brand_name || "—"}</:col>
             <:col :let={drug} label="Generic name">{drug.generic_name || "—"}</:col>
             <:col :let={drug} label="GTIN">
@@ -363,7 +364,8 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
             </:col>
             <:col :let={drug} label="Batches">
               <.batches_cell drug={drug} />
-            </:col>          </.table>
+            </:col>
+          </.table>
           <.pagination
             page={@page}
             total_pages={@total_pages}

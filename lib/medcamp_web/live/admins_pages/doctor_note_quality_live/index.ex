@@ -88,7 +88,7 @@ defmodule MedcampWeb.AdminDoctorNoteQualityLive.Index do
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p class="text-sm font-semibold text-[#6667ab]">Clinical documentation</p>
+              <p class="text-sm font-semibold text-brand-accent">Clinical documentation</p>
               <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">
                 Doctor Note Data Quality
               </h1>
@@ -105,7 +105,7 @@ defmodule MedcampWeb.AdminDoctorNoteQualityLive.Index do
                   type="date"
                   name="date_from"
                   value={date_value(@date_from)}
-                  class="w-full rounded-lg border-slate-300 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                  class="w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
                 />
               </label>
               <label class="block">
@@ -114,14 +114,14 @@ defmodule MedcampWeb.AdminDoctorNoteQualityLive.Index do
                   type="date"
                   name="date_to"
                   value={date_value(@date_to)}
-                  class="w-full rounded-lg border-slate-300 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                  class="w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
                 />
               </label>
               <label class="block">
                 <span class="mb-1 block text-xs font-semibold text-slate-600">Doctor</span>
                 <select
                   name="doctor_id"
-                  class="w-full rounded-lg border-slate-300 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                  class="w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
                 >
                   <option value="all" selected={@doctor_id == "all"}>All doctors</option>
                   <option
@@ -136,7 +136,7 @@ defmodule MedcampWeb.AdminDoctorNoteQualityLive.Index do
               <div class="flex items-end gap-2">
                 <button
                   type="submit"
-                  class="h-[42px] flex-1 rounded-lg bg-[#6667ab] px-4 text-sm font-semibold text-white hover:bg-[#55569a]"
+                  class="h-[42px] flex-1 rounded-lg bg-brand-accent px-4 text-sm font-semibold text-white hover:bg-[#55569a]"
                 >
                   Apply
                 </button>
@@ -303,7 +303,7 @@ defmodule MedcampWeb.AdminDoctorNoteQualityLive.Index do
   attr :label, :string, required: true
   attr :value, :any, required: true
   attr :detail, :string, required: true
-  attr :tone, :string, default: "text-[#373896] bg-[#f0f0ff]"
+  attr :tone, :string, default: "text-brand-primary bg-brand-50"
 
   defp metric_card(assigns) do
     ~H"""

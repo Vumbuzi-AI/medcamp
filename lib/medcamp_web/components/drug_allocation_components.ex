@@ -6,16 +6,16 @@ defmodule MedcampWeb.DrugAllocationComponents do
   def drug_allocations_section(assigns) do
     ~H"""
     <div class="bg-white mt-4 rounded-lg shadow border border-gray-200 overflow-hidden">
-      <div class="px-6 py-4 bg-gradient-to-r from-[#f0f0ff] to-[#e7e7ff] border-b border-gray-200">
-        <h2 class="text-xl font-semibold text-[#373896]">Drug Prescriptions</h2>
+      <div class="px-6 py-4 bg-gradient-to-r from-brand-50 to-brand-100 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-brand-primary">Drug Prescriptions</h2>
       </div>
 
       <div class="p-6">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold text-[#373896]">Patient Medications</h3>
+          <h3 class="text-lg font-semibold text-brand-primary">Patient Medications</h3>
 
           <.link patch={"/doctor/patients/#{@patient.id}/notes/#{@doctor_note.id}/prescribe_drug?tab=medication&subtab=admission"}>
-            <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+            <.button class="bg-brand-accent hover:bg-brand-accent-dark">
               <span class="flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -78,13 +78,13 @@ defmodule MedcampWeb.DrugAllocationComponents do
   def drug_allocations_section_for_nurse(assigns) do
     ~H"""
     <div class="bg-white mt-4 rounded-lg shadow border border-gray-200 overflow-hidden">
-      <div class="px-6 py-4 bg-gradient-to-r from-[#f0f0ff] to-[#e7e7ff] border-b border-gray-200">
-        <h2 class="text-xl font-semibold text-[#373896]">Drug Prescriptions</h2>
+      <div class="px-6 py-4 bg-gradient-to-r from-brand-50 to-brand-100 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-brand-primary">Drug Prescriptions</h2>
       </div>
 
       <div class="p-6">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold text-[#373896]">Patient Medications</h3>
+          <h3 class="text-lg font-semibold text-brand-primary">Patient Medications</h3>
         </div>
 
         <%= if Enum.empty?(@drug_allocations) do %>
@@ -130,7 +130,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
       <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
         <div class="mb-4">
           <div class="w-[100%] flex justify-between items-center">
-            <h4 class="font-medium text-[#373896]">Prescription from Doctor</h4>
+            <h4 class="font-medium text-brand-primary">Prescription from Doctor</h4>
 
             <button
               :if={
@@ -146,7 +146,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
               Delete Prescription <.icon name="hero-trash" class="h-5 w-5" />
             </button>
           </div>
-          <div class="p-3 mt-2 bg-[#f8f8ff] rounded-lg border border-[#e7e7ff] whitespace-pre-line text-gray-800">
+          <div class="p-3 mt-2 bg-[#f8f8ff] rounded-lg border border-brand-100 whitespace-pre-line text-gray-800">
             {@drug_allocation.prescription}
           </div>
         </div>
@@ -154,9 +154,9 @@ defmodule MedcampWeb.DrugAllocationComponents do
 
       <div class="p-4">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-md font-semibold text-[#373896]">Drugs Assigned</h3>
+          <h3 class="text-md font-semibold text-brand-primary">Drugs Assigned</h3>
           <.link :if={assigns[:add_drug_path]} patch={@add_drug_path}>
-            <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+            <.button class="bg-brand-accent hover:bg-brand-accent-dark">
               <span class="flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -217,7 +217,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
                     <p class="text-sm text-gray-600">{drug_assigned.generic_name}</p>
                   </div>
                   <div class="flex items-center space-x-2">
-                    <span class="px-2 py-1 bg-[#f0f0ff] text-[#373896] rounded-full text-sm">
+                    <span class="px-2 py-1 bg-brand-50 text-brand-primary rounded-full text-sm">
                       {drug_assigned.route_of_administration}
                     </span>
                     <%= if !drug_assigned.has_been_given do %>
@@ -517,7 +517,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -541,7 +541,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
           :if={!@drug_allocation.has_been_assigned}
           navigate={"/pharmacist/drug_allocations/#{@drug_allocation.id}/confirm"}
         >
-          <.button class="bg-[#373896] px-4 py-2.5 shadow-sm hover:bg-[#2d2f7d]">
+          <.button class="bg-brand-primary px-4 py-2.5 shadow-sm hover:bg-[#2d2f7d]">
             <div class="flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -567,7 +567,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
           <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div class="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50 px-5 py-5 sm:px-6">
               <div class="flex justify-between items-center">
-                <h3 class="text-lg font-bold text-[#373896]">
+                <h3 class="text-lg font-bold text-brand-primary">
                   {item.complete_info.brand_name}
                   <span class="text-sm text-blue-600">({item.complete_info.generic_name})</span>
                 </h3>
@@ -926,7 +926,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
                     autocomplete="off"
                     autofocus
                     phx-debounce="300"
-                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#6667ab] focus:ring-[#6667ab] sm:text-sm"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
                   />
                 </div>
 
@@ -958,7 +958,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
                 </button>
                 <button
                   type="submit"
-                  class="rounded-md bg-[#6667ab] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#5556a0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6667ab]"
+                  class="rounded-md bg-brand-accent px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-accent-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
                 >
                   Verify Batch
                 </button>

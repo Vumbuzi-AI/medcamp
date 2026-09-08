@@ -1,5 +1,6 @@
 defmodule Medcamp.Accounts.User do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   @roles ~w(admin doctor nurse pharmacist labtechnician)
@@ -7,6 +8,8 @@ defmodule Medcamp.Accounts.User do
   def roles, do: @roles
 
   schema "users" do
+    tenant_field()
+
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
@@ -21,6 +24,7 @@ defmodule Medcamp.Accounts.User do
     field :id_number, :string
     field :license_number, :string
     field :role, :string, default: "doctor"
+    field :is_superadmin, :boolean, default: false
     field :is_active, :boolean, default: true
     field :is_for_medical_camp, :boolean, default: false
     field :last_logged_in_at, :utc_datetime
@@ -62,6 +66,7 @@ defmodule Medcamp.Accounts.User do
     |> validate_otp_pin_if_changed()
     |> validate_required([:name])
     |> validate_role()
+    |> put_org_id()
   end
 
   def changeset(user, attrs, opts \\ []) do
@@ -86,6 +91,7 @@ defmodule Medcamp.Accounts.User do
     |> validate_otp_pin_if_changed()
     |> validate_required([:name, :role])
     |> validate_role()
+    |> put_org_id()
   end
 
   defp normalize_inserted_at(attrs) when is_map(attrs) do

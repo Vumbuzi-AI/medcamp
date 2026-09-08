@@ -205,7 +205,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsIndex do
           <:group label="Status">
             <select
               name="filters[status]"
-              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
             >
               <option value="" selected={@filters["status"] == ""}>All</option>
               <option value="given" selected={@filters["status"] == "given"}>Given</option>
@@ -216,7 +216,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsIndex do
           <:group label="Payment Type">
             <select
               name="filters[payment_type]"
-              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
             >
               <option value="" selected={@filters["payment_type"] == ""}>All</option>
               <option :for={pt <- @payment_types} value={pt} selected={@filters["payment_type"] == pt}>
@@ -252,17 +252,17 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsIndex do
               <td class="px-6 py-4 text-sm text-gray-400">—</td>
               <td class="px-6 py-4 text-sm text-gray-400">—</td>
               <td class="px-6 py-4 text-sm">
-                <span class="inline-flex items-center rounded-md bg-[#f0f0ff] px-2.5 py-1 text-xs font-medium text-gray-400">
+                <span class="inline-flex items-center rounded-md bg-brand-50 px-2.5 py-1 text-xs font-medium text-gray-400">
                   —
                 </span>
               </td>
               <td class="px-6 py-4 text-sm">
-                <span class="inline-flex items-center rounded-full bg-[#f0f0ff] px-2.5 py-1 text-xs font-medium text-gray-400">
+                <span class="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-gray-400">
                   —
                 </span>
               </td>
               <td class="px-6 py-4 text-sm">
-                <span class="inline-flex items-center rounded-md bg-[#f0f0ff] px-2.5 py-1 text-xs font-medium text-gray-400">
+                <span class="inline-flex items-center rounded-md bg-brand-50 px-2.5 py-1 text-xs font-medium text-gray-400">
                   —
                 </span>
               </td>
@@ -282,7 +282,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsIndex do
 
           <:col :let={drug_allocation} label="Patient">
             <div class="flex items-center gap-3">
-              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#e8e8ff] text-[#373896] font-semibold text-sm">
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#e8e8ff] text-brand-primary font-semibold text-sm">
                 {String.first(drug_allocation.patient.first_name || "?")}
               </div>
               <span class="font-medium text-slate-800">
@@ -356,7 +356,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsIndex do
           <:col :let={drug_allocation} label="Actions">
             <.link
               navigate={"/pharmacist/drug_allocations/#{drug_allocation.id}"}
-              class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-[#6667ab] hover:bg-[#6667ab]/10 transition-colors"
+              class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-brand-accent hover:bg-brand-accent/10 transition-colors"
             >
               <Heroicons.icon name="eye" type="outline" class="h-4 w-4" /> View
             </.link>

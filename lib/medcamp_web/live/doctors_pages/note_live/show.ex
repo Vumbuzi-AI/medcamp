@@ -417,7 +417,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteShow do
       <div class="w-full flex justify-between items-center mb-4">
         <.link
           navigate={"/doctor/patients/#{@patient.id}/notes"}
-          class="flex gap-2 cursor-pointer text-[#373896] font-semibold items-center hover:text-[#6667ab] transition-colors"
+          class="flex gap-2 cursor-pointer text-brand-primary font-semibold items-center hover:text-brand-accent transition-colors"
         >
           <Heroicons.icon name="arrow-left" type="outline" class="h-4 w-4" />
           <p>Back to Doctor's Notes</p>
@@ -446,8 +446,8 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteShow do
             class="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors text-left"
           >
             <div class="flex items-center gap-2">
-              <Heroicons.icon name="document-text" type="outline" class="h-5 w-5 text-[#6667ab]" />
-              <span class="text-base font-semibold text-[#373896]">
+              <Heroicons.icon name="document-text" type="outline" class="h-5 w-5 text-brand-accent" />
+              <span class="text-base font-semibold text-brand-primary">
                 Consultation Details — Dr. {@doctor_note.doctor.name}
               </span>
               <span class="text-xs text-gray-500 ml-1">
@@ -475,8 +475,8 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteShow do
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <div class="flex items-center gap-2">
-              <Heroicons.icon name="sparkles" type="outline" class="h-5 w-5 text-[#6667ab]" />
-              <span class="text-base font-semibold text-[#373896]">AI Review</span>
+              <Heroicons.icon name="sparkles" type="outline" class="h-5 w-5 text-brand-accent" />
+              <span class="text-base font-semibold text-brand-primary">AI Review</span>
             </div>
             <button
               :if={has_ai_review_source_data?(@doctor_note)}
@@ -484,7 +484,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteShow do
               phx-click="run_ai_review"
               phx-disable-with="Reviewing..."
               disabled={@ai_review_loading}
-              class="inline-flex items-center gap-1.5 rounded-lg bg-[#6667ab] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#5556a0] disabled:opacity-60 disabled:cursor-not-allowed"
+              class="inline-flex items-center gap-1.5 rounded-lg bg-brand-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-accent-dark disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {if @doctor_note.ai_review_status == "completed",
                 do: "Regenerate",
@@ -496,7 +496,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteShow do
             <%= cond do %>
               <% @ai_review_loading -> %>
                 <div class="flex flex-col items-center justify-center gap-3 py-10 text-center">
-                  <div class="h-8 w-8 animate-spin rounded-full border-2 border-[#6667ab] border-t-transparent">
+                  <div class="h-8 w-8 animate-spin rounded-full border-2 border-brand-accent border-t-transparent">
                   </div>
                   <p class="text-sm text-gray-500">
                     Generating your AI review — this can take a few seconds...
@@ -564,7 +564,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteShow do
                       </span>
                       <span
                         :if={Map.get(closeness, "status") == "computed"}
-                        class="rounded-full bg-[#f0f0ff] px-2 py-0.5 text-xs font-medium text-[#373896]"
+                        class="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-primary"
                       >
                         {Map.get(closeness, "score")}% diagnosis alignment
                       </span>
@@ -830,8 +830,8 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteShow do
       >
         <div class="px-2 py-2">
           <div class="flex items-center gap-2 mb-4">
-            <Heroicons.icon name="document-plus" type="outline" class="h-5 w-5 text-[#6667ab]" />
-            <h3 class="text-lg font-semibold text-[#373896]">Add Sub-note</h3>
+            <Heroicons.icon name="document-plus" type="outline" class="h-5 w-5 text-brand-accent" />
+            <h3 class="text-lg font-semibold text-brand-primary">Add Sub-note</h3>
           </div>
           <p class="text-sm text-gray-500 mb-4">
             Adding a sub-note to the note started by Dr. {@doctor_note.doctor.name} on {@doctor_note.date}.
@@ -882,7 +882,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteShow do
   defp urgency_badge_class("routine"), do: "bg-green-100 text-green-800"
   defp urgency_badge_class(_), do: "bg-gray-100 text-gray-700"
 
-  defp likelihood_badge_class("most_likely"), do: "bg-[#f0f0ff] text-[#373896]"
+  defp likelihood_badge_class("most_likely"), do: "bg-brand-50 text-brand-primary"
   defp likelihood_badge_class("possible"), do: "bg-gray-100 text-gray-700"
   defp likelihood_badge_class("less_likely"), do: "bg-gray-50 text-gray-500"
   defp likelihood_badge_class(_), do: "bg-gray-100 text-gray-700"

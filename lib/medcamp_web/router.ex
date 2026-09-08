@@ -17,6 +17,12 @@ defmodule MedcampWeb.Router do
     plug :accepts, ["json"]
   end
 
+  # The scan API carries no session, so the organisation is resolved from the
+  # scanned payload itself. See MedcampWeb.Plugs.ApiTenant.
+  pipeline :api_tenant do
+    plug MedcampWeb.Plugs.ApiTenant
+  end
+
   ## Public / camp-floor routes
 
   scope "/", MedcampWeb do
@@ -72,7 +78,7 @@ defmodule MedcampWeb.Router do
   ## Pharmacy scan API (GS1 DataMatrix scan-out / verify)
 
   scope "/api", MedcampWeb do
-    pipe_through :api
+    pipe_through [:api, :api_tenant]
 
     post "/drugs_given_scan_out", DrugsGivenController, :scan_out_drug
 
@@ -359,6 +365,7 @@ defmodule MedcampWeb.Router do
       live "/admin/lab_surveillance", AdminLabSurveillanceLive.Index, :index
 
       live "/admin/settings", AdminSettingsLive.Index, :index
+      live "/admin/organisation", AdminOrganisationLive.Index, :index
     end
 
     live_session :admin_users_permission,
@@ -383,6 +390,17 @@ defmodule MedcampWeb.Router do
       live "/admin/audit_logs", AuditLogsLive.Index, :index
       live "/admin/login_sessions", LoginSessionsLive.Index, :index
       live "/admin/audit_logs/:id", AuditLogLive.Show, :show
+    end
+  end
+
+  ## Superadmin - provisions the organisations everything else lives inside
+
+  scope "/", MedcampWeb do
+    pipe_through [:browser, :require_superadmin]
+
+    live_session :superadmin,
+      on_mount: [{MedcampWeb.UserAuth, :ensure_superadmin}] do
+      live "/superadmin/organisations", SuperadminOrganisationsLive.Index, :index
     end
   end
 
@@ -414,6 +432,8 @@ defmodule MedcampWeb.Router do
       on_mount: [{MedcampWeb.UserAuth, :redirect_if_user_is_authenticated}] do
       live "/users/log_in", UserLoginLive, :new
       live "/users/log_in/otp", UserLoginOtpLive, :new
+
+      live "/organisations/register", OrganisationSignupLive, :new
 
       live "/users/reset_password", UserForgotPasswordLive, :new
       live "/users/reset_password/:token", UserResetPasswordLive, :edit

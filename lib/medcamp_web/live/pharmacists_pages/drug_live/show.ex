@@ -454,7 +454,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           <div class="min-w-0 flex-1">
             <.link
               navigate="/pharmacist/drugs"
-              class="inline-flex items-center gap-2 text-sm font-medium text-[#373896] transition hover:text-[#6667ab]"
+              class="inline-flex items-center gap-2 text-sm font-medium text-brand-primary transition hover:text-brand-accent"
             >
               <Heroicons.icon name="arrow-left" type="outline" class="h-5 w-5" />
               <span>Back to drugs</span>
@@ -464,7 +464,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
                 Drug inventory
               </p>
-              <h1 class="mt-2 text-2xl font-semibold leading-tight text-[#373896]">
+              <h1 class="mt-2 text-2xl font-semibold leading-tight text-brand-primary">
                 {Drugs.display_name(@drug)}
               </h1>
               <p class="mt-2 text-sm text-slate-500">
@@ -476,14 +476,14 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           <div class="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap xl:w-auto xl:max-w-2xl xl:justify-end">
             <.button
               phx-click="open_edit_drug_modal"
-              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 bg-[#373896] px-5 text-sm shadow-sm hover:bg-[#2f317f]"
+              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 bg-brand-primary px-5 text-sm shadow-sm hover:bg-[#2f317f]"
             >
               <.icon name="hero-pencil-square" class="h-4 w-4" /> Edit Drug
             </.button>
 
             <.link
               patch={~p"/pharmacist/drugs/#{@drug.id}/new_batch"}
-              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-lg bg-[#373896] px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2f317f]"
+              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-lg bg-brand-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2f317f]"
             >
               <.icon name="hero-plus" class="h-4 w-4" /> Add Batch
             </.link>
@@ -498,7 +498,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "inline-flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium -mb-px transition-colors",
               if(@drug_tab == :batches,
-                do: "border-[#373896] text-[#373896]",
+                do: "border-brand-primary text-brand-primary",
                 else: "border-transparent text-gray-500 hover:text-gray-700"
               )
             ]}
@@ -510,7 +510,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "inline-flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium -mb-px transition-colors",
               if(@drug_tab == :allocations,
-                do: "border-[#373896] text-[#373896]",
+                do: "border-brand-primary text-brand-primary",
                 else: "border-transparent text-gray-500 hover:text-gray-700"
               )
             ]}
@@ -522,7 +522,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "inline-flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium -mb-px transition-colors",
               if(@drug_tab == :prescriptions,
-                do: "border-[#373896] text-[#373896]",
+                do: "border-brand-primary text-brand-primary",
                 else: "border-transparent text-gray-500 hover:text-gray-700"
               )
             ]}
@@ -549,7 +549,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@batch_tab == :active,
-                do: "bg-[#373896] text-white",
+                do: "bg-brand-primary text-white",
                 else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )
             ]}
@@ -562,7 +562,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@batch_tab == :discarded,
-                do: "bg-[#373896] text-white",
+                do: "bg-brand-primary text-white",
                 else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )
             ]}
@@ -613,7 +613,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
 
             <:col :let={drug_batch} label="Batch">
               <div class="py-3">
-                <span class="px-2 py-1 rounded-full bg-[#e7e7ff] text-[#373896] text-sm font-medium">
+                <span class="px-2 py-1 rounded-full bg-brand-100 text-brand-primary text-sm font-medium">
                   {if drug_batch.batch, do: drug_batch.batch.batch, else: "—"}
                 </span>
               </div>
@@ -671,7 +671,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                 <.link
                   :if={drug_batch.batch}
                   patch={~p"/pharmacist/drugs/#{@drug.id}/batches/#{drug_batch.id}/print"}
-                  class="inline-flex items-center gap-1 rounded-md border border-[#373896] px-3 py-2 text-sm font-medium text-[#373896] hover:bg-[#f0f0ff]"
+                  class="inline-flex items-center gap-1 rounded-md border border-brand-primary px-3 py-2 text-sm font-medium text-brand-primary hover:bg-brand-50"
                 >
                   <.icon name="hero-printer" class="h-4 w-4" /> Print DataMatrix
                 </.link>
@@ -841,7 +841,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
 
           <:col :let={dg} label="Qty Given">
             <div class="py-2">
-              <span class="text-sm font-semibold text-[#373896]">&times;{dg.quantity}</span>
+              <span class="text-sm font-semibold text-brand-primary">&times;{dg.quantity}</span>
             </div>
           </:col>
 
@@ -854,7 +854,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           <:col :let={dg} label="Batches">
             <div class="py-2 flex flex-wrap gap-1">
               <%= for ba <- dg.batch_allocations do %>
-                <span class="px-2 py-0.5 bg-[#e7e7ff] text-[#373896] text-xs rounded-full font-medium">
+                <span class="px-2 py-0.5 bg-brand-100 text-brand-primary text-xs rounded-full font-medium">
                   Batch #{ba.batch_id} &times;{ba.quantity}
                 </span>
               <% end %>
@@ -871,7 +871,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             <div class="py-2">
               <.link
                 navigate={~p"/pharmacist/drug_allocations/#{dg.drug_allocation_id}"}
-                class="text-[#373896] hover:text-[#6667ab] text-sm font-medium"
+                class="text-brand-primary hover:text-brand-accent text-sm font-medium"
               >
                 <.icon name="hero-eye" class="h-4 w-4 inline mr-1" /> View Allocation
               </.link>
@@ -897,7 +897,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@prescriptions_status == nil,
-                do: "bg-[#373896] text-white",
+                do: "bg-brand-primary text-white",
                 else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )
             ]}
@@ -910,7 +910,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@prescriptions_status == "pending",
-                do: "bg-[#373896] text-white",
+                do: "bg-brand-primary text-white",
                 else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )
             ]}
@@ -923,7 +923,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             class={[
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@prescriptions_status == "given",
-                do: "bg-[#373896] text-white",
+                do: "bg-brand-primary text-white",
                 else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )
             ]}
@@ -985,7 +985,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             <div class="py-2">
               <.link
                 navigate={~p"/pharmacist/drug_allocations/#{da.id}"}
-                class="text-[#373896] hover:text-[#6667ab] text-sm font-medium"
+                class="text-brand-primary hover:text-brand-accent text-sm font-medium"
               >
                 <.icon name="hero-eye" class="h-4 w-4 inline mr-1" /> View Allocation
               </.link>
@@ -1022,7 +1022,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                   type="text"
                   name="generic_name"
                   value={@drug.generic_name || @drug.inventory_received.generic_name || ""}
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#373896] focus:border-transparent"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                   placeholder="e.g. Paracetamol"
                 />
               </div>
@@ -1032,14 +1032,14 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                   type="text"
                   name="brand_name"
                   value={@drug.brand_name || @drug.inventory_received.brand_name || ""}
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#373896] focus:border-transparent"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                   placeholder="e.g. Panadol"
                 />
               </div>
               <div class="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  class="flex-1 px-4 py-2 bg-[#373896] text-white rounded-lg hover:bg-[#6667ab] font-medium transition-colors"
+                  class="flex-1 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-accent font-medium transition-colors"
                 >
                   Save Changes
                 </button>
@@ -1089,7 +1089,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                   Current Quantity:
-                  <span class="text-[#373896] font-semibold">
+                  <span class="text-brand-primary font-semibold">
                     {@editing_batch.remaining_quantity}
                   </span>
                 </label>
@@ -1099,7 +1099,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                   value={@editing_batch.remaining_quantity}
                   min="0"
                   required
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#373896] focus:border-transparent text-lg"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent text-lg"
                   placeholder="Enter new quantity"
                   autofocus
                 />
@@ -1109,7 +1109,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               <div class="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  class="flex-1 px-4 py-2 bg-[#373896] text-white rounded-lg hover:bg-[#6667ab] font-medium transition-colors"
+                  class="flex-1 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-accent font-medium transition-colors"
                 >
                   Save Changes
                 </button>

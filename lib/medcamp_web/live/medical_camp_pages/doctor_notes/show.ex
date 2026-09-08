@@ -1,6 +1,7 @@
 defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
   use MedcampWeb, :live_view
-  alias Medcamp.Patients
+
+  alias MedcampWeb.PublicTenant
   alias Medcamp.DoctorNotes
   alias Medcamp.LabResults
   alias Medcamp.DrugAllocations
@@ -9,7 +10,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
 
   @impl true
   def mount(%{"gsrn" => gsrn, "note_id" => note_id}, session, socket) do
-    patient = Patients.get_patient_by_gsrn(gsrn)
+    patient = PublicTenant.resolve_patient!(gsrn)
     doctor_note = DoctorNotes.get_doctor_note!(note_id)
 
     current_user =
@@ -88,7 +89,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
   def handle_event("qr_scanned", %{"value" => raw_value}, socket) do
     gsrn = extract_gsrn(raw_value)
 
-    case Patients.get_patient_by_gsrn(gsrn) do
+    case PublicTenant.resolve_patient!(gsrn) do
       nil ->
         {:noreply,
          socket
@@ -239,7 +240,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
       <%!-- Header --%>
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-xl font-semibold text-[#373896]">Doctor's Note</h1>
+          <h1 class="text-xl font-semibold text-brand-primary">Doctor's Note</h1>
           <p class="text-sm text-gray-500 mt-0.5">
             {Calendar.strftime(@doctor_note.date, "%d %b %Y")}
             <span :if={@doctor_note.time} class="ml-1">
@@ -251,7 +252,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
           :if={!@editing}
           type="button"
           phx-click="toggle_edit"
-          class="inline-flex items-center gap-1.5 rounded-lg border border-[#6667ab] px-3 py-1.5 text-sm font-medium text-[#6667ab] hover:bg-[#f0f0ff] transition-colors"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-brand-accent px-3 py-1.5 text-sm font-medium text-brand-accent hover:bg-brand-50 transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -299,7 +300,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
           <button
             type="button"
             phx-click="toggle_edit"
-            class="inline-flex items-center gap-2 rounded-lg bg-[#373896] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2a2b73] transition-colors"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:bg-[#2a2b73] transition-colors"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -342,10 +343,10 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
       <%!-- Lab Orders Section --%>
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 sm:px-6 py-4 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-[#373896] flex items-center gap-2">
+          <h2 class="text-lg font-semibold text-brand-primary flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5 text-[#6667ab]"
+              class="h-5 w-5 text-brand-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -362,7 +363,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
           <button
             type="button"
             phx-click="open_lab_modal"
-            class="inline-flex items-center gap-2 rounded-lg bg-[#6667ab] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#5556a0]"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-accent-dark"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -419,10 +420,10 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
       <%!-- Pharmacy / Drug Allocations Section --%>
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-[#373896] flex items-center gap-2">
+          <h2 class="text-lg font-semibold text-brand-primary flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5 text-[#6667ab]"
+              class="h-5 w-5 text-brand-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -439,7 +440,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
           <button
             type="button"
             phx-click="open_pharmacy_modal"
-            class="inline-flex items-center gap-2 rounded-lg bg-[#6667ab] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#5556a0]"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-accent-dark"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -499,7 +500,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
           :if={!@show_scanner}
           type="button"
           phx-click="open_scanner"
-          class="w-full inline-flex items-center justify-center gap-3 rounded-lg bg-[#373896] px-6 py-4 text-lg font-semibold text-white hover:bg-[#2a2b73] transition-colors"
+          class="w-full inline-flex items-center justify-center gap-3 rounded-lg bg-brand-primary px-6 py-4 text-lg font-semibold text-white hover:bg-[#2a2b73] transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -520,7 +521,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
 
         <div :if={@show_scanner}>
           <div class="flex items-center justify-between mb-3">
-            <h2 class="text-lg font-semibold text-[#373896]">Scan Next Patient</h2>
+            <h2 class="text-lg font-semibold text-brand-primary">Scan Next Patient</h2>
             <button type="button" phx-click="close_scanner" class="text-gray-400 hover:text-gray-600">
               <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path

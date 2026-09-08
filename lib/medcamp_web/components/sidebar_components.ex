@@ -11,28 +11,28 @@ defmodule MedcampWeb.SidebarComponents do
     <nav class="shadow-sm sticky top-0 z-40 bg-white">
       <div class="container mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center">
-          <div class="text-2xl font-bold flex flex-col justify-center items-center text-[#6667ab]">
+          <div class="text-2xl font-bold flex flex-col justify-center items-center text-brand-accent">
             <img src="/images/logo.png" alt="GHC Excellence Logo" class="h-[80px] object-contain" />
           </div>
         </div>
 
         <div class="hidden md:flex items-center space-x-8">
-          <a href="/" class="font-medium hover:text-[#6667ab] transition-colors">Home</a>
-          <a href="/" class="font-medium hover:text-[#6667ab] transition-colors">About Us</a>
-          <a href="/" class="font-medium hover:text-[#6667ab] transition-colors">Services</a>
-          <a href="/" class="font-medium hover:text-[#6667ab] transition-colors">Traceability</a>
-          <a href="/" class="font-medium hover:text-[#6667ab] transition-colors">Contact</a>
+          <a href="/" class="font-medium hover:text-brand-accent transition-colors">Home</a>
+          <a href="/" class="font-medium hover:text-brand-accent transition-colors">About Us</a>
+          <a href="/" class="font-medium hover:text-brand-accent transition-colors">Services</a>
+          <a href="/" class="font-medium hover:text-brand-accent transition-colors">Traceability</a>
+          <a href="/" class="font-medium hover:text-brand-accent transition-colors">Contact</a>
 
           <.link
             href="/users/log_in"
-            class="bg-[#6667ab] text-white px-4 py-2 rounded-md hover:bg-[#5556a0] transition-colors"
+            class="bg-brand-accent text-white px-4 py-2 rounded-md hover:bg-brand-accent-dark transition-colors"
           >
             Login
           </.link>
         </div>
 
         <div class="md:hidden">
-          <button class="text-gray-600 hover:text-[#6667ab]">
+          <button class="text-gray-600 hover:text-brand-accent">
             <i class="fa fa-bars text-2xl"></i>
           </button>
         </div>
@@ -43,7 +43,7 @@ defmodule MedcampWeb.SidebarComponents do
 
   def footer_user(assigns) do
     ~H"""
-    <footer class="bg-[#373896] text-white py-12">
+    <footer class="bg-brand-primary text-white py-12">
       <div class="container mx-auto px-4">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
@@ -52,14 +52,14 @@ defmodule MedcampWeb.SidebarComponents do
               Leading healthcare provider in Kenya with advanced traceability standards for patient safety and care quality.
             </p>
             <div class="flex space-x-4">
-              <a href="/" class="text-white hover:text-[#d2d3ff]">
+              <a href="/" class="text-white hover:text-brand-200">
                 <i class="fa fa-facebook-f"></i>
               </a>
-              <a href="/" class="text-white hover:text-[#d2d3ff]"><i class="fa fa-twitter"></i></a>
-              <a href="/" class="text-white hover:text-[#d2d3ff]">
+              <a href="/" class="text-white hover:text-brand-200"><i class="fa fa-twitter"></i></a>
+              <a href="/" class="text-white hover:text-brand-200">
                 <i class="fa fa-linkedin"></i>
               </a>
-              <a href="/" class="text-white hover:text-[#d2d3ff]">
+              <a href="/" class="text-white hover:text-brand-200">
                 <i class="fa fa-instagram"></i>
               </a>
             </div>
@@ -68,24 +68,24 @@ defmodule MedcampWeb.SidebarComponents do
           <div>
             <h3 class="text-xl font-bold mb-4">Our Services</h3>
             <ul class="space-y-2">
-              <li><a href="/" class="hover:text-[#d2d3ff]">General Medicine</a></li>
-              <li><a href="/" class="hover:text-[#d2d3ff]">Pediatrics</a></li>
-              <li><a href="/" class="hover:text-[#d2d3ff]">Obstetrics & Gynecology</a></li>
-              <li><a href="/" class="hover:text-[#d2d3ff]">Surgery</a></li>
-              <li><a href="/" class="hover:text-[#d2d3ff]">Laboratory Services</a></li>
-              <li><a href="/" class="hover:text-[#d2d3ff]">Radiology</a></li>
+              <li><a href="/" class="hover:text-brand-200">General Medicine</a></li>
+              <li><a href="/" class="hover:text-brand-200">Pediatrics</a></li>
+              <li><a href="/" class="hover:text-brand-200">Obstetrics & Gynecology</a></li>
+              <li><a href="/" class="hover:text-brand-200">Surgery</a></li>
+              <li><a href="/" class="hover:text-brand-200">Laboratory Services</a></li>
+              <li><a href="/" class="hover:text-brand-200">Radiology</a></li>
             </ul>
           </div>
 
           <div>
             <h3 class="text-xl font-bold mb-4">Quick Links</h3>
             <ul class="space-y-2">
-              <li><a href="/" class="hover:text-[#d2d3ff]">About Us</a></li>
-              <li><a href="/" class="hover:text-[#d2d3ff]">Traceability Standards</a></li>
-              <li><a href="/" class="hover:text-[#d2d3ff]">Patient Portal</a></li>
-              <li><a href="/" class="hover:text-[#d2d3ff]">Careers</a></li>
-              <li><a href="/" class="hover:text-[#d2d3ff]">News & Events</a></li>
-              <li><a href="/" class="hover:text-[#d2d3ff]">Contact Us</a></li>
+              <li><a href="/" class="hover:text-brand-200">About Us</a></li>
+              <li><a href="/" class="hover:text-brand-200">Traceability Standards</a></li>
+              <li><a href="/" class="hover:text-brand-200">Patient Portal</a></li>
+              <li><a href="/" class="hover:text-brand-200">Careers</a></li>
+              <li><a href="/" class="hover:text-brand-200">News & Events</a></li>
+              <li><a href="/" class="hover:text-brand-200">Contact Us</a></li>
             </ul>
           </div>
 
@@ -101,7 +101,7 @@ defmodule MedcampWeb.SidebarComponents do
           <p>
             2025 GHC Excellence, a subsidiary of <a
               href="https://gs1kenya.org/"
-              class="underline hover:text-[#d2d3ff]"
+              class="underline hover:text-brand-200"
             >GS1 Kenya</a>. All rights reserved.
           </p>
         </div>
@@ -477,10 +477,10 @@ defmodule MedcampWeb.SidebarComponents do
         navigate={resolve_sidebar_tab_url(@tab, @current_user)}
         aria-current={if @active_tab == @tab.tab_name, do: "page", else: nil}
         class={[
-          "sidebar-nav-item group relative flex min-h-[48px] items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6667AB] focus-visible:ring-offset-2",
+          "sidebar-nav-item group relative flex min-h-[48px] items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2",
           if(@active_tab == @tab.tab_name,
-            do: "bg-[#E7E7FF] text-[#373896] ring-1 ring-[#d2d3ff]",
-            else: "text-[#687083] hover:bg-[#F0F0FF] hover:text-[#373896]"
+            do: "bg-brand-100 text-brand-primary ring-1 ring-brand-200",
+            else: "text-[#687083] hover:bg-brand-50 hover:text-brand-primary"
           )
         ]}
       >
@@ -490,9 +490,9 @@ defmodule MedcampWeb.SidebarComponents do
           class={
             "h-5 w-5 shrink-0 stroke-[2] " <>
             if @active_tab == @tab.tab_name do
-              "text-[#373896]"
+              "text-brand-primary"
             else
-              "text-[#687083] group-hover:text-[#373896]"
+              "text-[#687083] group-hover:text-brand-primary"
             end
           }
         />
@@ -500,7 +500,7 @@ defmodule MedcampWeb.SidebarComponents do
           <span class="truncate">{@tab.name}</span>
           <span
             :if={@count}
-            class="shrink-0 rounded-full bg-[#373896] px-2 py-0.5 text-[11px] font-bold text-white"
+            class="shrink-0 rounded-full bg-brand-primary px-2 py-0.5 text-[11px] font-bold text-white"
           >
             {@count}
           </span>
@@ -537,10 +537,10 @@ defmodule MedcampWeb.SidebarComponents do
           |> JS.toggle_class("rotate-90", to: "##{@group_id}-chevron")
         }
         class={[
-          "sidebar-nav-item group relative flex min-h-[48px] w-full items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6667AB] focus-visible:ring-offset-2",
+          "sidebar-nav-item group relative flex min-h-[48px] w-full items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2",
           if(@group_active?,
-            do: "text-[#373896] hover:bg-[#F0F0FF]",
-            else: "text-[#687083] hover:bg-[#F0F0FF] hover:text-[#373896]"
+            do: "text-brand-primary hover:bg-brand-50",
+            else: "text-[#687083] hover:bg-brand-50 hover:text-brand-primary"
           )
         ]}
       >
@@ -548,7 +548,7 @@ defmodule MedcampWeb.SidebarComponents do
           name={@group.icon}
           type="outline"
           class={
-            "h-5 w-5 shrink-0 stroke-2 #{if(@group_active?, do: "text-[#373896]", else: "text-[#687083] group-hover:text-[#373896]")}"
+            "h-5 w-5 shrink-0 stroke-2 #{if(@group_active?, do: "text-brand-primary", else: "text-[#687083] group-hover:text-brand-primary")}"
           }
         />
         <span class="sidebar-label flex min-w-0 flex-1 items-center justify-between gap-2">
@@ -607,16 +607,34 @@ defmodule MedcampWeb.SidebarComponents do
   end
 
   defp top_base_sidebar(assigns) do
+    # Every sidebar renders through here, so resolving the organisation once
+    # in this component brands all eleven of them without threading an extra
+    # attr through each sidebar function and each layout template.
+    assigns =
+      assign_new(assigns, :organisation, fn ->
+        Medcamp.Organisations.get_user_organisation(assigns[:current_user])
+      end)
+
     ~H"""
     <div class="mb-6">
       <div class="sidebar-top-section sidebar-brand-row mb-4 flex items-center justify-between gap-3">
         <div class="flex min-w-0 items-center gap-3">
-          <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#cfd1ff] bg-[#f0f0ff] text-[13px] font-bold text-[#373896]">
-            GHC
+          <div class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-brand-300 bg-brand-50 text-[13px] font-bold text-brand-primary">
+            <%= if @organisation && @organisation.logo do %>
+              <img
+                src={@organisation.logo}
+                alt={@organisation.name}
+                class="h-full w-full object-contain"
+              />
+            <% else %>
+              {MedcampWeb.Layouts.organisation_initials(@organisation)}
+            <% end %>
           </div>
 
           <div class="sidebar-brand-copy min-w-0">
-            <p class="truncate text-[17px] font-bold leading-tight text-[#373896]">GHC Excellence</p>
+            <p class="truncate text-[17px] font-bold leading-tight text-brand-primary">
+              {MedcampWeb.Layouts.organisation_name(%{current_organisation: @organisation})}
+            </p>
             <p class="truncate text-[13px] font-medium leading-snug text-[#687083]">{@name}</p>
           </div>
         </div>
@@ -626,7 +644,7 @@ defmodule MedcampWeb.SidebarComponents do
           type="button"
           title="Toggle sidebar"
           aria-label="Toggle sidebar"
-          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#e2e6f0] bg-white text-[#373896] transition-colors hover:bg-[#F0F0FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6667AB] focus-visible:ring-offset-2"
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#e2e6f0] bg-white text-brand-primary transition-colors hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2"
         >
           <Heroicons.icon name="chevron-left" type="outline" class="sidebar-chevron h-4 w-4" />
         </button>
@@ -634,7 +652,7 @@ defmodule MedcampWeb.SidebarComponents do
 
       <div class="sidebar-account-card rounded-2xl border border-[#e8ebf3] bg-[#fbfbff] px-4 py-3.5">
         <div class="flex items-center gap-3">
-          <div class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#373896] text-[15px] font-bold text-white">
+          <div class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-primary text-[15px] font-bold text-white">
             <%= if @current_user.image do %>
               <img src={@current_user.image} alt="User Avatar" class="h-full w-full object-cover" />
             <% else %>
@@ -692,10 +710,10 @@ defmodule MedcampWeb.SidebarComponents do
       href={@href}
       method={@method}
       class={[
-        "sidebar-nav-item group relative flex min-h-[48px] items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6667AB] focus-visible:ring-offset-2",
+        "sidebar-nav-item group relative flex min-h-[48px] items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2",
         if(@tone == "danger",
           do: "text-[#c21f17] hover:bg-red-50",
-          else: "text-[#687083] hover:bg-[#F0F0FF] hover:text-[#373896]"
+          else: "text-[#687083] hover:bg-brand-50 hover:text-brand-primary"
         )
       ]}
     >
@@ -703,7 +721,7 @@ defmodule MedcampWeb.SidebarComponents do
         name={@icon}
         type="outline"
         class={
-          "h-5 w-5 shrink-0 stroke-[2] #{if(@tone == "danger", do: "text-current", else: "group-hover:text-[#373896]")}"
+          "h-5 w-5 shrink-0 stroke-[2] #{if(@tone == "danger", do: "text-current", else: "group-hover:text-brand-primary")}"
         }
       />
       <span class="sidebar-label flex-1 whitespace-nowrap">{@label}</span>

@@ -78,7 +78,7 @@ defmodule MedcampWeb.AdminMedicalCampAccessLive.Index do
 
               <button
                 type="submit"
-                class="inline-flex w-full items-center justify-center rounded-2xl bg-[#373896] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#2f307e] focus:outline-none focus:ring-4 focus:ring-indigo-200"
+                class="inline-flex w-full items-center justify-center rounded-2xl bg-brand-primary px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#2f307e] focus:outline-none focus:ring-4 focus:ring-indigo-200"
               >
                 Open dashboard
               </button>

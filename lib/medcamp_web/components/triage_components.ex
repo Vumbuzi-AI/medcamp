@@ -10,12 +10,12 @@ defmodule MedcampWeb.TriageComponents do
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
       <.header
         :if={Map.get(assigns, :show_header, true)}
-        class="text-[#373896] border-b border-gray-100 pb-4 mb-4"
+        class="text-brand-primary border-b border-gray-100 pb-4 mb-4"
       >
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -31,7 +31,7 @@ defmodule MedcampWeb.TriageComponents do
         </div>
         <:actions>
           <.link :if={@show_new_link} patch={@new_triage_url}>
-            <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+            <.button class="bg-brand-accent hover:bg-brand-accent-dark">
               <div class="flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -65,7 +65,7 @@ defmodule MedcampWeb.TriageComponents do
           }
         >
           <:actions :if={Map.get(assigns, :show_clear_filters, false)}>
-            <button phx-click="clear_filters" class="text-xs text-[#6667ab] hover:underline">
+            <button phx-click="clear_filters" class="text-xs text-brand-accent hover:underline">
               Clear filters
             </button>
           </:actions>
@@ -85,7 +85,7 @@ defmodule MedcampWeb.TriageComponents do
             <div class="flex items-center py-3">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4 mr-1 text-[#6667ab]"
+                class="h-4 w-4 mr-1 text-brand-accent"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -103,7 +103,7 @@ defmodule MedcampWeb.TriageComponents do
 
           <:col :let={triage} label="Temperature">
             <div class="flex items-center py-3">
-              <span class="px-2 py-1 text-xs rounded-full bg-[#f0f0ff] text-[#373896] font-medium">
+              <span class="px-2 py-1 text-xs rounded-full bg-brand-50 text-brand-primary font-medium">
                 {triage.temperature} °C
               </span>
             </div>
@@ -111,7 +111,7 @@ defmodule MedcampWeb.TriageComponents do
 
           <:col :let={triage} label="Blood Pressure">
             <div class="py-3">
-              <span class="px-2 py-1 text-xs rounded-full bg-[#f0f0ff] text-[#373896] font-medium">
+              <span class="px-2 py-1 text-xs rounded-full bg-brand-50 text-brand-primary font-medium">
                 {triage.blood_pressure} mmHg
               </span>
             </div>
@@ -119,7 +119,7 @@ defmodule MedcampWeb.TriageComponents do
 
           <:col :let={triage} label="Pulse Rate">
             <div class="py-3">
-              <span class="px-2 py-1 text-xs rounded-full bg-[#f0f0ff] text-[#373896] font-medium">
+              <span class="px-2 py-1 text-xs rounded-full bg-brand-50 text-brand-primary font-medium">
                 {triage.pulse_rate} bpm
               </span>
             </div>
@@ -127,7 +127,7 @@ defmodule MedcampWeb.TriageComponents do
 
           <:col :let={triage} label="Oxygen Saturation">
             <div class="py-3">
-              <span class="px-2 py-1 text-xs rounded-full bg-[#f0f0ff] text-[#373896] font-medium">
+              <span class="px-2 py-1 text-xs rounded-full bg-brand-50 text-brand-primary font-medium">
                 {triage.oxygen_saturation}%
               </span>
             </div>
@@ -147,7 +147,7 @@ defmodule MedcampWeb.TriageComponents do
 
           <:col :let={triage} label="BMI">
             <div class="py-3">
-              <span class="px-2 py-1 text-xs rounded-full bg-[#f0f0ff] text-[#373896] font-medium">
+              <span class="px-2 py-1 text-xs rounded-full bg-brand-50 text-brand-primary font-medium">
                 {triage.bmi}
               </span>
             </div>
@@ -156,7 +156,7 @@ defmodule MedcampWeb.TriageComponents do
           <:action :let={triage}>
             <.link
               patch={"#{@route_prefix}/#{triage.id}/edit"}
-              class="flex items-center text-[#6667ab] hover:text-[#373896]"
+              class="flex items-center text-brand-accent hover:text-brand-primary"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

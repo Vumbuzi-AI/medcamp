@@ -1,6 +1,7 @@
 defmodule MedcampWeb.MedicalCampPages.GlobalScan do
   use MedcampWeb, :live_view
-  alias Medcamp.Patients
+
+  alias MedcampWeb.PublicTenant
   alias Medcamp.Accounts
 
   @impl true
@@ -21,7 +22,7 @@ defmodule MedcampWeb.MedicalCampPages.GlobalScan do
   def handle_event("qr_scanned", %{"value" => raw_value}, socket) do
     gsrn = extract_gsrn(raw_value)
 
-    case Patients.get_patient_by_gsrn(gsrn) do
+    case PublicTenant.resolve_patient!(gsrn) do
       nil ->
         {:noreply, put_flash(socket, :error, "Patient not found for scanned code")}
 
@@ -86,7 +87,7 @@ defmodule MedcampWeb.MedicalCampPages.GlobalScan do
       <div class="w-full max-w-sm">
         <%!-- Header --%>
         <div class="text-center mb-6">
-          <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#373896] mb-3">
+          <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-brand-primary mb-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-7 w-7 text-white"
@@ -102,7 +103,7 @@ defmodule MedcampWeb.MedicalCampPages.GlobalScan do
               />
             </svg>
           </div>
-          <h1 class="text-2xl font-bold text-[#373896]">HDF Medical Camp</h1>
+          <h1 class="text-2xl font-bold text-brand-primary">HDF Medical Camp</h1>
           <p class="text-sm text-gray-500 mt-1">Scan a patient's QR code or Data Matrix</p>
         </div>
 

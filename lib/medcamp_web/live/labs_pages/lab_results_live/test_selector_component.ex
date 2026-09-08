@@ -30,7 +30,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestSelectorComponent do
           <div class="flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5 text-[#6667ab]"
+              class="h-5 w-5 text-brand-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -71,7 +71,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestSelectorComponent do
                 name="query"
                 value={@search_query}
                 placeholder="Search tests (e.g., FBC, Urinalysis, HIV)..."
-                class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-[#6667ab] focus:border-[#6667ab]"
+                class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-brand-accent focus:border-brand-accent"
                 phx-debounce="300"
               />
             </div>
@@ -115,8 +115,8 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestSelectorComponent do
             <%= for {category, templates} <- @grouped_templates do %>
               <%= if category do %>
                 <div>
-                  <h3 class="text-sm font-semibold text-[#373896] uppercase tracking-wide mb-3 flex items-center">
-                    <span class="w-2 h-2 rounded-full bg-[#6667ab] mr-2"></span>
+                  <h3 class="text-sm font-semibold text-brand-primary uppercase tracking-wide mb-3 flex items-center">
+                    <span class="w-2 h-2 rounded-full bg-brand-accent mr-2"></span>
                     {category.name}
                   </h3>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -144,7 +144,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestSelectorComponent do
       "p-4 rounded-lg border-2 transition-all",
       if(@is_added,
         do: "bg-green-50 border-green-200 opacity-60",
-        else: "bg-white border-gray-200 hover:border-[#6667ab] hover:shadow-md cursor-pointer"
+        else: "bg-white border-gray-200 hover:border-brand-accent hover:shadow-md cursor-pointer"
       )
     ]}>
       <div class="flex items-start justify-between">
@@ -176,7 +176,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestSelectorComponent do
             phx-click="select_and_add"
             phx-value-template-id={@template.id}
             phx-target={@myself}
-            class="px-3 py-1.5 text-sm font-medium text-white bg-[#6667ab] rounded-lg hover:bg-[#5556a0] transition-colors"
+            class="px-3 py-1.5 text-sm font-medium text-white bg-brand-accent rounded-lg hover:bg-brand-accent-dark transition-colors"
           >
             Select & Add Results
           </button>
@@ -215,7 +215,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestSelectorComponent do
           </button>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-[#6667ab]"
+            class="h-5 w-5 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -269,7 +269,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestSelectorComponent do
               type="date"
               name="sample_collected_on"
               required
-              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#6667ab] focus:ring-[#6667ab] sm:text-sm"
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
             />
           </div>
           <div>
@@ -281,7 +281,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestSelectorComponent do
               name="test_performed_on"
               value={Date.utc_today() |> Date.to_iso8601()}
               required
-              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#6667ab] focus:ring-[#6667ab] sm:text-sm"
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
             />
           </div>
         </div>
@@ -290,7 +290,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestSelectorComponent do
         <%= for {section, fields} <- @grouped_fields do %>
           <div class="mb-6">
             <%= if section != "main" do %>
-              <h3 class="text-sm font-semibold text-[#373896] uppercase tracking-wide mb-3 pb-2 border-b border-gray-200">
+              <h3 class="text-sm font-semibold text-brand-primary uppercase tracking-wide mb-3 pb-2 border-b border-gray-200">
                 {section}
               </h3>
             <% end %>
@@ -312,7 +312,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestSelectorComponent do
             name="remarks"
             rows="3"
             placeholder="Enter any additional observations or comments..."
-            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#6667ab] focus:ring-[#6667ab] sm:text-sm"
+            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
           ></textarea>
         </div>
         
@@ -328,7 +328,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestSelectorComponent do
           </button>
           <button
             type="submit"
-            class="px-4 py-2 text-sm font-medium text-white bg-[#6667ab] rounded-lg hover:bg-[#5556a0] flex items-center"
+            class="px-4 py-2 text-sm font-medium text-white bg-brand-accent rounded-lg hover:bg-brand-accent-dark flex items-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -389,13 +389,13 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestSelectorComponent do
             type="number"
             step="any"
             name={"results[#{@field_name}]"}
-            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#6667ab] focus:ring-[#6667ab] sm:text-sm"
+            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
             placeholder={@ref_range}
           />
         <% "select" -> %>
           <select
             name={"results[#{@field_name}]"}
-            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#6667ab] focus:ring-[#6667ab] sm:text-sm"
+            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
           >
             <option value="">Select...</option>
             <%= for option <- @options do %>
@@ -406,7 +406,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestSelectorComponent do
           <input
             type="text"
             name={"results[#{@field_name}]"}
-            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#6667ab] focus:ring-[#6667ab] sm:text-sm"
+            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
           />
       <% end %>
 

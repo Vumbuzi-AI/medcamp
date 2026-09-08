@@ -1,8 +1,11 @@
 defmodule Medcamp.Batches.Batch do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   schema "batches" do
+    tenant_field()
+
     field :serial, :string
     field :gtin, :string
     field :batch, :string
@@ -41,5 +44,6 @@ defmodule Medcamp.Batches.Batch do
       :inventory_manager_id
     ])
     |> validate_required([:gtin, :batch, :quantity])
+    |> put_org_id()
   end
 end

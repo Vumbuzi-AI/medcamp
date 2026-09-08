@@ -16,7 +16,9 @@ alias Medcamp.InventoriesReceived
 alias Medcamp.InventoriesReceived.InventoryReceived
 alias Medcamp.LabTests
 alias Medcamp.LabTests.LabTest
+alias Medcamp.Organisations
 alias Medcamp.Repo
+alias Medcamp.Tenancy
 
 password = "123456"
 now = DateTime.utc_now() |> DateTime.truncate(:second)
@@ -25,6 +27,32 @@ unwrap! = fn
   {:ok, record}, _label -> record
   {:error, changeset}, label -> raise "#{label} failed: #{inspect(changeset.errors)}"
 end
+
+## Organisation ------------------------------------------------------------
+#
+# Everything below is tenant-scoped, so the organisation has to exist and be
+# entered before a single record is written.
+
+organisation =
+  case Organisations.get_organisation_by_slug("default") do
+    nil ->
+      unwrap!.(
+        Organisations.create_organisation(%{
+          "name" => "GHC Excellence",
+          "slug" => "default",
+          "location" => "Kenya",
+          "logo" => "/images/logo.png",
+          "primary_color" => "#373896",
+          "accent_color" => "#6667ab"
+        }),
+        "default organisation"
+      )
+
+    existing ->
+      existing
+  end
+
+Tenancy.put_org_id(organisation.id)
 
 ## Staff -------------------------------------------------------------------
 
@@ -40,16 +68,34 @@ ensure_user = fn attrs ->
   user =
     case Accounts.get_user_by_email(attrs.email) do
       nil ->
-        unwrap!.(
-          Accounts.register_user(%{
-            "email" => attrs.email,
-            "password" => password,
-            "role" => attrs.role,
-            "name" => attrs.name,
-            "otp" => attrs.otp
-          }),
-          "user #{attrs.email}"
-        )
+        registration = %{
+          "email" => attrs.email,
+          "password" => password,
+          "role" => attrs.role,
+          "name" => attrs.name,
+          "otp" => attrs.otp
+        }
+
+        case Accounts.register_user(registration) do
+          {:ok, user} ->
+            user
+
+          {:error, changeset} ->
+            email_error = Keyword.get(changeset.errors, :email)
+
+            if match?({_, metadata} when is_list(metadata), email_error) and
+                 Keyword.get(elem(email_error, 1), :constraint) == :unique do
+              # The lookup and insert are separate queries. If another seed
+              # process (or a concurrent request) inserted this email between
+              # them, use the row protected by the unique index.
+              case Accounts.get_user_by_email(attrs.email) do
+                nil -> unwrap!.({:error, changeset}, "user #{attrs.email}")
+                user -> user
+              end
+            else
+              unwrap!.({:error, changeset}, "user #{attrs.email}")
+            end
+        end
 
       user ->
         user
@@ -63,6 +109,7 @@ ensure_user = fn attrs ->
   desired_changes = %{
     name: attrs.name,
     role: attrs.role,
+    organisation_id: organisation.id,
     is_active: true,
     confirmed_at: user.confirmed_at || now
   }
@@ -95,6 +142,29 @@ users =
   |> Map.new()
 
 pharmacist = users["pharmacist"]
+
+## Superadmins -------------------------------------------------------------
+#
+# Platform accounts land at /superadmin/organisations. The current schema
+# requires every user to have an organisation, so these accounts sit in the
+# default organisation for storage only; `is_superadmin`, not `role`, gives
+# them platform access. Add another entry here to seed a fellow superadmin.
+
+superadmin_accounts = [
+  %{
+    name: "Superadmin",
+    email: "superadmin@gmail.com",
+    role: "admin",
+    otp: "1000"
+  }
+]
+
+for attrs <- superadmin_accounts do
+  attrs
+  |> ensure_user.()
+  |> Ecto.Changeset.change(%{is_superadmin: true})
+  |> Repo.update!()
+end
 
 ## Lab test catalogue ------------------------------------------------------
 

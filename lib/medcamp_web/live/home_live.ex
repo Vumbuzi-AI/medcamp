@@ -377,6 +377,8 @@ defmodule MedcampWeb.HomeLive do
     """
   end
 
-  defp portal_path(%{role: role}), do: MedcampWeb.UserAuth.default_path_for_role(role)
+  defp portal_path(user) when not is_nil(user),
+    do: MedcampWeb.UserAuth.landing_path_for_user(user)
+
   defp portal_path(_), do: "/users/log_in"
 end

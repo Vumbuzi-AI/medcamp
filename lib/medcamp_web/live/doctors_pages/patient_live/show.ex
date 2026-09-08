@@ -163,13 +163,13 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Show do
       <div class="mt-6 rounded-lg border border-gray-100 bg-white p-5 shadow-sm">
         <div class="mb-4 flex items-center justify-between gap-3">
           <div>
-            <h3 class="text-lg font-semibold text-[#373896]">Allergy History</h3>
+            <h3 class="text-lg font-semibold text-brand-primary">Allergy History</h3>
             <p class="text-sm text-gray-500">Known allergies and intolerances for this patient.</p>
           </div>
           <button
             type="button"
             phx-click="open_allergy_modal"
-            class="inline-flex items-center gap-2 rounded-lg bg-[#373896] px-3 py-2 text-sm font-medium text-white hover:bg-[#2f327d]"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-3 py-2 text-sm font-medium text-white hover:bg-[#2f327d]"
           >
             <.icon name="hero-plus" class="h-4 w-4" /> Add Allergy
           </button>
@@ -221,7 +221,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Show do
                     type="button"
                     phx-click="edit_allergy"
                     phx-value-id={allergy.id}
-                    class="text-sm font-medium text-[#373896] hover:text-[#2f327d]"
+                    class="text-sm font-medium text-brand-primary hover:text-[#2f327d]"
                   >
                     Edit
                   </button>
@@ -327,7 +327,6 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Show do
           </:actions>
         </.simple_form>
       </.modal>
-
     </div>
     """
   end

@@ -9,6 +9,16 @@
     ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   --font-medical-display: var(--font-medical-body);
+
+  /* Tenant palette defaults. The root layout overrides these per organisation;
+     these values are what an unbranded page (login, public home) wears. */
+  --brand-primary: #373896;
+  --brand-accent: #6667ab;
+  --brand-accent-dark: #5556a0;
+  --brand-50: #f0f0ff;
+  --brand-100: #e7e7ff;
+  --brand-200: #d2d3ff;
+  --brand-300: #cfd1ff;
 }
 
 html {
@@ -54,7 +64,7 @@ button {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #373896;
+  color: var(--brand-primary);
   margin-top: 1.25rem;
   margin-bottom: 0.4rem;
   padding-bottom: 0.25rem;
@@ -227,7 +237,7 @@ button {
   pointer-events: none;
   white-space: nowrap;
   border-radius: 0.75rem;
-  background: #373896;
+  background: var(--brand-primary);
   padding: 0.5rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 600;
@@ -237,7 +247,7 @@ button {
 }
 
 #main-sidebar .sidebar-scrollbar {
-  scrollbar-color: #6667ab #e7e7ff;
+  scrollbar-color: var(--brand-accent) var(--brand-100);
   scrollbar-width: thin;
 }
 
@@ -246,17 +256,17 @@ button {
 }
 
 #main-sidebar .sidebar-scrollbar::-webkit-scrollbar-track {
-  background: #e7e7ff;
+  background: var(--brand-100);
   border-radius: 9999px;
 }
 
 #main-sidebar .sidebar-scrollbar::-webkit-scrollbar-thumb {
-  background: #6667ab;
+  background: var(--brand-accent);
   border-radius: 9999px;
 }
 
 #main-sidebar .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #373896;
+  background: var(--brand-primary);
 }
 
 /* ============================================
@@ -274,7 +284,7 @@ button {
   overflow-x: auto !important;
   overflow-y: visible;
   -webkit-overflow-scrolling: touch;
-  scrollbar-color: #6667ab #e7e7ff;
+  scrollbar-color: var(--brand-accent) var(--brand-100);
   scrollbar-width: thin;
 }
 
@@ -283,17 +293,17 @@ button {
 }
 
 .table-container::-webkit-scrollbar-track {
-  background: #e7e7ff;
+  background: var(--brand-100);
   border-radius: 4px;
 }
 
 .table-container::-webkit-scrollbar-thumb {
-  background: #6667ab;
+  background: var(--brand-accent);
   border-radius: 4px;
 }
 
 .table-container::-webkit-scrollbar-thumb:hover {
-  background: #373896;
+  background: var(--brand-primary);
 }
 
 table td,

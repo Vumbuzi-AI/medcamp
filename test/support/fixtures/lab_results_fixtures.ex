@@ -11,7 +11,8 @@ defmodule Medcamp.LabResultsFixtures do
     attrs = Enum.into(attrs, %{})
 
     doctor =
-      Map.get(attrs, :doctor) || Map.get(attrs, "doctor") || Medcamp.AccountsFixtures.user_fixture()
+      Map.get(attrs, :doctor) || Map.get(attrs, "doctor") ||
+        Medcamp.AccountsFixtures.user_fixture()
 
     patient =
       Map.get(attrs, :patient) || Map.get(attrs, "patient") ||

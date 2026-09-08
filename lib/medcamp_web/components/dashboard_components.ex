@@ -118,7 +118,7 @@ defmodule MedcampWeb.DashboardComponents do
       "red" -> %{text: "text-[#E0566F]", bg: "bg-[#E0566F] rounded-full p-3"}
       "purple" -> %{text: "text-[#7C58E8]", bg: "bg-[#7C58E8] rounded-full p-3"}
       "orange" -> %{text: "text-[#E5963A]", bg: "bg-[#E5963A] rounded-full p-3"}
-      "indigo" -> %{text: "text-[#373896]", bg: "bg-[#373896] rounded-full p-3"}
+      "indigo" -> %{text: "text-brand-primary", bg: "bg-brand-primary rounded-full p-3"}
       _ -> %{text: "text-[#5E6D86]", bg: "bg-[#5E6D86] rounded-full p-3"}
     end
   end
@@ -130,7 +130,7 @@ defmodule MedcampWeb.DashboardComponents do
       "red" -> "bg-[#E85D75] shadow-[0_10px_20px_rgba(232,93,117,0.2)]"
       "purple" -> "bg-[#7C58E8] shadow-[0_10px_20px_rgba(124,88,232,0.24)]"
       "orange" -> "bg-[#E39B41] shadow-[0_10px_20px_rgba(227,155,65,0.22)]"
-      "indigo" -> "bg-[#373896] shadow-[0_10px_20px_rgba(55,56,150,0.24)]"
+      "indigo" -> "bg-brand-primary shadow-[0_10px_20px_rgba(55,56,150,0.24)]"
       "amber" -> "bg-[#D79B2B] shadow-[0_10px_20px_rgba(215,155,43,0.22)]"
       "cyan" -> "bg-[#2AA8BD] shadow-[0_10px_20px_rgba(42,168,189,0.22)]"
       "pink" -> "bg-[#D75AA5] shadow-[0_10px_20px_rgba(215,90,165,0.22)]"
@@ -359,7 +359,7 @@ defmodule MedcampWeb.DashboardComponents do
           <p class="text-xs font-medium uppercase tracking-wide text-gray-500 truncate">
             {@label}
           </p>
-          <p class="text-2xl font-bold text-[#373896] leading-none mt-2 truncate">
+          <p class="text-2xl font-bold text-brand-primary leading-none mt-2 truncate">
             {@value}
           </p>
           <p
@@ -384,7 +384,7 @@ defmodule MedcampWeb.DashboardComponents do
   defp summary_icon_bg("rose"), do: "bg-[#FFF8FA]"
   defp summary_icon_bg(_), do: "bg-[#FAFBFD]"
 
-  defp summary_icon_color("indigo"), do: "text-[#373896]"
+  defp summary_icon_color("indigo"), do: "text-brand-primary"
   defp summary_icon_color("blue"), do: "text-[#2C66E4]"
   defp summary_icon_color("emerald"), do: "text-[#12B586]"
   defp summary_icon_color("amber"), do: "text-[#D79B2B]"
@@ -415,7 +415,7 @@ defmodule MedcampWeb.DashboardComponents do
         class={[
           "px-5 py-2 rounded-full text-sm font-medium transition-all duration-150",
           if(@active_tab == tab,
-            do: "bg-[#373896] text-white shadow-[0_10px_22px_rgba(55,56,150,0.28)]",
+            do: "bg-brand-primary text-white shadow-[0_10px_22px_rgba(55,56,150,0.28)]",
             else: "text-[#556781] hover:text-[#173052]"
           )
         ]}
@@ -608,7 +608,7 @@ defmodule MedcampWeb.DashboardComponents do
                   <td class="px-4 py-3 text-right">
                     <div class="flex items-center justify-end gap-2">
                       <div class="w-16 h-1.5 bg-[#EDF2F8] rounded-full overflow-hidden">
-                        <div class="h-full bg-[#373896] rounded-full" style={"width: #{loc.pct}%"}>
+                        <div class="h-full bg-brand-primary rounded-full" style={"width: #{loc.pct}%"}>
                         </div>
                       </div>
                       <span class="text-xs text-[#60718E] w-8 text-right">{loc.pct}%</span>
@@ -655,7 +655,7 @@ defmodule MedcampWeb.DashboardComponents do
             class={[
               "px-4 py-2 rounded-full text-sm font-medium transition-all",
               if(@active_view == :visit_type,
-                do: "bg-[#373896] text-white shadow-[0_10px_22px_rgba(55,56,150,0.28)]",
+                do: "bg-brand-primary text-white shadow-[0_10px_22px_rgba(55,56,150,0.28)]",
                 else: "text-[#556781]"
               )
             ]}
@@ -669,7 +669,7 @@ defmodule MedcampWeb.DashboardComponents do
             class={[
               "px-4 py-2 rounded-full text-sm font-medium transition-all",
               if(@active_view == :visit_status,
-                do: "bg-[#373896] text-white shadow-[0_10px_22px_rgba(55,56,150,0.28)]",
+                do: "bg-brand-primary text-white shadow-[0_10px_22px_rgba(55,56,150,0.28)]",
                 else: "text-[#556781]"
               )
             ]}

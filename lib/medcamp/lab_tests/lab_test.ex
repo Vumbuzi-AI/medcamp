@@ -1,8 +1,11 @@
 defmodule Medcamp.LabTests.LabTest do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   schema "lab_tests" do
+    tenant_field()
+
     field :name, :string
     field :desription, :string
     field :price, :integer
@@ -18,6 +21,7 @@ defmodule Medcamp.LabTests.LabTest do
     |> cast(attrs, [:name, :desription, :price, :subsidized_price, :creator_id])
     |> validate_required([:name, :price])
     |> put_subsidized_price_if_missing()
+    |> put_org_id()
   end
 
   defp put_subsidized_price_if_missing(changeset) do

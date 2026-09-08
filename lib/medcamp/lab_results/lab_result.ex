@@ -1,8 +1,11 @@
 defmodule Medcamp.LabResults.LabResult do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   schema "lab_results" do
+    tenant_field()
+
     field :name, :string
     field :description, :string
     field :date_of_test, :date
@@ -70,6 +73,7 @@ defmodule Medcamp.LabResults.LabResult do
     ])
     |> put_time_if_missing()
     |> cast_embed(:tests, with: &Medcamp.LabResults.LabTest.changeset/2)
+    |> put_org_id()
   end
 
   def interpretation_changeset(lab_result, attrs) do
@@ -100,6 +104,7 @@ defmodule Medcamp.LabResults.LabResult do
     |> cast_embed(:tests, with: &Medcamp.LabResults.LabTest.changeset/2)
     |> put_change(:has_paid, true)
     |> put_total_from_tests()
+    |> put_org_id()
   end
 
   defp put_total_from_tests(changeset) do

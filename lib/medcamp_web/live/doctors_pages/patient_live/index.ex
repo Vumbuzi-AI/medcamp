@@ -358,7 +358,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Index do
             type="checkbox"
             phx-click="toggle_figures"
             checked={@show_figures}
-            class="h-4 w-4 rounded border-slate-300 text-[#373896] focus:ring-[#373896]"
+            class="h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
           /> Show figures in table
         </label>
       </div>

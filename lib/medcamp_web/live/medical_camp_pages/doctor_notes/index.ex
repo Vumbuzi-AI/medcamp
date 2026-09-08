@@ -1,6 +1,7 @@
 defmodule MedcampWeb.MedicalCampPages.DoctorNotes do
   use MedcampWeb, :live_view
-  alias Medcamp.Patients
+
+  alias MedcampWeb.PublicTenant
   alias Medcamp.DoctorNotes
   alias Medcamp.DoctorNotes.DoctorNote
   alias Medcamp.Triages
@@ -8,7 +9,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNotes do
 
   @impl true
   def mount(%{"gsrn" => gsrn} = _params, session, socket) do
-    patient = Patients.get_patient_by_gsrn(gsrn)
+    patient = PublicTenant.resolve_patient!(gsrn)
     most_recent_triage = Triages.most_recent_triage(patient.id)
 
     current_user =
@@ -79,7 +80,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNotes do
         :if={@most_recent_triage}
         class="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mb-6"
       >
-        <h3 class="text-lg font-semibold text-[#373896] mb-1">Most Recent Triage</h3>
+        <h3 class="text-lg font-semibold text-brand-primary mb-1">Most Recent Triage</h3>
         <p class="text-sm text-gray-600 mb-3">
           <span class="font-medium">
             {[@patient.first_name, @patient.middle_name, @patient.last_name]
@@ -140,7 +141,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNotes do
         </div>
       </div>
 
-      <h1 class="text-xl font-semibold text-[#373896] mb-4">New Doctor's Note</h1>
+      <h1 class="text-xl font-semibold text-brand-primary mb-4">New Doctor's Note</h1>
       <.doctor_notes_form
         patient={@patient}
         show_lab_imaging_request={false}
@@ -153,7 +154,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNotes do
         :if={@doctor_notes != []}
         class="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mt-6"
       >
-        <h3 class="text-lg font-semibold text-[#373896] mb-3">Previous Notes</h3>
+        <h3 class="text-lg font-semibold text-brand-primary mb-3">Previous Notes</h3>
         <div class="divide-y divide-gray-100">
           <%= for note <- @doctor_notes do %>
             <a
@@ -170,13 +171,13 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNotes do
                 <p :if={note.symptoms} class="text-xs text-gray-500 mt-0.5 truncate max-w-xs">
                   {note.symptoms}
                 </p>
-                <p :if={note.doctor} class="text-xs text-[#6667ab] mt-0.5">
+                <p :if={note.doctor} class="text-xs text-brand-accent mt-0.5">
                   Dr. {note.doctor.name}
                 </p>
               </div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4 text-gray-400 group-hover:text-[#373896] flex-shrink-0"
+                class="h-4 w-4 text-gray-400 group-hover:text-brand-primary flex-shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

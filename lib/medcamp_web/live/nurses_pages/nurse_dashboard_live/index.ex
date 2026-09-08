@@ -93,7 +93,6 @@ defmodule MedcampWeb.NurseDashboardLive.Index do
       )
       |> filter_triage_search(search)
 
-
     registrations =
       Patients.list_patients()
       |> Enum.filter(
@@ -253,7 +252,7 @@ defmodule MedcampWeb.NurseDashboardLive.Index do
       class={[
         "px-3 py-1.5 rounded-full text-xs font-semibold transition-colors",
         if(@is_active,
-          do: "bg-[#373896] text-white",
+          do: "bg-brand-primary text-white",
           else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
         )
       ]}

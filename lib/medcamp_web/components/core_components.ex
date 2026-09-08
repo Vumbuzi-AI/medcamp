@@ -178,10 +178,10 @@ defmodule MedcampWeb.CoreComponents do
     ~H"""
     <div class="flex items-start justify-between gap-4 border-b border-gray-100 pb-4 mb-4">
       <div class="flex items-start gap-3">
-        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#e7e7ff]">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-100">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-[#373896]"
+            class="h-5 w-5 text-brand-primary"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -289,18 +289,18 @@ defmodule MedcampWeb.CoreComponents do
         phx-click={show_filter_drawer(@id)}
         class={[
           "flex h-[40px] items-center gap-2 rounded-md border px-4 text-sm font-medium whitespace-nowrap transition",
-          @active_count > 0 && "border-[#e7e7ff] bg-[#e7e7ff] text-[#373896] hover:bg-[#dcdcff]",
+          @active_count > 0 && "border-brand-100 bg-brand-100 text-brand-primary hover:bg-[#dcdcff]",
           @active_count == 0 && @variant == "outline" &&
             "border-gray-300 text-gray-700 hover:bg-gray-50",
           @active_count == 0 && @variant == "solid" &&
-            "border-[#373896] bg-[#373896] text-white hover:bg-[#2d2e78]"
+            "border-brand-primary bg-brand-primary text-white hover:bg-[#2d2e78]"
         ]}
       >
         <Heroicons.icon name="adjustments-horizontal" type="outline" class="h-4 w-4" />
         {@trigger_label}
         <span
           :if={@active_count > 0}
-          class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#373896] text-xs font-semibold text-white"
+          class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-brand-primary text-xs font-semibold text-white"
         >
           {@active_count}
         </span>
@@ -319,14 +319,14 @@ defmodule MedcampWeb.CoreComponents do
           phx-key="escape"
         >
           <div class="flex items-center justify-between gap-4 border-b border-gray-100 px-5 py-4 sm:px-6">
-            <h2 id={"#{@id}-title"} class="min-w-0 flex-1 text-lg font-semibold text-[#373896]">
+            <h2 id={"#{@id}-title"} class="min-w-0 flex-1 text-lg font-semibold text-brand-primary">
               {@title}
             </h2>
             <div class="flex shrink-0 items-center gap-2">
               <button
                 type="button"
                 phx-click={JS.push(@clear_event) |> hide_filter_drawer(@id)}
-                class="rounded-md px-2.5 py-1.5 text-sm font-medium text-[#6667ab] hover:bg-[#f4f4ff] hover:text-[#373896]"
+                class="rounded-md px-2.5 py-1.5 text-sm font-medium text-brand-accent hover:bg-[#f4f4ff] hover:text-brand-primary"
               >
                 Reset all
               </button>
@@ -375,7 +375,7 @@ defmodule MedcampWeb.CoreComponents do
               <button
                 :if={!@instant}
                 type="submit"
-                class="rounded-md bg-[#373896] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#6667ab]"
+                class="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-accent"
               >
                 Apply filters
               </button>
@@ -388,13 +388,13 @@ defmodule MedcampWeb.CoreComponents do
     <div :if={@chip != []} class="mt-3 flex w-full flex-wrap items-center gap-2">
       <span
         :for={chip <- @chip}
-        class="inline-flex items-center gap-1.5 rounded-full bg-[#e7e7ff] px-3 py-1 text-sm font-medium text-[#373896]"
+        class="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-3 py-1 text-sm font-medium text-brand-primary"
       >
         {chip.label}
         <button
           type="button"
           phx-click={chip.clear}
-          class="text-[#373896]/70 hover:text-[#373896]"
+          class="text-brand-primary/70 hover:text-brand-primary"
           aria-label={"Remove #{chip.label} filter"}
         >
           <.icon name="hero-x-mark-solid" class="h-3.5 w-3.5" />
@@ -403,7 +403,7 @@ defmodule MedcampWeb.CoreComponents do
       <button
         type="button"
         phx-click={@clear_event}
-        class="text-sm font-medium text-[#373896] hover:underline"
+        class="text-sm font-medium text-brand-primary hover:underline"
       >
         Clear all
       </button>
@@ -540,7 +540,7 @@ defmodule MedcampWeb.CoreComponents do
       <label class="mb-1 block text-xs font-medium text-gray-600">{@label}</label>
       <select
         name={@name}
-        class="h-9 w-full rounded-md border border-gray-300 px-2 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+        class="h-9 w-full rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
       >
         <option
           :for={{value, label} <- Medcamp.ExpiryFilter.options()}
@@ -614,7 +614,7 @@ defmodule MedcampWeb.CoreComponents do
       value={@value}
       placeholder={@placeholder}
       phx-debounce={@debounce}
-      class="h-[40px] w-full rounded-md border border-gray-300 px-3 text-sm focus:border-[#6667ab] focus:outline-none focus:ring-0"
+      class="h-[40px] w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:outline-none focus:ring-0"
       {@rest}
     />
     """
@@ -682,7 +682,7 @@ defmodule MedcampWeb.CoreComponents do
       <label class="mb-1 block text-xs font-medium text-gray-600">Age Group</label>
       <select
         name={@age_group_name}
-        class="h-9 w-full rounded-md border border-gray-300 px-2 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+        class="h-9 w-full rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
       >
         <option value="">All</option>
         <option value="<5" selected={@age_group_value == "<5"}>&lt; 5 years</option>
@@ -695,7 +695,7 @@ defmodule MedcampWeb.CoreComponents do
       <label class="mb-1 block text-xs font-medium text-gray-600">Gender</label>
       <select
         name={@gender_name}
-        class="h-9 w-full rounded-md border border-gray-300 px-2 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+        class="h-9 w-full rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
       >
         <option value="">All</option>
         <option value="Male" selected={@gender_value == "Male"}>Male</option>
@@ -735,14 +735,14 @@ defmodule MedcampWeb.CoreComponents do
         name={@diagnosis_name}
         value={@diagnosis_value}
         placeholder="Search..."
-        class="h-9 w-full rounded-md border border-gray-300 px-2 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+        class="h-9 w-full rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
       />
     </div>
     <div>
       <label class="mb-1 block text-xs font-medium text-gray-600">Visit Type</label>
       <select
         name={@visit_type_name}
-        class="h-9 w-full rounded-md border border-gray-300 px-2 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+        class="h-9 w-full rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
       >
         <option value="">All</option>
         <option

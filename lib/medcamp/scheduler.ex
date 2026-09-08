@@ -13,6 +13,8 @@ defmodule Medcamp.Scheduler do
 
   use GenServer
   alias Medcamp.Accounts
+  alias Medcamp.Organisations
+  alias Medcamp.Tenancy
 
   @default_password "123456"
 
@@ -34,11 +36,33 @@ defmodule Medcamp.Scheduler do
   end
 
   defp maybe_create_default_users do
-    for user <- default_users() do
-      case Accounts.get_user_by_email(user["email"]) do
-        nil -> Accounts.create_user(user)
-        _ -> :ok
-      end
+    # A spawned process starts with an empty process dictionary, so the
+    # organisation these accounts belong to has to be established here - and
+    # created first, if this really is a brand new database.
+    organisation = default_organisation()
+
+    Tenancy.with_org(organisation.id, fn -> create_missing_users() end)
+  end
+
+  defp create_missing_users do
+    for user <- default_users(), is_nil(Accounts.get_user_by_email(user["email"])) do
+      Accounts.create_user(user)
+    end
+  end
+
+  defp default_organisation do
+    case Organisations.get_organisation_by_slug("default") do
+      nil ->
+        {:ok, organisation} =
+          Organisations.create_organisation(%{
+            "name" => "Medcamp",
+            "slug" => "default"
+          })
+
+        organisation
+
+      organisation ->
+        organisation
     end
   end
 

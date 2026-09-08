@@ -342,7 +342,7 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
         >
           <:actions>
             <.link patch={~p"/nurse/patients/new"}>
-              <.button class="inline-flex items-center gap-2 bg-[#373896] hover:bg-[#2f317f]">
+              <.button class="inline-flex items-center gap-2 bg-brand-primary hover:bg-[#2f317f]">
                 <.icon name="hero-user-plus" class="h-4 w-4" /> Add Patient
               </.button>
             </.link>
@@ -406,7 +406,7 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
             type="checkbox"
             phx-click="toggle_figures"
             checked={@show_figures}
-            class="h-4 w-4 rounded border-slate-300 text-[#373896] focus:ring-[#373896]"
+            class="h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
           /> Show figures in table
         </label>
       </div>

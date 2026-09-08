@@ -14,7 +14,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             phx-click="change-tab"
             phx-value-tab={tab.id}
             class={"px-4 py-3 text-sm font-medium cursor-pointer border-b-2 transition-colors " <>
-            if(@current_tab == tab.id, do: "border-[#373896] text-[#373896]", else: "border-transparent text-gray-500 hover:text-[#6667ab]")}
+            if(@current_tab == tab.id, do: "border-brand-primary text-brand-primary", else: "border-transparent text-gray-500 hover:text-brand-accent")}
           >
             <div class="flex items-center gap-1">
               <%= if tab.icon_name do %>
@@ -41,11 +41,11 @@ defmodule MedcampWeb.DoctorNotesComponents do
   def doctor_notes_table(assigns) do
     ~H"""
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      <.header class="text-[#373896] text-base border-b flex-col md:flex-row gap-6 border-gray-100 pb-4 mb-4">
+      <.header class="text-brand-primary text-base border-b flex-col md:flex-row gap-6 border-gray-100 pb-4 mb-4">
         <div class="flex  items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -70,7 +70,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           <button
             type="button"
             phx-click={@add_note_click}
-            class="inline-flex items-center gap-2 rounded-lg bg-[#6667ab] px-4 py-2 text-sm font-semibold text-white hover:bg-[#5556a0] focus:z-10"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand-accent px-4 py-2 text-sm font-semibold text-white hover:bg-brand-accent-dark focus:z-10"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -90,7 +90,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           </button>
         <% else %>
           <.link patch={@new_note_url || "#"}>
-            <.button class="bg-[#6667ab] hover:bg-[#5556a0]">
+            <.button class="bg-brand-accent hover:bg-brand-accent-dark">
               <div class="flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -129,7 +129,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
       >
         <:col :let={doctor_note} label="Doctor">
           <div class="flex items-center py-3">
-            <span class="px-2 py-1 text-xs rounded-full bg-[#e7e7ff] text-[#373896] font-medium">
+            <span class="px-2 py-1 text-xs rounded-full bg-brand-100 text-brand-primary font-medium">
               Dr. {doctor_note.doctor.name}
             </span>
           </div>
@@ -139,7 +139,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           <div class="flex items-center py-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-4 w-4 mr-1 text-[#6667ab]"
+              class="h-4 w-4 mr-1 text-brand-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -162,7 +162,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           <div class="flex items-center space-x-2 py-3">
             <.link
               navigate={"#{@route_prefix}/#{doctor_note.id}"}
-              class="text-[#6667ab] hover:text-[#373896]"
+              class="text-brand-accent hover:text-brand-primary"
             >
               <div class="flex items-center">
                 <svg
@@ -203,11 +203,11 @@ defmodule MedcampWeb.DoctorNotesComponents do
   def nurse_doctor_notes_table(assigns) do
     ~H"""
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      <.header class="text-[#373896] border-b border-gray-100 pb-4 mb-4">
+      <.header class="text-brand-primary border-b border-gray-100 pb-4 mb-4">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -241,7 +241,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
       >
         <:col :let={doctor_note} label="Doctor">
           <div class="flex items-center py-3">
-            <span class="px-2 py-1 text-xs rounded-full bg-[#e7e7ff] text-[#373896] font-medium">
+            <span class="px-2 py-1 text-xs rounded-full bg-brand-100 text-brand-primary font-medium">
               Dr. {doctor_note.doctor.name}
             </span>
           </div>
@@ -251,7 +251,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           <div class="flex items-center py-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-4 w-4 mr-1 text-[#6667ab]"
+              class="h-4 w-4 mr-1 text-brand-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -271,7 +271,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           <div class="flex items-center py-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-4 w-4 mr-1 text-[#6667ab]"
+              class="h-4 w-4 mr-1 text-brand-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -318,7 +318,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           <div class="flex items-center space-x-2 py-3">
             <.link
               navigate={"#{@route_prefix}/#{doctor_note.id}"}
-              class="text-[#6667ab] hover:text-[#373896]"
+              class="text-brand-accent hover:text-brand-primary"
             >
               <div class="flex items-center">
                 <svg
@@ -374,7 +374,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           type="button"
           data-role="voice-btn"
           title="Dictate in a supported language and translate to English"
-          class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-[#6667ab] transition-colors hover:bg-[#f0f0ff] disabled:opacity-60"
+          class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-brand-accent transition-colors hover:bg-brand-50 disabled:opacity-60"
         >
           <Heroicons.icon name="microphone" type="outline" class="h-4 w-4" />
           <span data-role="voice-label">Dictate</span>
@@ -390,7 +390,10 @@ defmodule MedcampWeb.DoctorNotesComponents do
         class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
       >
         <div class="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl" data-role="voice-dialog">
-          <h3 id={"voice-language-title-#{@field.id}"} class="text-lg font-semibold text-[#373896]">
+          <h3
+            id={"voice-language-title-#{@field.id}"}
+            class="text-lg font-semibold text-brand-primary"
+          >
             Voice dictation
           </h3>
           <p class="mt-2 text-sm text-gray-600">
@@ -413,7 +416,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             <select
               id={"voice-language-#{@field.id}"}
               data-role="voice-language"
-              class="mt-2 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-[#6667ab] focus:outline-none focus:ring-2 focus:ring-[#6667ab]/20"
+              class="mt-2 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent/20"
             >
               <optgroup label="Kenyan languages">
                 <option :for={{code, name} <- VoiceDictation.kenyan_languages()} value={code}>
@@ -441,7 +444,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
               <button
                 type="button"
                 data-role="voice-start"
-                class="rounded-lg bg-[#373896] px-4 py-2 text-sm font-medium text-white hover:bg-[#2f307f]"
+                class="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2f307f]"
               >
                 Start dictating
               </button>
@@ -492,7 +495,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
               id={"voice-transcript-#{@field.id}"}
               data-role="voice-transcript"
               rows="7"
-              class="mt-2 block w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-[#6667ab] focus:outline-none focus:ring-2 focus:ring-[#6667ab]/20"
+              class="mt-2 block w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent/20"
               placeholder="Your English transcription will appear here for review."
             ></textarea>
             <p class="mt-2 text-xs text-gray-500">
@@ -516,7 +519,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
               <button
                 type="button"
                 data-role="voice-save"
-                class="rounded-lg bg-[#373896] px-4 py-2 text-sm font-medium text-white hover:bg-[#2f307f]"
+                class="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2f307f]"
               >
                 Save to note
               </button>
@@ -548,7 +551,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
         <div class="flex items-center mb-6 pb-2 border-b border-gray-100">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -560,7 +563,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
             />
           </svg>
-          <h2 class="text-lg font-semibold text-[#373896]">
+          <h2 class="text-lg font-semibold text-brand-primary">
             Consultation Details
           </h2>
         </div>
@@ -571,20 +574,20 @@ defmodule MedcampWeb.DoctorNotesComponents do
               field={@form[:date]}
               type="date"
               label="Date"
-              class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="focus:border-brand-accent focus:ring-brand-accent"
             />
             <input type="hidden" name={@form[:time].name} value={@form[:time].value} />
           </div>
 
           <div
             :if={@patient.gender == "Female"}
-            class="bg-[#f8f8ff] p-4 rounded-lg border border-[#e7e7ff]"
+            class="bg-[#f8f8ff] p-4 rounded-lg border border-brand-100"
           >
             <.input
               field={@form[:last_period_date]}
               type="date"
               label="Last period date"
-              class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="focus:border-brand-accent focus:ring-brand-accent"
             />
           </div>
 
@@ -593,7 +596,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             label="Complaints"
             placeholder="Enter patient's symptoms and complaints..."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
 
           <.voice_textarea
@@ -601,7 +604,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             label="Clinical Notes"
             placeholder="Enter any clinical notes or observations..."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
 
           <.voice_textarea
@@ -609,7 +612,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             label="Past medical and Surgical history"
             placeholder="Enter the patient's past medical history..."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
 
           <.voice_textarea
@@ -617,7 +620,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             label="Examinations"
             placeholder="Enter examination findings..."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
 
           <.voice_textarea
@@ -625,7 +628,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             label="Impression"
             placeholder="Enter your impression based on the examination findings..."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
           <.voice_textarea
             field={@form[:management]}
@@ -634,21 +637,21 @@ defmodule MedcampWeb.DoctorNotesComponents do
     and imaging investigations, medications to be prescribed/stopped/changed for the patient,
     minor/major surgical interventions planned, and admission."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
           <.voice_textarea
             field={@form[:investigations]}
             label="Investigations"
             placeholder="Document any investigations performed or ordered..."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
 
           <div class="space-y-2">
             <label class="block text-sm font-medium text-gray-700">Diagnosis (ICD-11)</label>
             <select
               name="doctor_note[diagnosis_icd_code]"
-              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-[#6667ab] focus:border-[#6667ab]"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-brand-accent focus:border-brand-accent"
             >
               <option value="">Select diagnosis code...</option>
               <%= for {label, code} <- @icd_options do %>
@@ -662,7 +665,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
               label="Diagnosis notes (optional)"
               placeholder="Add any additional diagnosis details..."
               rows={2}
-              class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="focus:border-brand-accent focus:ring-brand-accent"
             />
           </div>
         </div>
@@ -675,7 +678,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
         <div class="flex items-center mb-6 pb-2 border-b border-gray-100">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -687,7 +690,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
               d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
             />
           </svg>
-          <h2 class="text-lg font-semibold text-[#373896]">
+          <h2 class="text-lg font-semibold text-brand-primary">
             Lab & Imaging Request
           </h2>
         </div>
@@ -704,7 +707,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
 
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div class="flex items-center mb-4 pb-2 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-[#373896]">
+          <h2 class="text-lg font-semibold text-brand-primary">
             Doctor's Signature
           </h2>
         </div>
@@ -729,7 +732,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
       <div class="flex justify-end">
         <.button
           phx-disable-with="Saving..."
-          class="bg-[#6667ab] hover:bg-[#5556a0] px-5 py-2.5 flex items-center gap-2"
+          class="bg-brand-accent hover:bg-brand-accent-dark px-5 py-2.5 flex items-center gap-2"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -770,7 +773,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
         <div class="flex items-center mb-6 pb-2 border-b border-gray-100">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -782,7 +785,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
             />
           </svg>
-          <h2 class="text-lg font-semibold text-[#373896]">
+          <h2 class="text-lg font-semibold text-brand-primary">
             Consultation Details
           </h2>
         </div>
@@ -794,27 +797,27 @@ defmodule MedcampWeb.DoctorNotesComponents do
               type="date"
               disabled
               label="Date"
-              class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="focus:border-brand-accent focus:ring-brand-accent"
             />
             <.input
               field={@form[:time]}
               type="time"
               disabled
               label="Time"
-              class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="focus:border-brand-accent focus:ring-brand-accent"
             />
           </div>
 
           <div
             :if={@patient.gender == "Female"}
-            class="bg-[#f8f8ff] p-4 rounded-lg border border-[#e7e7ff]"
+            class="bg-[#f8f8ff] p-4 rounded-lg border border-brand-100"
           >
             <.input
               field={@form[:last_period_date]}
               type="date"
               disabled={!@editable}
               label="Last period date"
-              class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="focus:border-brand-accent focus:ring-brand-accent"
             />
           </div>
 
@@ -825,7 +828,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             disabled={!@editable}
             placeholder="Enter patient's symptoms and complaints..."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
 
           <.input
@@ -835,7 +838,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             label="Clinical Notes"
             placeholder="Enter any clinical notes or observations..."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
 
           <.input
@@ -845,7 +848,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             label="Past medical and Surgical history"
             placeholder="Enter the patient's past medical history..."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
 
           <.input
@@ -855,7 +858,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             label="Examinations"
             placeholder="Enter examination findings..."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
 
           <.input
@@ -865,7 +868,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             label="Impression"
             placeholder="Enter your impression based on the examination findings..."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
           <.input
             field={@form[:management]}
@@ -874,7 +877,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             label="Management"
             placeholder="Enter planned lab and imaging investigations, medications to be prescribed/stopped/changed for the patient, minor/major surgical interventions planned, and admission."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
           <.input
             field={@form[:investigations]}
@@ -883,7 +886,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             label="Investigations"
             placeholder="Document any investigations performed or ordered..."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
 
           <.input
@@ -893,7 +896,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             label="Diagnosis"
             placeholder="Enter your diagnosis based on the findings..."
             rows={3}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
         </div>
       </div>
@@ -905,7 +908,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
         <div class="flex items-center mb-6 pb-2 border-b border-gray-100">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -917,7 +920,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
               d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
             />
           </svg>
-          <h2 class="text-lg font-semibold text-[#373896]">
+          <h2 class="text-lg font-semibold text-brand-primary">
             Lab & Imaging Request
           </h2>
         </div>
@@ -943,7 +946,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
         </button>
         <button
           type="submit"
-          class="inline-flex items-center gap-2 rounded-lg bg-[#373896] px-5 py-2 text-sm font-semibold text-white hover:bg-[#2a2b73] transition-colors"
+          class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-5 py-2 text-sm font-semibold text-white hover:bg-[#2a2b73] transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -975,16 +978,16 @@ defmodule MedcampWeb.DoctorNotesComponents do
     ~H"""
     <div class="mt-6 border-t border-gray-100 pt-4">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="text-sm font-semibold text-[#373896] flex items-center gap-2">
+        <h3 class="text-sm font-semibold text-brand-primary flex items-center gap-2">
           <Heroicons.icon name="document-duplicate" type="outline" class="h-4 w-4" /> Sub-notes
-          <span class="px-2 py-0.5 text-xs rounded-full bg-[#e7e7ff] text-[#373896]">
+          <span class="px-2 py-0.5 text-xs rounded-full bg-brand-100 text-brand-primary">
             {length(@child_notes)}
           </span>
         </h3>
         <button
           type="button"
           phx-click="open_add_sub_note"
-          class="inline-flex items-center gap-1.5 rounded-lg bg-[#6667ab] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#5556a0] transition-colors"
+          class="inline-flex items-center gap-1.5 rounded-lg bg-brand-accent px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-accent-dark transition-colors"
         >
           <Heroicons.icon name="plus" type="outline" class="h-3.5 w-3.5" /> Add Sub-note
         </button>
@@ -1002,10 +1005,14 @@ defmodule MedcampWeb.DoctorNotesComponents do
                 type="button"
                 phx-click="toggle_sub_note"
                 phx-value-id={note.id}
-                class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-[#f0f0ff] transition-colors text-left"
+                class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-brand-50 transition-colors text-left"
               >
                 <div class="flex items-center gap-3">
-                  <Heroicons.icon name="document-text" type="outline" class="h-4 w-4 text-[#6667ab]" />
+                  <Heroicons.icon
+                    name="document-text"
+                    type="outline"
+                    class="h-4 w-4 text-brand-accent"
+                  />
                   <div>
                     <span class="text-sm font-medium text-gray-800">
                       Dr. {note.doctor.name}
@@ -1100,25 +1107,25 @@ defmodule MedcampWeb.DoctorNotesComponents do
             field={@form[:date]}
             type="date"
             label="Date"
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
           <.input
             field={@form[:time]}
             type="time"
             label="Time"
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
         </div>
 
         <div
           :if={@patient.gender == "Female"}
-          class="bg-[#f8f8ff] p-4 rounded-lg border border-[#e7e7ff]"
+          class="bg-[#f8f8ff] p-4 rounded-lg border border-brand-100"
         >
           <.input
             field={@form[:last_period_date]}
             type="date"
             label="Last period date"
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
         </div>
 
@@ -1128,7 +1135,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           label="Complaints"
           placeholder="Enter patient's symptoms and complaints..."
           rows={3}
-          class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+          class="focus:border-brand-accent focus:ring-brand-accent"
         />
 
         <.input
@@ -1137,7 +1144,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           label="Clinical Notes"
           placeholder="Enter any clinical notes or observations..."
           rows={3}
-          class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+          class="focus:border-brand-accent focus:ring-brand-accent"
         />
 
         <.input
@@ -1146,7 +1153,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           label="Past Medical & Surgical History"
           placeholder="Enter the patient's past medical history..."
           rows={3}
-          class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+          class="focus:border-brand-accent focus:ring-brand-accent"
         />
 
         <.input
@@ -1155,7 +1162,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           label="Examinations"
           placeholder="Enter examination findings..."
           rows={3}
-          class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+          class="focus:border-brand-accent focus:ring-brand-accent"
         />
 
         <.input
@@ -1164,7 +1171,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           label="Impression"
           placeholder="Enter your impression..."
           rows={3}
-          class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+          class="focus:border-brand-accent focus:ring-brand-accent"
         />
 
         <.input
@@ -1173,7 +1180,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           label="Management"
           placeholder="Enter management plan..."
           rows={3}
-          class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+          class="focus:border-brand-accent focus:ring-brand-accent"
         />
 
         <.input
@@ -1182,14 +1189,14 @@ defmodule MedcampWeb.DoctorNotesComponents do
           label="Investigations"
           placeholder="Document any investigations performed or ordered..."
           rows={3}
-          class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+          class="focus:border-brand-accent focus:ring-brand-accent"
         />
 
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-700">Diagnosis (ICD-11)</label>
           <select
             name="sub_doctor_note[diagnosis_icd_code]"
-            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-[#6667ab] focus:border-[#6667ab]"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-brand-accent focus:border-brand-accent"
           >
             <option value="">Select diagnosis code...</option>
             <%= for {label, code} <- @icd_options do %>
@@ -1204,7 +1211,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             label="Diagnosis notes (optional)"
             placeholder="Add any additional diagnosis details..."
             rows={2}
-            class="focus:border-[#6667ab] focus:ring-[#6667ab]"
+            class="focus:border-brand-accent focus:ring-brand-accent"
           />
         </div>
       </div>
@@ -1212,7 +1219,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
       <div class="flex justify-end gap-3 pt-2">
         <.button
           phx-disable-with="Saving..."
-          class="bg-[#6667ab] hover:bg-[#5556a0] px-5 py-2.5 flex items-center gap-2"
+          class="bg-brand-accent hover:bg-brand-accent-dark px-5 py-2.5 flex items-center gap-2"
         >
           <Heroicons.icon name="document-plus" type="outline" class="h-4 w-4" /> Save Sub-note
         </.button>

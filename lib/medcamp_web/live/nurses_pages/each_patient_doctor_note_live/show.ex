@@ -64,7 +64,7 @@ defmodule MedcampWeb.NursesPages.EachPatientDoctorNoteShow do
       <div class="w-full flex justify-between items-center mb-4">
         <.link
           navigate={"/nurse/#{@patient.id}/doctor_notes"}
-          class="flex gap-2 cursor-pointer text-[#373896] font-semibold items-center hover:text-[#6667ab] transition-colors"
+          class="flex gap-2 cursor-pointer text-brand-primary font-semibold items-center hover:text-brand-accent transition-colors"
         >
           <Heroicons.icon name="arrow-left" type="outline" class="h-4 w-4" />
           <p>

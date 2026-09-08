@@ -8,6 +8,73 @@ defmodule Medcamp.Repo do
 
   require Logger
 
+  import Ecto.Query, only: [where: 3]
+
+  alias Medcamp.Tenancy
+
+  @doc """
+  Carries the current tenant through every query spawned by a repository call.
+
+  Ecto runs independent association preloads in Task processes. Process
+  dictionary values are not inherited by those tasks, but repository default
+  options are passed to every preload query, so this is the boundary where the
+  tenant must be captured.
+  """
+  @impl true
+  def default_options(_operation) do
+    case Tenancy.current_org_id() do
+      nil -> []
+      org_id -> [tenant_org_id: org_id]
+    end
+  end
+
+  @doc """
+  Filters every query against a tenant table by the current organisation.
+
+  Schemas opt in with `use Medcamp.Tenancy.Schema`. For those, this is the
+  single place tenant isolation is enforced on the read path - which is why
+  the context modules could keep their existing `Repo.all/2` calls unchanged.
+
+  With no organisation set, a tenant query *raises* rather than returning
+  every organisation's rows. A missed scope should be a loud crash in
+  development, not a silent cross-tenant leak in production.
+
+  The handful of lookups that legitimately run before an organisation is
+  known - authenticating by email, resolving a patient from a scanned GSRN,
+  the superadmin console - pass `skip_org_id: true`.
+  """
+  @impl true
+  def prepare_query(_operation, query, opts) do
+    cond do
+      opts[:skip_org_id] || opts[:schema_migration] ->
+        {query, opts}
+
+      not tenant_query?(query) ->
+        {query, opts}
+
+      org_id = opts[:tenant_org_id] || Tenancy.current_org_id() ->
+        {where(query, [t], t.organisation_id == ^org_id), opts}
+
+      true ->
+        raise """
+        Query against a tenant-scoped table with no organisation set.
+
+            #{inspect(query.from.source)}
+
+        Set one with Medcamp.Tenancy.put_org_id/1 (the browser pipeline and the
+        LiveView on_mount hook do this from the current user), or pass
+        `skip_org_id: true` if this lookup genuinely runs before the
+        organisation is known.
+        """
+    end
+  end
+
+  defp tenant_query?(%{from: %{source: {_source, schema}}}) when not is_nil(schema) do
+    Code.ensure_loaded?(schema) and function_exported?(schema, :__tenant__?, 0)
+  end
+
+  defp tenant_query?(_query), do: false
+
   # Store audit user in process dictionary
   def put_audit_user(user_id) do
     Process.put(:audit_user_id, user_id)
@@ -92,9 +159,15 @@ defmodule Medcamp.Repo do
   end
 
   defp log_change_async(action, changeset_or_struct, result, user_id) do
+    # The task starts with an empty process dictionary, so carry the acting
+    # organisation across - `audit_logs` is itself a tenant table.
+    org_id = Tenancy.current_org_id()
+
     # Run in background task to avoid slowing down requests
     Task.start(fn ->
-      log_change(action, changeset_or_struct, result, user_id)
+      Tenancy.with_org(org_id, fn ->
+        log_change(action, changeset_or_struct, result, user_id)
+      end)
     end)
   end
 

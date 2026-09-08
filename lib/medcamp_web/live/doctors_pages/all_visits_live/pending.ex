@@ -108,18 +108,21 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PendingIndex do
         }
       >
         <:actions :if={@search != ""}>
-          <button phx-click="clear_search" class="text-xs text-[#6667ab] hover:underline">
+          <button phx-click="clear_search" class="text-xs text-brand-accent hover:underline">
             Clear search
           </button>
         </:actions>
       </.blank_state>
 
-      <.table :if={@pending_visits_count > 0} id="patient_visits" rows={@patient_visits}
+      <.table
+        :if={@pending_visits_count > 0}
+        id="patient_visits"
+        rows={@patient_visits}
         row_id={&"patient_visits-#{&1.id}"}
       >
         <:col :let={patient_visit} label="Patient">
           <div class="flex items-center py-3">
-            <div class="h-8 w-8 rounded-full bg-[#e7e7ff] flex items-center justify-center text-[#373896] font-medium mr-2 text-sm">
+            <div class="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-medium mr-2 text-sm">
               {String.first(patient_visit.patient.first_name || "")}
             </div>
             <span class="font-medium text-gray-900">
@@ -137,7 +140,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PendingIndex do
           <div class="flex items-center py-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-4 w-4 mr-1 text-[#6667ab]"
+              class="h-4 w-4 mr-1 text-brand-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -171,7 +174,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PendingIndex do
               data-confirm="Are you sure you want to see this patient?"
               phx-click="see_patient"
               phx-value-id={patient_visit.id}
-              class="bg-[#6667ab] hover:bg-[#5556a0] text-white font-medium py-2 px-4 rounded-md text-sm"
+              class="bg-brand-accent hover:bg-brand-accent-dark text-white font-medium py-2 px-4 rounded-md text-sm"
             >
               See Patient
             </.button>

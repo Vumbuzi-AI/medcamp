@@ -1,8 +1,11 @@
 defmodule Medcamp.UserLoginSessions.UserLoginSession do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   schema "user_login_sessions" do
+    tenant_field()
+
     field :logged_in_at, :utc_datetime
     field :logged_out_at, :utc_datetime
     belongs_to :user, Medcamp.Accounts.User
@@ -15,5 +18,6 @@ defmodule Medcamp.UserLoginSessions.UserLoginSession do
     |> cast(attrs, [:user_id, :logged_in_at, :logged_out_at])
     |> validate_required([:user_id, :logged_in_at])
     |> foreign_key_constraint(:user_id)
+    |> put_org_id()
   end
 end

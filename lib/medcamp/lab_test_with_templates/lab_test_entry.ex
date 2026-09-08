@@ -21,11 +21,14 @@ defmodule Medcamp.LabTestTemplates.LabTestEntry do
   Flags: "normal", "low", "high", "critical_low", "critical_high"
   """
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   @statuses ["pending", "in_progress", "completed", "verified"]
 
   schema "lab_test_entries" do
+    tenant_field()
+
     field :results, :map, default: %{}
     field :remarks, :string
     field :sample_collected_on, :date
@@ -66,6 +69,7 @@ defmodule Medcamp.LabTestTemplates.LabTestEntry do
       name: :lab_test_entries_unique_test_per_request,
       message: "this test has already been added to this lab request"
     )
+    |> put_org_id()
   end
 
   def results_changeset(entry, attrs) do

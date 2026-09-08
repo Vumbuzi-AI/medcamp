@@ -161,7 +161,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.AllLabResultsLiveIndex do
           <:group label="Urgency">
             <select
               name="filters[urgency]"
-              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
             >
               <option value="" selected={@filters["urgency"] == ""}>All</option>
               <option value="Urgent" selected={@filters["urgency"] == "Urgent"}>Urgent</option>
@@ -174,7 +174,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.AllLabResultsLiveIndex do
           <:group label="Report Status">
             <select
               name="filters[report_complete]"
-              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
             >
               <option value="" selected={@filters["report_complete"] == ""}>All</option>
               <option value="true" selected={@filters["report_complete"] == "true"}>Complete</option>
@@ -203,12 +203,12 @@ defmodule MedcampWeb.DoctorsPagePatientLive.AllLabResultsLiveIndex do
             </td>
             <td class="px-6 py-4 text-sm text-gray-400">—</td>
             <td class="px-6 py-4 text-sm">
-              <span class="inline-flex rounded-full bg-[#f0f0ff] px-2 py-1 text-xs font-medium text-gray-400">
+              <span class="inline-flex rounded-full bg-brand-50 px-2 py-1 text-xs font-medium text-gray-400">
                 —
               </span>
             </td>
             <td class="px-6 py-4 text-sm">
-              <span class="inline-flex rounded-full bg-[#f0f0ff] px-2 py-1 text-xs font-medium text-gray-400">
+              <span class="inline-flex rounded-full bg-brand-50 px-2 py-1 text-xs font-medium text-gray-400">
                 —
               </span>
             </td>
@@ -217,7 +217,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.AllLabResultsLiveIndex do
 
         <:col :let={lab_result} label="Patient">
           <div class="flex items-center py-3">
-            <div class="h-8 w-8 rounded-full bg-[#e7e7ff] flex items-center justify-center text-[#373896] font-medium mr-2 text-sm">
+            <div class="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-medium mr-2 text-sm">
               {String.first(lab_result.patient.first_name || "")}
             </div>
             <span class="font-medium text-gray-900">
@@ -234,7 +234,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.AllLabResultsLiveIndex do
 
         <:col :let={lab_result} label="Doctor">
           <div class="flex items-center py-3">
-            <span class="px-2 py-1 text-xs rounded-full bg-[#e7e7ff] text-[#373896]">
+            <span class="px-2 py-1 text-xs rounded-full bg-brand-100 text-brand-primary">
               Dr. {lab_result.doctor.name}
             </span>
           </div>

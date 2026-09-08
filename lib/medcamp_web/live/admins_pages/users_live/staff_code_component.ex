@@ -16,7 +16,7 @@ defmodule MedcampWeb.AdminUsersLive.StaffCodeComponent do
       </div>
       <div class="flex">
         <div class=" pt-2 flex justify-between gap-8 items-center">
-          <div class=" py-1 flex flex-col gap-0 text-xs rounded-full text-[#373896] font-medium">
+          <div class=" py-1 flex flex-col gap-0 text-xs rounded-full text-brand-primary font-medium">
             <p>GSRN:</p>
             <p>{@user.gsrn}</p>
           </div>

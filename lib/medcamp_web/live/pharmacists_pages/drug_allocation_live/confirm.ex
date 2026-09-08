@@ -57,7 +57,7 @@ defmodule MedcampWeb.DrugAllocationLive.ConfirmComponent do
           phx-click="confirm_dispense"
           phx-target={@myself}
           phx-disable-with="Dispensing..."
-          class="w-full rounded-md bg-[#373896] px-4 py-2 text-sm font-semibold text-white hover:bg-[#6667ab] focus:outline-none focus:ring-2 focus:ring-[#6667ab] focus:ring-offset-2"
+          class="w-full rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2"
         >
           Confirm & Dispense
         </button>

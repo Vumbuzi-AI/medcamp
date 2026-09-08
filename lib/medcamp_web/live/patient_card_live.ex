@@ -1,25 +1,32 @@
 defmodule MedcampWeb.PatientCardLive do
   use MedcampWeb, :live_view
 
+  alias MedcampWeb.PublicTenant
+
   alias Medcamp.DoctorNotes
   alias Medcamp.DrugAllocations
   alias Medcamp.LabResults
   alias Medcamp.PatientVisits
-  alias Medcamp.Patients
   alias Medcamp.Triages
 
   @tabs ~w(overview triages doctor_notes lab_results visits medications)a
 
   def mount(%{"gsrn" => gsrn}, _session, socket) do
-    case Patients.get_patient_by_gsrn(gsrn) do
+    case PublicTenant.resolve_patient!(gsrn) do
       nil ->
-        {:ok, assign(socket, patient: nil, page_title: "Patient not found")}
+        {:ok,
+         assign(socket,
+           patient: nil,
+           current_organisation: nil,
+           page_title: "Patient not found"
+         )}
 
       patient ->
         {:ok,
          socket
          |> assign(
            patient: patient,
+           current_organisation: Medcamp.Organisations.get_organisation(patient.organisation_id),
            page_title: "Patient record",
            pin: "",
            pin_error: nil,
@@ -68,9 +75,15 @@ defmodule MedcampWeb.PatientCardLive do
       <header class="bg-white border-b border-slate-200">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <img src="/images/logo.png" class="h-10 w-10 object-contain" alt="GHC Excellence" />
+            <img
+              src={Medcamp.Organisations.logo_path(@current_organisation)}
+              class="h-10 w-10 object-contain"
+              alt={Medcamp.Organisations.display_name(@current_organisation)}
+            />
             <div>
-              <p class="font-bold text-slate-900">GHC Excellence</p>
+              <p class="font-bold text-slate-900">
+                {Medcamp.Organisations.display_name(@current_organisation)}
+              </p>
               <p class="text-xs text-slate-500">Patient record</p>
             </div>
           </div>

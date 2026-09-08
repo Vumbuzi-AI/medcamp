@@ -101,11 +101,11 @@ defmodule MedcampWeb.PharmacistsLive.EachPatientDrugAllocationsIndex do
   def render(assigns) do
     ~H"""
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      <.header class="text-[#373896] border-b border-gray-100 pb-4 mb-4">
+      <.header class="text-brand-primary border-b border-gray-100 pb-4 mb-4">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-[#6667ab]"
+            class="h-5 w-5 mr-2 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -212,7 +212,7 @@ defmodule MedcampWeb.PharmacistsLive.EachPatientDrugAllocationsIndex do
           <:col :let={drug_allocation} label="Pharmacist">
             <div class="flex items-center py-3">
               <%= if drug_allocation.pharmacist && drug_allocation.pharmacist.name do %>
-                <span class="px-2 py-1 text-xs rounded-full bg-[#f0f0ff] text-[#373896]">
+                <span class="px-2 py-1 text-xs rounded-full bg-brand-50 text-brand-primary">
                   {drug_allocation.pharmacist.name}
                 </span>
               <% else %>
@@ -248,7 +248,7 @@ defmodule MedcampWeb.PharmacistsLive.EachPatientDrugAllocationsIndex do
             >
               <.link
                 navigate={"/pharmacist/drug_allocations/#{drug_allocation.id}"}
-                class="flex items-center text-[#6667ab] hover:text-[#373896]"
+                class="flex items-center text-brand-accent hover:text-brand-primary"
               >
                 <.icon name="hero-eye" class="h-4 w-4" />
               </.link>

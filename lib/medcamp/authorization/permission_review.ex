@@ -1,10 +1,13 @@
 defmodule Medcamp.Authorization.PermissionReview do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   alias Medcamp.Accounts.User
 
   schema "permission_reviews" do
+    tenant_field()
+
     field :role, :string
     field :reviewed_at, :utc_datetime
     field :notes, :string
@@ -21,5 +24,6 @@ defmodule Medcamp.Authorization.PermissionReview do
     |> validate_required([:role, :reviewed_at])
     |> validate_inclusion(:role, User.roles())
     |> foreign_key_constraint(:reviewer_id)
+    |> put_org_id()
   end
 end

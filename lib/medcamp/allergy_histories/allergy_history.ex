@@ -1,5 +1,6 @@
 defmodule Medcamp.AllergyHistories.AllergyHistory do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   @categories ~w(food medication environment biologic)
@@ -10,6 +11,8 @@ defmodule Medcamp.AllergyHistories.AllergyHistory do
   @severities ~w(mild moderate severe)
 
   schema "allergy_histories" do
+    tenant_field()
+
     field :substance_name, :string
     field :substance_code, :string
     field :substance_code_system, :string
@@ -72,5 +75,6 @@ defmodule Medcamp.AllergyHistories.AllergyHistory do
     |> validate_inclusion(:reaction_severity, @severities ++ [nil])
     |> foreign_key_constraint(:patient_id)
     |> foreign_key_constraint(:recorded_by_id)
+    |> put_org_id()
   end
 end

@@ -1,8 +1,11 @@
 defmodule Medcamp.Drugs.Drug do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   schema "drugs" do
+    tenant_field()
+
     belongs_to :inventory_received, Medcamp.InventoriesReceived.InventoryReceived,
       foreign_key: :inventory_received_id
 
@@ -31,5 +34,6 @@ defmodule Medcamp.Drugs.Drug do
       :inventory_received_id,
       :inventory_manager_id
     ])
+    |> put_org_id()
   end
 end

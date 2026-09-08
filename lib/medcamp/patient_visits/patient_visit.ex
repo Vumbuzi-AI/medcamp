@@ -1,5 +1,6 @@
 defmodule Medcamp.PatientVisits.PatientVisit do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   @moduledoc """
@@ -32,6 +33,8 @@ defmodule Medcamp.PatientVisits.PatientVisit do
   def status_label(other), do: other
 
   schema "patient_visits" do
+    tenant_field()
+
     field :reason, :string
     field :date, :date, default: Date.utc_today()
     field :time, :time
@@ -61,6 +64,7 @@ defmodule Medcamp.PatientVisits.PatientVisit do
     |> validate_inclusion(:status, @statuses)
     |> put_time_if_missing()
     |> put_date_if_missing()
+    |> put_org_id()
   end
 
   defp put_date_if_missing(changeset) do

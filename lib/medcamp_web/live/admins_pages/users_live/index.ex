@@ -21,7 +21,6 @@ defmodule MedcampWeb.AdminUsersLive.Index do
      |> load_users()}
   end
 
-
   @impl true
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
@@ -184,7 +183,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
         >
           <:actions>
             <.link patch="/admin/users/new">
-              <button class="inline-flex items-center gap-2 rounded-lg bg-[#373896] px-4 py-2 text-sm font-medium text-white hover:bg-[#2d2d7a]">
+              <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2d2d7a]">
                 <Heroicons.icon name="plus" type="outline" class="h-4 w-4" /> Add User
               </button>
             </.link>
@@ -211,7 +210,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                 <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
                 <select
                   name="filters[is_active]"
-                  class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                  class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
                 >
                   <option value="">All statuses</option>
                   <option value="true" selected={@filters.is_active == "true"}>Active</option>
@@ -222,7 +221,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                 <label class="block text-xs font-medium text-gray-600 mb-1">Role</label>
                 <select
                   name="filters[role]"
-                  class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                  class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
                 >
                   <option value="">All roles</option>
                   <%= for role <- @roles do %>
@@ -254,7 +253,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
             }
           >
             <:actions :if={@filters.search != "" or count_active_filters(@filters) > 0}>
-              <button phx-click="clear_filters" class="text-xs text-[#6667ab] hover:underline">
+              <button phx-click="clear_filters" class="text-xs text-brand-accent hover:underline">
                 Clear filters
               </button>
             </:actions>
@@ -297,7 +296,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                       <%= if user.image do %>
                         <img src={user.image} class="h-9 w-9 rounded-full object-cover shrink-0" />
                       <% else %>
-                        <div class="h-9 w-9 rounded-full bg-[#e7e7ff] flex items-center justify-center text-[#373896] font-semibold text-sm shrink-0">
+                        <div class="h-9 w-9 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-semibold text-sm shrink-0">
                           {String.first(user.name || "?")}
                         </div>
                       <% end %>
@@ -309,7 +308,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                   </td>
                   <%!-- Role --%>
                   <td class="px-5 py-3">
-                    <span class="inline-flex items-center rounded-full bg-[#f0f0ff] px-2.5 py-0.5 text-xs font-medium text-[#373896]">
+                    <span class="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-primary">
                       {user.role}
                     </span>
                   </td>
@@ -344,7 +343,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                     <div class="flex items-center justify-end gap-2">
                       <.link
                         navigate={~p"/admin/users/#{user}/edit"}
-                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-[#6667ab] hover:bg-[#f0f0ff]"
+                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-brand-accent hover:bg-brand-50"
                         phx-click=""
                       >
                         <Heroicons.icon name="pencil-square" type="outline" class="h-3.5 w-3.5" />
@@ -352,14 +351,14 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                       </.link>
                       <.link
                         navigate={~p"/admin/users/#{user}/permissions"}
-                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-[#6667ab] hover:bg-[#f0f0ff]"
+                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-brand-accent hover:bg-brand-50"
                         phx-click=""
                       >
                         <Heroicons.icon name="key" type="outline" class="h-3.5 w-3.5" /> Panels
                       </.link>
                       <.link
                         navigate={~p"/admin/users/#{user.email}"}
-                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-white bg-[#373896] hover:bg-[#2d2d7a]"
+                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-white bg-brand-primary hover:bg-[#2d2d7a]"
                         phx-click=""
                       >
                         Access
@@ -392,7 +391,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
           phx-click=""
         >
           <%!-- Header bar --%>
-          <div class="bg-[#373896] px-6 py-5 flex items-center gap-4">
+          <div class="bg-brand-primary px-6 py-5 flex items-center gap-4">
             <%= if u.image do %>
               <img
                 src={u.image}
@@ -499,7 +498,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
             </button>
             <.link
               navigate={~p"/admin/users/#{u.email}"}
-              class="inline-flex items-center gap-1.5 rounded-lg bg-[#373896] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#2d2d7a]"
+              class="inline-flex items-center gap-1.5 rounded-lg bg-brand-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-[#2d2d7a]"
             >
               <Heroicons.icon name="arrow-right-on-rectangle" type="outline" class="h-4 w-4" />
               Access Account

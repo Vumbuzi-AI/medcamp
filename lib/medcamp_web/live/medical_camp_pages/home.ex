@@ -1,7 +1,8 @@
 defmodule MedcampWeb.MedicalCampPages.Home do
   use MedcampWeb, :live_view
+
+  alias MedcampWeb.PublicTenant
   alias Phoenix.LiveView.JS
-  alias Medcamp.Patients
   alias Medcamp.Triages
   alias Medcamp.DoctorNotes
   alias Medcamp.Accounts
@@ -12,7 +13,7 @@ defmodule MedcampWeb.MedicalCampPages.Home do
 
   @impl true
   def mount(%{"gsrn" => gsrn}, session, socket) do
-    patient = Patients.get_patient_by_gsrn(gsrn)
+    patient = PublicTenant.resolve_patient!(gsrn)
     most_recent_triage = Triages.most_recent_triage(patient.id)
     triages = Triages.list_triages_by_patient(patient.id)
 
@@ -205,7 +206,7 @@ defmodule MedcampWeb.MedicalCampPages.Home do
           on_cancel={JS.push("close_triage_modal")}
         >
           <div class="p-2">
-            <h2 class="text-lg font-bold text-[#373896] mb-4">Triage Details</h2>
+            <h2 class="text-lg font-bold text-brand-primary mb-4">Triage Details</h2>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
               <div class="bg-gray-50 rounded p-2">
                 <span class="text-gray-500 block">Date</span>

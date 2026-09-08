@@ -14,13 +14,11 @@ defmodule Medcamp.Patients do
   }
 
   @doc """
-  Returns the list of patients.
+  The most recently issued GSRN, across patients and users alike.
 
-  ## Examples
-
-      iex> list_patients()
-      [%Patient{}, ...]
-
+  GSRNs are GS1 identifiers with a system-wide unique index, so the next one
+  has to be allocated from a single global sequence - scoping this per
+  organisation would let two camps issue the same GSRN.
   """
   def last_patient_gsrn do
     last_patient_query =
@@ -35,8 +33,8 @@ defmodule Medcamp.Patients do
         limit: 1,
         select: {u.inserted_at, u.gsrn}
 
-    last_patient = Repo.one(last_patient_query)
-    last_user = Repo.one(last_user_query)
+    last_patient = Repo.one(last_patient_query, skip_org_id: true)
+    last_user = Repo.one(last_user_query, skip_org_id: true)
 
     case {last_patient, last_user} do
       {nil, nil} ->
@@ -128,7 +126,10 @@ defmodule Medcamp.Patients do
         where: p.gsrn == ^gsrn,
         select: p.id
 
-    Repo.exists?(user_gsrn) or Repo.exists?(patient_gsrn)
+    # Unscoped for the same reason as `last_patient_gsrn/0`: a GSRN taken by
+    # another organisation is still taken.
+    Repo.exists?(user_gsrn, skip_org_id: true) or
+      Repo.exists?(patient_gsrn, skip_org_id: true)
   end
 
   def list_patients_for_selection do
@@ -139,8 +140,26 @@ defmodule Medcamp.Patients do
     )
   end
 
+  @doc """
+  Finds a patient by GSRN within the current organisation.
+
+  This is what the staff scan screens use: scanning a card belonging to
+  another organisation's patient should come back empty.
+  """
   def get_patient_by_gsrn(gsrn) do
     Repo.get_by(Patient, gsrn: gsrn)
+  end
+
+  @doc """
+  Finds a patient by GSRN across every organisation.
+
+  Only for the public, unauthenticated camp routes (`/8018/:gsrn`), which have
+  no session to read an organisation from - the patient found here is what
+  establishes it. Callers must hand the result to
+  `Medcamp.Tenancy.put_org_id/1` before running any further query.
+  """
+  def resolve_patient_by_gsrn(gsrn) do
+    Repo.get_by(Patient, [gsrn: gsrn], skip_org_id: true)
   end
 
   @doc """
@@ -657,7 +676,10 @@ defmodule Medcamp.Patients do
             from r in Medcamp.DrugAllocations.DrugAllocation, where: r.patient_id == ^id
           )
 
-          Repo.delete_all(from r in Medcamp.PatientVisits.PatientVisit, where: r.patient_id == ^id)
+          Repo.delete_all(
+            from r in Medcamp.PatientVisits.PatientVisit, where: r.patient_id == ^id
+          )
+
           Repo.delete_all(from r in Medcamp.Triages.Triage, where: r.patient_id == ^id)
 
           Repo.delete!(patient)

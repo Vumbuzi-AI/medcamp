@@ -153,10 +153,10 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DoctorNoteNew do
   def render(assigns) do
     ~H"""
     <div class="w-full">
-      <h1 class="text-xl font-semibold text-[#373896] mb-4 flex items-center">
+      <h1 class="text-xl font-semibold text-brand-primary mb-4 flex items-center">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5 mr-2 text-[#6667ab]"
+          class="h-5 w-5 mr-2 text-brand-accent"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

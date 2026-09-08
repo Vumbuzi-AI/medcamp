@@ -5,7 +5,16 @@ defmodule MedcampWeb.StockAlertsLive do
   import Phoenix.Component
 
   def on_mount(:assign_stock_alerts, _params, _session, socket) do
-    alerts = Medcamp.StockAlerts.list_all_alerts()
+    # Some LiveViews (notably a superadmin or a disconnected mount) can be
+    # reached before a tenant has been established. Stock tables are tenant
+    # scoped, so do not query them until the current process has an org.
+    alerts =
+      if Medcamp.Tenancy.current_org_id() do
+        Medcamp.StockAlerts.list_all_alerts()
+      else
+        %{near_expiry: [], below_reorder: []}
+      end
+
     alert_count = length(alerts.near_expiry) + length(alerts.below_reorder)
 
     socket =

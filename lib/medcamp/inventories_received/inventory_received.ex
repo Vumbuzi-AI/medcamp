@@ -1,5 +1,6 @@
 defmodule Medcamp.InventoriesReceived.InventoryReceived do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
   alias Medcamp.Repo
   import Ecto.Query
@@ -18,6 +19,8 @@ defmodule Medcamp.InventoriesReceived.InventoryReceived do
   """
 
   schema "inventories_received" do
+    tenant_field()
+
     field :type, :string
     field :description, :string
     field :image, :string
@@ -51,6 +54,7 @@ defmodule Medcamp.InventoriesReceived.InventoryReceived do
       :user_id
     ])
     |> validate_required([:gtin, :brand_name])
+    |> put_org_id()
   end
 
   def unique_gtin_checker(changeset) do

@@ -9,9 +9,27 @@ defmodule Medcamp.Accounts do
 
   alias Medcamp.Accounts.{User, UserToken, UserNotifier}
 
+  # Lookups that run before we know which organisation we are in - logging in,
+  # a reset-password token, a scanned GSRN - plus the two identifiers that are
+  # unique across the whole system rather than per organisation (email, OTP).
+  # Everything else in this module is filtered automatically by
+  # `Medcamp.Repo.prepare_query/3`.
+  @unscoped [skip_org_id: true]
+
   # In your Accounts context (lib/medcamp/accounts.ex)
 
   def get_user_by_email(email) when is_binary(email) do
+    Repo.get_by(User, [email: email], @unscoped)
+  end
+
+  @doc """
+  Finds a user by email within the current organisation.
+
+  For the admin-facing lookups, where reaching a user in another organisation
+  would be a tenancy breach - unlike `get_user_by_email/1`, which is the
+  pre-login path and has to search everywhere.
+  """
+  def get_organisation_user_by_email(email) when is_binary(email) do
     Repo.get_by(User, email: email)
   end
 
@@ -19,7 +37,7 @@ defmodule Medcamp.Accounts do
   Gets a medical-camp-enabled user by OTP pin.
   """
   def get_user_for_medical_camp_by_otp(otp) when is_binary(otp) do
-    Repo.get_by(User, otp: otp)
+    Repo.get_by(User, [otp: otp], @unscoped)
   end
 
   @doc """
@@ -27,7 +45,7 @@ defmodule Medcamp.Accounts do
   """
   def get_admin_by_otp(otp) when is_binary(otp) do
     with {:ok, normalized_otp} <- normalize_lookup_otp(otp) do
-      Repo.get_by(User, otp: normalized_otp, role: "admin")
+      Repo.get_by(User, [otp: normalized_otp, role: "admin"], @unscoped)
     else
       :error -> nil
     end
@@ -41,7 +59,11 @@ defmodule Medcamp.Accounts do
   """
   def get_support_staff_by_otp(otp) when is_binary(otp) do
     with {:ok, normalized_otp} <- normalize_lookup_otp(otp) do
-      Repo.get_by(User, otp: normalized_otp, role: "support staff", is_active: true)
+      Repo.get_by(
+        User,
+        [otp: normalized_otp, role: "support staff", is_active: true],
+        @unscoped
+      )
     else
       :error -> nil
     end
@@ -213,8 +235,15 @@ defmodule Medcamp.Accounts do
 
   defp apply_role_filter(query, _), do: query
 
+  @doc """
+  Finds a user by their GS1 GSRN.
+
+  GSRNs are globally unique, so this deliberately searches across every
+  organisation - it is how the public `/8017/:gsrn` routes resolve which
+  organisation they are dealing with in the first place.
+  """
   def get_user_by_gsrn(gsrn) when is_binary(gsrn) do
-    Repo.all(from u in User, where: u.gsrn == ^gsrn)
+    Repo.all(from(u in User, where: u.gsrn == ^gsrn), @unscoped)
     |> List.first()
   end
 
@@ -301,7 +330,7 @@ defmodule Medcamp.Accounts do
   """
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, email: email)
+    user = Repo.get_by(User, [email: email], @unscoped)
     if User.valid_password?(user, password), do: user
   end
 
@@ -320,6 +349,24 @@ defmodule Medcamp.Accounts do
 
   """
   def get_user!(id), do: Repo.get!(User, id)
+
+  @doc """
+  Gets a user by id without an organisation filter.
+
+  Only for the PIN-gated external medical camp pages, which are reached
+  without a login and so have no organisation in scope yet - the user found
+  here is what establishes it.
+  """
+  def get_user_across_organisations(id), do: Repo.get(User, id, @unscoped)
+
+  @doc """
+  Gets a user by id mid-login, before an organisation is in scope.
+
+  The OTP challenge and the one-time login token both carry a user id that has
+  already been verified by a signed session or `Phoenix.Token`, so this is a
+  lookup of an identity we have established but not yet entered the tenant of.
+  """
+  def get_login_user!(id), do: Repo.get!(User, id, @unscoped)
 
   ## User registration
 
@@ -653,7 +700,9 @@ defmodule Medcamp.Accounts do
       Enum.reduce_while(1..attempts, nil, fn _, _acc ->
         candidate = generate_otp_pin4()
 
-        if Repo.get_by(User, otp: candidate) == nil do
+        # The OTP pin is a login credential with a system-wide unique index,
+        # so the candidate has to be checked against every organisation.
+        if Repo.get_by(User, [otp: candidate], @unscoped) == nil do
           {:halt, candidate}
         else
           {:cont, nil}

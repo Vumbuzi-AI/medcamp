@@ -80,7 +80,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
           <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/80">
               <h3 class="text-base font-semibold text-slate-800 flex items-center">
-                <div class="w-8 h-8 rounded-lg bg-[#6667ab] flex items-center justify-center mr-3">
+                <div class="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center mr-3">
                   <svg
                     class="h-4 w-4 text-white"
                     fill="none"
@@ -157,7 +157,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
       <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
         <h3 class="text-base font-semibold text-slate-800 mb-4 flex items-center">
-          <div class="w-8 h-8 rounded-lg bg-[#6667ab] flex items-center justify-center mr-3">
+          <div class="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center mr-3">
             <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 stroke-linecap="round"
@@ -388,7 +388,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
   defp metric_card_tone("rose"), do: "bg-gradient-to-br from-rose-50 to-white border-rose-200"
   defp metric_card_tone(_), do: "bg-white border-slate-200"
 
-  defp metric_icon_tone("indigo"), do: "bg-[#6667ab]"
+  defp metric_icon_tone("indigo"), do: "bg-brand-accent"
   defp metric_icon_tone("blue"), do: "bg-blue-500"
   defp metric_icon_tone("emerald"), do: "bg-emerald-500"
   defp metric_icon_tone("amber"), do: "bg-amber-500"
@@ -411,5 +411,4 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
   defp format_datetime(datetime) do
     Calendar.strftime(datetime, "%B %d, %Y at %I:%M %p")
   end
-
 end

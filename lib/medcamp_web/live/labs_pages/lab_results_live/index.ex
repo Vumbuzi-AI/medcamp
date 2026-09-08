@@ -401,7 +401,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
           <tr>
             <td colspan="7" class="px-6 py-16 text-center">
               <div class="mx-auto flex max-w-md flex-col items-center">
-                <div class="flex h-12 w-12 items-center justify-center rounded-xl border border-[#d9dcff] bg-[#f0f0ff] text-[#373896]">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl border border-[#d9dcff] bg-brand-50 text-brand-primary">
                   <Heroicons.icon name="magnifying-glass" type="outline" class="h-6 w-6" />
                 </div>
                 <h3 class="mt-4 text-base font-semibold text-gray-900">
@@ -422,7 +422,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
                   :if={(@filters[:search] || "") != "" or count_active_filters(@filters) > 0}
                   type="button"
                   phx-click="clear_filters"
-                  class="mt-5 rounded-lg border border-[#cdd0ff] bg-[#f0f0ff] px-4 py-2 text-sm font-semibold text-[#373896] hover:bg-[#e7e7ff]"
+                  class="mt-5 rounded-lg border border-[#cdd0ff] bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-primary hover:bg-brand-100"
                 >
                   Clear search and filters
                 </button>
@@ -434,7 +434,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
         <:col :let={lab_result} label="Tests Requested">
           <div class="flex gap-2 items-center flex-wrap py-3">
             <%= for test <- lab_result.tests do %>
-              <span class="px-2 py-1 text-xs rounded-full bg-[#f0f0ff] text-[#373896]">
+              <span class="px-2 py-1 text-xs rounded-full bg-brand-50 text-brand-primary">
                 {test.name}
               </span>
             <% end %>
@@ -443,7 +443,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
 
         <:col :let={lab_result} label="Patient">
           <div class="flex items-center py-3">
-            <div class="h-8 w-8 rounded-full bg-[#e7e7ff] flex items-center justify-center text-[#373896] font-medium mr-2 text-sm">
+            <div class="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-medium mr-2 text-sm">
               {String.first(lab_result.patient.first_name || "")}
             </div>
             <span class="font-medium text-gray-900">
@@ -460,7 +460,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
 
         <:col :let={lab_result} label="Doctor">
           <div class="flex items-center py-3">
-            <span class="px-2 py-1 text-xs rounded-full bg-[#e7e7ff] text-[#373896]">
+            <span class="px-2 py-1 text-xs rounded-full bg-brand-100 text-brand-primary">
               Dr. {lab_result.doctor.name}
             </span>
           </div>
@@ -485,7 +485,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
           <div class="flex items-center justify-center">
             <.link
               navigate={~p"/lab/lab_results/#{lab_result}"}
-              class="flex items-center text-[#6667ab] hover:text-[#373896]"
+              class="flex items-center text-brand-accent hover:text-brand-primary"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

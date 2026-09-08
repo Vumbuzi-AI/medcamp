@@ -217,7 +217,7 @@ defmodule Medcamp.Batches do
 
   def list_batches_for_inventory_received(inventory_received_id) do
     Repo.all(from b in Batch, where: b.inventory_received_id == ^inventory_received_id)
-      end
+  end
 
   def list_batches_for_inventory_received_paginated(
         inventory_received_id,
@@ -228,7 +228,7 @@ defmodule Medcamp.Batches do
     batches_for_inventory_received_query(inventory_received_id, filters)
     |> Repo.paginate(page: page, page_size: per_page)
     |> Map.get(:entries)
-      end
+  end
 
   def count_batches_for_inventory_received(inventory_received_id, filters \\ %{}) do
     batches_for_inventory_received_query(inventory_received_id, filters)

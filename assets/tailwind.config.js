@@ -10,7 +10,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        brand: "#FD4F00",
+        // The tenant palette. Every value resolves to a CSS variable, so the
+        // whole UI recolours from the `<style>` block the root layout emits
+        // for the current organisation. Defaults live in app.css.
+        brand: {
+          DEFAULT: "#FD4F00",
+          primary: "var(--brand-primary)",
+          accent: "var(--brand-accent)",
+          "accent-dark": "var(--brand-accent-dark)",
+          50: "var(--brand-50)",
+          100: "var(--brand-100)",
+          200: "var(--brand-200)",
+          300: "var(--brand-300)",
+        },
         darkblue: "#1D3557",
         grey: "#667085",
       },

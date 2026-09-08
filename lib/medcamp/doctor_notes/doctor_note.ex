@@ -1,8 +1,11 @@
 defmodule Medcamp.DoctorNotes.DoctorNote do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   schema "doctor_notes" do
+    tenant_field()
+
     field :date, :date
     field :reason_for_consulatation, :string
     field :symptoms, :string
@@ -67,6 +70,7 @@ defmodule Medcamp.DoctorNotes.DoctorNote do
     |> put_date_if_missing()
     |> put_time_if_missing()
     |> put_signed_at_if_signature_added()
+    |> put_org_id()
   end
 
   def ai_review_changeset(doctor_note, attrs) do

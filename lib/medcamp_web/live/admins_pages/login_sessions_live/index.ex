@@ -132,7 +132,7 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
               <label class="block text-xs font-medium text-gray-600 mb-1">Session Status</label>
               <select
                 name="active"
-                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-[#6667ab] focus:border-[#6667ab]"
+                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="">All</option>
                 <option value="active" selected={@filters[:active] == "active"}>
@@ -177,7 +177,7 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
           }
         >
           <:actions :if={@filters.search != "" or count_active_filters(@filters) > 0}>
-            <button phx-click="clear_filters" class="text-xs text-[#6667ab] hover:underline">
+            <button phx-click="clear_filters" class="text-xs text-brand-accent hover:underline">
               Clear filters
             </button>
           </:actions>
@@ -186,7 +186,7 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
         <.table id="login-sessions" rows={@sessions}>
           <:col :let={session} label="User">
             <div class="py-2 flex items-center gap-2">
-              <div class="h-7 w-7 rounded-full bg-[#e7e7ff] flex items-center justify-center text-[#373896] font-medium text-xs flex-shrink-0">
+              <div class="h-7 w-7 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-medium text-xs flex-shrink-0">
                 {String.first(session.user.name || "?")}
               </div>
               <div>

@@ -60,7 +60,7 @@ defmodule MedcampWeb.MedicalCampPages.LabOrderComponent do
               <label class={[
                 "flex items-center gap-3 rounded-lg border-2 p-3 cursor-pointer transition-colors",
                 if(test.id in @selected_test_ids,
-                  do: "border-[#6667ab] bg-[#f0f0ff]",
+                  do: "border-brand-accent bg-brand-50",
                   else: "border-gray-200 hover:border-gray-300"
                 )
               ]}>
@@ -71,7 +71,7 @@ defmodule MedcampWeb.MedicalCampPages.LabOrderComponent do
                   phx-click="toggle_camp_test"
                   phx-value-id={test.id}
                   phx-target={@myself}
-                  class="rounded text-[#6667ab] focus:ring-[#6667ab]"
+                  class="rounded text-brand-accent focus:ring-brand-accent"
                 />
                 <span class="text-sm font-medium text-gray-800">{test.name}</span>
               </label>

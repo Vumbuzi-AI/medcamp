@@ -27,6 +27,14 @@ defmodule Medcamp.Authorization do
   unrecognized permission slug is always `false` (fails closed).
   """
   def can?(%User{} = user, permission_slug) when is_binary(permission_slug) do
+    if user.is_superadmin do
+      true
+    else
+      can_for_regular_user(user, permission_slug)
+    end
+  end
+
+  defp can_for_regular_user(%User{} = user, permission_slug) do
     query =
       from p in Permission,
         where: p.slug == ^permission_slug,
@@ -51,6 +59,17 @@ defmodule Medcamp.Authorization do
   to `can?/2`).
   """
   def effective_permissions(%User{} = user) do
+    if user.is_superadmin do
+      Permission
+      |> select([p], p.slug)
+      |> Repo.all()
+      |> MapSet.new()
+    else
+      effective_permissions_for_regular_user(user)
+    end
+  end
+
+  defp effective_permissions_for_regular_user(%User{} = user) do
     role_slugs =
       from(p in Permission,
         join: rp in RolePermission,

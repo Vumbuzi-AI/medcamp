@@ -111,7 +111,7 @@ defmodule MedcampWeb.DrugAllocationReportLive do
               value={@search}
               placeholder="Brand, generic name, or GTIN"
               phx-debounce="300"
-              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
             />
           </div>
 
@@ -122,7 +122,7 @@ defmodule MedcampWeb.DrugAllocationReportLive do
             <select
               id="drug-allocation-category"
               name="category"
-              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
             >
               <option value="">All categories</option>
               <option :for={option <- @category_options} value={option} selected={@category == option}>
@@ -138,7 +138,7 @@ defmodule MedcampWeb.DrugAllocationReportLive do
             <select
               id="drug-allocation-type"
               name="inventory_type"
-              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
             >
               <option value="">All types</option>
               <option
@@ -160,7 +160,7 @@ defmodule MedcampWeb.DrugAllocationReportLive do
               type="date"
               name="date_from"
               value={@date_from}
-              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
             />
           </div>
 
@@ -174,7 +174,7 @@ defmodule MedcampWeb.DrugAllocationReportLive do
                 type="date"
                 name="date_to"
                 value={@date_to}
-                class="h-10 min-w-0 flex-1 rounded-md border border-gray-300 px-3 text-sm focus:border-[#6667ab] focus:ring-[#6667ab]"
+                class="h-10 min-w-0 flex-1 rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
               />
               <button
                 type="button"
@@ -215,7 +215,7 @@ defmodule MedcampWeb.DrugAllocationReportLive do
             <tbody class="divide-y divide-gray-100">
               <tr :for={summary <- @category_summary}>
                 <td class="px-4 py-3 text-sm font-medium text-gray-900">{summary.category}</td>
-                <td class="px-4 py-3 text-right text-sm font-bold text-[#373896]">
+                <td class="px-4 py-3 text-right text-sm font-bold text-brand-primary">
                   {summary.issued_quantity}
                 </td>
                 <td class="px-4 py-3 text-right text-sm text-gray-700">{summary.item_count}</td>
@@ -257,7 +257,7 @@ defmodule MedcampWeb.DrugAllocationReportLive do
                 <td class="px-4 py-3 text-sm text-gray-700">{classification(row)}</td>
                 <td class="px-4 py-3 text-sm text-gray-700">{present(row.inventory_type)}</td>
                 <td class="px-4 py-3 font-mono text-xs text-gray-600">{present(row.gtin)}</td>
-                <td class="px-4 py-3 text-right text-sm font-bold text-[#373896]">
+                <td class="px-4 py-3 text-right text-sm font-bold text-brand-primary">
                   {row.issued_quantity} {row.unit_of_measurement || "units"}
                 </td>
                 <td class="px-4 py-3 text-right text-sm text-gray-700">{row.allocation_count}</td>
@@ -282,9 +282,9 @@ defmodule MedcampWeb.DrugAllocationReportLive do
 
   defp report_stat_card(assigns) do
     ~H"""
-    <div class="rounded-lg border border-[#e7e7ff] bg-[#f0f0ff] p-4">
+    <div class="rounded-lg border border-brand-100 bg-brand-50 p-4">
       <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{@label}</p>
-      <p class="mt-1 text-2xl font-bold text-[#373896]">{@value}</p>
+      <p class="mt-1 text-2xl font-bold text-brand-primary">{@value}</p>
     </div>
     """
   end

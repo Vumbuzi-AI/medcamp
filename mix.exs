@@ -82,7 +82,7 @@ defmodule Medcamp.MixProject do
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": [&blocked_task/1],
-      "ecto.drop": [&blocked_task/1],
+      # "ecto.drop": [&blocked_task/1],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind medcamp", "esbuild medcamp"],

@@ -18,7 +18,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.PreviewComponent do
         <div class="flex items-center gap-2 text-sm text-gray-600">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-[#6667ab]"
+            class="h-5 w-5 text-brand-accent"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -42,7 +42,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.PreviewComponent do
 
         <button
           onclick="window.print()"
-          class="px-4 py-2 text-sm font-medium text-white bg-[#6667ab] rounded-lg hover:bg-[#5556a0] flex items-center shadow-sm transition-colors"
+          class="px-4 py-2 text-sm font-medium text-white bg-brand-accent rounded-lg hover:bg-brand-accent-dark flex items-center shadow-sm transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -67,20 +67,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.PreviewComponent do
         style="max-width: 210mm;"
         id="lab-report-preview"
       >
-        <div class="text-center py-8 print:py-6">
-          <img src="/images/logo.png" alt="Glocal Logo" class="mx-auto h-16 w-16 mb-4" />
-          <h1 class="text-2xl font-bold text-[#7c3aed] tracking-wide mb-2">
-            GLOCAL HEALTHCARE CENTRE OF EXCELLENCE
-          </h1>
-          <p class="text-gray-800 text-base font-medium">P.o Box 3243 00200, Nairobi, Kenya</p>
-          <p class="text-[#10b981] text-base font-medium mt-1">
-            Mwalimu Sacco, Kisaju, Namanga Road
-          </p>
-          <p class="mt-1 text-base">
-            <span class="text-[#10b981] font-medium">Tel:254</span>
-            <span class="text-[#10b981]"> 709040200/709040200</span>
-          </p>
-        </div>
+        <.letterhead />
 
         <div class="px-8 print:px-6 mb-6">
           <table class="w-full border-collapse text-base">

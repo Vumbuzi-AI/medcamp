@@ -1,5 +1,6 @@
 defmodule Medcamp.Patients.PatientDocument do
   use Ecto.Schema
+  use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
   @derive {Jason.Encoder,
@@ -15,6 +16,8 @@ defmodule Medcamp.Patients.PatientDocument do
            ]}
 
   schema "patient_documents" do
+    tenant_field()
+
     field :document_name, :string
 
     field :document_type,
@@ -58,5 +61,6 @@ defmodule Medcamp.Patients.PatientDocument do
       :patient_id
     ])
     |> foreign_key_constraint(:patient_id)
+    |> put_org_id()
   end
 end

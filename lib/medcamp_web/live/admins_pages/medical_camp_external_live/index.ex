@@ -26,7 +26,7 @@ defmodule MedcampWeb.AdminMedicalCampExternalLive.Index do
           <div class="flex flex-wrap items-center gap-3">
             <.link
               navigate="/admin/medical_camp/external/report"
-              class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#373896] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#2f307e]"
+              class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#2f307e]"
             >
               <Heroicons.icon name="document-text" type="outline" class="h-4 w-4" /> Report
             </.link>

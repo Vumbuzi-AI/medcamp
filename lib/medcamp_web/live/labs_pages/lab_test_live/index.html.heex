@@ -14,9 +14,7 @@
   description="No lab tests or rates have been configured yet."
 />
 
-<.table :if={@lab_tests_count > 0} id="lab_tests" rows={@lab_tests}
-  row_id={&"lab_tests-#{&1.id}"}
->
+<.table :if={@lab_tests_count > 0} id="lab_tests" rows={@lab_tests} row_id={&"lab_tests-#{&1.id}"}>
   <:col :let={lab_test} label="Name">{lab_test.name}</:col>
   <:col :let={lab_test} label="Desription">{lab_test.desription}</:col>
   <:col :let={lab_test} label="Standard rate (KES)">{lab_test.price}</:col>
@@ -28,7 +26,9 @@
   </:action>
   <:action :let={lab_test}>
     <.link
-      phx-click={JS.push("delete", value: %{id: lab_test.id}) |> hide("#lab_tests-#{lab_test.id}")}
+      phx-click={
+        JS.push("delete", value: %{id: lab_test.id}) |> hide("#lab_tests-#{lab_test.id}")
+      }
       data-confirm="Are you sure?"
     >
       Delete
