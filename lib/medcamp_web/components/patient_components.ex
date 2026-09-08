@@ -136,6 +136,17 @@ defmodule MedcampWeb.PatientComponents do
   end
 
   def patients_table_for_receptionists(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :row_click,
+        Map.get(assigns, :row_click, fn patient ->
+          JS.navigate("#{assigns.route_prefix}/#{patient.id}/patient_overview")
+        end)
+      )
+
+    assigns = assign(assigns, :show_print_code, Map.get(assigns, :show_print_code, false))
+
     ~H"""
     <div
       :if={Map.get(assigns, :show_header, true)}
@@ -205,18 +216,23 @@ defmodule MedcampWeb.PatientComponents do
       :if={@count > 0}
       id="patients"
       rows={@patients}
-      row_click={fn patient -> JS.navigate("#{@route_prefix}/#{patient.id}/patient_overview") end}
+      row_click={@row_click}
       row_id={&"patients-#{&1.id}"}
     >
       <:col :let={patient} label="">
-        <.link navigate={"/reception/patients/#{patient.id}/patient_code"} class="flex flex-col gap-1">
-          <div>
-            <.button class="bg- text-[#373896] hover:bg-[#d2d3ff] border-0 font-normal text-sm">
-              Patient Code
-            </.button>
-          </div>
+        <div class="flex flex-col gap-1">
+          <button
+            :if={@show_print_code}
+            type="button"
+            phx-click="show_patient_code"
+            phx-value-patient_id={patient.id}
+            class="w-fit rounded-md bg-[#6667ab] px-3 py-2 text-sm font-medium text-white hover:bg-[#5556a0]"
+          >
+            Print code
+          </button>
+          <span :if={!@show_print_code} class="text-sm font-medium text-slate-500">Patient code</span>
           <p class="text-gray-500 text-sm font-medium mt-1">GSRN: {patient.gsrn}</p>
-        </.link>
+        </div>
       </:col>
       <:col :let={patient} label="Name">
         {[
@@ -234,14 +250,17 @@ defmodule MedcampWeb.PatientComponents do
       <:col :let={patient} label="Gender">{patient.gender}</:col>
 
       <:action :let={patient}>
-        <p
+        <button
+          type="button"
           phx-click="send_pin"
           phx-value-patient_id={patient.id}
           data-confirm="Are you sure you want to send the PIN?"
-          class="bg-[#6667ab] text-white rounded-md  text-center flex p-2 justify-center items-center font-medium"
+          phx-disable-with="Sending..."
+          aria-label={"Resend PIN to #{patient.first_name} #{patient.last_name}"}
+          class="inline-flex items-center justify-center gap-1.5 rounded-md bg-[#6667ab] px-3 py-2 text-center text-sm font-medium text-white transition hover:bg-[#373896] focus:outline-none focus:ring-2 focus:ring-[#6667ab] focus:ring-offset-2 disabled:cursor-wait disabled:opacity-60"
         >
-          ReSend Pin
-        </p>
+          <.icon name="hero-paper-airplane-mini" class="h-4 w-4" /> Resend PIN
+        </button>
       </:action>
       <:action :let={patient}>
         <.link
@@ -366,6 +385,13 @@ defmodule MedcampWeb.PatientComponents do
                   />
                 </svg>
                 Download Card
+              </button>
+              <button
+                data-print-trigger
+                data-target-div="#my-content-to-download"
+                class="ml-2 inline-flex items-center rounded-md border border-[#373896] px-3 py-2 text-sm font-medium text-[#373896] hover:bg-[#f0f0ff]"
+              >
+                <Heroicons.icon name="printer" type="outline" class="mr-1 h-4 w-4" /> Print Code
               </button>
             </div>
           </div>

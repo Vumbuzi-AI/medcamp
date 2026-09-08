@@ -20,9 +20,11 @@ defmodule MedcampWeb.Router do
   ## Public / camp-floor routes
 
   scope "/", MedcampWeb do
-    pipe_through [:browser, :redirect_to_correct_page]
+    pipe_through [:browser]
 
-    get "/", PageController, :home
+    live_session :public_home, on_mount: [{MedcampWeb.UserAuth, :mount_current_user}] do
+      live "/", HomeLive, :index
+    end
   end
 
   scope "/", MedcampWeb do

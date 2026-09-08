@@ -1405,6 +1405,21 @@ Hooks.DownloadableDiv = {
           .catch((err) => {
             console.error("Error creating image:", err);
           });
+      } else if (e.target.matches("[data-print-trigger]")) {
+        e.preventDefault();
+        const targetSelector = e.target.getAttribute("data-target-div");
+        const targetDiv = document.querySelector(targetSelector);
+
+        if (!targetDiv) {
+          console.error(`Target div not found: ${targetSelector}`);
+          return;
+        }
+
+        const originalContents = document.body.innerHTML;
+        document.body.innerHTML = targetDiv.innerHTML;
+        window.print();
+        document.body.innerHTML = originalContents;
+        window.liveSocket && window.liveSocket.connect();
       }
     });
   },
