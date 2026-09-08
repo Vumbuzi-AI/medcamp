@@ -74,4 +74,18 @@ defmodule Medcamp.CampRegistrationTest do
       assert Repo.aggregate(PatientVisit, :count) == visits_before
     end
   end
+
+  describe "receptionist registration" do
+    test "a receptionist can register a patient and open the triage visit" do
+      receptionist = user_fixture(%{role: "receptionist"})
+
+      assert {:ok, {patient, visit}} =
+               Patients.register_for_camp(valid_attrs(), receptionist)
+
+      assert patient.creator_id == receptionist.id
+      assert visit.patient_id == patient.id
+      assert visit.creator_id == receptionist.id
+      assert visit.status == "triage_pending"
+    end
+  end
 end

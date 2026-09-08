@@ -90,7 +90,7 @@ defmodule MedcampWeb.ProfileComponents do
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-5">
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
               <label
                 for="first_name"
@@ -119,7 +119,7 @@ defmodule MedcampWeb.ProfileComponents do
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-5">
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1 spartan-medium">
                 Phone Number

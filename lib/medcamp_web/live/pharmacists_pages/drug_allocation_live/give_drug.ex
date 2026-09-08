@@ -8,7 +8,7 @@ defmodule MedcampWeb.DrugAllocationLive.GiveDrugComponent do
       <p class="text-xl">
         Drug You Want to Assign
       </p>
-      <div class="grid grid-cols-3 mt-4 gap-4">
+      <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
           <p class="text-xs text-gray-500 uppercase font-semibold">Quantity</p>
           <p class="font-medium text-gray-900">

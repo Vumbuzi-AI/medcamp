@@ -92,7 +92,7 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
       </.header>
 
       <%!-- Read-only insurance info --%>
-      <div class="mb-4 grid grid-cols-2 gap-4">
+      <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Payment Type</label>
           <div class="mt-1 block w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700 cursor-not-allowed">

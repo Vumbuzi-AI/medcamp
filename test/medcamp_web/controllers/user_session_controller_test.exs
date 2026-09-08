@@ -9,16 +9,17 @@ defmodule MedcampWeb.UserSessionControllerTest do
   end
 
   describe "POST /users/log_in" do
-    for email <- ~w(
-          admin@gmail.com
-          labtechnician@gmail.com
-          pharmacist@gmail.com
-          nurse@gmail.com
-          doctor@gmail.com
-        ) do
-      test "#{email} logs in without a verification code", %{conn: conn} do
-        email = unquote(email)
-        user_fixture(email: email)
+    for {role, landing_path} <- [
+          {"admin", "/admin/dashboard"},
+          {"labtechnician", "/lab/scan"},
+          {"pharmacist", "/pharmacist/scan"},
+          {"nurse", "/nurse/scan"},
+          {"doctor", "/doctor/scan"},
+          {"receptionist", "/receptionist/patients"}
+        ] do
+      test "#{role} logs in and is sent directly to their workspace", %{conn: conn} do
+        email = unique_user_email()
+        user_fixture(email: email, role: unquote(role))
 
         conn =
           post(conn, ~p"/users/log_in", %{
@@ -27,7 +28,7 @@ defmodule MedcampWeb.UserSessionControllerTest do
 
         assert get_session(conn, :user_token)
         refute get_session(conn, :login_otp_challenge)
-        assert redirected_to(conn) == ~p"/"
+        assert redirected_to(conn) == unquote(landing_path)
       end
     end
 
@@ -42,7 +43,7 @@ defmodule MedcampWeb.UserSessionControllerTest do
 
       assert get_session(conn, :user_token)
       refute get_session(conn, :login_otp_challenge)
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/doctor/scan"
     end
 
     test "a valid verification code logs the user in", %{conn: conn, user: user} do
@@ -55,10 +56,6 @@ defmodule MedcampWeb.UserSessionControllerTest do
 
       assert get_session(conn, :user_token)
       refute get_session(conn, :login_otp_challenge)
-      assert redirected_to(conn) == ~p"/"
-
-      # A logged in request to "/" redirects to the user's role dashboard
-      conn = get(conn, ~p"/")
       assert redirected_to(conn) == ~p"/doctor/scan"
     end
 
@@ -71,7 +68,7 @@ defmodule MedcampWeb.UserSessionControllerTest do
         |> post(~p"/users/log_in/otp", %{"otp" => %{"code" => "123456"}})
 
       assert conn.resp_cookies["_medic_web_user_remember_me"]
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/doctor/scan"
     end
 
     test "logs the user in with return to", %{conn: conn, user: user} do
@@ -102,7 +99,7 @@ defmodule MedcampWeb.UserSessionControllerTest do
         })
 
       assert get_session(conn, :user_token)
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/doctor/scan"
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Account created successfully"
     end
 

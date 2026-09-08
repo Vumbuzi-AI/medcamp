@@ -16,7 +16,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.TriageFormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <.input field={@form[:date]} type="date" label="Date" />
           <.input field={@form[:time]} type="time" label="Time" />
           <.input field={@form[:temperature]} type="number" label="Temperature" step="any" />

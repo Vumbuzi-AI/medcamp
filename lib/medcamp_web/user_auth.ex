@@ -347,6 +347,7 @@ defmodule MedcampWeb.UserAuth do
   @role_gates [
     doctor: "doctor",
     nurse: "nurse",
+    receptionist: "receptionist",
     admin: "admin",
     pharmacist: "pharmacist",
     lab_technician: "labtechnician"
@@ -428,6 +429,7 @@ defmodule MedcampWeb.UserAuth do
       "admin" -> "/admin/dashboard"
       "doctor" -> "/doctor/scan"
       "nurse" -> "/nurse/scan"
+      "receptionist" -> "/receptionist/patients"
       "labtechnician" -> "/lab/scan"
       "pharmacist" -> "/pharmacist/scan"
       _ -> "/users/log_in"
@@ -462,5 +464,5 @@ defmodule MedcampWeb.UserAuth do
   end
 
   defp signed_in_path_for_user(%{is_superadmin: true}), do: "/superadmin/organisations"
-  defp signed_in_path_for_user(_user), do: ~p"/"
+  defp signed_in_path_for_user(user), do: landing_path_for_user(user)
 end

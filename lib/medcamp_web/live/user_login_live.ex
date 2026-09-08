@@ -3,11 +3,11 @@ defmodule MedcampWeb.UserLoginLive do
 
   def render(assigns) do
     ~H"""
-    <div class="w-[90%] h-[100vh] mx-auto flex justify-between items-center">
-      <div class="w-[48%] flex justify-center items-center h-[100vh]">
-        <img src="/images/why.png" alt="Medcamp Logo" class="w-[100%] object-cover h-[90vh] mx-auto" />
+    <div class="mx-auto flex min-h-screen w-full items-center justify-center px-4 sm:w-[90%] lg:justify-between lg:px-0">
+      <div class="hidden h-screen w-[48%] items-center justify-center lg:flex">
+        <img src="/images/why.png" alt="Medcamp Logo" class="mx-auto h-[90vh] w-full object-cover" />
       </div>
-      <div class="w-[48%] h-[100vh] flex flex-col  justify-center items-center px-12">
+      <div class="flex min-h-screen w-full max-w-md flex-col items-center justify-center px-2 py-8 sm:px-6 lg:w-[48%] lg:max-w-none lg:px-12">
         <.header class="text-center">
           Sign to your account
           <p class="text-[16px] text-grey font-normal">
@@ -19,7 +19,7 @@ defmodule MedcampWeb.UserLoginLive do
           for={@form}
           id="login_form"
           action={~p"/users/log_in"}
-          class="w-[100%]"
+          class="w-full"
           phx-update="ignore"
         >
           <.input field={@form[:email]} type="email" label="Email" required />

@@ -3,7 +3,7 @@ defmodule Medcamp.Accounts.User do
   use Medcamp.Tenancy.Schema
   import Ecto.Changeset
 
-  @roles ~w(admin doctor nurse pharmacist labtechnician)
+  @roles ~w(admin doctor nurse receptionist pharmacist labtechnician)
 
   def roles, do: @roles
 

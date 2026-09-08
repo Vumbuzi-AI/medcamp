@@ -220,6 +220,18 @@ defmodule MedcampWeb.Router do
     end
   end
 
+  ## Receptionist — patient registration only
+
+  scope "/", MedcampWeb do
+    pipe_through [:browser, :require_authenticated_receptionist]
+
+    live_session :receptionist_current_user,
+      on_mount: [{MedcampWeb.UserAuth, :mount_current_user}] do
+      live "/receptionist/patients", ReceptionistPatientLive.New, :index
+      live "/receptionist/patients/new", ReceptionistPatientLive.New, :new
+    end
+  end
+
   ## Lab technician
 
   scope "/", MedcampWeb do

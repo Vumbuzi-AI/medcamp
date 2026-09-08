@@ -22,7 +22,7 @@ defmodule MedcampWeb.EditPatientComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <.input field={@form[:first_name]} type="text" label="First Name" />
           <.input field={@form[:middle_name]} type="text" label="Middle Name" />
 

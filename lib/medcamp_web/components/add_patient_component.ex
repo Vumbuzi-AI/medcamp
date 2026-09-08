@@ -19,7 +19,7 @@ defmodule MedcampWeb.AddPatientComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <div :if={@step == "personal"} class="w-[100%] grid grid-cols-2 gap-4">
+        <div :if={@step == "personal"} class="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
           <.input
             field={@form[:first_name]}
             type="text"

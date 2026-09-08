@@ -56,7 +56,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.FormComponent do
           required
           label="Sample collection description"
         />
-        <div class="grid grid-cols-2 w-[100%] gap-4">
+        <div class="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
           <.input
             field={@form[:sample_collection_date]}
             required
