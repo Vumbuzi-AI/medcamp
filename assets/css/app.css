@@ -1,4 +1,4 @@
-/* Use a professional system font stack (no external webfonts). */
+/* Plus Jakarta Sans (loaded in root.html.heex) with a system-font fallback. */
 
 @import "tailwindcss/base";
 @import "tailwindcss/components";
@@ -6,8 +6,9 @@
 
 :root {
   --font-medical-body:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji";
   --font-medical-display: var(--font-medical-body);
 
   /* Tenant palette defaults. The root layout overrides these per organisation;
