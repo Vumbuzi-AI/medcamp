@@ -8,7 +8,9 @@ defmodule Medcamp.DrugAllocationsTest do
 
     import Medcamp.DrugAllocationsFixtures
 
-    @invalid_attrs %{quantity: nil, prescription: nil}
+    # A prescription with no drug lines is invalid - the drug lines *are* the
+    # prescription; the free-text note is optional.
+    @invalid_attrs %{quantity: nil, drugs_assigned: []}
 
     test "list_drug_allocations/0 returns all drug_allocations" do
       drug_allocation = drug_allocation_fixture()
@@ -22,21 +24,25 @@ defmodule Medcamp.DrugAllocationsTest do
     end
 
     test "create_drug_allocation/1 with valid data creates a drug_allocation" do
-      patient = Medcamp.PatientsFixtures.patient_fixture()
-
-      valid_attrs = %{
-        has_been_assigned: false,
-        patient_id: patient.id,
-        quantity: 42,
-        prescription: "some prescription"
-      }
-
-      assert {:ok, %DrugAllocation{} = drug_allocation} =
-               DrugAllocations.create_drug_allocation(valid_attrs)
+      drug_allocation =
+        drug_allocation_fixture(%{quantity: 42, prescription: "some prescription"})
 
       assert drug_allocation.quantity == 42
-      assert drug_allocation.patient_id == patient.id
       assert drug_allocation.prescription == "some prescription"
+      assert length(drug_allocation.drugs_assigned) >= 1
+    end
+
+    test "create_drug_allocation/1 without drug lines is rejected" do
+      patient = Medcamp.PatientsFixtures.patient_fixture()
+
+      assert {:error, changeset} =
+               DrugAllocations.create_drug_allocation(%{
+                 has_been_assigned: false,
+                 patient_id: patient.id,
+                 prescription: "note only, no drugs"
+               })
+
+      assert %{drugs_assigned: _} = errors_on(changeset)
     end
 
     test "create_drug_allocation/1 with invalid data returns error changeset" do

@@ -12,6 +12,8 @@ defmodule MedcampWeb.DoctorNoteSearchLiveTest do
     {:ok, view, html} = conn |> log_in_user(admin) |> live("/admin/doctor-note-search")
 
     assert html =~ "Doctor Note Master Search"
+    assert html =~ "Filters"
+    assert html =~ "doctor-note-search-filters"
 
     view
     |> form("#doctor-note-search-form", %{

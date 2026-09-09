@@ -63,8 +63,7 @@ defmodule MedcampWeb.HomeLive do
           <div class="mx-auto grid max-w-6xl gap-12 px-5 py-16 lg:grid-cols-[minmax(0,1fr)_1.05fr] lg:items-center lg:gap-14 lg:px-8 lg:py-24 lg:pr-0">
             <div>
               <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600">
-                <span class="h-2 w-2 rounded-full bg-[#52B2D8]"></span>
-                Care that moves with the camp
+                <span class="h-2 w-2 rounded-full bg-[#52B2D8]"></span> Care that moves with the camp
               </p>
               <h1 class="text-4xl font-bold leading-[1.1] tracking-[-0.02em] sm:text-5xl">
                 Run every medical camp from <span class="text-[#52B2D8]">one place</span>.
@@ -101,11 +100,11 @@ defmodule MedcampWeb.HomeLive do
       </main>
 
       <section id="features" class="scroll-mt-20">
-        <div class="mx-auto max-w-6xl px-5 py-20 lg:px-8">
-          <h2 class="max-w-2xl text-3xl font-bold tracking-[-0.01em] sm:text-4xl">
+        <div class="mx-auto max-w-6xl px-5 py-12 sm:py-16 lg:px-8 lg:py-20">
+          <h2 class="max-w-2xl text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">
             One record, from registration to dispensing.
           </h2>
-          <div class="mt-12 grid gap-4 md:grid-cols-3">
+          <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:mt-12 lg:grid-cols-3">
             <.feature
               title="Register and triage"
               text="Capture patient details once; the visit opens and the patient joins the queue."
@@ -295,17 +294,26 @@ defmodule MedcampWeb.HomeLive do
               </p>
               <ul class="mt-4 space-y-2.5 text-sm">
                 <li>
-                  <a href="#features" class="text-white/70 transition-colors duration-150 hover:text-white">
+                  <a
+                    href="#features"
+                    class="text-white/70 transition-colors duration-150 hover:text-white"
+                  >
                     Features
                   </a>
                 </li>
                 <li>
-                  <a href="#stations" class="text-white/70 transition-colors duration-150 hover:text-white">
+                  <a
+                    href="#stations"
+                    class="text-white/70 transition-colors duration-150 hover:text-white"
+                  >
                     Workflow
                   </a>
                 </li>
                 <li>
-                  <a href="#analysis" class="text-white/70 transition-colors duration-150 hover:text-white">
+                  <a
+                    href="#analysis"
+                    class="text-white/70 transition-colors duration-150 hover:text-white"
+                  >
                     Reporting
                   </a>
                 </li>
@@ -326,7 +334,10 @@ defmodule MedcampWeb.HomeLive do
                   </a>
                 </li>
                 <li>
-                  <a href={@portal_path} class="text-white/70 transition-colors duration-150 hover:text-white">
+                  <a
+                    href={@portal_path}
+                    class="text-white/70 transition-colors duration-150 hover:text-white"
+                  >
                     Staff sign in
                   </a>
                 </li>
@@ -346,18 +357,18 @@ defmodule MedcampWeb.HomeLive do
   defp feature(assigns) do
     ~H"""
     <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-      <div class="p-6">
-        <span class="grid h-12 w-12 place-items-center rounded-xl bg-[#e9f6fb] text-[#0C2765]">
+      <div class="p-5 sm:p-6">
+        <span class="grid h-10 w-10 place-items-center rounded-xl bg-[#e9f6fb] text-[#0C2765] sm:h-12 sm:w-12">
           {render_slot(@inner_block)}
         </span>
-        <h3 class="mt-5 text-xl font-semibold">{@title}</h3>
-        <p class="mt-2 leading-relaxed text-slate-600">{@text}</p>
+        <h3 class="mt-4 text-lg font-semibold sm:mt-5 sm:text-xl">{@title}</h3>
+        <p class="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">{@text}</p>
       </div>
       <img
         src={@image}
         alt=""
         loading="lazy"
-        class="h-44 w-full border-t border-slate-200 object-cover"
+        class="h-36 w-full border-t border-slate-200 object-cover sm:h-40 lg:h-44"
       />
     </article>
     """

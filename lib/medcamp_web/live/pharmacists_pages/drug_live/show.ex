@@ -448,7 +448,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
       <div class="mb-6 rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-white to-slate-50 p-5">
         <div class="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div class="min-w-0 flex-1">
@@ -491,7 +491,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
         </div>
       </div>
 
-      <div class="mb-6 flex flex-col gap-4 border-b border-gray-200 pb-2 sm:flex-row sm:items-end sm:justify-between">
+      <div class="mb-6 flex flex-col gap-4 border-b border-slate-200 pb-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <.link
             patch={~p"/pharmacist/drugs/#{@drug.id}"}
@@ -499,7 +499,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               "inline-flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium -mb-px transition-colors",
               if(@drug_tab == :batches,
                 do: "border-brand-primary text-brand-primary",
-                else: "border-transparent text-gray-500 hover:text-gray-700"
+                else: "border-transparent text-slate-500 hover:text-slate-700"
               )
             ]}
           >
@@ -511,7 +511,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               "inline-flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium -mb-px transition-colors",
               if(@drug_tab == :allocations,
                 do: "border-brand-primary text-brand-primary",
-                else: "border-transparent text-gray-500 hover:text-gray-700"
+                else: "border-transparent text-slate-500 hover:text-slate-700"
               )
             ]}
           >
@@ -523,7 +523,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               "inline-flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium -mb-px transition-colors",
               if(@drug_tab == :prescriptions,
                 do: "border-brand-primary text-brand-primary",
-                else: "border-transparent text-gray-500 hover:text-gray-700"
+                else: "border-transparent text-slate-500 hover:text-slate-700"
               )
             ]}
           >
@@ -550,7 +550,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@batch_tab == :active,
                 do: "bg-brand-primary text-white",
-                else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                else: "bg-slate-100 text-slate-600 hover:bg-slate-200"
               )
             ]}
           >
@@ -563,7 +563,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@batch_tab == :discarded,
                 do: "bg-brand-primary text-white",
-                else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                else: "bg-slate-100 text-slate-600 hover:bg-slate-200"
               )
             ]}
           >
@@ -596,10 +596,10 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
         </div>
 
         <div class="overflow-hidden">
-          <.table id="drug_batches" rows={@drug_batches} row_id={&"drug_batches-#{&1.id}"}>
+          <.data_table id="drug_batches" rows={@drug_batches} row_id={&"drug_batches-#{&1.id}"}>
             <:col :let={drug_batch} label="Brand Name">
               <div class="py-3">
-                <span class="font-medium text-gray-900">
+                <span class="font-medium text-slate-900">
                   {drug_batch.inventory_received.strength} {drug_batch.inventory_received.brand_name}
                 </span>
               </div>
@@ -607,7 +607,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
 
             <:col :let={drug_batch} label="Generic Name">
               <div class="py-3">
-                <span class="text-gray-700">{drug_batch.inventory_received.generic_name}</span>
+                <span class="text-slate-700">{drug_batch.inventory_received.generic_name}</span>
               </div>
             </:col>
 
@@ -625,7 +625,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                   <% expired = batch_expired?(drug_batch.batch.expiry) %>
                   <span class={[
                     "text-sm font-medium",
-                    if(expired, do: "text-amber-600", else: "text-gray-700")
+                    if(expired, do: "text-amber-600", else: "text-slate-700")
                   ]}>
                     {drug_batch.batch.expiry}
                     <%= if expired do %>
@@ -633,7 +633,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                     <% end %>
                   </span>
                 <% else %>
-                  <span class="text-sm text-gray-400">—</span>
+                  <span class="text-sm text-slate-400">—</span>
                 <% end %>
               </div>
             </:col>
@@ -680,7 +680,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                     type="button"
                     phx-click="discard_batch"
                     phx-value-id={drug_batch.id}
-                    data-confirm="Discard this batch? It will be hidden from drug listing and search."
+                    data-confirm-message="Discard this batch? It will be hidden from drug listing and search."
                     class="text-amber-600 hover:text-amber-800 text-sm"
                   >
                     <.icon name="hero-trash" class="h-4 w-4" /> Discard
@@ -690,7 +690,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                     type="button"
                     phx-click="reactivate_batch"
                     phx-value-id={drug_batch.id}
-                    data-confirm="Reactivate this batch? It will appear in drug listing and search again."
+                    data-confirm-message="Reactivate this batch? It will appear in drug listing and search again."
                     class="text-green-600 hover:text-green-800 text-sm"
                   >
                     <.icon name="hero-arrow-path" class="h-4 w-4" /> Reactivate
@@ -698,7 +698,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                 <% end %>
               </div>
             </:col>
-          </.table>
+          </.data_table>
         </div>
       <% end %>
 
@@ -815,14 +815,14 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           description="This drug has not been dispensed to any patient yet."
         />
 
-        <.table
+        <.data_table
           :if={@drugs_given_count > 0}
           id="drugs_given"
           rows={@drugs_given}
           row_id={&"drugs_given-#{&1.id}"}
         >
           <:col :let={dg} label="Patient">
-            <div class="py-2 font-medium text-gray-900">
+            <div class="py-2 font-medium text-slate-900">
               {[
                 dg.drug_allocation.patient.first_name,
                 dg.drug_allocation.patient.middle_name,
@@ -834,7 +834,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           </:col>
 
           <:col :let={dg} label="Pharmacist">
-            <div class="py-2 text-gray-700">
+            <div class="py-2 text-slate-700">
               {if dg.pharmacist, do: dg.pharmacist.name, else: "—"}
             </div>
           </:col>
@@ -846,7 +846,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           </:col>
 
           <:col :let={dg} label="Price">
-            <div class="py-2 text-sm text-gray-900">
+            <div class="py-2 text-sm text-slate-900">
               KSh {Number.Delimit.number_to_delimited(dg.price, delimiter: ",")}
             </div>
           </:col>
@@ -862,7 +862,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           </:col>
 
           <:col :let={dg} label="Date Given">
-            <div class="py-2 text-sm text-gray-600">
+            <div class="py-2 text-sm text-slate-600">
               {Calendar.strftime(dg.inserted_at, "%d %b %Y, %H:%M")}
             </div>
           </:col>
@@ -877,7 +877,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               </.link>
             </div>
           </:col>
-        </.table>
+        </.data_table>
 
         <.pagination
           page={@drugs_given_page}
@@ -898,7 +898,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@prescriptions_status == nil,
                 do: "bg-brand-primary text-white",
-                else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                else: "bg-slate-100 text-slate-600 hover:bg-slate-200"
               )
             ]}
           >
@@ -911,7 +911,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@prescriptions_status == "pending",
                 do: "bg-brand-primary text-white",
-                else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                else: "bg-slate-100 text-slate-600 hover:bg-slate-200"
               )
             ]}
           >
@@ -924,7 +924,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
               if(@prescriptions_status == "given",
                 do: "bg-brand-primary text-white",
-                else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                else: "bg-slate-100 text-slate-600 hover:bg-slate-200"
               )
             ]}
           >
@@ -943,14 +943,14 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           }
         />
 
-        <.table
+        <.data_table
           :if={@drug_prescriptions_count > 0}
           id="drug_prescriptions"
           rows={@drug_prescriptions}
           row_id={&"drug_prescriptions-#{&1.id}"}
         >
           <:col :let={da} label="Patient">
-            <div class="py-2 font-medium text-gray-900">
+            <div class="py-2 font-medium text-slate-900">
               {[da.patient.first_name, da.patient.middle_name, da.patient.last_name]
               |> Enum.filter(& &1)
               |> Enum.join(" ")}
@@ -958,13 +958,13 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           </:col>
 
           <:col :let={da} label="Date">
-            <div class="py-2 text-sm text-gray-600">
+            <div class="py-2 text-sm text-slate-600">
               {Calendar.strftime(da.inserted_at, "%d %b %Y, %H:%M")}
             </div>
           </:col>
 
           <:col :let={da} label="Prescribing Doctor">
-            <div class="py-2 text-gray-700">
+            <div class="py-2 text-slate-700">
               {if da.doctor, do: "Dr. #{da.doctor.name}", else: "—"}
             </div>
           </:col>
@@ -991,7 +991,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
               </.link>
             </div>
           </:col>
-        </.table>
+        </.data_table>
 
         <.pagination
           page={@prescriptions_page}
@@ -1010,29 +1010,29 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
         <div class="flex min-h-full items-center justify-center p-4">
           <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <div class="mb-4">
-              <h3 class="text-lg font-semibold text-gray-900">Edit Drug Details</h3>
-              <p class="mt-1 text-sm text-gray-600">
+              <h3 class="text-lg font-semibold text-slate-900">Edit Drug Details</h3>
+              <p class="mt-1 text-sm text-slate-600">
                 Update the generic and brand name for this drug.
               </p>
             </div>
             <form phx-submit="save_drug_details" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Generic Name</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Generic Name</label>
                 <input
                   type="text"
                   name="generic_name"
                   value={@drug.generic_name || @drug.inventory_received.generic_name || ""}
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                   placeholder="e.g. Paracetamol"
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Brand Name</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Brand Name</label>
                 <input
                   type="text"
                   name="brand_name"
                   value={@drug.brand_name || @drug.inventory_received.brand_name || ""}
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                   placeholder="e.g. Panadol"
                 />
               </div>
@@ -1046,7 +1046,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                 <button
                   type="button"
                   phx-click="close_edit_drug_modal"
-                  class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-colors"
+                  class="flex-1 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 font-medium transition-colors"
                 >
                   Cancel
                 </button>
@@ -1068,10 +1068,10 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <%!-- Header --%>
             <div class="mb-4">
-              <h3 class="text-lg font-semibold text-gray-900">
+              <h3 class="text-lg font-semibold text-slate-900">
                 Update Remaining Quantity
               </h3>
-              <p class="mt-2 text-sm text-gray-600">
+              <p class="mt-2 text-sm text-slate-600">
                 <span class="font-medium">{@editing_batch.inventory_received.brand_name}</span>
                 - Batch: <span class="font-medium">{@editing_batch.batch.batch}</span>
               </p>
@@ -1087,7 +1087,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
             <%!-- Form --%>
             <form phx-submit="update_remaining_quantity" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-slate-700 mb-2">
                   Current Quantity:
                   <span class="text-brand-primary font-semibold">
                     {@editing_batch.remaining_quantity}
@@ -1099,7 +1099,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                   value={@editing_batch.remaining_quantity}
                   min="0"
                   required
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent text-lg"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent text-lg"
                   placeholder="Enter new quantity"
                   autofocus
                 />
@@ -1116,7 +1116,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
                 <button
                   type="button"
                   phx-click="close_modal"
-                  class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-colors"
+                  class="flex-1 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 font-medium transition-colors"
                 >
                   Cancel
                 </button>

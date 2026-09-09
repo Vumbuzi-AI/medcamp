@@ -294,7 +294,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Index do
   def render(assigns) do
     ~H"""
     <div class="w-[100%]">
-      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
+      <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4 mb-4">
         <.page_header
           icon_path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
           title="Patients"
@@ -353,7 +353,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Index do
           </.filter_drawer>
         </div>
 
-        <label class="mt-3 inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+        <label class="mt-3 inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
           <input
             type="checkbox"
             phx-click="toggle_figures"

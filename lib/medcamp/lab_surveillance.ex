@@ -41,7 +41,7 @@ defmodule Medcamp.LabSurveillance do
         entry_test_name = test_name(entry)
         group = age_group(entry)
 
-        (is_nil(test_name) || entry_test_name == test_name) &&
+        (is_nil(test_name) || String.contains?(String.downcase(entry_test_name), test_name)) &&
           (is_nil(age_group) || Atom.to_string(group) == age_group)
       end)
 
@@ -211,5 +211,5 @@ defmodule Medcamp.LabSurveillance do
   end
 
   defp normalize_filter(value) when value in [nil, ""], do: nil
-  defp normalize_filter(value), do: value
+  defp normalize_filter(value), do: value |> String.downcase() |> String.trim()
 end

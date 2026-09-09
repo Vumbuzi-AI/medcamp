@@ -15,7 +15,7 @@ defmodule MedcampWeb.AdminMedicalCampExternalReportLive.Show do
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      <div class="mx-auto w-[90%] mx-auto px-4 py-4 sm:px-6 lg:px-8">
+      <div class="mx-auto w-full px-4 py-4 sm:px-6 lg:px-8">
         <div class="medical-camp-report-print-hidden mb-4 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div class="flex flex-wrap items-center gap-3 text-sm">
             <.link

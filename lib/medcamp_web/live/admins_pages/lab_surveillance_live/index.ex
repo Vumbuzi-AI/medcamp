@@ -4,11 +4,13 @@ defmodule MedcampWeb.AdminLabSurveillanceLive.Index do
   alias MedcampWeb.LabSurveillanceLive
 
   @impl true
-  def mount(_params, _session, socket), do: {:ok, LabSurveillanceLive.mount(socket)}
+  def mount(_params, _session, socket) do
+    {:ok, LabSurveillanceLive.mount(socket)}
+  end
 
   @impl true
-  def handle_event("filter", %{"filters" => filters}, socket) do
-    {:noreply, LabSurveillanceLive.apply_filters(socket, filters)}
+  def handle_event("filter", params, socket) do
+    {:noreply, LabSurveillanceLive.apply_filters(socket, params)}
   end
 
   @impl true

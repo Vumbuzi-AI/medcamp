@@ -9,37 +9,37 @@ defmodule MedcampWeb.DrugAllocationLive.GiveDrugComponent do
         Drug You Want to Assign
       </p>
       <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
-          <p class="text-xs text-gray-500 uppercase font-semibold">Quantity</p>
-          <p class="font-medium text-gray-900">
+        <div class="bg-slate-50 rounded-md p-3 border border-slate-100">
+          <p class="text-xs text-slate-500 uppercase font-semibold">Quantity</p>
+          <p class="font-medium text-slate-900">
             {@drug_assigned.quantity} {@drug_assigned.unit_of_measurement}
           </p>
         </div>
 
-        <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
-          <p class="text-xs text-gray-500 uppercase font-semibold">Frequency</p>
-          <p class="font-medium text-gray-900">{@drug_assigned.frequency}</p>
+        <div class="bg-slate-50 rounded-md p-3 border border-slate-100">
+          <p class="text-xs text-slate-500 uppercase font-semibold">Frequency</p>
+          <p class="font-medium text-slate-900">{@drug_assigned.frequency}</p>
         </div>
 
-        <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
-          <p class="text-xs text-gray-500 uppercase font-semibold">Duration</p>
-          <p class="font-medium text-gray-900">{@drug_assigned.duration_in_days} days</p>
+        <div class="bg-slate-50 rounded-md p-3 border border-slate-100">
+          <p class="text-xs text-slate-500 uppercase font-semibold">Duration</p>
+          <p class="font-medium text-slate-900">{@drug_assigned.duration_in_days} days</p>
         </div>
 
-        <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
-          <p class="text-xs text-gray-500 uppercase font-semibold">Prescription Note</p>
-          <p class="font-medium text-gray-900">
+        <div class="bg-slate-50 rounded-md p-3 border border-slate-100">
+          <p class="text-xs text-slate-500 uppercase font-semibold">Prescription Note</p>
+          <p class="font-medium text-slate-900">
             {@drug_assigned.prescription_note || "None"}
           </p>
         </div>
 
-        <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
-          <p class="text-xs text-gray-500 uppercase font-semibold">Price</p>
-          <p class="font-medium text-gray-900">KSh {@drug_assigned.price}</p>
+        <div class="bg-slate-50 rounded-md p-3 border border-slate-100">
+          <p class="text-xs text-slate-500 uppercase font-semibold">Price</p>
+          <p class="font-medium text-slate-900">KSh {@drug_assigned.price}</p>
         </div>
-        <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
-          <p class="text-xs text-gray-500 uppercase font-semibold">Quantity</p>
-          <p class="font-medium text-gray-900">
+        <div class="bg-slate-50 rounded-md p-3 border border-slate-100">
+          <p class="text-xs text-slate-500 uppercase font-semibold">Quantity</p>
+          <p class="font-medium text-slate-900">
             {@drug_assigned.quantity} {@drug_assigned.unit_of_measurement}
           </p>
         </div>
@@ -51,7 +51,7 @@ defmodule MedcampWeb.DrugAllocationLive.GiveDrugComponent do
           name="drug_form[pharmacist_note]"
           placeholder="Pharmacist Note"
           value={@pharmacist_note}
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
         />
         <button
           type="submit"

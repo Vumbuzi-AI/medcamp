@@ -14,6 +14,9 @@ mix deps.get
 echo "==> Checking formatting"
 mix format --check-formatted
 
+echo "==> Compiling with warnings as errors"
+mix compile --warnings-as-errors
+
 echo "==> Running Credo"
 mix credo
 

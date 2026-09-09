@@ -6,7 +6,7 @@ defmodule Medcamp.AuditTest do
   import Medcamp.AccountsFixtures
 
   describe "list_audit_users/0" do
-    test "returns only active users for the audit-log filter" do
+    test "returns only active users for the audit-log filter", %{organisation: organisation} do
       active_user = user_fixture(%{name: "Active Auditor"})
       inactive_user = user_fixture(%{name: "Inactive Auditor"})
 
@@ -16,6 +16,7 @@ defmodule Medcamp.AuditTest do
         action: "update",
         table_name: "patients",
         record_id: 1,
+        organisation_id: organisation.id,
         user_id: active_user.id
       })
 
@@ -23,6 +24,7 @@ defmodule Medcamp.AuditTest do
         action: "update",
         table_name: "patients",
         record_id: 2,
+        organisation_id: organisation.id,
         user_id: inactive_user.id
       })
 
@@ -34,19 +36,21 @@ defmodule Medcamp.AuditTest do
   end
 
   describe "paginated audit log search" do
-    test "counts and retrieves database-backed search pages" do
+    test "counts and retrieves database-backed search pages", %{organisation: organisation} do
       for record_id <- 1..12 do
         Repo.insert!(%AuditLog{
           action: "update",
           table_name: "pagination_patients",
-          record_id: record_id
+          record_id: record_id,
+          organisation_id: organisation.id
         })
       end
 
       Repo.insert!(%AuditLog{
         action: "update",
         table_name: "unrelated_table",
-        record_id: 99
+        record_id: 99,
+        organisation_id: organisation.id
       })
 
       filters = [search: "pagination_patients"]
@@ -56,17 +60,19 @@ defmodule Medcamp.AuditTest do
       assert length(Audit.list_audit_logs(filters: filters, page: 2, page_size: 10)) == 2
     end
 
-    test "combines search with the other audit filters" do
+    test "combines search with the other audit filters", %{organisation: organisation} do
       Repo.insert!(%AuditLog{
         action: "insert",
         table_name: "pagination_patients",
-        record_id: 1
+        record_id: 1,
+        organisation_id: organisation.id
       })
 
       Repo.insert!(%AuditLog{
         action: "delete",
         table_name: "pagination_patients",
-        record_id: 2
+        record_id: 2,
+        organisation_id: organisation.id
       })
 
       assert Audit.count_audit_logs(search: "pagination", action: "delete") == 1

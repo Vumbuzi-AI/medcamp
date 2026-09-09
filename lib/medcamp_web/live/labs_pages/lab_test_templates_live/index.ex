@@ -104,8 +104,8 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-      <.header class="p-6 border-b border-gray-100">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100">
+      <.header class="p-6 border-b border-slate-100">
         <div class="flex items-center">
           <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-accent to-[#8384c9] flex items-center justify-center mr-4">
             <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -119,7 +119,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
           </div>
           <div>
             <h1 class="text-2xl font-bold text-brand-primary">Lab Test Templates</h1>
-            <p class="text-sm text-gray-600 mt-1">Manage laboratory test templates and parameters</p>
+            <p class="text-sm text-slate-600 mt-1">Manage laboratory test templates and parameters</p>
           </div>
         </div>
         <:actions>
@@ -144,7 +144,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
         <form phx-change="search" phx-submit="search" class="mb-6">
           <div class="relative">
             <svg
-              class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"
+              class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -161,16 +161,16 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
               name="query"
               value={@search_query}
               placeholder="Search templates by name or short name (e.g., FBC, HIV, Urinalysis)..."
-              class="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-brand-accent focus:border-brand-accent"
+              class="block w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-brand-accent focus:border-brand-accent"
               phx-debounce="300"
             />
           </div>
         </form>
 
         <%= if @total_count == 0 do %>
-          <div class="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+          <div class="text-center py-12 bg-slate-50 rounded-lg border border-dashed border-slate-300">
             <svg
-              class="mx-auto h-16 w-16 text-gray-400"
+              class="mx-auto h-16 w-16 text-slate-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -182,8 +182,8 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            <h3 class="mt-4 text-lg font-medium text-gray-900">No templates yet</h3>
-            <p class="mt-2 text-sm text-gray-500">Get started by creating a new test template.</p>
+            <h3 class="mt-4 text-lg font-medium text-slate-900">No templates yet</h3>
+            <p class="mt-2 text-sm text-slate-500">Get started by creating a new test template.</p>
             <div class="mt-6">
               <.link patch={~p"/lab/lab_test_templates/new"}>
                 <.button class="bg-brand-accent hover:bg-brand-accent-dark">
@@ -202,32 +202,32 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
           </div>
         <% else %>
           <!-- Desktop View -->
-          <div class="hidden lg:block overflow-hidden rounded-xl border border-gray-200">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+          <div class="hidden lg:block overflow-hidden rounded-xl border border-slate-200">
+            <table class="min-w-full divide-y divide-slate-200">
+              <thead class="bg-slate-50">
                 <tr>
-                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Template Name
                   </th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Short Name
                   </th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Category
                   </th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Parameters
                   </th>
-                  <th class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody id="templates" phx-update="stream" class="bg-white divide-y divide-gray-100">
+              <tbody id="templates" phx-update="stream" class="bg-white divide-y divide-slate-100">
                 <tr
                   :for={{id, template} <- @streams.templates}
                   id={id}
-                  class="hover:bg-gray-50 transition-colors"
+                  class="hover:bg-slate-50 transition-colors"
                 >
                   <td class="px-6 py-4">
                     <div class="flex items-center">
@@ -247,7 +247,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
                         </svg>
                       </div>
                       <div>
-                        <div class="text-sm font-medium text-gray-900">{template.name}</div>
+                        <div class="text-sm font-medium text-slate-900">{template.name}</div>
                       </div>
                     </div>
                   </td>
@@ -257,14 +257,14 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
                     </span>
                   </td>
                   <td class="px-6 py-4">
-                    <span class="text-sm text-gray-700">
+                    <span class="text-sm text-slate-700">
                       {template.category && template.category.name}
                     </span>
                   </td>
                   <td class="px-6 py-4">
                     <div class="flex items-center">
                       <svg
-                        class="w-4 h-4 text-gray-400 mr-2"
+                        class="w-4 h-4 text-slate-400 mr-2"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -276,7 +276,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
                           d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                         />
                       </svg>
-                      <span class="text-sm text-gray-600">
+                      <span class="text-sm text-slate-600">
                         {length(template.field_definitions)} fields
                       </span>
                     </div>
@@ -329,7 +329,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
                       </.link>
                       <.link
                         phx-click={JS.push("delete", value: %{id: template.id}) |> hide("##{id}")}
-                        data-confirm="Are you sure you want to delete this template?"
+                        data-confirm-message="Are you sure you want to delete this template?"
                         class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
                       >
                         <svg
@@ -359,7 +359,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
             <div
               :for={{id, template} <- @streams.templates}
               id={id}
-              class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+              class="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow"
             >
               <div class="flex items-start justify-between mb-3">
                 <div class="flex items-center flex-1">
@@ -379,8 +379,8 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
                     </svg>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <h3 class="text-sm font-semibold text-gray-900 truncate">{template.name}</h3>
-                    <p class="text-xs text-gray-500 mt-1">
+                    <h3 class="text-sm font-semibold text-slate-900 truncate">{template.name}</h3>
+                    <p class="text-xs text-slate-500 mt-1">
                       {template.category && template.category.name}
                     </p>
                   </div>
@@ -390,9 +390,9 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
                 </span>
               </div>
 
-              <div class="flex items-center text-sm text-gray-600 mb-4">
+              <div class="flex items-center text-sm text-slate-600 mb-4">
                 <svg
-                  class="w-4 h-4 text-gray-400 mr-2"
+                  class="w-4 h-4 text-slate-400 mr-2"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -444,7 +444,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
                 </.link>
                 <.link
                   phx-click={JS.push("delete", value: %{id: template.id}) |> hide("##{id}")}
-                  data-confirm="Are you sure?"
+                  data-confirm-message="Are you sure?"
                   class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
                 >
                   <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

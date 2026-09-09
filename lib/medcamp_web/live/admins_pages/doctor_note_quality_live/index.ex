@@ -84,7 +84,7 @@ defmodule MedcampWeb.AdminDoctorNoteQualityLive.Index do
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-slate-50 -m-4 p-4 sm:-m-6 sm:p-6">
-      <div class="mx-auto w-[95%] space-y-6">
+      <div class="space-y-6">
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
@@ -96,6 +96,12 @@ defmodule MedcampWeb.AdminDoctorNoteQualityLive.Index do
                 Review documentation completeness across doctor notes and identify the fields
                 and clinicians that need follow-up.
               </p>
+              <div class="mt-4">
+                <.camp_switcher
+                  camps={assigns[:camp_options] || []}
+                  camp_filter={assigns[:camp_filter]}
+                />
+              </div>
             </div>
 
             <form phx-submit="filter" class="grid gap-3 sm:grid-cols-4 lg:min-w-[680px]">
@@ -153,13 +159,11 @@ defmodule MedcampWeb.AdminDoctorNoteQualityLive.Index do
         </div>
 
         <%= if @quality.total_notes == 0 do %>
-          <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
-            <.icon name="hero-document-magnifying-glass" class="mx-auto h-10 w-10 text-slate-400" />
-            <h2 class="mt-3 text-base font-semibold text-slate-900">No doctor notes found</h2>
-            <p class="mt-1 text-sm text-slate-500">
-              No notes match the selected date range and doctor.
-            </p>
-          </div>
+          <.blank_state
+            icon_path="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            title="No doctor notes found"
+            description="No notes match the selected date range and doctor."
+          />
         <% else %>
           <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <.metric_card
@@ -217,74 +221,52 @@ defmodule MedcampWeb.AdminDoctorNoteQualityLive.Index do
               </div>
             </section>
 
-            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <div class="border-b border-slate-200 px-5 py-4">
+            <section class="space-y-3">
+              <div>
                 <h2 class="text-base font-bold text-slate-900">Quality by doctor</h2>
                 <p class="mt-1 text-sm text-slate-500">
                   Doctors needing the most documentation support appear first.
                 </p>
               </div>
-              <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200">
-                  <thead class="bg-slate-50">
-                    <tr>
-                      <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        Doctor
-                      </th>
-                      <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        Notes
-                      </th>
-                      <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        Fully complete
-                      </th>
-                      <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        Avg. score
-                      </th>
-                      <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        No impression
-                      </th>
-                      <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        No investigations
-                      </th>
-                      <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        No plan
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-slate-100">
-                    <tr :for={doctor <- @quality.by_doctor} class="hover:bg-slate-50/70">
-                      <td class="whitespace-nowrap px-5 py-4 text-sm font-semibold text-slate-900">
-                        Dr. {doctor.doctor_name}
-                      </td>
-                      <td class="px-4 py-4 text-right text-sm text-slate-700">
-                        {doctor.total_notes}
-                      </td>
-                      <td class="px-4 py-4 text-right text-sm">
-                        <span class={[
-                          "rounded-full px-2.5 py-1 font-semibold",
-                          quality_colour(doctor.complete_percentage)
-                        ]}>
-                          {percentage(doctor.complete_percentage)}
-                        </span>
-                      </td>
-                      <td class="px-4 py-4 text-right text-sm font-semibold text-slate-800">
-                        {percentage(doctor.average_completion)}
-                      </td>
-                      <td class="px-4 py-4 text-right text-sm text-slate-700">
-                        {doctor.missing_impression} ({percentage(doctor.missing_impression_percentage)})
-                      </td>
-                      <td class="px-4 py-4 text-right text-sm text-slate-700">
-                        {doctor.missing_investigations} ({percentage(
-                          doctor.missing_investigations_percentage
-                        )})
-                      </td>
-                      <td class="px-5 py-4 text-right text-sm text-slate-700">
-                        {doctor.missing_management} ({percentage(doctor.missing_management_percentage)})
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <.data_table id="quality-by-doctor" rows={@quality.by_doctor}>
+                <:col
+                  :let={doctor}
+                  label="Doctor"
+                  class="whitespace-nowrap font-semibold text-slate-900"
+                >
+                  Dr. {doctor.doctor_name}
+                </:col>
+                <:col :let={doctor} label="Notes" align="right">
+                  {doctor.total_notes}
+                </:col>
+                <:col :let={doctor} label="Fully complete" align="right">
+                  <span class={[
+                    "rounded-full px-2.5 py-1 font-semibold",
+                    quality_colour(doctor.complete_percentage)
+                  ]}>
+                    {percentage(doctor.complete_percentage)}
+                  </span>
+                </:col>
+                <:col
+                  :let={doctor}
+                  label="Avg. score"
+                  align="right"
+                  class="font-semibold text-slate-800"
+                >
+                  {percentage(doctor.average_completion)}
+                </:col>
+                <:col :let={doctor} label="No impression" align="right" hide_below="md">
+                  {doctor.missing_impression} ({percentage(doctor.missing_impression_percentage)})
+                </:col>
+                <:col :let={doctor} label="No investigations" align="right" hide_below="lg">
+                  {doctor.missing_investigations} ({percentage(
+                    doctor.missing_investigations_percentage
+                  )})
+                </:col>
+                <:col :let={doctor} label="No plan" align="right" hide_below="lg">
+                  {doctor.missing_management} ({percentage(doctor.missing_management_percentage)})
+                </:col>
+              </.data_table>
             </section>
           </div>
 

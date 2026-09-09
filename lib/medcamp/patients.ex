@@ -7,6 +7,7 @@ defmodule Medcamp.Patients do
 
   import Ecto.Query, warn: false
   alias Medcamp.Repo
+  alias Medcamp.Validation
 
   alias Medcamp.Patients.{
     Patient,
@@ -396,6 +397,73 @@ defmodule Medcamp.Patients do
     )
   end
 
+  @doc """
+  Every patient with an attendance row for `camp_id`, name-ordered, with age.
+
+  This is the camp roster the dashboards and exports scope to: membership is
+  `camp_attendances`, not the legacy `is_for_medical_camp` flag or a fixed
+  date window.
+  """
+  def list_patients_for_camp(camp_id) do
+    from(p in Patient,
+      join: a in Medcamp.Camps.CampAttendance,
+      on: a.patient_id == p.id,
+      where: a.camp_id == ^camp_id,
+      order_by: [asc: p.first_name, asc: p.last_name]
+    )
+    |> Repo.all()
+    |> Enum.map(&Patient.with_age/1)
+  end
+
+  @doc """
+  The `list_patients_for_camp/1` roster narrowed to patients first seen at the
+  camp on `date` (Africa/Nairobi).
+  """
+  def list_patients_for_camp_on(camp_id, %Date{} = date) do
+    from(p in Patient,
+      join: a in Medcamp.Camps.CampAttendance,
+      on: a.patient_id == p.id,
+      where:
+        a.camp_id == ^camp_id and
+          fragment("DATE(? AT TIME ZONE 'Africa/Nairobi')", a.first_seen_at) == ^date,
+      order_by: [asc: p.first_name, asc: p.last_name]
+    )
+    |> Repo.all()
+    |> Enum.map(&Patient.with_age/1)
+  end
+
+  @doc """
+  The active camp's roster for the reception list: patients with a
+  `camp_attendances` row for `camp_id`, most recently seen first, with the
+  shared search filter applied, paginated. A fresh camp starts empty; the
+  reception search box still spans the whole organisation via
+  `list_patients_paginated/3`.
+  """
+  def list_camp_patients_paginated(camp_id, filters \\ %{}, page \\ 1, per_page \\ 20) do
+    camp_patients_query(camp_id, filters)
+    |> Repo.paginate(page: page, page_size: per_page)
+    |> Map.get(:entries)
+    |> Repo.preload(:documents)
+    |> Enum.map(&Patient.with_age/1)
+  end
+
+  def count_camp_patients(camp_id, filters \\ %{}) do
+    camp_patients_query(camp_id, filters)
+    |> exclude(:order_by)
+    |> select([p, _a], count(p.id))
+    |> Repo.one()
+  end
+
+  defp camp_patients_query(camp_id, filters) do
+    from(p in Patient,
+      join: a in Medcamp.Camps.CampAttendance,
+      on: a.patient_id == p.id,
+      where: a.camp_id == ^camp_id,
+      order_by: [desc: a.first_seen_at, desc: p.inserted_at]
+    )
+    |> apply_search_filter(filters[:search])
+  end
+
   def medical_camp_stats(date \\ Date.utc_today()) do
     list_medical_camp_patients(date) |> compute_camp_stats()
   end
@@ -505,11 +573,63 @@ defmodule Medcamp.Patients do
     |> Repo.transaction()
     |> case do
       {:ok, %{patient: patient, visit: visit}} ->
+        record_camp_attendance(patient.id)
         Task.start(fn -> send_pin(patient) end)
         {:ok, {patient, visit}}
 
       {:error, _step, changeset, _changes} ->
         {:error, changeset}
+    end
+  end
+
+  @doc """
+  Finds a patient in the current organisation by an exact (trimmed,
+  case-insensitive) National ID, or `nil`. Used by the reception "find
+  patient" step so a returning patient is reused rather than re-created.
+  """
+  def find_by_national_id(national_id) when is_binary(national_id) do
+    case String.trim(national_id) do
+      "" ->
+        nil
+
+      trimmed ->
+        Repo.one(
+          from p in Patient,
+            where: fragment("lower(?) = lower(?)", p.national_id, ^trimmed),
+            limit: 1
+        )
+    end
+  end
+
+  def find_by_national_id(_), do: nil
+
+  @doc """
+  Opens a fresh camp visit for a patient who is already on file, reusing their
+  existing record and GSRN. Records camp attendance. Returns
+  `{:ok, {patient, visit}}`.
+  """
+  def register_visit_for_existing(%Patient{} = patient, %Medcamp.Accounts.User{} = staff) do
+    %Medcamp.PatientVisits.PatientVisit{}
+    |> Medcamp.PatientVisits.PatientVisit.changeset(%{
+      "patient_id" => patient.id,
+      "creator_id" => staff.id,
+      "status" => "triage_pending"
+    })
+    |> Repo.insert()
+    |> case do
+      {:ok, visit} ->
+        record_camp_attendance(patient.id)
+        {:ok, {patient, visit}}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
+  end
+
+  defp record_camp_attendance(patient_id) do
+    case Medcamp.Camps.Scope.active_camp_id() do
+      nil -> :ok
+      camp_id -> Medcamp.CampAttendances.record(patient_id, camp_id)
     end
   end
 
@@ -622,9 +742,11 @@ defmodule Medcamp.Patients do
   defp find_patient_by_email(nil), do: nil
 
   defp find_patient_by_email(email) do
+    email = Validation.normalize_email(email)
+
     Repo.one(
       from p in Patient,
-        where: not is_nil(p.email) and fragment("lower(?)", p.email) == ^String.downcase(email),
+        where: not is_nil(p.email) and fragment("lower(?)", p.email) == ^email,
         limit: 1
     )
   end

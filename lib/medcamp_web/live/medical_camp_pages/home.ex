@@ -147,8 +147,8 @@ defmodule MedcampWeb.MedicalCampPages.Home do
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       >
         <div class="bg-white rounded-xl shadow-xl p-8 w-full max-w-sm mx-4">
-          <h2 class="text-xl font-bold text-gray-800 mb-1">Medical Camp Access</h2>
-          <p class="text-sm text-gray-500 mb-6">Enter your 4-digit OTP to continue.</p>
+          <h2 class="text-xl font-bold text-slate-800 mb-1">Medical Camp Access</h2>
+          <p class="text-sm text-slate-500 mb-6">Enter your 4-digit OTP to continue.</p>
 
           <form action={"/8018/#{@patient.gsrn}/medical-camp/session"} method="post">
             <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
@@ -159,7 +159,7 @@ defmodule MedcampWeb.MedicalCampPages.Home do
               inputmode="numeric"
               placeholder="_ _ _ _"
               autofocus
-              class="w-full text-center text-2xl tracking-[0.5em] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full text-center text-2xl tracking-[0.5em] border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               type="submit"
@@ -174,14 +174,14 @@ defmodule MedcampWeb.MedicalCampPages.Home do
       <%!-- Main content (blurred when OTP modal is showing) --%>
       <div class={if @show_otp_modal, do: "pointer-events-none select-none blur-sm", else: ""}>
         <%!-- Patient header --%>
-        <div class="bg-white rounded-lg border border-gray-100 shadow-sm p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div class="bg-white rounded-lg border border-slate-100 shadow-sm p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
-            <h2 class="text-lg font-bold text-gray-800">
+            <h2 class="text-lg font-bold text-slate-800">
               {[@patient.first_name, @patient.middle_name, @patient.last_name]
               |> Enum.filter(&(&1 != nil))
               |> Enum.join(" ")}
             </h2>
-            <p class="text-sm text-gray-500">
+            <p class="text-sm text-slate-500">
               GSRN: {@patient.gsrn} · {@patient.gender} · {@patient.date_of_birth}
             </p>
           </div>
@@ -208,44 +208,44 @@ defmodule MedcampWeb.MedicalCampPages.Home do
           <div class="p-2">
             <h2 class="text-lg font-bold text-brand-primary mb-4">Triage Details</h2>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Date</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Date</span>
                 <span class="font-medium">{@selected_triage.date}</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Time</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Time</span>
                 <span class="font-medium">{@selected_triage.time || "-"}</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Temperature</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Temperature</span>
                 <span class="font-medium">{@selected_triage.temperature || "-"} °C</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Blood Pressure</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Blood Pressure</span>
                 <span class="font-medium">{@selected_triage.blood_pressure || "-"}</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Pulse Rate</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Pulse Rate</span>
                 <span class="font-medium">{@selected_triage.pulse_rate || "-"} bpm</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">O2 Saturation</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">O2 Saturation</span>
                 <span class="font-medium">{@selected_triage.oxygen_saturation || "-"} %</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Weight</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Weight</span>
                 <span class="font-medium">{@selected_triage.weight || "-"} kg</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Height</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Height</span>
                 <span class="font-medium">{@selected_triage.height || "-"} cm</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">BMI</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">BMI</span>
                 <span class="font-medium">{@selected_triage.bmi || "-"}</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Emergency</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Emergency</span>
                 <span class={[
                   "font-medium",
                   @selected_triage.emergency_scale == "High" && "text-red-600",
@@ -260,8 +260,8 @@ defmodule MedcampWeb.MedicalCampPages.Home do
               <span class="text-red-600 font-medium">Allergies: </span>
               <span class="text-red-800">{@selected_triage.allergies}</span>
             </div>
-            <div :if={@selected_triage.triage_notes} class="mt-2 bg-gray-50 rounded p-2 text-sm">
-              <span class="text-gray-500 font-medium">Notes: </span>
+            <div :if={@selected_triage.triage_notes} class="mt-2 bg-slate-50 rounded p-2 text-sm">
+              <span class="text-slate-500 font-medium">Notes: </span>
               <span>{@selected_triage.triage_notes}</span>
             </div>
           </div>

@@ -241,7 +241,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-xl font-semibold text-brand-primary">Doctor's Note</h1>
-          <p class="text-sm text-gray-500 mt-0.5">
+          <p class="text-sm text-slate-500 mt-0.5">
             {Calendar.strftime(@doctor_note.date, "%d %b %Y")}
             <span :if={@doctor_note.time} class="ml-1">
               · {@doctor_note.time |> Time.to_string() |> String.slice(0..4)}
@@ -273,7 +273,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
       </div>
 
       <%!-- Read-only cards --%>
-      <div :if={!@editing} class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 space-y-4">
+      <div :if={!@editing} class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
         <.note_field label="Complaints" value={@doctor_note.reason_for_consulatation} />
         <.note_field label="Clinical Notes" value={@doctor_note.clinical_notes} />
         <.note_field
@@ -296,7 +296,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
           value={@doctor_note.last_period_date && to_string(@doctor_note.last_period_date)}
         />
 
-        <div class="pt-3 border-t border-gray-100 flex justify-end">
+        <div class="pt-3 border-t border-slate-100 flex justify-end">
           <button
             type="button"
             phx-click="toggle_edit"
@@ -327,7 +327,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
           <button
             type="button"
             phx-click="toggle_edit"
-            class="text-sm text-gray-500 hover:text-gray-700"
+            class="text-sm text-slate-500 hover:text-slate-700"
           >
             Cancel
           </button>
@@ -341,8 +341,8 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
       </div>
 
       <%!-- Lab Orders Section --%>
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 sm:px-6 py-4 border-b border-gray-100">
+      <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 sm:px-6 py-4 border-b border-slate-100">
           <h2 class="text-lg font-semibold text-brand-primary flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -389,7 +389,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
         <%!-- Print stickers for each lab result --%>
         <%= if not Enum.empty?(@lab_results) do %>
           <div class="px-4 sm:px-6 pb-4 space-y-3">
-            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Print Stickers</p>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Print Stickers</p>
             <%= for lr <- @lab_results do %>
               <div class="flex flex-wrap gap-2">
                 <%= for {test, index} <- Enum.with_index(lr.tests) do %>
@@ -418,8 +418,8 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
       </div>
 
       <%!-- Pharmacy / Drug Allocations Section --%>
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-gray-100">
+      <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-slate-100">
           <h2 class="text-lg font-semibold text-brand-primary flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -461,10 +461,10 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
         </div>
 
         <%= if Enum.empty?(@drug_allocations) do %>
-          <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+          <div class="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="mx-auto h-12 w-12 text-gray-400"
+              class="mx-auto h-12 w-12 text-slate-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -476,8 +476,8 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
                 d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
               />
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No medications</h3>
-            <p class="mt-1 text-sm text-gray-500">
+            <h3 class="mt-2 text-sm font-medium text-slate-900">No medications</h3>
+            <p class="mt-1 text-sm text-slate-500">
               No medications have been prescribed for this note yet.
             </p>
           </div>
@@ -495,7 +495,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
       </div>
 
       <%!-- Scan Next Patient --%>
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+      <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
         <%!-- <button
           :if={!@show_scanner}
           type="button"
@@ -522,7 +522,11 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
         <div :if={@show_scanner}>
           <div class="flex items-center justify-between mb-3">
             <h2 class="text-lg font-semibold text-brand-primary">Scan Next Patient</h2>
-            <button type="button" phx-click="close_scanner" class="text-gray-400 hover:text-gray-600">
+            <button
+              type="button"
+              phx-click="close_scanner"
+              class="text-slate-400 hover:text-slate-600"
+            >
               <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   stroke-linecap="round"
@@ -534,7 +538,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
             </button>
           </div>
           <div id="qr-camera-scanner" phx-hook="QrCameraScanner" class="relative">
-            <video class="w-full rounded-lg border border-gray-300" autoplay playsinline muted>
+            <video class="w-full rounded-lg border border-slate-300" autoplay playsinline muted>
             </video>
             <div class="qr-overlay hidden absolute inset-0 bg-green-500/20 rounded-lg items-center justify-center">
               <svg
@@ -551,7 +555,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
                 />
               </svg>
             </div>
-            <p class="qr-status text-sm text-center text-gray-500 mt-2">
+            <p class="qr-status text-sm text-center text-slate-500 mt-2">
               Point camera at patient's QR code...
             </p>
           </div>
@@ -611,9 +615,9 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
 
   defp note_field(assigns) do
     ~H"""
-    <div :if={@value && @value != ""} class="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
-      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{@label}</p>
-      <p class="text-sm text-gray-800 whitespace-pre-wrap">{@value}</p>
+    <div :if={@value && @value != ""} class="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+      <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{@label}</p>
+      <p class="text-sm text-slate-800 whitespace-pre-wrap">{@value}</p>
     </div>
     """
   end

@@ -21,6 +21,9 @@ defmodule MedcampWeb.NursesPages.PatientIndexTest do
     assert has_element?(index_view, ~s(a[href="/nurse/patients/new"]), "Add Patient")
 
     {:ok, form_view, _html} = live(conn, ~p"/nurse/patients/new")
+
+    form_view |> element("button[phx-click='register_new']") |> render_click()
+
     refute has_element?(form_view, ~s(input[name="patient[birth_certificate_number]"]))
     refute has_element?(form_view, ~s(input[name="patient[has_insurance]"]))
     refute has_element?(form_view, ~s(input[name="patient[consent_agreement]"]))

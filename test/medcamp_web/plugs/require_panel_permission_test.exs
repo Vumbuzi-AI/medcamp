@@ -6,19 +6,19 @@ defmodule MedcampWeb.Plugs.RequirePanelPermissionTest do
 
   alias Medcamp.Authorization
 
-  describe "the doctor.doctor_procedures panel" do
+  describe "the doctor.lab_results panel" do
     test "a doctor with the role default can access it", %{conn: conn} do
       doctor = user_fixture(%{role: "doctor"})
 
-      assert {:ok, _view, _html} = live(log_in_user(conn, doctor), ~p"/doctor/doctor_procedures")
+      assert {:ok, _view, _html} = live(log_in_user(conn, doctor), ~p"/doctor/lab_results")
     end
 
     test "a doctor with a per-user deny override is redirected, not shown the page", %{conn: conn} do
       doctor = user_fixture(%{role: "doctor"})
-      {:ok, _} = Authorization.deny_user_override(doctor, "doctor.doctor_procedures", nil)
+      {:ok, _} = Authorization.deny_user_override(doctor, "doctor.lab_results", nil)
 
       assert {:error, {:redirect, %{to: "/doctor/scan", flash: flash}}} =
-               live(log_in_user(conn, doctor), ~p"/doctor/doctor_procedures")
+               live(log_in_user(conn, doctor), ~p"/doctor/lab_results")
 
       assert flash["error"] == "You do not have permission to access that page."
     end
@@ -30,7 +30,7 @@ defmodule MedcampWeb.Plugs.RequirePanelPermissionTest do
       nurse = user_fixture(%{role: "nurse"})
 
       assert {:error, {:redirect, %{to: "/nurse/scan"}}} =
-               live(log_in_user(conn, nurse), ~p"/doctor/doctor_procedures")
+               live(log_in_user(conn, nurse), ~p"/doctor/lab_results")
     end
   end
 
@@ -70,26 +70,20 @@ defmodule MedcampWeb.Plugs.RequirePanelPermissionTest do
     end
   end
 
-  describe "the pharmacist.dangerous_drug_registers panel" do
+  describe "the pharmacist.drugs panel" do
     test "a pharmacist with the role default can access it", %{conn: conn} do
       pharmacist = user_fixture(%{role: "pharmacist"})
 
-      assert {:ok, _view, _html} =
-               live(log_in_user(conn, pharmacist), ~p"/pharmacist/dangerous_drug_registers")
+      assert {:ok, _view, _html} = live(log_in_user(conn, pharmacist), ~p"/pharmacist/drugs")
     end
 
     test "a pharmacist with a per-user deny override is redirected", %{conn: conn} do
       pharmacist = user_fixture(%{role: "pharmacist"})
 
-      {:ok, _} =
-        Authorization.deny_user_override(
-          pharmacist,
-          "pharmacist.dangerous_drug_registers",
-          nil
-        )
+      {:ok, _} = Authorization.deny_user_override(pharmacist, "pharmacist.drugs", nil)
 
       assert {:error, {:redirect, %{to: "/pharmacist/scan", flash: flash}}} =
-               live(log_in_user(conn, pharmacist), ~p"/pharmacist/dangerous_drug_registers")
+               live(log_in_user(conn, pharmacist), ~p"/pharmacist/drugs")
 
       assert flash["error"] == "You do not have permission to access that page."
     end
@@ -108,10 +102,10 @@ defmodule MedcampWeb.Plugs.RequirePanelPermissionTest do
   describe "per-patient sub-pages of a panel" do
     test "are blocked when the panel itself is denied", %{conn: conn} do
       doctor = user_fixture(%{role: "doctor"})
-      {:ok, _} = Authorization.deny_user_override(doctor, "doctor.doctor_procedures", nil)
+      {:ok, _} = Authorization.deny_user_override(doctor, "doctor.patient.doctor_notes", nil)
 
       assert {:error, {:redirect, %{to: "/doctor/scan"}}} =
-               live(log_in_user(conn, doctor), ~p"/doctor/1/doctor_procedures")
+               live(log_in_user(conn, doctor), ~p"/doctor/patients/1/notes")
     end
   end
 
@@ -120,12 +114,12 @@ defmodule MedcampWeb.Plugs.RequirePanelPermissionTest do
       doctor = user_fixture(%{role: "doctor"})
 
       {:ok, _view, html} = live(log_in_user(conn, doctor), ~p"/doctor/scan")
-      assert html =~ "My Procedures"
+      assert html =~ "Lab Results"
 
-      {:ok, _} = Authorization.deny_user_override(doctor, "doctor.doctor_procedures", nil)
+      {:ok, _} = Authorization.deny_user_override(doctor, "doctor.lab_results", nil)
 
       {:ok, _view, html} = live(log_in_user(conn, doctor), ~p"/doctor/scan")
-      refute html =~ "My Procedures"
+      refute html =~ "Lab Results"
     end
   end
 end

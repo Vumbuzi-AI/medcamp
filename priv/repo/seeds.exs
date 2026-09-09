@@ -54,8 +54,8 @@ organisation =
           "slug" => "default",
           "location" => "Kenya",
           "logo" => "/images/logo.png",
-          "primary_color" => "#373896",
-          "accent_color" => "#6667ab"
+          "primary_color" => "#0C2765",
+          "accent_color" => "#52B2D8"
         }),
         "default organisation"
       )
@@ -448,6 +448,8 @@ patients =
         nil -> PatientVisit.changeset(%PatientVisit{}, visit_attrs) |> Repo.insert!()
         visit -> PatientVisit.changeset(visit, visit_attrs) |> Repo.update!()
       end
+
+    Medcamp.CampAttendances.record(patient.id, camp.id)
 
     if visit_status != "triage_pending" do
       triage_attrs = %{

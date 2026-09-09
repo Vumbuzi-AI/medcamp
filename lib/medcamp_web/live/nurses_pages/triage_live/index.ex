@@ -204,7 +204,7 @@ defmodule MedcampWeb.NursesPages.TriageIndex do
   def render(assigns) do
     ~H"""
     <div class="w-[100%]">
-      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
+      <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4 mb-4">
         <.page_header
           icon_path="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
           title="Triages"

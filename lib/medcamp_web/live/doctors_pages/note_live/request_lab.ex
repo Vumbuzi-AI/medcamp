@@ -22,7 +22,7 @@ defmodule MedcampWeb.RequestLabComponent do
         |> Enum.join(" ")}
       </.header>
 
-      <p class="mb-5 text-sm text-gray-500">
+      <p class="mb-5 text-sm text-slate-500">
         Select the tests the laboratory should perform, then set how urgently they are needed.
       </p>
 
@@ -44,7 +44,7 @@ defmodule MedcampWeb.RequestLabComponent do
           />
 
           <div class="mt-2 flex items-center justify-between">
-            <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">
               Selected tests ({length(@selected_tests)})
             </span>
             <span :if={@selected_tests == []} class="text-xs text-amber-600">
@@ -69,8 +69,8 @@ defmodule MedcampWeb.RequestLabComponent do
             <% end %>
           </div>
 
-          <div class="mt-2 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-            <p class="border-b border-gray-200 px-3 py-2 text-xs text-gray-500">
+          <div class="mt-2 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+            <p class="border-b border-slate-200 px-3 py-2 text-xs text-slate-500">
               Click a test to add it to this request
             </p>
             <%= for option <- @searched_lab_tests do %>
@@ -78,12 +78,12 @@ defmodule MedcampWeb.RequestLabComponent do
                 phx-click="select_lab_test"
                 phx-target={@myself}
                 phx-value-id={option.id}
-                class="cursor-pointer border-b border-gray-200 bg-white px-3 py-2.5 text-sm last:border-b-0 hover:bg-indigo-50"
+                class="cursor-pointer border-b border-slate-200 bg-white px-3 py-2.5 text-sm last:border-b-0 hover:bg-indigo-50"
               >
                 {option.name}
               </div>
             <% end %>
-            <p :if={@searched_lab_tests == []} class="px-3 py-4 text-center text-sm text-gray-500">
+            <p :if={@searched_lab_tests == []} class="px-3 py-4 text-center text-sm text-slate-500">
               No matching lab tests found. Try a different search.
             </p>
           </div>
@@ -106,7 +106,7 @@ defmodule MedcampWeb.RequestLabComponent do
             {"Low (Green)", "Low"}
           ]}
         />
-        <p class="-mt-2 text-xs text-gray-500">
+        <p class="-mt-2 text-xs text-slate-500">
           High: act immediately · Medium: process soon · Low: routine
         </p>
 
