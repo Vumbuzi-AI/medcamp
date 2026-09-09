@@ -10,6 +10,7 @@ defmodule Medcamp.Repo do
 
   import Ecto.Query, only: [where: 3]
 
+  alias Medcamp.Camps.Scope
   alias Medcamp.Tenancy
 
   @doc """
@@ -19,14 +20,20 @@ defmodule Medcamp.Repo do
   dictionary values are not inherited by those tasks, but repository default
   options are passed to every preload query, so this is the boundary where the
   tenant must be captured.
+
+  The camp filter rides along for the same reason - a preloaded association on
+  a camp-scoped table has to see the same camp as the query that loaded its
+  parent.
   """
   @impl true
   def default_options(_operation) do
-    case Tenancy.current_org_id() do
-      nil -> []
-      org_id -> [tenant_org_id: org_id]
-    end
+    []
+    |> put_option(:tenant_org_id, Tenancy.current_org_id())
+    |> put_option(:camp_filter_id, Scope.camp_filter_id())
   end
+
+  defp put_option(opts, _key, nil), do: opts
+  defp put_option(opts, key, value), do: [{key, value} | opts]
 
   @doc """
   Filters every query against a tenant table by the current organisation.
@@ -45,15 +52,19 @@ defmodule Medcamp.Repo do
   """
   @impl true
   def prepare_query(_operation, query, opts) do
+    {scope_organisation(query, opts), opts}
+  end
+
+  defp scope_organisation(query, opts) do
     cond do
       opts[:skip_org_id] || opts[:schema_migration] ->
-        {query, opts}
+        query
 
       not tenant_query?(query) ->
-        {query, opts}
+        query
 
       org_id = opts[:tenant_org_id] || Tenancy.current_org_id() ->
-        {where(query, [t], t.organisation_id == ^org_id), opts}
+        query |> where([t], t.organisation_id == ^org_id) |> scope_camp(opts)
 
       true ->
         raise """
@@ -69,11 +80,31 @@ defmodule Medcamp.Repo do
     end
   end
 
+  # The camp filter is a view, not a boundary: with none set - the default -
+  # a query spans every camp, so nothing that predates camps changes
+  # behaviour. Applied only to schemas that `use Medcamp.Camps.Schema`.
+  defp scope_camp(query, opts) do
+    camp_id =
+      if opts[:skip_camp_id], do: nil, else: opts[:camp_filter_id] || Scope.camp_filter_id()
+
+    if camp_id && camp_query?(query) do
+      where(query, [t], t.camp_id == ^camp_id)
+    else
+      query
+    end
+  end
+
   defp tenant_query?(%{from: %{source: {_source, schema}}}) when not is_nil(schema) do
     Code.ensure_loaded?(schema) and function_exported?(schema, :__tenant__?, 0)
   end
 
   defp tenant_query?(_query), do: false
+
+  defp camp_query?(%{from: %{source: {_source, schema}}}) when not is_nil(schema) do
+    Code.ensure_loaded?(schema) and function_exported?(schema, :__camp_scoped__?, 0)
+  end
+
+  defp camp_query?(_query), do: false
 
   # Store audit user in process dictionary
   def put_audit_user(user_id) do
