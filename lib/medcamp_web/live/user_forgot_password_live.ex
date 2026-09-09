@@ -6,24 +6,23 @@ defmodule MedcampWeb.UserForgotPasswordLive do
 
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-sm">
-      <.header class="text-center">
-        Forgot your password?
-        <:subtitle>We'll send a password reset link to your inbox</:subtitle>
-      </.header>
-
+    <.auth_shell
+      title="Forgot your password?"
+      subtitle="We'll email a reset link if the address is in our system."
+    >
       <.simple_form for={@form} id="reset_password_form" phx-submit="send_email">
-        <.input field={@form[:email]} type="email" placeholder="Email" required />
+        <.input field={@form[:email]} type="email" label="Email" required />
         <:actions>
-          <.button phx-disable-with="Sending..." class="w-full">
-            Send password reset instructions
-          </.button>
+          <.auth_submit label="Send reset link" phx-disable-with="Sending..." />
         </:actions>
       </.simple_form>
-      <p class="text-center text-sm mt-4">
-        | <.link href={~p"/users/log_in"}>Log in</.link>
-      </p>
-    </div>
+
+      <:footer>
+        <.link href={~p"/users/log_in"} class="transition-colors duration-150 hover:text-[#52B2D8]">
+          Back to sign in
+        </.link>
+      </:footer>
+    </.auth_shell>
     """
   end
 

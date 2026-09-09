@@ -62,6 +62,9 @@ defmodule Medcamp.Accounts.User do
     user
     |> cast(attrs, [:email, :password, :role, :name, :gsrn, :otp, :is_for_medical_camp])
     |> validate_email(opts)
+    # No-op unless the caller passes `password_confirmation` (the self-serve
+    # organisation signup does; the superadmin add-admin form does not).
+    |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
     |> validate_otp_pin_if_changed()
     |> validate_required([:name])

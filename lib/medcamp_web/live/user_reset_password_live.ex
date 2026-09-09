@@ -5,9 +5,7 @@ defmodule MedcampWeb.UserResetPasswordLive do
 
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-sm">
-      <.header class="text-center">Reset Password</.header>
-
+    <.auth_shell title="Reset your password">
       <.simple_form
         for={@form}
         id="reset_password_form"
@@ -15,7 +13,7 @@ defmodule MedcampWeb.UserResetPasswordLive do
         phx-change="validate"
       >
         <.error :if={@form.errors != []}>
-          Oops,  something went wrong! Please check the errors below.
+          Please check the errors below.
         </.error>
 
         <.input field={@form[:password]} type="password" label="New password" required />
@@ -26,14 +24,16 @@ defmodule MedcampWeb.UserResetPasswordLive do
           required
         />
         <:actions>
-          <.button phx-disable-with="Resetting..." class="w-full">Reset Password</.button>
+          <.auth_submit label="Reset password" phx-disable-with="Resetting..." />
         </:actions>
       </.simple_form>
 
-      <p class="text-center text-sm mt-4">
-        | <.link href={~p"/users/log_in"}>Log in</.link>
-      </p>
-    </div>
+      <:footer>
+        <.link href={~p"/users/log_in"} class="transition-colors duration-150 hover:text-[#52B2D8]">
+          Back to sign in
+        </.link>
+      </:footer>
+    </.auth_shell>
     """
   end
 

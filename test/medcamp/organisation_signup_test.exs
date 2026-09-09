@@ -19,9 +19,21 @@ defmodule Medcamp.OrganisationSignupTest do
         "location" => "Nairobi"
       })
 
-    admin = %{"email" => "ada@example.com", "password" => "hello world!"}
+    admin = %{
+      "email" => "ada@example.com",
+      "password" => "correct horse battery",
+      "password_confirmation" => "correct horse battery"
+    }
 
     Organisations.register_organisation(org, admin)
+  end
+
+  defp admin_attrs(email) do
+    %{
+      "email" => email,
+      "password" => "correct horse battery",
+      "password_confirmation" => "correct horse battery"
+    }
   end
 
   describe "register_organisation/2" do
@@ -68,7 +80,7 @@ defmodule Medcamp.OrganisationSignupTest do
                    "email" => "second@example.com",
                    "contact_name" => "Grace Hopper"
                  },
-                 %{"email" => "grace@example.com", "password" => "hello world!"}
+                 admin_attrs("grace@example.com")
                )
 
       refute first.slug == second.slug
@@ -86,7 +98,7 @@ defmodule Medcamp.OrganisationSignupTest do
                    "email" => "another@example.com",
                    "contact_name" => "Grace Hopper"
                  },
-                 %{"email" => "ada@example.com", "password" => "hello world!"}
+                 admin_attrs("ada@example.com")
                )
 
       assert "has already been taken" in errors_on(changeset).email
@@ -96,6 +108,33 @@ defmodule Medcamp.OrganisationSignupTest do
     test "rejects an organisation with no contact name" do
       assert {:error, :organisation, changeset} = signup(%{"contact_name" => ""})
       assert "can't be blank" in errors_on(changeset).contact_name
+    end
+  end
+
+  describe "admin invitations" do
+    test "creates an admin with a password-set token instead of a shared starter password", %{
+      organisation: organisation
+    } do
+      assert {:ok, %{user: admin, token: token}} =
+               Tenancy.with_org(organisation.id, fn ->
+                 Accounts.create_admin_invitation(%{
+                   "name" => "Invited Admin",
+                   "email" => "invited-admin@example.com"
+                 })
+               end)
+
+      assert admin.role == "admin"
+      assert admin.organisation_id == organisation.id
+      refute Accounts.get_user_by_email_and_password(admin.email, "123456")
+      assert Accounts.get_user_by_reset_password_token(token).id == admin.id
+
+      assert {:ok, updated} =
+               Accounts.reset_user_password(admin, %{
+                 "password" => "new secure password",
+                 "password_confirmation" => "new secure password"
+               })
+
+      assert Accounts.get_user_by_email_and_password(updated.email, "new secure password")
     end
   end
 
@@ -128,7 +167,11 @@ defmodule Medcamp.OrganisationSignupTest do
           Medcamp.Patients.create_patient(%{
             "first_name" => "Ada",
             "last_name" => "Test",
-            "gender" => "female"
+            "gender" => "female",
+            "date_of_birth" => "1990-01-01",
+            "phone_number" => "0712345678",
+            "home_address" => "Nairobi",
+            "creator_id" => Medcamp.AccountsFixtures.user_fixture().id
           })
         end)
 

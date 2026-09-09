@@ -107,14 +107,20 @@ defmodule Medcamp.Organisations do
   end
 
   defp create_first_admin(organisation, attrs) do
+    admin_attrs =
+      %{
+        "name" => attrs["name"] || organisation.contact_name,
+        "email" => attrs["email"],
+        "password" => attrs["password"],
+        "role" => "admin"
+      }
+      # Only forward the confirmation when the caller actually collected one -
+      # `validate_confirmation/2` fires the moment the key is present, even as nil.
+      |> maybe_put("password_confirmation", attrs["password_confirmation"])
+
     result =
       Medcamp.Tenancy.with_org(organisation.id, fn ->
-        Medcamp.Accounts.register_user(%{
-          "name" => attrs["name"] || organisation.contact_name,
-          "email" => attrs["email"],
-          "password" => attrs["password"],
-          "role" => "admin"
-        })
+        Medcamp.Accounts.register_user(admin_attrs)
       end)
 
     case result do
@@ -122,6 +128,9 @@ defmodule Medcamp.Organisations do
       {:error, changeset} -> {:error, :admin, changeset}
     end
   end
+
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
 
   @doc """
   Approves a pending organisation, letting its staff log in.
