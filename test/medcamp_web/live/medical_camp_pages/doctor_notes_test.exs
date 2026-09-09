@@ -19,13 +19,33 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNotesTest do
     }
   end
 
-  test "redirects unauthenticated visitors to OTP verification", %{patient: patient} do
+  test "redirects visitors with no staff login to sign in", %{patient: patient} do
     conn = Phoenix.ConnTest.build_conn()
 
-    assert {:error, {:redirect, %{to: to}}} =
+    assert {:error, {:redirect, %{to: "/users/log_in"}}} =
              live(conn, "/8018/#{patient.gsrn}/medical-camp/doctor_notes")
+  end
 
-    assert to == "/8018/#{patient.gsrn}/medical-camp"
+  test "redirects a doctor from a different organisation", %{patient: patient} do
+    other_org = Medcamp.OrganisationsFixtures.organisation_fixture(%{"name" => "Other Org"})
+
+    outside_doctor =
+      user_fixture(%{role: "doctor"})
+      |> Ecto.Changeset.change(%{organisation_id: other_org.id})
+      |> Medcamp.Repo.update!()
+
+    conn = log_in_user(Phoenix.ConnTest.build_conn(), outside_doctor)
+
+    assert {:error, {:redirect, %{to: "/users/log_in"}}} =
+             live(conn, "/8018/#{patient.gsrn}/medical-camp/doctor_notes")
+  end
+
+  test "redirects a same-org user whose role is not a doctor", %{patient: patient} do
+    nurse = user_fixture(%{role: "nurse"})
+    conn = log_in_user(Phoenix.ConnTest.build_conn(), nurse)
+
+    assert {:error, {:redirect, %{to: "/users/log_in"}}} =
+             live(conn, "/8018/#{patient.gsrn}/medical-camp/doctor_notes")
   end
 
   test "renders a draft key scoped to this patient's new note", %{
