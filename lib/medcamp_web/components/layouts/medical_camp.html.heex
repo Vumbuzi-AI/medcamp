@@ -29,9 +29,20 @@
               <span class="hidden sm:inline">Back</span>
             </a>
           <% end %>
-          <span class="text-base sm:text-lg font-bold text-blue-700 tracking-tight">
-            HDF Medical Camp
-          </span>
+          <div class="min-w-0">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+              Recording into
+            </p>
+            <%= if assigns[:active_camp] do %>
+              <span class="block truncate text-sm font-bold tracking-tight text-brand-primary sm:text-base">
+                {@active_camp.name}
+              </span>
+            <% else %>
+              <span class="block truncate text-sm font-bold tracking-tight text-amber-600 sm:text-base">
+                No active camp
+              </span>
+            <% end %>
+          </div>
         </div>
 
         <%!-- Center: nav tabs (hidden on mobile) --%>

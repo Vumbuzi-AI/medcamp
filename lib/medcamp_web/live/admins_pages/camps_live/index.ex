@@ -20,6 +20,7 @@ defmodule MedcampWeb.AdminCampsLive.Index do
      socket
      |> assign(:active_tab, :camps)
      |> assign(:page_title, "Camps")
+     |> assign(:search, "")
      |> load_camps()}
   end
 
@@ -31,7 +32,7 @@ defmodule MedcampWeb.AdminCampsLive.Index do
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:camp, %Camp{})
-    |> assign(:form, to_form(Camps.change_camp(%Camp{}), as: "camp"))
+    |> assign(:form, to_form(Camps.change_camp(%Camp{}, %{}, camp_form_opts(:new)), as: "camp"))
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -49,8 +50,14 @@ defmodule MedcampWeb.AdminCampsLive.Index do
   end
 
   @impl true
+  def handle_event("search", %{"search" => term}, socket) do
+    {:noreply, socket |> assign(:search, term) |> load_camps()}
+  end
+
   def handle_event("validate", %{"camp" => params}, socket) do
-    changeset = Camps.change_camp(socket.assigns.camp, params)
+    changeset =
+      Camps.change_camp(socket.assigns.camp, params, camp_form_opts(socket.assigns.live_action))
+
     {:noreply, assign(socket, :form, to_form(changeset, action: :validate, as: "camp"))}
   end
 
@@ -99,7 +106,7 @@ defmodule MedcampWeb.AdminCampsLive.Index do
   end
 
   defp save_camp(socket, :new, params) do
-    case Camps.create_camp(params) do
+    case Camps.create_camp(params, camp_form_opts(:new)) do
       {:ok, camp} ->
         {:noreply,
          socket
@@ -128,99 +135,130 @@ defmodule MedcampWeb.AdminCampsLive.Index do
 
   # Reloaded rather than patched in place because activating one camp changes
   # the row of whichever camp was active before it, not just the one clicked.
+  # A camp created here must not start in the past; an existing camp can (it
+  # started before today by now), and the DB / seeds stay permissive.
+  defp camp_form_opts(:new), do: [reject_past_start: true]
+  defp camp_form_opts(_), do: []
+
+  defp today_iso, do: Date.utc_today() |> Date.to_iso8601()
+
   defp load_camps(socket) do
-    camps = Camps.list_camps()
+    all_camps = Camps.list_camps()
+    term = socket.assigns[:search] |> to_string() |> String.trim() |> String.downcase()
+
+    camps =
+      if term == "" do
+        all_camps
+      else
+        Enum.filter(all_camps, fn c ->
+          String.contains?(String.downcase(c.name || ""), term) or
+            String.contains?(String.downcase(c.location || ""), term)
+        end)
+      end
 
     socket
     |> assign(:camps, camps)
-    |> assign(:camp_options, camps)
-    |> assign(:active_camp, Enum.find(camps, & &1.is_active))
+    |> assign(:camp_options, all_camps)
+    |> assign(:active_camp, Enum.find(all_camps, & &1.is_active))
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <div>
-      <.page_header
-        title="Camps"
-        subtitle="The events your organisation runs. New records are stamped with the active camp."
-        icon_path="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"
-      >
-        <:actions>
-          <.link patch={~p"/admin/camps/new"}>
-            <.button>New camp</.button>
-          </.link>
-        </:actions>
-      </.page_header>
+    <.list_page
+      title="Camps"
+      subtitle="The events your organisation runs. New records are stamped with the active camp."
+      icon_path="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"
+    >
+      <:actions>
+        <.link patch={~p"/admin/camps/new"}>
+          <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2d2d7a]">
+            <Heroicons.icon name="plus" type="outline" class="h-4 w-4" /> New camp
+          </button>
+        </.link>
+      </:actions>
+
+      <:toolbar>
+        <form phx-change="search" class="flex-1">
+          <.search_input name="search" value={@search} placeholder="Search by name or location" />
+        </form>
+      </:toolbar>
 
       <div
         :if={is_nil(@active_camp)}
-        class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+        class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
       >
         No camp is active. Work recorded now is not attributed to any camp, and will not appear
         when the reports are filtered to one.
       </div>
 
-      <.table id="camps" rows={@camps} visible_cols={4}>
-        <:col :let={camp} label="Camp" always_show>
+      <.blank_state
+        :if={@camps == []}
+        icon_path="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"
+        title={if @search == "", do: "No camps yet", else: "No camps match your search"}
+        description={
+          if @search == "",
+            do: "Create one to start attributing work to it.",
+            else: "Try a different name or location."
+        }
+      />
+
+      <.data_table :if={@camps != []} id="camps" rows={@camps} row_id={&"camp-#{&1.id}"}>
+        <:col :let={camp} label="Camp">
           <div class="font-medium text-slate-900">{camp.name}</div>
           <div :if={camp.description} class="text-sm text-slate-500">{camp.description}</div>
         </:col>
-        <:col :let={camp} label="Location" always_show>{camp.location || "—"}</:col>
-        <:col :let={camp} label="Dates" always_show>{Camp.date_range(camp) || "—"}</:col>
-        <:col :let={camp} label="Status" always_show>
+        <:col :let={camp} label="Location">{camp.location || "—"}</:col>
+        <:col :let={camp} label="Dates">{Camp.date_range(camp) || "—"}</:col>
+        <:col :let={camp} label="Status">
           <span
             :if={camp.is_active}
-            class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-800"
+            class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-600/20"
           >
-            Active
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Active
           </span>
-          <span :if={!camp.is_active} class="text-sm text-slate-500">Inactive</span>
+          <span
+            :if={!camp.is_active}
+            class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"
+          >
+            Inactive
+          </span>
         </:col>
-        <:col :let={camp} label="Records">{Camps.record_count(camp)}</:col>
+        <:col :let={camp} label="Records" align="right">{Camps.record_count(camp)}</:col>
 
         <:action :let={camp}>
           <.link
             :if={!camp.is_active}
             phx-click="activate"
             phx-value-id={camp.id}
-            class="text-brand-primary hover:underline"
+            class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-brand-accent hover:bg-brand-50"
           >
             Set active
           </.link>
           <.link
             :if={camp.is_active}
             phx-click="deactivate"
-            class="text-amber-700 hover:underline"
-            data-confirm="New records will not be attributed to any camp until you activate one. Continue?"
+            data-confirm-message="New records will not be attributed to any camp until you activate one. Continue?"
+            class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50"
           >
             Deactivate
           </.link>
-        </:action>
-        <:action :let={camp}>
-          <.link patch={~p"/admin/camps/#{camp.id}/edit"} class="text-slate-700 hover:underline">
+          <.link
+            patch={~p"/admin/camps/#{camp.id}/edit"}
+            class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
+          >
             Edit
           </.link>
-        </:action>
-        <:action :let={camp}>
           <.link
             phx-click="delete"
             phx-value-id={camp.id}
-            data-confirm="Delete this camp?"
-            class="text-red-600 hover:underline"
+            data-confirm-message="Delete this camp?"
+            class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
           >
             Delete
           </.link>
         </:action>
-
-        <:empty_state>
-          <tr>
-            <td colspan="6" class="px-6 py-10 text-center text-sm text-slate-500">
-              No camps yet. Create one to start attributing work to it.
-            </td>
-          </tr>
-        </:empty_state>
-      </.table>
+      </.data_table>
 
       <.modal
         :if={@live_action in [:new, :edit]}
@@ -235,7 +273,12 @@ defmodule MedcampWeb.AdminCampsLive.Index do
 
           <.input field={@form[:name]} type="text" label="Name" required />
           <.input field={@form[:location]} type="text" label="Location" />
-          <.input field={@form[:start_date]} type="date" label="Start date" />
+          <.input
+            field={@form[:start_date]}
+            type="date"
+            label="Start date"
+            min={if @live_action == :new, do: today_iso()}
+          />
           <.input field={@form[:end_date]} type="date" label="End date" />
           <.input field={@form[:description]} type="textarea" label="Description" />
 
@@ -247,7 +290,7 @@ defmodule MedcampWeb.AdminCampsLive.Index do
           </:actions>
         </.simple_form>
       </.modal>
-    </div>
+    </.list_page>
     """
   end
 end

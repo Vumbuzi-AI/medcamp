@@ -7,8 +7,8 @@ defmodule MedcampWeb.LabPagesLabSurveillanceLive.Index do
   def mount(_params, _session, socket), do: {:ok, LabSurveillanceLive.mount(socket)}
 
   @impl true
-  def handle_event("filter", %{"filters" => filters}, socket) do
-    {:noreply, LabSurveillanceLive.apply_filters(socket, filters)}
+  def handle_event("filter", params, socket) do
+    {:noreply, LabSurveillanceLive.apply_filters(socket, params)}
   end
 
   @impl true

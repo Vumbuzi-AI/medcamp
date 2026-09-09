@@ -15,7 +15,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.PreviewComponent do
     ~H"""
     <div class="bg-white mt-4">
       <div class="flex justify-between items-center mb-4 print:hidden">
-        <div class="flex items-center gap-2 text-sm text-gray-600">
+        <div class="flex items-center gap-2 text-sm text-slate-600">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 text-brand-accent"
@@ -37,7 +37,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.PreviewComponent do
             />
           </svg>
           <span class="font-medium">Template Preview</span>
-          <span class="text-gray-400">— how this template appears on a lab report</span>
+          <span class="text-slate-400">— how this template appears on a lab report</span>
         </div>
 
         <button
@@ -73,28 +73,28 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.PreviewComponent do
           <table class="w-full border-collapse text-base">
             <tbody>
               <tr>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold w-[20%]">Patient No:</td>
-                <td class="border-2 border-gray-800 px-3 py-2 w-[30%]">—</td>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold w-[20%]">Lab Test No:</td>
-                <td class="border-2 border-gray-800 px-3 py-2 w-[30%]">—</td>
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold w-[20%]">Patient No:</td>
+                <td class="border-2 border-slate-800 px-3 py-2 w-[30%]">—</td>
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold w-[20%]">Lab Test No:</td>
+                <td class="border-2 border-slate-800 px-3 py-2 w-[30%]">—</td>
               </tr>
               <tr>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold">Patient Name:</td>
-                <td class="border-2 border-gray-800 px-3 py-2">—</td>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold">Requested On:</td>
-                <td class="border-2 border-gray-800 px-3 py-2">—</td>
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold">Patient Name:</td>
+                <td class="border-2 border-slate-800 px-3 py-2">—</td>
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold">Requested On:</td>
+                <td class="border-2 border-slate-800 px-3 py-2">—</td>
               </tr>
               <tr>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold">Gender:</td>
-                <td class="border-2 border-gray-800 px-3 py-2">—</td>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold">Lab service Provider</td>
-                <td class="border-2 border-gray-800 px-3 py-2">—</td>
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold">Gender:</td>
+                <td class="border-2 border-slate-800 px-3 py-2">—</td>
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold">Lab service Provider</td>
+                <td class="border-2 border-slate-800 px-3 py-2">—</td>
               </tr>
               <tr>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold">Age:</td>
-                <td class="border-2 border-gray-800 px-3 py-2">—</td>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold">Referring Doctor:</td>
-                <td class="border-2 border-gray-800 px-3 py-2">—</td>
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold">Age:</td>
+                <td class="border-2 border-slate-800 px-3 py-2">—</td>
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold">Referring Doctor:</td>
+                <td class="border-2 border-slate-800 px-3 py-2">—</td>
               </tr>
             </tbody>
           </table>
@@ -108,32 +108,32 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.PreviewComponent do
           <table class="w-full border-collapse text-base">
             <thead>
               <tr>
-                <td colspan="2" class="border-2 border-gray-800 px-3 py-2">
+                <td colspan="2" class="border-2 border-slate-800 px-3 py-2">
                   <span class="text-[#7c3aed] font-bold">Investigation:</span>
                   <span class="text-[#7c3aed] ml-1 font-semibold">{@template.name}</span>
                 </td>
-                <td colspan="2" class="border-2 border-gray-800 px-3 py-2 text-right">
+                <td colspan="2" class="border-2 border-slate-800 px-3 py-2 text-right">
                   <div class="leading-tight">
                     <span class="text-[#7c3aed] font-bold">Sample collected on:</span>
-                    <span class="text-gray-800 font-medium ml-1">—</span>
+                    <span class="text-slate-800 font-medium ml-1">—</span>
                   </div>
                   <div class="leading-tight">
                     <span class="text-[#7c3aed] font-bold">Test Performed on:</span>
-                    <span class="text-gray-800 font-medium ml-1">—</span>
+                    <span class="text-slate-800 font-medium ml-1">—</span>
                   </div>
                 </td>
               </tr>
               <tr>
-                <th class="border-2 border-gray-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold">
+                <th class="border-2 border-slate-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold">
                   Test_Name
                 </th>
-                <th class="border-2 border-gray-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold">
+                <th class="border-2 border-slate-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold">
                   Result
                 </th>
-                <th class="border-2 border-gray-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold">
+                <th class="border-2 border-slate-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold">
                   Ref. Ranges
                 </th>
-                <th class="border-2 border-gray-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold w-20">
+                <th class="border-2 border-slate-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold w-20">
                   Flag
                 </th>
               </tr>
@@ -144,7 +144,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.PreviewComponent do
                   <tr>
                     <td
                       colspan="4"
-                      class="border-2 border-gray-800 px-3 py-2 bg-gray-50 font-bold text-gray-800"
+                      class="border-2 border-slate-800 px-3 py-2 bg-slate-50 font-bold text-slate-800"
                     >
                       {section}
                     </td>
@@ -155,25 +155,25 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.PreviewComponent do
                   <% unit = field["unit"] || field[:unit]
                   ref_range = field["ref_range_text"] || field[:ref_range_text] %>
                   <tr>
-                    <td class="border-2 border-gray-800 px-3 py-2">
+                    <td class="border-2 border-slate-800 px-3 py-2">
                       {field["label"] || field[:label]}
                     </td>
-                    <td class="border-2 border-gray-800 px-3 py-2 text-gray-400">
+                    <td class="border-2 border-slate-800 px-3 py-2 text-slate-400">
                       <%= if unit do %>
                         {unit}
                       <% else %>
                         —
                       <% end %>
                     </td>
-                    <td class="border-2 border-gray-800 px-3 py-2">{ref_range || ""}</td>
-                    <td class="border-2 border-gray-800 px-3 py-2"></td>
+                    <td class="border-2 border-slate-800 px-3 py-2">{ref_range || ""}</td>
+                    <td class="border-2 border-slate-800 px-3 py-2"></td>
                   </tr>
                 <% end %>
               <% end %>
 
               <tr>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold text-[#06b6d4]">Remarks</td>
-                <td colspan="3" class="border-2 border-gray-800 px-3 py-2"></td>
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold text-[#06b6d4]">Remarks</td>
+                <td colspan="3" class="border-2 border-slate-800 px-3 py-2"></td>
               </tr>
             </tbody>
           </table>
@@ -183,7 +183,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.PreviewComponent do
           <div class="flex justify-between items-end mt-12 print:mt-8">
             <div class="text-left">
               <p class="text-base font-bold text-[#06b6d4] mb-2 print:mb-12">Lab Technologist</p>
-              <p class="text-sm text-gray-700">—</p>
+              <p class="text-sm text-slate-700">—</p>
             </div>
           </div>
         </div>

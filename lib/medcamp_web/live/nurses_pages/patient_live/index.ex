@@ -37,31 +37,6 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  def handle_event("show_patient_code", %{"patient_id" => id}, socket) do
-    {:noreply,
-     socket
-     |> assign(:code_patient, Patients.get_patient!(id))
-     |> assign(:show_patient_code, true)}
-  end
-
-  def handle_event("close_patient_code", _params, socket) do
-    {:noreply, assign(socket, show_patient_code: false, code_patient: nil)}
-  end
-
-  def handle_event("send_pin", %{"patient_id" => patient_id}, socket) do
-    case Patients.get_patient(patient_id) do
-      nil ->
-        {:noreply, put_flash(socket, :error, "That patient could not be found.")}
-
-      patient ->
-        # Delivery can involve both email and SMS providers. Queue it so the
-        # table stays responsive while confirming the request immediately.
-        Task.start(fn -> Patients.send_pin(patient) end)
-
-        {:noreply, put_flash(socket, :info, "PIN delivery queued for #{patient_name(patient)}.")}
-    end
-  end
-
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
     |> assign(:page_title, "Edit Patient")
@@ -288,6 +263,31 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
   end
 
   @impl true
+  def handle_event("show_patient_code", %{"patient_id" => id}, socket) do
+    {:noreply,
+     socket
+     |> assign(:code_patient, Patients.get_patient!(id))
+     |> assign(:show_patient_code, true)}
+  end
+
+  def handle_event("close_patient_code", _params, socket) do
+    {:noreply, assign(socket, show_patient_code: false, code_patient: nil)}
+  end
+
+  def handle_event("send_pin", %{"patient_id" => patient_id}, socket) do
+    case Patients.get_patient(patient_id) do
+      nil ->
+        {:noreply, put_flash(socket, :error, "That patient could not be found.")}
+
+      patient ->
+        # Delivery can involve both email and SMS providers. Queue it so the
+        # table stays responsive while confirming the request immediately.
+        Task.start(fn -> Patients.send_pin(patient) end)
+
+        {:noreply, put_flash(socket, :info, "PIN delivery queued for #{patient_name(patient)}.")}
+    end
+  end
+
   def handle_event("filter", %{"filters" => form_filters}, socket) do
     form_filters = Map.merge(stringify_filters(socket.assigns.filters), form_filters)
 
@@ -334,7 +334,7 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
   def render(assigns) do
     ~H"""
     <div class="w-[100%]">
-      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
+      <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4 mb-4">
         <.page_header
           icon_path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
           title="Patients"
@@ -401,7 +401,7 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
           </.filter_drawer>
         </div>
 
-        <label class="mt-3 inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+        <label class="mt-3 inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
           <input
             type="checkbox"
             phx-click="toggle_figures"

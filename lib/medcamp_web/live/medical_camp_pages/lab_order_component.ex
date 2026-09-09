@@ -33,14 +33,14 @@ defmodule MedcampWeb.MedicalCampPages.LabOrderComponent do
 
       <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="hidden">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Lab Payment</label>
-          <div class="mt-1 block w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700 cursor-not-allowed">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Lab Payment</label>
+          <div class="mt-1 block w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700 cursor-not-allowed">
             Subsidized (30% off)
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Insurance Provider</label>
-          <div class="mt-1 block w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700 cursor-not-allowed">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Insurance Provider</label>
+          <div class="mt-1 block w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700 cursor-not-allowed">
             Human Development Fund ( HDF )
           </div>
         </div>
@@ -54,14 +54,14 @@ defmodule MedcampWeb.MedicalCampPages.LabOrderComponent do
         phx-submit="save"
       >
         <div class="flex flex-col gap-3 mb-4">
-          <label class="block text-sm font-medium text-gray-700">Select Lab Tests</label>
+          <label class="block text-sm font-medium text-slate-700">Select Lab Tests</label>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <%= for test <- @camp_tests do %>
               <label class={[
                 "flex items-center gap-3 rounded-lg border-2 p-3 cursor-pointer transition-colors",
                 if(test.id in @selected_test_ids,
                   do: "border-brand-accent bg-brand-50",
-                  else: "border-gray-200 hover:border-gray-300"
+                  else: "border-slate-200 hover:border-slate-300"
                 )
               ]}>
                 <input
@@ -73,7 +73,7 @@ defmodule MedcampWeb.MedicalCampPages.LabOrderComponent do
                   phx-target={@myself}
                   class="rounded text-brand-accent focus:ring-brand-accent"
                 />
-                <span class="text-sm font-medium text-gray-800">{test.name}</span>
+                <span class="text-sm font-medium text-slate-800">{test.name}</span>
               </label>
             <% end %>
           </div>

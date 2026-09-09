@@ -211,10 +211,10 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-6">
       <div :if={@live_action not in [:view_results, :print_preview]}>
         <!-- Header -->
-        <.header class="text-brand-primary border-b border-gray-100 pb-4 mb-6">
+        <.header class="text-brand-primary border-b border-slate-100 pb-4 mb-6">
           <div class="flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -232,7 +232,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
             </svg>
             <div>
               <h1 class="text-xl font-semibold">Lab Result #{@lab_result.id}</h1>
-              <p class="text-sm text-gray-600 mt-1">
+              <p class="text-sm text-slate-600 mt-1">
                 Requested: {format_datetime(@lab_result.inserted_at)}
               </p>
             </div>
@@ -244,7 +244,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
                 <.button
                   class="bg-green-600 hover:bg-green-700"
                   phx-click="mark-complete"
-                  data-confirm="Are you sure you want to mark this report as complete?"
+                  data-confirm-message="Are you sure you want to mark this report as complete?"
                 >
                   <div class="flex items-center">
                     <svg
@@ -335,8 +335,8 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
         
     <!-- Urgency & Status -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <p class="text-xs font-medium text-gray-500 uppercase">Urgency</p>
+          <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+            <p class="text-xs font-medium text-slate-500 uppercase">Urgency</p>
             <div class="mt-1">
               <%= case @lab_result.urgency do %>
                 <% "Urgent" -> %>
@@ -359,8 +359,8 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
             </div>
           </div>
 
-          <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <p class="text-xs font-medium text-gray-500 uppercase">Report Status</p>
+          <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+            <p class="text-xs font-medium text-slate-500 uppercase">Report Status</p>
             <div class="mt-1">
               <%= if @lab_result.report_complete do %>
                 <span class="px-2 py-1 text-sm rounded-full bg-green-100 text-green-800 font-medium flex items-center w-fit">
@@ -390,14 +390,14 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
             </div>
           </div>
 
-          <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <p class="text-xs font-medium text-gray-500 uppercase">Tests Requested</p>
-            <p class="mt-1 text-xl font-semibold text-gray-900">{length(@lab_result.tests)}</p>
+          <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+            <p class="text-xs font-medium text-slate-500 uppercase">Tests Requested</p>
+            <p class="mt-1 text-xl font-semibold text-slate-900">{length(@lab_result.tests)}</p>
           </div>
 
-          <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <p class="text-xs font-medium text-gray-500 uppercase">Tests Completed</p>
-            <p class="mt-1 text-xl font-semibold text-gray-900">
+          <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+            <p class="text-xs font-medium text-slate-500 uppercase">Tests Completed</p>
+            <p class="mt-1 text-xl font-semibold text-slate-900">
               {Enum.count(@test_entries, &(&1.status == "completed" || &1.status == "verified"))} / {length(
                 @test_entries
               )}
@@ -498,7 +498,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
             <% payload = @lab_result.interpretation_payload %>
             <div class="space-y-4">
               <%= if @lab_result.interpretation_generated_at do %>
-                <p class="text-xs text-gray-500">
+                <p class="text-xs text-slate-500">
                   Generated: {format_datetime(@lab_result.interpretation_generated_at)}
                 </p>
               <% end %>
@@ -506,18 +506,18 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
     <!-- Patient & Clinical Context -->
               <% triage = Map.get(payload, "triage_context", %{}) %>
               <% note = Map.get(payload, "doctor_note_context", %{}) %>
-              <div class="bg-white rounded p-3 border border-gray-200">
-                <h4 class="text-xs font-semibold text-gray-700 uppercase mb-2">Clinical Context</h4>
+              <div class="bg-white rounded p-3 border border-slate-200">
+                <h4 class="text-xs font-semibold text-slate-700 uppercase mb-2">Clinical Context</h4>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2">
                   <div>
-                    <p class="text-xs text-gray-500">Age</p>
-                    <p class="text-sm font-medium text-gray-900">
+                    <p class="text-xs text-slate-500">Age</p>
+                    <p class="text-sm font-medium text-slate-900">
                       {calculate_age(@lab_result.patient.date_of_birth)} years
                     </p>
                   </div>
                   <div>
-                    <p class="text-xs text-gray-500">Gender</p>
-                    <p class="text-sm font-medium text-gray-900">
+                    <p class="text-xs text-slate-500">Gender</p>
+                    <p class="text-sm font-medium text-slate-900">
                       {if @lab_result.patient.gender,
                         do: String.capitalize(@lab_result.patient.gender),
                         else: "-"}
@@ -535,9 +535,9 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
                   <.context_value label="Diagnosis" value={Map.get(note, "diagnosis")} />
                 </div>
                 <%= if present_value?(Map.get(note, "symptoms")) do %>
-                  <div class="mt-2 pt-2 border-t border-gray-100">
-                    <p class="text-xs text-gray-500">Symptoms</p>
-                    <p class="text-sm text-gray-700 whitespace-pre-line">
+                  <div class="mt-2 pt-2 border-t border-slate-100">
+                    <p class="text-xs text-slate-500">Symptoms</p>
+                    <p class="text-sm text-slate-700 whitespace-pre-line">
                       {Map.get(note, "symptoms")}
                     </p>
                   </div>
@@ -546,21 +546,21 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
 
               <%= if Enum.any?(Map.get(payload, "abnormal_findings", [])) do %>
                 <div>
-                  <h4 class="text-xs font-semibold text-gray-700 uppercase mb-2">
+                  <h4 class="text-xs font-semibold text-slate-700 uppercase mb-2">
                     Abnormal Findings
                   </h4>
                   <div class="space-y-2">
                     <%= for finding <- Map.get(payload, "abnormal_findings", []) do %>
-                      <div class="bg-white rounded p-3 border border-gray-200">
+                      <div class="bg-white rounded p-3 border border-slate-200">
                         <div class="flex items-center justify-between">
-                          <span class="font-medium text-sm text-gray-900">{finding["test"]}</span>
+                          <span class="font-medium text-sm text-slate-900">{finding["test"]}</span>
                           <span class={[
                             "text-xs font-bold px-1.5 py-0.5 rounded",
                             case finding["flag"] do
                               "low" -> "bg-blue-100 text-blue-700"
                               "high" -> "bg-red-100 text-red-700"
                               "critical" -> "bg-red-100 text-red-700"
-                              _ -> "bg-gray-100 text-gray-700"
+                              _ -> "bg-slate-100 text-slate-700"
                             end
                           ]}>
                             {finding["value"]} {finding["unit"]}
@@ -570,12 +570,12 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
                           </span>
                         </div>
                         <%= if finding["reference_range"] do %>
-                          <p class="text-xs text-gray-500 mt-1">
+                          <p class="text-xs text-slate-500 mt-1">
                             Range: {finding["reference_range"]}
                           </p>
                         <% end %>
                         <%= if finding["doctor_note"] && finding["doctor_note"] != "" do %>
-                          <p class="text-xs text-gray-600 mt-1">{finding["doctor_note"]}</p>
+                          <p class="text-xs text-slate-600 mt-1">{finding["doctor_note"]}</p>
                         <% end %>
                       </div>
                     <% end %>
@@ -585,12 +585,12 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
 
               <%= if Enum.any?(Map.get(payload, "clinical_interpretation", [])) do %>
                 <div>
-                  <h4 class="text-xs font-semibold text-gray-700 uppercase mb-2">
+                  <h4 class="text-xs font-semibold text-slate-700 uppercase mb-2">
                     Clinical Interpretation
                   </h4>
                   <ul class="list-disc list-inside space-y-1">
                     <%= for line <- Map.get(payload, "clinical_interpretation", []) do %>
-                      <li class="text-sm text-gray-700">{line}</li>
+                      <li class="text-sm text-slate-700">{line}</li>
                     <% end %>
                   </ul>
                 </div>
@@ -598,25 +598,25 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
 
               <%= if Enum.any?(Map.get(payload, "recommended_attention", [])) do %>
                 <div>
-                  <h4 class="text-xs font-semibold text-gray-700 uppercase mb-2">
+                  <h4 class="text-xs font-semibold text-slate-700 uppercase mb-2">
                     Recommended Attention
                   </h4>
                   <ul class="list-disc list-inside space-y-1">
                     <%= for line <- Map.get(payload, "recommended_attention", []) do %>
-                      <li class="text-sm text-gray-700">{line}</li>
+                      <li class="text-sm text-slate-700">{line}</li>
                     <% end %>
                   </ul>
                 </div>
               <% end %>
 
               <%= if Map.get(payload, "disclaimer") do %>
-                <p class="text-xs italic text-gray-500 pt-2 border-t border-brand-100">
+                <p class="text-xs italic text-slate-500 pt-2 border-t border-brand-100">
                   {payload["disclaimer"]}
                 </p>
               <% end %>
             </div>
           <% else %>
-            <p class="text-sm text-gray-500">
+            <p class="text-sm text-slate-500">
               <%= if has_test_entries?(@test_entries) do %>
                 No interpretation generated yet. Click "Generate AI Lab Data" to generate one.
               <% else %>
@@ -628,7 +628,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
         
     <!-- Test Entries Section -->
         <div class="mt-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center">
             <svg
               class="h-5 w-5 mr-2 text-brand-accent"
               fill="none"
@@ -646,9 +646,9 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
           </h3>
 
           <%= if Enum.empty?(@test_entries) do %>
-            <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+            <div class="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300">
               <svg
-                class="mx-auto h-12 w-12 text-gray-400"
+                class="mx-auto h-12 w-12 text-slate-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -660,8 +660,8 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
                   d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
                 />
               </svg>
-              <h3 class="mt-2 text-sm font-medium text-gray-900">No tests added yet</h3>
-              <p class="mt-1 text-sm text-gray-500">
+              <h3 class="mt-2 text-sm font-medium text-slate-900">No tests added yet</h3>
+              <p class="mt-1 text-sm text-slate-500">
                 Click "Add Test & Results" to select a test and record results.
               </p>
               <div class="mt-4">
@@ -682,7 +682,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
         </div>
         
     <!-- Back Link -->
-        <div class="mt-6 pt-4 border-t border-gray-200">
+        <div class="mt-6 pt-4 border-t border-slate-200">
           <.back navigate={~p"/lab/lab_results"}>
             Back to lab results
           </.back>
@@ -804,7 +804,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
       case @entry.status do
         "completed" -> "border-green-200 bg-green-50/30"
         "verified" -> "border-blue-200 bg-blue-50/30"
-        _ -> "border-gray-200"
+        _ -> "border-slate-200"
       end
     ]}>
       <div class="flex items-start justify-between">
@@ -816,7 +816,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
               case @entry.status do
                 "completed" -> "bg-green-100"
                 "verified" -> "bg-blue-100"
-                _ -> "bg-gray-100"
+                _ -> "bg-slate-100"
               end
             ]}>
               <%= case @entry.status do %>
@@ -850,7 +850,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
                   </svg>
                 <% _ -> %>
                   <svg
-                    class="h-5 w-5 text-gray-400"
+                    class="h-5 w-5 text-slate-400"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -866,9 +866,9 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
             </div>
 
             <div>
-              <h4 class="font-semibold text-gray-900">{@entry.template.name}</h4>
+              <h4 class="font-semibold text-slate-900">{@entry.template.name}</h4>
               <%= if @entry.template.short_name do %>
-                <span class="text-xs text-gray-500">({@entry.template.short_name})</span>
+                <span class="text-xs text-slate-500">({@entry.template.short_name})</span>
               <% end %>
               <div class="flex items-center gap-2 mt-1">
                 <span class={[
@@ -877,12 +877,12 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
                     "completed" -> "bg-green-100 text-green-800"
                     "verified" -> "bg-blue-100 text-blue-800"
                     "in_progress" -> "bg-yellow-100 text-yellow-800"
-                    _ -> "bg-gray-100 text-gray-800"
+                    _ -> "bg-slate-100 text-slate-800"
                   end
                 ]}>
                   {String.capitalize(@entry.status)}
                 </span>
-                <span class="text-xs text-gray-500">
+                <span class="text-xs text-slate-500">
                   {length(@entry.template.field_definitions)} parameters
                 </span>
               </div>
@@ -891,7 +891,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
           
     <!-- Results Preview (if completed) -->
           <%= if @entry.status in ["completed", "verified"] && map_size(@entry.results) > 0 do %>
-            <div class="mt-3 pt-3 border-t border-gray-100">
+            <div class="mt-3 pt-3 border-t border-slate-100">
               <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                 <%= for {field_name, result_data} <- Enum.take(@entry.results, 4) do %>
                   <% field_def = find_field_def(@entry.template, field_name)
@@ -901,14 +901,14 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
                       field_def["ref_range_text"] %>
                   <div class="text-sm">
                     <div>
-                      <span class="text-gray-500">{field_def["label"] || field_name}:</span>
+                      <span class="text-slate-500">{field_def["label"] || field_name}:</span>
                       <span class={[
                         "font-medium ml-1",
                         case result_data["flag"] do
                           "low" -> "text-blue-600"
                           "high" -> "text-red-600"
                           "normal" -> "text-green-700"
-                          _ -> "text-gray-900"
+                          _ -> "text-slate-900"
                         end
                       ]}>
                         {result_data["value"]}
@@ -932,14 +932,14 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
                       </span>
                     </div>
                     <%= if result_data["note"] && result_data["note"] != "" do %>
-                      <p class="text-xs italic text-gray-500 mt-0.5 line-clamp-2">
+                      <p class="text-xs italic text-slate-500 mt-0.5 line-clamp-2">
                         {result_data["note"]}
                       </p>
                     <% end %>
                   </div>
                 <% end %>
                 <%= if map_size(@entry.results) > 4 do %>
-                  <div class="text-sm text-gray-500">
+                  <div class="text-sm text-slate-500">
                     +{map_size(@entry.results) - 4} more...
                   </div>
                 <% end %>
@@ -968,8 +968,8 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
             <button
               phx-click="delete_entry"
               phx-value-id={@entry.id}
-              data-confirm="Are you sure you want to remove this test?"
-              class="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+              data-confirm-message="Are you sure you want to remove this test?"
+              class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
             >
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -1051,8 +1051,8 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
   defp context_value(assigns) do
     ~H"""
     <div :if={present_value?(@value)}>
-      <p class="text-xs text-gray-500">{@label}</p>
-      <p class="text-sm font-medium text-gray-900">{@value}</p>
+      <p class="text-xs text-slate-500">{@label}</p>
+      <p class="text-sm font-medium text-slate-900">{@value}</p>
     </div>
     """
   end

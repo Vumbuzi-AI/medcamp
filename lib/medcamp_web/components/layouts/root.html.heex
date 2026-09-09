@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="[scrollbar-gutter:stable]">
+<html lang="en" class="scroll-smooth [scrollbar-gutter:stable]">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -15,7 +15,13 @@
     <meta name="robots" content="index, follow" />
     <meta name="twitter:image" content={organisation_logo(assigns)} />
     <meta property="og:image" content={organisation_logo(assigns)} />
-    <link rel="icon" type="image/svg+xml" href={organisation_logo(assigns)} />
+    <link rel="icon" type="image/png" href={organisation_logo(assigns)} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
+    />
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <%!-- The current organisation's palette. Overrides the --brand-* defaults
           in app.css, which is what every brand-* Tailwind class reads. --%>
@@ -58,5 +64,30 @@
       })();
     </script>
     {@inner_content}
+
+    <.modal id="global-confirm-modal" max_width="max-w-md">
+      <h3 id="global-confirm-title" class="pr-6 text-lg font-bold text-slate-900">
+        Confirm action
+      </h3>
+      <p id="global-confirm-message" class="mt-2 text-sm leading-relaxed text-slate-600">
+        Are you sure?
+      </p>
+      <div class="mt-6 flex justify-end gap-3">
+        <button
+          type="button"
+          data-global-confirm-cancel
+          class="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition-colors duration-150 hover:bg-slate-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          data-global-confirm-accept
+          class="inline-flex items-center justify-center rounded-full bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-brand-accent"
+        >
+          Confirm
+        </button>
+      </div>
+    </.modal>
   </body>
 </html>

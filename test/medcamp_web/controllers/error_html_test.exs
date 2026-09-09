@@ -5,10 +5,25 @@ defmodule MedcampWeb.ErrorHTMLTest do
   import Phoenix.Template
 
   test "renders 404.html" do
-    assert render_to_string(MedcampWeb.ErrorHTML, "404", "html", []) =~ "Page Not Found"
+    html = render_to_string(MedcampWeb.ErrorHTML, "404", "html", [])
+    assert html =~ ">404<"
+    assert html =~ "Page not found"
+    assert html =~ "Tibasasa"
+    assert html =~ "/images/tibasasa-ai-logo.png"
+    refute html =~ "cdn.tailwindcss.com"
   end
 
   test "renders 500.html" do
-    assert render_to_string(MedcampWeb.ErrorHTML, "500", "html", []) =~ "Internal Server Error"
+    html = render_to_string(MedcampWeb.ErrorHTML, "500", "html", [])
+    assert html =~ ">500<"
+    assert html =~ "Something went wrong on our end"
+    assert html =~ "Tibasasa"
+    refute html =~ "cdn.tailwindcss.com"
+  end
+
+  test "renders 503.html" do
+    html = render_to_string(MedcampWeb.ErrorHTML, "503", "html", [])
+    assert html =~ ">503<"
+    assert html =~ "Back shortly"
   end
 end

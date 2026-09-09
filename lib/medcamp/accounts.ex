@@ -6,6 +6,7 @@ defmodule Medcamp.Accounts do
   import Ecto.Query, warn: false
   alias Medcamp.Repo
   alias Medcamp.Patients
+  alias Medcamp.Validation
 
   alias Medcamp.Accounts.{User, UserToken, UserNotifier}
 
@@ -19,7 +20,10 @@ defmodule Medcamp.Accounts do
   # In your Accounts context (lib/medcamp/accounts.ex)
 
   def get_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, [email: email], @unscoped)
+    case Validation.normalize_email(email) do
+      nil -> nil
+      email -> Repo.get_by(User, [email: email], @unscoped)
+    end
   end
 
   @doc """
@@ -30,7 +34,10 @@ defmodule Medcamp.Accounts do
   pre-login path and has to search everywhere.
   """
   def get_organisation_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, email: email)
+    case Validation.normalize_email(email) do
+      nil -> nil
+      email -> Repo.get_by(User, email: email)
+    end
   end
 
   @doc """
@@ -161,6 +168,64 @@ defmodule Medcamp.Accounts do
     |> Repo.all()
   end
 
+  @doc """
+  The admin users of an organisation, newest first. Superadmin only - runs
+  unscoped because the platform console sits outside every tenant.
+  """
+  def list_admins_for_organisation(org_id) do
+    Repo.all(
+      from(u in User,
+        where: u.organisation_id == ^org_id and u.role == "admin",
+        order_by: [asc: u.inserted_at]
+      ),
+      @unscoped
+    )
+  end
+
+  @doc """
+  Paginated, optionally name/email-searched admin users of an organisation.
+  Superadmin only - runs unscoped, like `list_admins_for_organisation/1`.
+
+  Returns `%{rows: [...], count: total_matching, page:, per_page:}`.
+  """
+  def paged_admins_for_organisation(org_id, opts \\ []) do
+    page = Medcamp.Pagination.normalize_page(opts[:page])
+    per_page = Medcamp.Pagination.normalize_per_page(opts[:per_page])
+
+    query =
+      from(u in User,
+        where: u.organisation_id == ^org_id and u.role == "admin",
+        order_by: [asc: u.inserted_at]
+      )
+      |> admin_search(opts[:search])
+
+    count = Repo.aggregate(query, :count, :id, @unscoped)
+
+    rows =
+      query
+      |> limit(^per_page)
+      |> offset(^((page - 1) * per_page))
+      |> Repo.all(@unscoped)
+
+    %{rows: rows, count: count, page: page, per_page: per_page}
+  end
+
+  defp admin_search(query, term) when is_binary(term) do
+    case String.trim(term) do
+      "" -> query
+      t -> from(u in query, where: ilike(u.name, ^"%#{t}%") or ilike(u.email, ^"%#{t}%"))
+    end
+  end
+
+  defp admin_search(query, _), do: query
+
+  @doc "Sets a user's active flag. Superadmin only."
+  def set_user_active(%User{} = user, active?) when is_boolean(active?) do
+    user
+    |> Ecto.Changeset.change(is_active: active?)
+    |> Repo.update()
+  end
+
   def list_users_paginated(filters \\ %{}, page \\ 1, per_page \\ 20) do
     users_list_query(filters)
     |> Repo.paginate(page: page, page_size: per_page)
@@ -210,8 +275,16 @@ defmodule Medcamp.Accounts do
     where(query, [u], u.is_active == true)
   end
 
+  defp apply_active_filter(query, "pending") do
+    where(query, [u], (u.is_active == false or is_nil(u.is_active)) and is_nil(u.activated_at))
+  end
+
   defp apply_active_filter(query, "false") do
-    where(query, [u], u.is_active == false or is_nil(u.is_active))
+    where(
+      query,
+      [u],
+      (u.is_active == false or is_nil(u.is_active)) and not is_nil(u.activated_at)
+    )
   end
 
   defp apply_active_filter(query, _), do: query
@@ -282,6 +355,65 @@ defmodule Medcamp.Accounts do
     User.changeset(user, attrs)
   end
 
+  def change_admin_invitation(attrs \\ %{}) do
+    User.changeset(%User{role: "admin"}, attrs)
+  end
+
+  @doc """
+  Creates an admin account that must set its own password from an emailed link.
+
+  The generated password is intentionally random and never shown. The returned
+  token is a normal reset-password token, so password setup uses the same
+  single-use, short-lived path as password recovery.
+  """
+  def create_admin_invitation(attrs \\ %{}) do
+    attrs =
+      attrs
+      |> invitation_attrs()
+      |> Map.put("role", "admin")
+
+    with {:ok, user} <- create_user(attrs) do
+      {:ok, %{user: user, token: get_reset_password_link_for_user(user)}}
+    end
+  end
+
+  @doc """
+  Creates an admin account without emailing or generating a password-set token.
+
+  Used by self-serve organisation signup: the account is created while the
+  organisation is pending, and a fresh password-set link is sent only after
+  superadmin approval.
+  """
+  def create_pending_admin(attrs \\ %{}) do
+    attrs
+    |> invitation_attrs()
+    |> Map.put("role", "admin")
+    |> create_user()
+  end
+
+  @doc """
+  Invites a staff member of any role: creates the account with a random,
+  never-shown password and returns a single-use password-set token.
+
+  The account starts `is_active: false` and is flipped to active the moment
+  the invitee sets their own password (`reset_user_password/2`), so "active"
+  on the users directory reads as "has finished onboarding".
+  """
+  def invite_user(attrs) do
+    normalised = Enum.into(attrs, %{}, fn {k, v} -> {to_string(k), v} end)
+    role = Map.get(normalised, "role", "support staff")
+
+    invite_attrs =
+      normalised
+      |> invitation_attrs()
+      |> Map.put("role", role)
+      |> Map.put("is_active", false)
+
+    with {:ok, user} <- create_user(invite_attrs) do
+      {:ok, %{user: user, token: get_reset_password_link_for_user(user)}}
+    end
+  end
+
   def get_reset_password_link_for_user(user) do
     {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
     Repo.insert!(user_token)
@@ -297,6 +429,19 @@ defmodule Medcamp.Accounts do
     %User{}
     |> User.changeset(attrs)
     |> Repo.insert()
+  end
+
+  defp invitation_attrs(attrs) do
+    attrs
+    |> Enum.into(%{}, fn {key, value} -> {to_string(key), value} end)
+    |> Map.take(["name", "email"])
+    |> Map.put("hashed_password", Bcrypt.hash_pwd_salt(random_invitation_secret()))
+  end
+
+  defp random_invitation_secret do
+    32
+    |> :crypto.strong_rand_bytes()
+    |> Base.url_encode64(padding: false)
   end
 
   @doc """
@@ -330,7 +475,12 @@ defmodule Medcamp.Accounts do
   """
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, [email: email], @unscoped)
+    user =
+      case Validation.normalize_email(email) do
+        nil -> nil
+        email -> Repo.get_by(User, [email: email], @unscoped)
+      end
+
     if User.valid_password?(user, password), do: user
   end
 
@@ -544,7 +694,7 @@ defmodule Medcamp.Accounts do
   """
   def get_user_by_session_token(token) do
     {:ok, query} = UserToken.verify_session_token_query(token)
-    Repo.one(query)
+    Repo.one(query, @unscoped)
   end
 
   @doc """
@@ -588,7 +738,7 @@ defmodule Medcamp.Accounts do
   """
   def confirm_user(token) do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "confirm"),
-         %User{} = user <- Repo.one(query),
+         %User{} = user <- Repo.one(query, @unscoped),
          {:ok, %{user: user}} <- Repo.transaction(confirm_user_multi(user)) do
       {:ok, user}
     else
@@ -634,7 +784,7 @@ defmodule Medcamp.Accounts do
   """
   def get_user_by_reset_password_token(token) do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "reset_password"),
-         %User{} = user <- Repo.one(query) do
+         %User{} = user <- Repo.one(query, @unscoped) do
       user
     else
       _ -> nil
@@ -655,7 +805,26 @@ defmodule Medcamp.Accounts do
   """
   def reset_user_password(user, attrs) do
     Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
+    |> Ecto.Multi.update(
+      :user,
+      # Setting a password also completes an invitation: the account becomes
+      # active, and the first time through it is stamped `activated_at` so the
+      # directory can tell "never onboarded" (Pending) from "deactivated".
+      user
+      |> User.password_changeset(attrs)
+      |> Ecto.Changeset.put_change(:is_active, true)
+      |> then(fn cs ->
+        if is_nil(user.activated_at) do
+          Ecto.Changeset.put_change(
+            cs,
+            :activated_at,
+            DateTime.utc_now() |> DateTime.truncate(:second)
+          )
+        else
+          cs
+        end
+      end)
+    )
     |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do

@@ -31,6 +31,9 @@ defmodule Medcamp.TriagesTest do
     end
 
     test "create_triage/1 with valid data creates a triage" do
+      patient = Medcamp.PatientsFixtures.patient_fixture()
+      creator = Medcamp.AccountsFixtures.user_fixture(%{role: "nurse"})
+
       valid_attrs = %{
         date: ~D[2025-02-21],
         temperature: 120.5,
@@ -39,7 +42,9 @@ defmodule Medcamp.TriagesTest do
         oxygen_saturation: 120.5,
         height: 120.5,
         weight: 120.5,
-        triage_notes: "some triage_notes"
+        triage_notes: "some triage_notes",
+        patient_id: patient.id,
+        creator_id: creator.id
       }
 
       assert {:ok, %Triage{} = triage} = Triages.create_triage(valid_attrs)
@@ -52,6 +57,8 @@ defmodule Medcamp.TriagesTest do
       assert triage.height == 120.5
       assert triage.weight == 120.5
       assert triage.triage_notes == "some triage_notes"
+      assert triage.patient_id == patient.id
+      assert triage.creator_id == creator.id
     end
 
     test "create_triage/1 with invalid data returns error changeset" do

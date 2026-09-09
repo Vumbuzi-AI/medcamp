@@ -6,22 +6,30 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
   alias Medcamp.Triages
   alias Medcamp.DoctorNotes
   alias Medcamp.LabResults
-
-  # Fixed camp days (March 28 and 29, 2026)
-  @day1 ~D[2026-03-28]
-  @day2 ~D[2026-03-29]
+  alias Medcamp.Camps
+  alias Medcamp.Tenancy
 
   @per_page 10
 
   @impl true
   def mount(_params, session, socket) do
     report_path = Map.get(session, "report_path", "/admin/medical_camp/report")
+    organisation_name = Map.get(session, "superadmin_organisation_name")
+    back_path = Map.get(session, "superadmin_back_path")
+
+    if org_id = Map.get(session, "superadmin_org_id"), do: Tenancy.put_org_id(org_id)
+
+    camp = safe_active_camp()
 
     {:ok,
      socket
      |> assign(:active_tab, :medical_camp)
      |> assign(:page_title, "Medical Camp Dashboard")
      |> assign(:report_path, report_path)
+     |> assign(:superadmin_organisation_name, organisation_name)
+     |> assign(:superadmin_back_path, back_path)
+     |> assign(:camp, camp)
+     |> assign(:camp_days, (camp && Camps.Camp.days(camp)) || [])
      |> assign(:selected_date, nil)
      |> assign(:active_day_tab, :all)
      |> assign(:selected_patient, nil)
@@ -70,35 +78,29 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
      |> paginate_patients()}
   end
 
-  def handle_event("set_day_tab", %{"tab" => tab}, socket) do
-    tab_atom = String.to_existing_atom(tab)
-    socket = assign(socket, :page, 1)
+  def handle_event("set_day_tab", %{"tab" => "all"}, socket) do
+    {:noreply,
+     socket
+     |> assign(:page, 1)
+     |> assign(:active_day_tab, :all)
+     |> assign(:selected_date, nil)
+     |> assign(:selected_patient, nil)
+     |> load_all_data()}
+  end
 
-    socket =
-      case tab_atom do
-        :all ->
-          socket
-          |> assign(:active_day_tab, :all)
-          |> assign(:selected_date, nil)
-          |> assign(:selected_patient, nil)
-          |> load_all_data()
-
-        :day1 ->
-          socket
-          |> assign(:active_day_tab, :day1)
-          |> assign(:selected_date, @day1)
-          |> assign(:selected_patient, nil)
-          |> load_data(@day1)
-
-        :day2 ->
-          socket
-          |> assign(:active_day_tab, :day2)
-          |> assign(:selected_date, @day2)
-          |> assign(:selected_patient, nil)
-          |> load_data(@day2)
-      end
-
-    {:noreply, socket}
+  def handle_event("set_day_tab", %{"tab" => iso}, socket) do
+    with {:ok, date} <- Date.from_iso8601(iso),
+         true <- date in socket.assigns.camp_days do
+      {:noreply,
+       socket
+       |> assign(:page, 1)
+       |> assign(:active_day_tab, date)
+       |> assign(:selected_date, date)
+       |> assign(:selected_patient, nil)
+       |> load_data(date)}
+    else
+      _ -> {:noreply, socket}
+    end
   end
 
   def handle_event("select_patient", %{"id" => id}, socket) do
@@ -242,15 +244,31 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
   end
 
   defp load_all_data(socket) do
-    patients = Patients.list_patients()
-    stats = patients |> Patients.compute_camp_stats_for_patients()
+    patients =
+      case socket.assigns.camp do
+        nil -> Patients.list_patients()
+        camp -> Patients.list_patients_for_camp(camp.id)
+      end
+
+    stats = Patients.compute_camp_stats_for_patients(patients)
     load_from_patients(socket, patients, stats)
   end
 
   defp load_data(socket, date) do
-    patients = Patients.list_medical_camp_patients(date)
-    stats = Patients.medical_camp_stats(date)
+    patients =
+      case socket.assigns.camp do
+        nil -> Patients.list_medical_camp_patients(date)
+        camp -> Patients.list_patients_for_camp_on(camp.id, date)
+      end
+
+    stats = Patients.compute_camp_stats_for_patients(patients)
     load_from_patients(socket, patients, stats)
+  end
+
+  defp safe_active_camp do
+    Camps.get_active_camp()
+  rescue
+    _ -> nil
   end
 
   defp load_from_patients(socket, patients, stats) do
@@ -337,34 +355,82 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 -m-4 sm:-m-6 p-4 sm:p-6">
-      <div class="w-[90%] mx-auto  space-y-6">
+    <div class="-m-4 min-h-screen bg-slate-50 p-4 sm:-m-6 sm:p-6">
+      <div class="space-y-6">
         
     <!-- Header -->
-        <div class="bg-gradient-to-r from-brand-primary to-brand-accent-dark rounded-2xl p-6 text-white shadow-lg">
+        <div class="rounded-2xl bg-brand-primary p-6 text-white">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 class="text-2xl font-bold">Medical Camp Dashboard</h1>
-              <p class="text-blue-100 text-sm mt-1">
-                {@stats.total} patients ·
-                <span class="font-semibold">
-                  All medical-camp patients
+              <.link
+                :if={@superadmin_back_path}
+                navigate={@superadmin_back_path}
+                class="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-white/70 transition-colors duration-150 hover:text-white"
+              >
+                <Heroicons.icon name="arrow-left" type="outline" class="h-4 w-4" />
+                Back to organisations
+              </.link>
+              <h1 class="text-2xl font-bold tracking-[-0.01em]">Medical Camp Dashboard</h1>
+              <p class="mt-1 text-sm text-white/70">
+                <span :if={@superadmin_organisation_name} class="font-semibold text-white">
+                  {@superadmin_organisation_name} ·
                 </span>
+                {@stats.total} patients
               </p>
             </div>
-            <div class="flex flex-col items-stretch gap-3 sm:items-end">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+              <.camp_switcher
+                :if={is_nil(@superadmin_organisation_name)}
+                tone="on_dark"
+                camps={assigns[:camp_options] || []}
+                camp_filter={assigns[:camp_filter]}
+              />
               <.link
                 navigate={@report_path}
-                class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-primary transition hover:bg-blue-50"
+                class="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-primary transition-colors duration-150 hover:bg-white/90"
               >
                 <Heroicons.icon name="document-text" type="outline" class="h-4 w-4" /> View Report
               </.link>
             </div>
           </div>
         </div>
+
+        <div
+          :if={length(@camp_days) > 1}
+          class="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white p-2"
+        >
+          <span class="px-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            Camp day
+          </span>
+          <button
+            type="button"
+            phx-click="set_day_tab"
+            phx-value-tab="all"
+            class={[
+              "rounded-full px-3 py-1.5 text-sm font-semibold transition-colors duration-150",
+              (@active_day_tab == :all && "bg-brand-primary text-white") ||
+                "text-slate-600 hover:bg-slate-100"
+            ]}
+          >
+            All days
+          </button>
+          <button
+            :for={day <- @camp_days}
+            type="button"
+            phx-click="set_day_tab"
+            phx-value-tab={Date.to_iso8601(day)}
+            class={[
+              "rounded-full px-3 py-1.5 text-sm font-semibold transition-colors duration-150",
+              (@active_day_tab == day && "bg-brand-primary text-white") ||
+                "text-slate-600 hover:bg-slate-100"
+            ]}
+          >
+            {Calendar.strftime(day, "%a, %d %b")}
+          </button>
+        </div>
         
     <!-- Top-level Tabs -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
           <div class="overflow-x-auto">
             <div class="flex min-w-max sm:min-w-0">
               <button
@@ -373,7 +439,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 class={[
                   "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :overview,
-                    do: "border-brand-primary text-brand-primary bg-indigo-50/60",
+                    do: "border-brand-primary text-brand-primary bg-brand-50",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                   )
                 ]}
@@ -394,7 +460,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 class={[
                   "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :patient_data,
-                    do: "border-brand-primary text-brand-primary bg-indigo-50/60",
+                    do: "border-brand-primary text-brand-primary bg-brand-50",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                   )
                 ]}
@@ -415,7 +481,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 class={[
                   "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :ai_analysis,
-                    do: "border-brand-primary text-brand-primary bg-indigo-50/60",
+                    do: "border-brand-primary text-brand-primary bg-brand-50",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                   )
                 ]}
@@ -436,7 +502,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 class={[
                   "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :financials,
-                    do: "border-brand-primary text-brand-primary bg-indigo-50/60",
+                    do: "border-brand-primary text-brand-primary bg-brand-50",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                   )
                 ]}
@@ -457,7 +523,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 class={[
                   "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :downloads,
-                    do: "border-brand-primary text-brand-primary bg-indigo-50/60",
+                    do: "border-brand-primary text-brand-primary bg-brand-50",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                   )
                 ]}
@@ -567,7 +633,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           
     <!-- Operational Breakdowns -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6">
               <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">
                 Age Group Breakdown
               </h3>
@@ -599,7 +665,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6">
               <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">
                 Patient Type Breakdown
               </h3>
@@ -615,7 +681,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
             </div>
           </div>
           <!-- Geographic Spread -->
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
               <div>
                 <h3 class="text-base font-semibold text-slate-800">Geographic Spread</h3>
@@ -693,7 +759,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
         <!-- Patient Data Tab Content -->
         <%= if @active_dashboard_tab == :patient_data do %>
           <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
               <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
                 <div>
                   <h3 class="text-base font-semibold text-slate-800">Doctor Notes by Doctor</h3>
@@ -750,7 +816,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               <% end %>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
               <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
                 <div>
                   <h3 class="text-base font-semibold text-slate-800">Top Diagnoses</h3>
@@ -805,7 +871,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           </div>
           
     <!-- Test Breakdown -->
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
                 <h3 class="text-base font-semibold text-slate-800">Lab Test Breakdown</h3>
@@ -870,7 +936,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           </div>
           
     <!-- Patients Table -->
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between gap-3 flex-wrap">
               <h3 class="text-base font-semibold text-slate-800">
                 All Camp Patients
@@ -1026,18 +1092,18 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     <!-- Modal -->
             <div class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
               <div
-                class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col pointer-events-auto"
+                class="bg-white rounded-2xl border border-slate-200 w-full max-w-2xl max-h-[90vh] flex flex-col pointer-events-auto"
                 phx-click-away="close_patient"
               >
                 <!-- Modal Header -->
-                <div class="px-6 py-5 bg-gradient-to-r from-brand-primary to-brand-accent-dark rounded-t-2xl text-white flex items-center justify-between shrink-0">
+                <div class="px-6 py-5 bg-brand-primary rounded-t-2xl text-white flex items-center justify-between shrink-0">
                   <div class="flex items-center gap-3">
                     <div class="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center font-bold text-lg">
                       {String.first(@selected_patient.first_name || "?")}
                     </div>
                     <div>
                       <h3 class="font-bold text-lg leading-tight">{full_name(@selected_patient)}</h3>
-                      <p class="text-blue-100 text-xs mt-0.5 flex items-center gap-2">
+                      <p class="text-white/70 text-xs mt-0.5 flex items-center gap-2">
                         <span>{@selected_patient.age || "—"} yrs</span>
                         <span>·</span>
                         <span>{@selected_patient.gender || "—"}</span>
@@ -1249,7 +1315,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                       <div class="space-y-5">
                         <%= for note <- @patient_doctor_notes do %>
                           <div class="rounded-xl border border-slate-200 overflow-hidden">
-                            <div class="bg-gradient-to-r from-indigo-50 to-slate-50 px-4 py-3 flex items-center gap-3">
+                            <div class="bg-slate-50 px-4 py-3 flex items-center gap-3">
                               <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm shrink-0">
                                 Dr
                               </div>
@@ -1348,7 +1414,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     <!-- AI Analysis Tab -->
                   <%= if @active_report_tab == :ai do %>
                     <div class="space-y-4">
-                      <div class="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-indigo-50/50 p-4 sm:p-5">
+                      <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
                         <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div>
                             <h4 class="text-base font-semibold text-slate-900">
@@ -1375,7 +1441,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                             rows="4"
                             value={@patient_ai_question}
                             placeholder="Ask for a case summary, likely disease pattern, missing documentation, red flags, or follow-up advice."
-                            class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-indigo-100"
+                            class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-indigo-100"
                           ></textarea>
 
                           <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -1386,7 +1452,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                             <button
                               type="submit"
                               phx-disable-with="Analyzing..."
-                              class="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2e307a]"
+                              class="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
                             >
                               Analyze with AI
                             </button>
@@ -1407,12 +1473,12 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                       <% end %>
 
                       <%= if @patient_ai_response do %>
-                        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
+                        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
                           <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
                             <Heroicons.icon
                               name="sparkles"
                               type="outline"
-                              class="h-5 w-5 text-indigo-600"
+                              class="h-5 w-5 text-brand-primary"
                             />
                             <h4 class="text-sm font-semibold uppercase tracking-wide text-slate-700">
                               AI Findings
@@ -1437,7 +1503,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                   </button>
                   <a
                     href={"/admin/patients/#{@selected_patient.id}"}
-                    class="flex items-center gap-2 text-sm font-semibold text-white bg-brand-primary hover:bg-[#2e307a] px-4 py-2 rounded-xl transition-colors"
+                    class="flex items-center gap-2 text-sm font-semibold text-white bg-brand-primary hover:opacity-90 px-4 py-2 rounded-xl transition-colors"
                   >
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
@@ -1458,7 +1524,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
 
         <%= if @active_dashboard_tab == :ai_analysis do %>
           <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
               <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h3 class="text-lg font-semibold text-slate-900">Medical Camp AI Analysis</h3>
@@ -1482,20 +1548,20 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                   rows="5"
                   value={@camp_ai_question}
                   placeholder="Ask: how many had respiratory disease patterns, what were the most common diagnoses, which age groups carried most burden, what follow-up gaps exist, or summarize the whole camp."
-                  class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-indigo-100"
+                  class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-indigo-100"
                 ></textarea>
 
                 <button
                   type="submit"
                   phx-disable-with="Analyzing..."
-                  class="flex w-fit items-center gap-2 rounded-xl bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2e307a]"
+                  class="flex w-fit items-center gap-2 rounded-xl bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
                 >
                   Analyze with AI
                 </button>
               </.form>
 
               <%= if @camp_ai_loading do %>
-                <div class="mt-4 rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm">
+                <div class="mt-4 rounded-2xl border border-indigo-100 bg-white p-5">
                   <div class="flex items-center gap-3 mb-5">
                     <span class="text-sm font-medium text-indigo-600">Analysing camp data…</span>
                   </div>
@@ -1522,7 +1588,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               <% end %>
 
               <%= if @camp_ai_response do %>
-                <div class="mt-4 rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm">
+                <div class="mt-4 rounded-2xl border border-indigo-100 bg-white p-5">
                   <div class="flex items-center gap-2 border-b border-slate-200 pb-3 mb-1">
                     <Heroicons.icon name="sparkles" type="solid" class="h-4 w-4 text-indigo-500" />
                     <h4 class="text-sm font-semibold uppercase tracking-wide text-indigo-700">
@@ -1537,7 +1603,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
             </div>
 
             <div class="space-y-4">
-              <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+              <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
                 <h4 class="text-sm font-semibold uppercase tracking-wide text-slate-600">
                   AI Input Snapshot
                 </h4>
@@ -1553,7 +1619,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 </div>
               </div>
 
-              <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+              <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
                 <h4 class="text-sm font-semibold uppercase tracking-wide text-slate-600">
                   Suggested Questions
                 </h4>
@@ -1602,7 +1668,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           
     <!-- Summary stat cards -->
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col gap-1">
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col gap-1">
               <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Total Revenue
               </p>
@@ -1611,21 +1677,21 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </p>
               <p class="text-xs text-slate-400">from lab tests</p>
             </div>
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col gap-1">
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col gap-1">
               <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Collected</p>
               <p class="text-2xl font-bold text-blue-700 tabular-nums">
                 KSh {Number.Delimit.number_to_delimited(f.total_paid, precision: 0)}
               </p>
               <p class="text-xs text-slate-400">marked as paid</p>
             </div>
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col gap-1">
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col gap-1">
               <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pending</p>
               <p class="text-2xl font-bold text-amber-600 tabular-nums">
                 KSh {Number.Delimit.number_to_delimited(f.total_pending, precision: 0)}
               </p>
               <p class="text-xs text-slate-400">awaiting payment</p>
             </div>
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col gap-2">
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col gap-2">
               <div>
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Patients Billed
@@ -1642,13 +1708,13 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           </div>
           
     <!-- Per-patient breakdown -->
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
             
     <!-- Invoice-style header -->
-            <div class="bg-gradient-to-r from-brand-primary to-brand-accent-dark px-8 py-6 text-white">
+            <div class="bg-brand-primary px-8 py-6 text-white">
               <div class="flex items-start justify-between">
                 <div>
-                  <p class="text-xs font-medium uppercase tracking-widest text-blue-200 mb-1">
+                  <p class="text-xs font-medium uppercase tracking-widest text-white/60 mb-1">
                     Medical Camp
                   </p>
                   <h2 class="text-xl font-bold">
@@ -1656,11 +1722,11 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                   </h2>
                 </div>
                 <div class="text-right">
-                  <p class="text-xs text-blue-200 uppercase tracking-wide">Grand Total</p>
+                  <p class="text-xs text-white/60 uppercase tracking-wide">Grand Total</p>
                   <p class="text-3xl font-bold mt-0.5 tabular-nums">
                     KSh {Number.Delimit.number_to_delimited(f.total_revenue, precision: 0)}
                   </p>
-                  <p class="text-xs text-blue-200 mt-1">
+                  <p class="text-xs text-white/60 mt-1">
                     {f.patient_count} patient{if f.patient_count != 1, do: "s", else: ""} · {f.test_count} test{if f.test_count !=
                                                                                                                      1,
                                                                                                                    do:
@@ -1815,29 +1881,21 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               <% end %>
               
     <!-- Grand total footer -->
-              <div class="border-t-2 border-brand-primary bg-gradient-to-r from-brand-primary to-brand-accent-dark px-8 py-5 text-white">
+              <div class="border-t border-white/15 bg-brand-primary px-8 py-5 text-white">
                 <div class="flex items-center justify-between">
                   <div>
-                    <p class="text-sm font-medium text-blue-100">
-                      Grand Total —
-                      <%= case @active_day_tab do %>
-                        <% :all  -> %>
-                          All Days
-                        <% :day1 -> %>
-                          Day 1 · Mar 28
-                        <% :day2 -> %>
-                          Day 2 · Mar 29
-                      <% end %>
+                    <p class="text-sm font-medium text-white/70">
+                      Grand Total — {day_tab_label(@active_day_tab)}
                     </p>
                     <div class="flex items-center gap-4 mt-1">
-                      <span class="text-xs text-blue-200">
+                      <span class="text-xs text-white/60">
                         <span class="font-semibold text-white">
                           KSh {Number.Delimit.number_to_delimited(f.total_paid, precision: 0)}
                         </span>
                         collected
                       </span>
                       <span class="text-blue-300">·</span>
-                      <span class="text-xs text-blue-200">
+                      <span class="text-xs text-white/60">
                         <span class="font-semibold text-amber-300">
                           KSh {Number.Delimit.number_to_delimited(f.total_pending, precision: 0)}
                         </span>
@@ -1860,29 +1918,24 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
 
         <!-- Downloads Tab Content -->
         <%= if @active_dashboard_tab == :downloads do %>
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
             <div class="px-5 py-5 border-b border-slate-200 bg-slate-50/80">
               <h3 class="text-base font-semibold text-slate-800">Export & Download</h3>
               <p class="text-sm text-slate-500 mt-1">
                 Download camp data as CSV or open the printable PDF report.
-                All exports respect the current day filter (<span class="font-medium">
-                  <%= case @active_day_tab do %>
-                    <% :all  -> %>All Days
-                    <% :day1 -> %>Day 1 · Mar 28
-                    <% :day2 -> %>Day 2 · Mar 29
-                  <% end %>
-                </span>).
+                All exports respect the current day filter
+                (<span class="font-medium">{day_tab_label(@active_day_tab)}</span>).
               </p>
             </div>
 
             <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
               
     <!-- Summary Stats -->
-              <div class="border border-slate-200 rounded-2xl p-5 flex flex-col gap-3">
+              <div class="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col gap-3">
                 <div class="flex items-center gap-3">
-                  <div class="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+                  <div class="h-10 w-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0">
                     <svg
-                      class="h-5 w-5 text-indigo-600"
+                      class="h-5 w-5 text-brand-primary"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -1926,7 +1979,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                   </button>
                   <.link
                     href={"/admin/medical_camp/export/summary?day=#{@active_day_tab}"}
-                    class="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded-xl transition-colors"
+                    class="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-brand-primary hover:opacity-90 px-3 py-2 rounded-xl transition-colors"
                   >
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
@@ -1942,11 +1995,11 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </div>
               
     <!-- Complete Patient List -->
-              <div class="border border-slate-200 rounded-2xl p-5 flex flex-col gap-3">
+              <div class="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col gap-3">
                 <div class="flex items-center gap-3">
-                  <div class="h-10 w-10 rounded-xl bg-violet-50 flex items-center justify-center shrink-0">
+                  <div class="h-10 w-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0">
                     <svg
-                      class="h-5 w-5 text-violet-600"
+                      class="h-5 w-5 text-brand-primary"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -1990,7 +2043,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                   </button>
                   <.link
                     href={"/admin/medical_camp/export/patients?day=#{@active_day_tab}"}
-                    class="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded-xl transition-colors"
+                    class="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-brand-primary hover:opacity-90 px-3 py-2 rounded-xl transition-colors"
                   >
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
@@ -2006,11 +2059,11 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </div>
               
     <!-- Geographic Spread -->
-              <div class="border border-slate-200 rounded-2xl p-5 flex flex-col gap-3">
+              <div class="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col gap-3">
                 <div class="flex items-center gap-3">
-                  <div class="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+                  <div class="h-10 w-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0">
                     <svg
-                      class="h-5 w-5 text-emerald-600"
+                      class="h-5 w-5 text-brand-primary"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -2060,7 +2113,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                   </button>
                   <.link
                     href={"/admin/medical_camp/export/geography?day=#{@active_day_tab}"}
-                    class="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-2 rounded-xl transition-colors"
+                    class="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-brand-primary hover:opacity-90 px-3 py-2 rounded-xl transition-colors"
                   >
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
@@ -2076,11 +2129,11 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </div>
               
     <!-- Diagnosis Data -->
-              <div class="border border-slate-200 rounded-2xl p-5 flex flex-col gap-3">
+              <div class="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col gap-3">
                 <div class="flex items-center gap-3">
-                  <div class="h-10 w-10 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
+                  <div class="h-10 w-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0">
                     <svg
-                      class="h-5 w-5 text-rose-600"
+                      class="h-5 w-5 text-brand-primary"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -2124,7 +2177,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                   </button>
                   <.link
                     href={"/admin/medical_camp/export/diagnoses?day=#{@active_day_tab}"}
-                    class="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 px-3 py-2 rounded-xl transition-colors"
+                    class="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-brand-primary hover:opacity-90 px-3 py-2 rounded-xl transition-colors"
                   >
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
@@ -2144,15 +2197,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
             <div class="px-6 pb-6">
               <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200">
                 <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">
-                  Current Data Snapshot —
-                  <%= case @active_day_tab do %>
-                    <% :all  -> %>
-                      All Days
-                    <% :day1 -> %>
-                      Day 1 · Mar 28
-                    <% :day2 -> %>
-                      Day 2 · Mar 29
-                  <% end %>
+                  Current Data Snapshot — {day_tab_label(@active_day_tab)}
                 </p>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div class="text-center">
@@ -2196,7 +2241,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
       <div class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" phx-click="close_preview"></div>
       <!-- Modal container -->
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[85vh] flex flex-col pointer-events-auto">
+        <div class="bg-white rounded-2xl border border-slate-200 w-full max-w-5xl max-h-[85vh] flex flex-col pointer-events-auto">
           <!-- Header -->
           <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
             <div>
@@ -2356,7 +2401,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
   defp camp_stat(assigns) do
     ~H"""
     <div class={[
-      "rounded-2xl border p-4 shadow-sm flex flex-col gap-1",
+      "rounded-2xl border p-4 flex flex-col gap-1",
       camp_stat_style(@color)
     ]}>
       <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{@label}</p>
@@ -2492,7 +2537,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
       |> assign(:dom_id, chart_dom_id(assigns.title))
 
     ~H"""
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-full">
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 h-full">
       <div class="mb-4">
         <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">{@title}</h3>
         <p :if={@subtitle} class="text-sm text-slate-500 mt-1 leading-relaxed">{@subtitle}</p>
@@ -2513,8 +2558,8 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     %{
       medical_camp_scope: current_scope_label(assigns.active_day_tab),
       filters: %{
-        active_day_tab: assigns.active_day_tab,
-        selected_date: assigns.selected_date
+        active_day_tab: to_string(assigns.active_day_tab),
+        selected_date: assigns.selected_date && to_string(assigns.selected_date)
       },
       summary: %{
         stats: assigns.stats,
@@ -2561,9 +2606,13 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     }
   end
 
-  defp current_scope_label(:all), do: "All medical camp days"
-  defp current_scope_label(:day1), do: "Day 1 - 28 March 2026"
-  defp current_scope_label(:day2), do: "Day 2 - 29 March 2026"
+  defp current_scope_label(:all), do: "All camp days"
+  defp current_scope_label(%Date{} = date), do: Calendar.strftime(date, "%A, %d %b %Y")
+  defp current_scope_label(_), do: "All camp days"
+
+  defp day_tab_label(:all), do: "All days"
+  defp day_tab_label(%Date{} = date), do: Calendar.strftime(date, "%a, %d %b")
+  defp day_tab_label(_), do: "All days"
 
   defp patient_payload(nil), do: nil
 
@@ -2815,21 +2864,11 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     }
   end
 
-  defp doctor_registered_in_march?(nil), do: false
-
-  defp doctor_registered_in_march?(doctor) do
-    case doctor.inserted_at do
-      %DateTime{month: 3, year: 2026} -> true
-      %NaiveDateTime{month: 3, year: 2026} -> true
-      _ -> false
-    end
-  end
-
   defp build_doctor_note_doctor_breakdown(doctor_notes) do
+    # The notes are already scoped to this camp's patients, so every one counts;
+    # group them by the authoring doctor.
     doctor_notes
-    |> Enum.filter(fn note ->
-      date_from_record(note) in [@day1, @day2] and doctor_registered_in_march?(note.doctor)
-    end)
+    |> Enum.filter(fn note -> note.doctor && note.doctor.name end)
     |> Enum.group_by(fn note ->
       note.doctor.name
     end)
@@ -3087,11 +3126,33 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
 
   defp delimited(value), do: Number.Delimit.number_to_delimited(value || 0, precision: 0)
 
-  defp daily_flow_chart(rows) do
-    day_colors = [
-      "rgba(55, 56, 150, 0.78)",
-      "rgba(20, 184, 166, 0.78)"
+  # The UI chrome stays navy/cyan, but *category* charts (diagnoses, test types,
+  # patient types, age bands) need distinguishable series colours - one hue per
+  # bar/slice - or every bar looks the same and can't be scanned. Fixed order,
+  # brand navy + cyan first so 2-3 category charts still read on-brand. See
+  # docs/DESIGN.md ("Charts").
+  defp camp_palette do
+    [
+      "#0C2765",
+      "#52B2D8",
+      "#F59E0B",
+      "#22C55E",
+      "#8B5CF6",
+      "#EC4899",
+      "#14B8A6",
+      "#F43F5E",
+      "#0EA5E9",
+      "#94A3B8"
     ]
+  end
+
+  defp palette_for(count) do
+    Stream.cycle(camp_palette()) |> Enum.take(max(count, 1))
+  end
+
+  defp daily_flow_chart(rows) do
+    # One distinct colour per day - never the grey "disabled"-looking fallback.
+    day_colors = palette_for(length(rows))
 
     datasets =
       rows
@@ -3100,7 +3161,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
         %{
           label: row.label,
           data: [row.registrations, row.triaged, row.doctor_reviews, row.tests],
-          backgroundColor: Enum.at(day_colors, i, "rgba(100,100,100,0.6)"),
+          backgroundColor: Enum.at(day_colors, i),
           borderRadius: 10
         }
       end)
@@ -3128,8 +3189,8 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           %{
             label: "All registrations",
             data: day1,
-            borderColor: "rgba(55, 56, 150, 0.9)",
-            backgroundColor: "rgba(55, 56, 150, 0.12)",
+            borderColor: "rgba(12, 39, 101, 0.9)",
+            backgroundColor: "rgba(12, 39, 101, 0.12)",
             borderWidth: 2,
             pointRadius: 4,
             pointHoverRadius: 6,
@@ -3139,8 +3200,8 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           %{
             label: "",
             data: day2,
-            borderColor: "rgba(20, 184, 166, 0.9)",
-            backgroundColor: "rgba(20, 184, 166, 0.10)",
+            borderColor: "rgba(82, 178, 216, 0.9)",
+            backgroundColor: "rgba(82, 178, 216, 0.12)",
             borderWidth: 2,
             pointRadius: 4,
             pointHoverRadius: 6,
@@ -3195,7 +3256,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           %{
             label: "Patients",
             data: Enum.map(rows, & &1.count),
-            backgroundColor: "rgba(99, 102, 241, 0.78)",
+            backgroundColor: palette_for(length(rows)),
             borderRadius: 10
           }
         ]
@@ -3217,7 +3278,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           %{
             label: "Patients",
             data: Enum.map(rows, & &1.count),
-            backgroundColor: ["#f59e0b", "#22c55e", "#3b82f6", "#f43f5e"],
+            backgroundColor: palette_for(length(rows)),
             borderRadius: 10
           }
         ]
@@ -3241,7 +3302,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           %{
             label: "Tests",
             data: Enum.map(rows, & &1.total),
-            backgroundColor: "rgba(15, 118, 110, 0.8)",
+            backgroundColor: palette_for(length(rows)),
             borderRadius: 10
           }
         ]
@@ -3303,7 +3364,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           %{
             label: "Doctor Notes",
             data: Enum.map(rows, & &1.count),
-            backgroundColor: "rgba(124, 58, 237, 0.8)",
+            backgroundColor: palette_for(length(rows)),
             borderRadius: 10
           }
         ]
@@ -3468,30 +3529,11 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
   defp emergency_scale_style("5"), do: "bg-red-200 text-red-900"
   defp emergency_scale_style(_), do: "bg-slate-100 text-slate-600"
 
-  defp camp_stat_style("violet"),
-    do: "bg-gradient-to-br from-violet-50 to-white border-violet-100"
-
-  defp camp_stat_style("teal"), do: "bg-gradient-to-br from-teal-50 to-white border-teal-100"
-
-  defp camp_stat_style("indigo"),
-    do: "bg-gradient-to-br from-indigo-50 to-white border-indigo-100"
-
-  defp camp_stat_style("blue"), do: "bg-gradient-to-br from-blue-50 to-white border-blue-100"
-  defp camp_stat_style("cyan"), do: "bg-gradient-to-br from-cyan-50 to-white border-cyan-100"
-  defp camp_stat_style("pink"), do: "bg-gradient-to-br from-pink-50 to-white border-pink-100"
-  defp camp_stat_style("amber"), do: "bg-gradient-to-br from-amber-50 to-white border-amber-100"
-  defp camp_stat_style("rose"), do: "bg-gradient-to-br from-rose-50 to-white border-rose-100"
+  # One flat card style for every KPI tile - hairline border, no tint, no shadow
+  # (Tibasasa system). The `color` arg is kept for call-site compatibility.
   defp camp_stat_style(_), do: "bg-white border-slate-200"
 
-  defp camp_stat_value_color("violet"), do: "text-violet-700"
-  defp camp_stat_value_color("teal"), do: "text-teal-700"
-  defp camp_stat_value_color("indigo"), do: "text-indigo-700"
-  defp camp_stat_value_color("blue"), do: "text-blue-700"
-  defp camp_stat_value_color("cyan"), do: "text-cyan-700"
-  defp camp_stat_value_color("pink"), do: "text-pink-700"
-  defp camp_stat_value_color("amber"), do: "text-amber-700"
-  defp camp_stat_value_color("rose"), do: "text-rose-700"
-  defp camp_stat_value_color(_), do: "text-slate-800"
+  defp camp_stat_value_color(_), do: "text-brand-primary"
 
   defp bar_color("amber"), do: "bg-amber-400"
   defp bar_color("green"), do: "bg-green-500"

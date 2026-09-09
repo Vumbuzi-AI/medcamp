@@ -33,7 +33,7 @@ defmodule MedcampWeb.PatientComponents do
         </button>
       </:actions>
     </.blank_state>
-    <.table
+    <.data_table
       :if={@count > 0}
       id="patients"
       rows={@patients}
@@ -47,7 +47,7 @@ defmodule MedcampWeb.PatientComponents do
               Patient Code
             </.button>
           </div>
-          <p class="text-gray-500 text-sm font-medium mt-1">GSRN: {patient.gsrn}</p>
+          <p class="text-slate-500 text-sm font-medium mt-1">GSRN: {patient.gsrn}</p>
         </div>
       </:col>
       <:col :let={patient} label="Name">
@@ -73,7 +73,7 @@ defmodule MedcampWeb.PatientComponents do
           Edit
         </.link>
       </:action>
-    </.table>
+    </.data_table>
     """
   end
 
@@ -95,7 +95,7 @@ defmodule MedcampWeb.PatientComponents do
         </button>
       </:actions>
     </.blank_state>
-    <.table
+    <.data_table
       :if={@total_count > 0}
       id="patients"
       rows={@patients}
@@ -109,7 +109,7 @@ defmodule MedcampWeb.PatientComponents do
               Patient Code
             </.button>
           </div>
-          <p class="text-gray-500 text-sm font-medium mt-1">GSRN: {patient.gsrn}</p>
+          <p class="text-slate-500 text-sm font-medium mt-1">GSRN: {patient.gsrn}</p>
         </div>
       </:col>
       <:col :let={patient} label="Name">
@@ -127,7 +127,7 @@ defmodule MedcampWeb.PatientComponents do
       <:col :let={patient} label="Phone Number">{patient.phone_number}</:col>
       <:col :let={patient} label="National ID">{patient.national_id}</:col>
       <:col :let={patient} label="Gender">{patient.gender}</:col>
-    </.table>
+    </.data_table>
     <.pagination
       page={@page}
       total_pages={@total_pages}
@@ -152,9 +152,9 @@ defmodule MedcampWeb.PatientComponents do
     ~H"""
     <div
       :if={Map.get(assigns, :show_header, true)}
-      class="bg-white rounded-lg shadow-sm border border-gray-100 p-4"
+      class="bg-white rounded-lg border border-slate-100 p-4"
     >
-      <.header class="text-brand-primary border-b border-gray-100 pb-4 mb-4">
+      <.header class="text-brand-primary border-b border-slate-100 pb-4 mb-4">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -214,7 +214,7 @@ defmodule MedcampWeb.PatientComponents do
         </button>
       </:actions>
     </.blank_state>
-    <.table
+    <.data_table
       :if={@count > 0}
       id="patients"
       rows={@patients}
@@ -233,7 +233,7 @@ defmodule MedcampWeb.PatientComponents do
             Print code
           </button>
           <span :if={!@show_print_code} class="text-sm font-medium text-slate-500">Patient code</span>
-          <p class="text-gray-500 text-sm font-medium mt-1">GSRN: {patient.gsrn}</p>
+          <p class="text-slate-500 text-sm font-medium mt-1">GSRN: {patient.gsrn}</p>
         </div>
       </:col>
       <:col :let={patient} label="Name">
@@ -256,7 +256,7 @@ defmodule MedcampWeb.PatientComponents do
           type="button"
           phx-click="send_pin"
           phx-value-patient_id={patient.id}
-          data-confirm="Are you sure you want to send the PIN?"
+          data-confirm-message="Are you sure you want to send the PIN?"
           phx-disable-with="Sending..."
           aria-label={"Resend PIN to #{patient.first_name} #{patient.last_name}"}
           class="inline-flex items-center justify-center gap-1.5 rounded-md bg-brand-accent px-3 py-2 text-center text-sm font-medium text-white transition hover:bg-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 disabled:cursor-wait disabled:opacity-60"
@@ -272,17 +272,21 @@ defmodule MedcampWeb.PatientComponents do
           Edit
         </.link>
       </:action>
-    </.table>
+    </.data_table>
     """
   end
 
   attr :show_birth_certificate, :boolean, default: true
   attr :show_insurance_details, :boolean, default: true
   attr :new_triage_url, :string, default: nil
+  attr :patient, :map, required: true
+  attr :form, :any, required: true
+  attr :most_recent_triage, :any, default: nil
+  attr :back_url, :string, required: true
 
   def patient_overview(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+    <div class="bg-white rounded-lg border border-slate-100 p-6">
       <div class="flex gap-2 text-brand-primary font-semibold items-center mb-6">
         <.link navigate={@back_url} class="hover:text-brand-accent transition-colors">
           <Heroicons.icon name="arrow-left" type="outline" class="h-5 w-5" />
@@ -300,13 +304,12 @@ defmodule MedcampWeb.PatientComponents do
 
       <div class="flex flex-col md:flex-row gap-6">
         <!-- Patient summary card -->
-        <div class="w-full md:w-1/3 bg-[#f8f8ff] rounded-lg p-5 shadow-sm border border-gray-100">
+        <div class="w-full md:w-1/3 bg-[#f8f8ff] rounded-lg p-5 border border-slate-100">
           <div>
             <div id="my-downloadable-container" phx-hook="DownloadableDiv" class="relative rounded ">
               <div id="my-content-to-download" class="">
-                <div class="  bg-white rounded-lg shadow-md mx-auto my-5 p-4 border border-gray-200 relative overflow-hidden print:shadow-none print:m-0">
-                  <div class="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-transparent to-brand-100 opacity-20 -z-10">
-                  </div>
+                <div class="  bg-white rounded-lg mx-auto my-5 p-4 border border-slate-200 relative overflow-hidden print:shadow-none print:m-0">
+                  <div class="hidden"></div>
 
                   <div class="flex justify-between items-center w-[100%] border-b-2 border-brand-primary pb-2 mb-3">
                     <div class="text-brand-primary">
@@ -332,7 +335,7 @@ defmodule MedcampWeb.PatientComponents do
                         |> Enum.filter(&(&1 != nil))
                         |> Enum.join(" ")}
                       </h2>
-                      <p class="text-xs text-gray-600 mt-1 mb-2">
+                      <p class="text-xs text-slate-600 mt-1 mb-2">
                         {@patient.gender}
                       </p>
 
@@ -366,7 +369,7 @@ defmodule MedcampWeb.PatientComponents do
                     </div>
                   </div>
 
-                  <div class="text-center text-gray-400 italic text-[8px] mt-2">
+                  <div class="text-center text-slate-400 italic text-[8px] mt-2">
                     Please bring this card to all appointments
                   </div>
                 </div>
@@ -404,26 +407,26 @@ defmodule MedcampWeb.PatientComponents do
             </div>
           </div>
 
-          <div class="border-t border-gray-200 my-4"></div>
+          <div class="border-t border-slate-200 my-4"></div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
-              <p class="text-sm text-gray-500 mb-1">Phone Number</p>
+              <p class="text-sm text-slate-500 mb-1">Phone Number</p>
               <p class="font-medium">{@patient.phone_number}</p>
             </div>
 
             <div>
-              <p class="text-sm text-gray-500 mb-1">Date of Birth</p>
+              <p class="text-sm text-slate-500 mb-1">Date of Birth</p>
               <p class="font-medium">{@patient.date_of_birth}</p>
             </div>
 
             <div>
-              <p class="text-sm text-gray-500 mb-1">Gender</p>
+              <p class="text-sm text-slate-500 mb-1">Gender</p>
               <p class="font-medium">{@patient.gender}</p>
             </div>
 
             <div>
-              <p class="text-sm text-gray-500 mb-1">National ID</p>
+              <p class="text-sm text-slate-500 mb-1">National ID</p>
               <p class="font-medium">{@patient.national_id}</p>
               <a
                 :if={@patient.national_id_document}
@@ -437,7 +440,7 @@ defmodule MedcampWeb.PatientComponents do
             </div>
 
             <div :if={@show_birth_certificate}>
-              <p class="text-sm text-gray-500 mb-1">Birth Certificate Number</p>
+              <p class="text-sm text-slate-500 mb-1">Birth Certificate Number</p>
               <p class="font-medium">{@patient.birth_certificate_number || "—"}</p>
               <a
                 :if={@patient.birth_certificate_document}
@@ -451,36 +454,36 @@ defmodule MedcampWeb.PatientComponents do
             </div>
 
             <div>
-              <p class="text-sm text-gray-500 mb-1">Email</p>
+              <p class="text-sm text-slate-500 mb-1">Email</p>
               <p class="font-medium">{@patient.email}</p>
             </div>
           </div>
           <div>
-            <p class="text-sm text-gray-500 mb-1">Residence</p>
+            <p class="text-sm text-slate-500 mb-1">Residence</p>
             <p class="font-medium">{@patient.home_address}</p>
           </div>
 
-          <div class="border-t border-gray-200 my-4"></div>
+          <div class="border-t border-slate-200 my-4"></div>
 
           <div class="mb-4">
             <h3 class="text-md font-semibold text-brand-primary mb-2">Emergency Contact</h3>
             <div class="grid grid-cols-1 gap-2">
               <div>
-                <p class="text-sm text-gray-500 mb-1">Name</p>
+                <p class="text-sm text-slate-500 mb-1">Name</p>
                 <p class="font-medium">{@patient.emergency_contact_name}</p>
               </div>
               <div>
-                <p class="text-sm text-gray-500 mb-1">Phone</p>
+                <p class="text-sm text-slate-500 mb-1">Phone</p>
                 <p class="font-medium">{@patient.emergency_contact_phone_number}</p>
               </div>
               <div>
-                <p class="text-sm text-gray-500 mb-1">Relationship</p>
+                <p class="text-sm text-slate-500 mb-1">Relationship</p>
                 <p class="font-medium">{@patient.emergency_contact_relationship}</p>
               </div>
             </div>
           </div>
 
-          <div class="border-t border-gray-200 my-4"></div>
+          <div class="border-t border-slate-200 my-4"></div>
 
           <div>
             <div :if={@show_insurance_details}>
@@ -490,7 +493,7 @@ defmodule MedcampWeb.PatientComponents do
 
               <div class="grid grid-cols-1 gap-2">
                 <div>
-                  <p class="mb-1 text-sm text-gray-500">
+                  <p class="mb-1 text-sm text-slate-500">
                     Insurance Status
                   </p>
 
@@ -498,14 +501,14 @@ defmodule MedcampWeb.PatientComponents do
                     <%= if @patient.has_insurance do %>
                       <span class="text-green-600">Insured</span>
                     <% else %>
-                      <span class="text-gray-600">Not Insured</span>
+                      <span class="text-slate-600">Not Insured</span>
                     <% end %>
                   </p>
                 </div>
 
                 <%= if @patient.has_insurance do %>
                   <div>
-                    <p class="mb-1 text-sm text-gray-500">
+                    <p class="mb-1 text-sm text-slate-500">
                       Insurance Scheme
                     </p>
 
@@ -515,7 +518,7 @@ defmodule MedcampWeb.PatientComponents do
                   </div>
 
                   <div>
-                    <p class="mb-1 text-sm text-gray-500">
+                    <p class="mb-1 text-sm text-slate-500">
                       Insurance Number
                     </p>
 
@@ -525,7 +528,7 @@ defmodule MedcampWeb.PatientComponents do
                   </div>
 
                   <div>
-                    <p class="mb-1 text-sm text-gray-500">
+                    <p class="mb-1 text-sm text-slate-500">
                       Cover Limit
                     </p>
 
@@ -537,17 +540,17 @@ defmodule MedcampWeb.PatientComponents do
               </div>
             </div>
 
-            <div class="my-4 border-t border-gray-200"></div>
+            <div class="my-4 border-t border-slate-200"></div>
 
             <%= if Enum.empty?(@patient.documents) do %>
-              <div class="rounded-lg border border-dashed border-gray-300 p-6 text-center">
+              <div class="rounded-lg border border-dashed border-slate-300 p-6 text-center">
                 <Heroicons.icon
                   name="folder-open"
                   type="outline"
-                  class="mx-auto h-10 w-10 text-gray-400"
+                  class="mx-auto h-10 w-10 text-slate-400"
                 />
 
-                <p class="mt-3 text-sm text-gray-500">
+                <p class="mt-3 text-sm text-slate-500">
                   No patient documents have been uploaded.
                 </p>
               </div>
@@ -557,7 +560,7 @@ defmodule MedcampWeb.PatientComponents do
                   <% document_url =
                     "/patients/#{@patient.id}/documents/#{document.document_type}" %>
 
-                  <div class="flex gap-5 rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                  <div class="flex gap-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
                     <%= if String.starts_with?(document.content_type || "", "image/") do %>
                       <img
                         src={document_url}
@@ -588,15 +591,15 @@ defmodule MedcampWeb.PatientComponents do
                           </span>
                         </div>
 
-                        <p class="mt-2 text-sm font-medium text-gray-700">
+                        <p class="mt-2 text-sm font-medium text-slate-700">
                           {document.document_name}
                         </p>
 
-                        <p class="mt-1 text-xs text-gray-500">
+                        <p class="mt-1 text-xs text-slate-500">
                           {document.content_type}
                         </p>
 
-                        <p class="mt-1 text-xs text-gray-400">
+                        <p class="mt-1 text-xs text-slate-400">
                           Uploaded {Calendar.strftime(document.inserted_at, "%d %b %Y %I:%M %p")}
                         </p>
                       </div>
@@ -627,7 +630,7 @@ defmodule MedcampWeb.PatientComponents do
         </div>
 
         <div class="w-full md:w-2/3">
-          <div class="bg-white rounded-lg border border-gray-100 p-5 shadow-sm">
+          <div class="bg-white rounded-lg border border-slate-100 p-5">
             <h2 class="text-lg font-semibold text-brand-primary mb-4 flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -650,16 +653,16 @@ defmodule MedcampWeb.PatientComponents do
               <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3  gap-4">
                 <%= for vital <- recent_vitals(@most_recent_triage) do %>
                   <div class="flex flex-col p-4 rounded-lg bg-brand-50 border border-brand-100">
-                    <p class="text-sm text-gray-600 mb-1">{vital.name}</p>
+                    <p class="text-sm text-slate-600 mb-1">{vital.name}</p>
                     <p class="text-xl font-semibold text-brand-primary">{vital.value}</p>
                   </div>
                 <% end %>
               </div>
             <% else %>
-              <div class="text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <div class="text-center py-6 bg-slate-50 rounded-lg border border-dashed border-slate-300">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="mx-auto h-12 w-12 text-gray-400"
+                  class="mx-auto h-12 w-12 text-slate-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -671,8 +674,8 @@ defmodule MedcampWeb.PatientComponents do
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No vitals recorded</h3>
-                <p class="mt-1 text-sm text-gray-500">
+                <h3 class="mt-2 text-sm font-medium text-slate-900">No vitals recorded</h3>
+                <p class="mt-1 text-sm text-slate-500">
                   No triage information has been recorded for this patient yet.
                 </p>
               </div>
@@ -703,7 +706,7 @@ defmodule MedcampWeb.PatientComponents do
 
   def patient_overview_for_camp_details(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+    <div class="bg-white rounded-lg border border-slate-100 p-6">
       <div class="flex gap-2 text-brand-primary font-semibold items-center mb-6">
         <p class="text-lg">
           Patient list / Patients Details / {[
@@ -745,7 +748,7 @@ defmodule MedcampWeb.PatientComponents do
 
   def patient_overview_to_show_all(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+    <div class="bg-white rounded-lg border border-slate-100 p-6">
       <div class="flex gap-2 text-brand-primary font-semibold items-center mb-6">
         <.link navigate={@back_url} class="hover:text-brand-accent transition-colors">
           <Heroicons.icon name="arrow-left" type="outline" class="h-5 w-5" />
@@ -763,11 +766,10 @@ defmodule MedcampWeb.PatientComponents do
 
       <div class="flex flex-col md:flex-row gap-6">
         <!-- Patient summary card -->
-        <div class="w-full md:w-1/3 bg-[#f8f8ff] rounded-lg p-5 shadow-sm border border-gray-100">
+        <div class="w-full md:w-1/3 bg-[#f8f8ff] rounded-lg p-5 border border-slate-100">
           <div>
-            <div class="  bg-white rounded-lg shadow-md mx-auto my-5 p-4 border border-gray-200 relative overflow-hidden print:shadow-none print:m-0">
-              <div class="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-transparent to-brand-100 opacity-20 -z-10">
-              </div>
+            <div class="  bg-white rounded-lg mx-auto my-5 p-4 border border-slate-200 relative overflow-hidden print:shadow-none print:m-0">
+              <div class="hidden"></div>
 
               <div class="flex justify-between items-center w-[100%] border-b-2 border-brand-primary pb-2 mb-3">
                 <div class="text-brand-primary">
@@ -793,7 +795,7 @@ defmodule MedcampWeb.PatientComponents do
                     |> Enum.filter(&(&1 != nil))
                     |> Enum.join(" ")}
                   </h2>
-                  <p class="text-xs text-gray-600 mt-1 mb-2">
+                  <p class="text-xs text-slate-600 mt-1 mb-2">
                     {@patient.gender}
                   </p>
 
@@ -822,32 +824,32 @@ defmodule MedcampWeb.PatientComponents do
                 </div>
               </div>
 
-              <div class="text-center text-gray-400 italic text-[8px] mt-2">
+              <div class="text-center text-slate-400 italic text-[8px] mt-2">
                 Please bring this card to all appointments
               </div>
             </div>
           </div>
 
-          <div class="border-t border-gray-200 my-4"></div>
+          <div class="border-t border-slate-200 my-4"></div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
-              <p class="text-sm text-gray-500 mb-1">Phone Number</p>
+              <p class="text-sm text-slate-500 mb-1">Phone Number</p>
               <p class="font-medium">{@patient.phone_number}</p>
             </div>
 
             <div>
-              <p class="text-sm text-gray-500 mb-1">Date of Birth</p>
+              <p class="text-sm text-slate-500 mb-1">Date of Birth</p>
               <p class="font-medium">{@patient.date_of_birth}</p>
             </div>
 
             <div>
-              <p class="text-sm text-gray-500 mb-1">Gender</p>
+              <p class="text-sm text-slate-500 mb-1">Gender</p>
               <p class="font-medium">{@patient.gender}</p>
             </div>
 
             <div>
-              <p class="text-sm text-gray-500 mb-1">National ID</p>
+              <p class="text-sm text-slate-500 mb-1">National ID</p>
               <p class="font-medium">{@patient.national_id}</p>
               <a
                 :if={@patient.national_id_document}
@@ -861,7 +863,7 @@ defmodule MedcampWeb.PatientComponents do
             </div>
 
             <div>
-              <p class="text-sm text-gray-500 mb-1">Birth Certificate Number</p>
+              <p class="text-sm text-slate-500 mb-1">Birth Certificate Number</p>
               <p class="font-medium">{@patient.birth_certificate_number || "—"}</p>
               <a
                 :if={@patient.birth_certificate_document}
@@ -875,62 +877,62 @@ defmodule MedcampWeb.PatientComponents do
             </div>
 
             <div>
-              <p class="text-sm text-gray-500 mb-1">Email</p>
+              <p class="text-sm text-slate-500 mb-1">Email</p>
               <p class="font-medium">{@patient.email}</p>
             </div>
           </div>
           <div>
-            <p class="text-sm text-gray-500 mb-1">Residence</p>
+            <p class="text-sm text-slate-500 mb-1">Residence</p>
             <p class="font-medium">{@patient.home_address}</p>
           </div>
 
-          <div class="border-t border-gray-200 my-4"></div>
+          <div class="border-t border-slate-200 my-4"></div>
 
           <div class="mb-4">
             <h3 class="text-md font-semibold text-brand-primary mb-2">Emergency Contact</h3>
             <div class="grid grid-cols-1 gap-2">
               <div>
-                <p class="text-sm text-gray-500 mb-1">Name</p>
+                <p class="text-sm text-slate-500 mb-1">Name</p>
                 <p class="font-medium">{@patient.emergency_contact_name}</p>
               </div>
               <div>
-                <p class="text-sm text-gray-500 mb-1">Phone</p>
+                <p class="text-sm text-slate-500 mb-1">Phone</p>
                 <p class="font-medium">{@patient.emergency_contact_phone_number}</p>
               </div>
               <div>
-                <p class="text-sm text-gray-500 mb-1">Relationship</p>
+                <p class="text-sm text-slate-500 mb-1">Relationship</p>
                 <p class="font-medium">{@patient.emergency_contact_relationship}</p>
               </div>
             </div>
           </div>
 
-          <div class="border-t border-gray-200 my-4"></div>
+          <div class="border-t border-slate-200 my-4"></div>
 
           <div>
             <h3 class="text-md font-semibold text-brand-primary mb-2">Insurance Details</h3>
             <div class="grid grid-cols-1 gap-2">
               <div>
-                <p class="text-sm text-gray-500 mb-1">Insurance Status</p>
+                <p class="text-sm text-slate-500 mb-1">Insurance Status</p>
                 <p class="font-medium">
                   <%= if @patient.has_insurance do %>
                     <span class="text-green-600">Insured</span>
                   <% else %>
-                    <span class="text-gray-600">Not Insured</span>
+                    <span class="text-slate-600">Not Insured</span>
                   <% end %>
                 </p>
               </div>
 
               <%= if @patient.has_insurance do %>
                 <div>
-                  <p class="text-sm text-gray-500 mb-1">Insurance Scheme</p>
+                  <p class="text-sm text-slate-500 mb-1">Insurance Scheme</p>
                   <p class="font-medium">{@patient.insurance_scheme}</p>
                 </div>
                 <div>
-                  <p class="text-sm text-gray-500 mb-1">Insurance Number</p>
+                  <p class="text-sm text-slate-500 mb-1">Insurance Number</p>
                   <p class="font-medium">{@patient.insurance_number}</p>
                 </div>
                 <div>
-                  <p class="text-sm text-gray-500 mb-1">Cover Limit</p>
+                  <p class="text-sm text-slate-500 mb-1">Cover Limit</p>
                   <p class="font-medium">KSh {@patient.insurance_cover_limit}</p>
                 </div>
               <% end %>
@@ -940,7 +942,7 @@ defmodule MedcampWeb.PatientComponents do
         
     <!-- Vitals section -->
         <div class="w-full md:w-2/3">
-          <div class="bg-white rounded-lg border border-gray-100 p-5 shadow-sm">
+          <div class="bg-white rounded-lg border border-slate-100 p-5">
             <h2 class="text-lg font-semibold text-brand-primary mb-4 flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -963,16 +965,16 @@ defmodule MedcampWeb.PatientComponents do
               <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3  gap-4">
                 <%= for vital <- recent_vitals(@most_recent_triage) do %>
                   <div class="flex flex-col p-4 rounded-lg bg-brand-50 border border-brand-100">
-                    <p class="text-sm text-gray-600 mb-1">{vital.name}</p>
+                    <p class="text-sm text-slate-600 mb-1">{vital.name}</p>
                     <p class="text-xl font-semibold text-brand-primary">{vital.value}</p>
                   </div>
                 <% end %>
               </div>
             <% else %>
-              <div class="text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <div class="text-center py-6 bg-slate-50 rounded-lg border border-dashed border-slate-300">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="mx-auto h-12 w-12 text-gray-400"
+                  class="mx-auto h-12 w-12 text-slate-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -984,8 +986,8 @@ defmodule MedcampWeb.PatientComponents do
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No vitals recorded</h3>
-                <p class="mt-1 text-sm text-gray-500">
+                <h3 class="mt-2 text-sm font-medium text-slate-900">No vitals recorded</h3>
+                <p class="mt-1 text-sm text-slate-500">
                   No triage information has been recorded for this patient yet.
                 </p>
               </div>
@@ -1033,4 +1035,103 @@ defmodule MedcampWeb.PatientComponents do
       }
     ]
   end
+
+  @doc """
+  The GSRN wristband a receptionist issues at registration. Same layout as the
+  GS1 identification card used elsewhere in the app (org lockup, Data Matrix,
+  `(8018) <gsrn>` line), with download / print actions.
+
+  `scan_url` is accepted for compatibility but the code encodes the GS1
+  `8018<gsrn>` string, which every station scanner already resolves.
+  """
+  attr :patient, :map, required: true
+  attr :id, :string, default: "patient-code-card"
+  attr :scan_url, :string, default: nil
+
+  def patient_code_card(assigns) do
+    assigns = assign(assigns, :code_value, "8018#{assigns.patient.gsrn}")
+
+    ~H"""
+    <div id={@id <> "-wrap"} phx-hook="DownloadableDiv" class="space-y-4">
+      <div
+        id={@id}
+        class="mx-auto w-full max-w-sm overflow-hidden rounded-lg border border-slate-200 bg-white p-4 print:m-0 print:shadow-none"
+      >
+        <div class="mb-3 flex items-center justify-between border-b-2 border-brand-primary pb-2">
+          <div class="text-brand-primary">
+            <div class="text-xs font-bold">
+              {Medcamp.Organisations.display_name(current_organisation())}
+            </div>
+            <div class="text-xs">Patient wristband</div>
+          </div>
+          <img
+            src={Medcamp.Organisations.logo_path(current_organisation())}
+            alt="Logo"
+            class="h-10 w-10 rounded-full object-contain"
+          />
+        </div>
+
+        <div class="flex items-start gap-3">
+          <div class="flex flex-col">
+            <span class="flex items-center gap-0 text-xs">
+              GS1 <span class="text-sm">&#174;</span>
+            </span>
+            <svg
+              id={@id <> "-dm"}
+              data-value={@code_value}
+              phx-hook="datamatrix"
+              phx-update="ignore"
+              class="datamatrix"
+              style="width: 70px; height: 70px;"
+            >
+            </svg>
+          </div>
+          <div class="flex min-w-0 flex-1 flex-col text-sm">
+            <p class="truncate font-semibold text-slate-900">{code_card_name(@patient)}</p>
+            <p class="text-slate-600">{@patient.date_of_birth || "—"}</p>
+            <p class="text-slate-600">{card_age(@patient)} | {@patient.gender || "—"}</p>
+          </div>
+        </div>
+
+        <div class="mt-3 border-b-2 border-black"></div>
+        <p class="mt-2 font-mono text-xs font-bold text-slate-900">(8018) {@patient.gsrn}</p>
+      </div>
+
+      <div class="flex items-center justify-center gap-2 print:hidden">
+        <button
+          type="button"
+          data-download-trigger
+          data-target-div={"#" <> @id}
+          data-filename={"wristband-" <> @patient.gsrn <> ".png"}
+          class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors duration-150 hover:bg-slate-100"
+        >
+          Download
+        </button>
+        <button
+          type="button"
+          data-print-trigger
+          data-target-div={"#" <> @id}
+          class="rounded-full bg-[#0C2765] px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-[#16418f]"
+        >
+          Print wristband
+        </button>
+      </div>
+    </div>
+    """
+  end
+
+  defp code_card_name(patient) do
+    [patient.first_name, patient.middle_name, patient.last_name]
+    |> Enum.reject(&(&1 in [nil, ""]))
+    |> Enum.join(" ")
+  end
+
+  defp card_age(%{age: age}) when is_integer(age), do: "#{age}y"
+
+  defp card_age(%{date_of_birth: %Date{} = dob}) do
+    years = div(Date.diff(Date.utc_today(), dob), 365)
+    "#{years}y"
+  end
+
+  defp card_age(_patient), do: "—"
 end

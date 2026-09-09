@@ -2,6 +2,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
   use MedcampWeb, :admin_live_view
 
   alias Medcamp.Audit
+  alias Medcamp.Tenancy
 
   @per_page 10
 
@@ -29,6 +30,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
       |> assign(:audit_logs, [])
 
     if connected?(socket) do
+      org_id = Tenancy.current_org_id()
       audit_logs = Audit.list_audit_logs(page: 1, page_size: @per_page)
 
       {:ok,
@@ -37,9 +39,13 @@ defmodule MedcampWeb.AuditLogsLive.Index do
        |> assign(:has_audit_logs, audit_logs != [])
        |> assign(:audit_logs, audit_logs)
        |> start_async(:audit_filter_options, fn ->
-         %{tables: Audit.list_audited_tables(), users: Audit.list_audit_users()}
+         Tenancy.with_org(org_id, fn ->
+           %{tables: Audit.list_audited_tables(), users: Audit.list_audit_users()}
+         end)
        end)
-       |> start_async(:audit_stats, fn -> Audit.get_audit_stats() end)}
+       |> start_async(:audit_stats, fn ->
+         Tenancy.with_org(org_id, fn -> Audit.get_audit_stats() end)
+       end)}
     else
       # Avoid running every audit query twice during LiveView's disconnected and
       # connected mounts. The connected mount above loads the first page.
@@ -261,7 +267,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
       "insert" -> {"Created", "bg-green-100 text-green-800", "➕"}
       "update" -> {"Updated", "bg-blue-100 text-blue-800", "✏️"}
       "delete" -> {"Deleted", "bg-red-100 text-red-800", "🗑️"}
-      _ -> {action, "bg-gray-100 text-gray-800", "📝"}
+      _ -> {action, "bg-slate-100 text-slate-800", "📝"}
     end
   end
 
@@ -276,7 +282,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
       <.page_header
         icon_path="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
         title="Audit Logs"
@@ -364,10 +370,10 @@ defmodule MedcampWeb.AuditLogsLive.Index do
         >
           <:group label="Table and User">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Table</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Table</label>
               <select
                 name="table"
-                class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                class="w-full h-9 rounded-md border border-slate-300 px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="all" selected={@filter_table == "all"}>All Tables</option>
                 <%= for table <- @tables do %>
@@ -378,10 +384,10 @@ defmodule MedcampWeb.AuditLogsLive.Index do
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">User</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">User</label>
               <select
                 name="user"
-                class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                class="w-full h-9 rounded-md border border-slate-300 px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="all" selected={@filter_user == "all"}>All Users</option>
                 <%= for user <- @users do %>
@@ -395,10 +401,10 @@ defmodule MedcampWeb.AuditLogsLive.Index do
 
           <:group label="Action">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Action</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Action</label>
               <select
                 name="action"
-                class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                class="w-full h-9 rounded-md border border-slate-300 px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="all" selected={@filter_action == "all"}>All Actions</option>
                 <option value="insert" selected={@filter_action == "insert"}>Created</option>
@@ -428,9 +434,9 @@ defmodule MedcampWeb.AuditLogsLive.Index do
     <!-- Audit Logs Table -->
       <div
         :if={@audit_logs_loading}
-        class="my-8 flex items-center justify-center gap-3 text-sm text-gray-500"
+        class="my-8 flex items-center justify-center gap-3 text-sm text-slate-500"
       >
-        <span class="h-5 w-5 animate-spin rounded-full border-2 border-gray-200 border-t-brand-accent">
+        <span class="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-brand-accent">
         </span>
         Loading recent audit logs…
       </div>
@@ -451,7 +457,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
         </:actions>
       </.blank_state>
       <%= if @has_audit_logs do %>
-        <.table
+        <.data_table
           id="audit_logs"
           rows={@audit_logs}
           row_click={fn log -> JS.navigate(~p"/admin/audit_logs/#{log}") end}
@@ -466,7 +472,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
                     {label}
                   </span>
               <% end %>
-              <span class="text-xs text-gray-500 mt-1">
+              <span class="text-xs text-slate-500 mt-1">
                 {format_datetime_kenya(log.inserted_at)}
               </span>
             </div>
@@ -474,8 +480,8 @@ defmodule MedcampWeb.AuditLogsLive.Index do
 
           <:col :let={log} label="Table & Record">
             <div class="flex flex-col py-3">
-              <span class="font-medium text-gray-900">{format_table_name(log.table_name)}</span>
-              <span class="text-xs text-gray-500">ID: {log.record_id}</span>
+              <span class="font-medium text-slate-900">{format_table_name(log.table_name)}</span>
+              <span class="text-xs text-slate-500">ID: {log.record_id}</span>
             </div>
           </:col>
 
@@ -489,15 +495,15 @@ defmodule MedcampWeb.AuditLogsLive.Index do
                 <% end %>
               </div>
               <div class="ml-2">
-                <p class="text-sm font-medium text-gray-900">
+                <p class="text-sm font-medium text-slate-900">
                   <%= if log.user do %>
                     {log.user.email}
                   <% else %>
-                    <span class="text-gray-400">Unknown User</span>
+                    <span class="text-slate-400">Unknown User</span>
                   <% end %>
                 </p>
                 <%= if log.user && log.user.role do %>
-                  <p class="text-xs text-gray-500">{String.capitalize(log.user.role)}</p>
+                  <p class="text-xs text-slate-500">{String.capitalize(log.user.role)}</p>
                 <% end %>
               </div>
             </div>
@@ -513,13 +519,13 @@ defmodule MedcampWeb.AuditLogsLive.Index do
                     </span>
                   <% end %>
                   <%= if length(log.changed_fields) > 3 do %>
-                    <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">
+                    <span class="px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-600 rounded">
                       +{length(log.changed_fields) - 3} more
                     </span>
                   <% end %>
                 </div>
               <% else %>
-                <span class="text-gray-400 text-xs">No field changes</span>
+                <span class="text-slate-400 text-xs">No field changes</span>
               <% end %>
             </div>
           </:col>
@@ -554,7 +560,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
               </.link>
             </div>
           </:action>
-        </.table>
+        </.data_table>
       <% end %>
       <.pagination
         page={@page}

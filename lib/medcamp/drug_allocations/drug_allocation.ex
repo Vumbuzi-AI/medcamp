@@ -45,11 +45,14 @@ defmodule Medcamp.DrugAllocations.DrugAllocation do
       :pharmacist_id
     ])
     |> validate_required([
-      :prescription,
       :patient_id,
       :has_been_assigned
     ])
+    # `prescription` is the doctor's optional free-text note to the pharmacist;
+    # the actual prescription is the drug lines, so require at least one of
+    # those instead.
     |> cast_embed(:drugs_assigned,
+      required: true,
       with: fn drug_assigned, attrs ->
         Medcamp.DrugAllocations.DrugAssigned.changeset(drug_assigned, attrs, opts)
       end

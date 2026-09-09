@@ -111,7 +111,7 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
                       <h4 class="font-medium">
                         {drug.inventory_received.strength} {drug.brand_name}
                       </h4>
-                      <p class="text-sm text-gray-600">{drug.generic_name}</p>
+                      <p class="text-sm text-slate-600">{drug.generic_name}</p>
                       <p class="text-sm">
                         {drug.quantity} | {drug.frequency} | {drug.duration_in_days} days
                         | {drug.route_of_administration}
@@ -133,7 +133,7 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
                 <% end %>
 
                 <div class="mt-4 text-right">
-                  <span class="text-gray-600">Total:</span>
+                  <span class="text-slate-600">Total:</span>
                   <span class="font-bold text-lg ml-2">{@total_price || 0} KES</span>
                 </div>
               </div>
@@ -172,7 +172,7 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
           >
             <div :if={@selected_drug == nil} class="mb-4 space-y-4">
               <div>
-                <label for="drug-search" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="drug-search" class="block text-sm font-medium text-slate-700 mb-1">
                   Search medicines
                 </label>
                 <input
@@ -188,7 +188,7 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
+                <label class="block text-sm font-medium text-slate-700 mb-1">
                   Or browse by category
                 </label>
                 <.input
@@ -230,7 +230,7 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
                           Give this first
                         </span>
                       </div>
-                      <p class="text-sm text-gray-600">{drug.generic_name}</p>
+                      <p class="text-sm text-slate-600">{drug.generic_name}</p>
                       <.available_batches_preview drug={drug} />
                     </div>
                   <% end %>
@@ -260,13 +260,13 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
               <input type="hidden" name="drug_form[inventory_received_id]" value={@selected_drug.id} />
 
               <div class="mb-4">
-                <label for="drug_form_frequency" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="drug_form_frequency" class="block text-sm font-medium text-slate-700 mb-1">
                   Frequency
                 </label>
                 <select
                   id="drug_form_frequency"
                   name="drug_form[frequency]"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 >
                   <option value="">Select frequency</option>
                   <option value="Once daily">Once daily</option>
@@ -286,7 +286,7 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
               <div class="mb-4">
                 <label
                   for="drug_form_duration_in_days"
-                  class="block text-sm font-medium text-gray-700 mb-1"
+                  class="block text-sm font-medium text-slate-700 mb-1"
                 >
                   Duration (days)
                 </label>
@@ -296,7 +296,7 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
                   type="number"
                   min="1"
                   value={@drug_form[:duration_in_days] && @drug_form[:duration_in_days].value}
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
                 <%= if @drug_form[:duration_in_days].errors != [] do %>
                   <p class="mt-1 text-sm text-red-600">
@@ -307,14 +307,14 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
               <div class="mb-4">
                 <label
                   for="drug_form_route_of_administration"
-                  class="block text-sm font-medium text-gray-700 mb-1"
+                  class="block text-sm font-medium text-slate-700 mb-1"
                 >
                   Route of Administration
                 </label>
                 <select
                   id="drug_form_route_of_administration"
                   name="drug_form[route_of_administration]"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 >
                   <option value="">Select route</option>
                   <option value="Oral">Oral</option>
@@ -339,7 +339,7 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
                 <% end %>
               </div>
               <div class="mb-4">
-                <label for="drug_form_quantity" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="drug_form_quantity" class="block text-sm font-medium text-slate-700 mb-1">
                   Quantity
                 </label>
                 <input
@@ -352,7 +352,7 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
                     "block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
                     if(@drug_form[:quantity] && @drug_form[:quantity].errors != [],
                       do: "border-red-300",
-                      else: "border-gray-300"
+                      else: "border-slate-300"
                     )
                   ]}
                 />
@@ -366,7 +366,7 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
               <div class="mb-4">
                 <label
                   for="drug_form_duration_in_days"
-                  class="block text-sm font-medium text-gray-700 mb-1"
+                  class="block text-sm font-medium text-slate-700 mb-1"
                 >
                   Prescription Note
                 </label>
@@ -375,7 +375,7 @@ defmodule MedcampWeb.PrescribeMedicineComponent do
                   name="drug_form[prescription_note]"
                   placeholder="Note to Print on Prescription eg 2 x 1"
                   value={@drug_form[:prescription_note] && @drug_form[:prescription_note].value}
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
               <p class="text-xs text-zinc-500">Complete the required fields to add this medicine.</p>

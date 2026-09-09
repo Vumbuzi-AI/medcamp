@@ -5,7 +5,7 @@ defmodule MedcampWeb.ScanComponents do
 
   def scan_card(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 max-w-xl">
+    <div class="bg-white rounded-lg border border-slate-100 p-6 max-w-xl">
       <.form for={%{}} phx-change="check" class="space-y-4">
         <div class="flex items-center mb-4">
           <svg
@@ -34,7 +34,7 @@ defmodule MedcampWeb.ScanComponents do
           class="focus:border-brand-accent focus:ring-brand-accent"
         />
 
-        <div class="text-sm text-gray-500 flex items-center">
+        <div class="text-sm text-slate-500 flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-4 w-4 mr-1 text-brand-accent"

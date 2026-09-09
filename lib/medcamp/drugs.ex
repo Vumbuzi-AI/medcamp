@@ -501,6 +501,17 @@ defmodule Medcamp.Drugs do
     end
   end
 
+  @doc """
+  The item-master row for a GTIN in the current organisation, or `nil`.
+  Used to prefill the add-drug form when a barcode is scanned for a product
+  the pharmacy has catalogued before.
+  """
+  def get_item_master_by_gtin(gtin) when is_binary(gtin) and gtin != "" do
+    Repo.get_by(Medcamp.InventoriesReceived.InventoryReceived, gtin: gtin)
+  end
+
+  def get_item_master_by_gtin(_gtin), do: nil
+
   defp create_item_and_drug(attrs, gtin, generic_name, brand_name, pharmacist) do
     item_attrs = %{
       "gtin" => gtin,
@@ -518,7 +529,8 @@ defmodule Medcamp.Drugs do
       :item,
       Medcamp.InventoriesReceived.InventoryReceived.changeset(
         %Medcamp.InventoriesReceived.InventoryReceived{},
-        item_attrs
+        item_attrs,
+        strict: true
       )
     )
     |> Ecto.Multi.insert(:drug, fn %{item: item} ->

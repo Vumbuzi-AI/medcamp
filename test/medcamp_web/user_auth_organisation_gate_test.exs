@@ -59,6 +59,7 @@ defmodule MedcampWeb.UserAuthOrganisationGateTest do
       conn: conn,
       organisation: org
     } do
+      {:ok, org} = Organisations.update_organisation(org, %{is_active: false, approved_at: nil})
       user = create_user(org)
 
       conn = UserAuth.log_in_user(conn_with_session(conn), user)

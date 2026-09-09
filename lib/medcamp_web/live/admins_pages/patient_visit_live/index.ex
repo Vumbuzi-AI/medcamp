@@ -195,14 +195,12 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
     assigns = assign(assigns, :visit_types, @visit_types)
 
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      <.page_header
-        icon_path="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-        title="Patient Visits"
-        subtitle="Search, filter and manage patient visit records."
-      />
-
-      <div class="flex flex-wrap items-center gap-3 mb-4">
+    <.list_page
+      icon_path="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+      title="Patient Visits"
+      subtitle="Search, filter and manage patient visit records."
+    >
+      <:toolbar>
         <form phx-change="apply_filters" class="flex-1">
           <.search_input
             name="search"
@@ -210,6 +208,8 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
             placeholder="Search by patient name or GSRN"
           />
         </form>
+
+        <.camp_switcher camps={assigns[:camp_options] || []} camp_filter={assigns[:camp_filter]} />
 
         <.filter_drawer
           id="patient-visits-filters"
@@ -228,10 +228,10 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
 
           <:group label="Visit Details">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Visit Type</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Visit Type</label>
               <select
                 name="visit_type"
-                class="w-full rounded-lg border-gray-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
+                class="w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
               >
                 <option value="">All Types</option>
                 <%= for vt <- @visit_types do %>
@@ -240,10 +240,10 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Status</label>
               <select
                 name="status"
-                class="w-full rounded-lg border-gray-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
+                class="w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
               >
                 <option value="">All</option>
                 <%= for status <- PatientVisit.statuses() do %>
@@ -254,10 +254,10 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Doctor</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Doctor</label>
               <select
                 name="doctor_id"
-                class="w-full rounded-lg border-gray-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
+                class="w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
               >
                 <option value="">All Doctors</option>
                 <%= for {name, id} <- @doctors do %>
@@ -271,10 +271,10 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
 
           <:group label="Patient Details">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Patient Gender</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Patient Gender</label>
               <select
                 name="gender"
-                class="w-full rounded-lg border-gray-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
+                class="w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
               >
                 <option value="">All</option>
                 <option value="male" selected={@filters.gender == "male"}>Male</option>
@@ -283,10 +283,10 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Age Group</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Age Group</label>
               <select
                 name="age_group"
-                class="w-full rounded-lg border-gray-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
+                class="w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
               >
                 <option value="">All Ages</option>
                 <option value="<5" selected={@filters.age_group == "<5"}>Under 5 years</option>
@@ -309,9 +309,8 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
             clear={JS.push("clear_chip", value: %{"field" => chip.field})}
           />
         </.filter_drawer>
-      </div>
-      
-    <!-- Table -->
+      </:toolbar>
+
       <.blank_state
         :if={@visit_count == 0}
         icon_path="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
@@ -328,90 +327,82 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
           </button>
         </:actions>
       </.blank_state>
-      <.table
+      <.data_table
         :if={@visit_count > 0}
         id="patient_visits"
         rows={@patient_visits}
         row_id={&"patient_visits-#{&1.id}"}
       >
         <:col :let={pv} label="Patient">
-          <div class="flex items-center py-2">
+          <div class="flex items-center">
             <div class="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-medium mr-2 text-sm shrink-0">
               {String.first(pv.patient.first_name || "?")}
             </div>
             <div>
-              <p class="font-medium text-gray-900 text-sm">
+              <p class="font-medium text-slate-900 text-sm">
                 {[pv.patient.first_name, pv.patient.middle_name]
                 |> Enum.filter(&(&1 != nil))
                 |> Enum.join(" ")}
               </p>
               <%= if pv.patient.gender do %>
-                <p class="text-xs text-gray-500 capitalize">{pv.patient.gender}</p>
+                <p class="text-xs text-slate-500 capitalize">{pv.patient.gender}</p>
               <% end %>
             </div>
           </div>
         </:col>
 
         <:col :let={pv} label="Date & Time">
-          <div class="py-2">
-            <p class="text-sm text-gray-900 font-medium">{pv.date}</p>
-            <p class="text-xs text-gray-500">{pv.time}</p>
-          </div>
+          <p class="text-sm text-slate-900 font-medium">{pv.date}</p>
+          <p class="text-xs text-slate-500">{pv.time}</p>
         </:col>
 
         <:col :let={pv} label="Visit Type">
-          <div class="py-2">
-            <span class={[
-              "px-2 py-1 text-xs font-medium rounded-full",
-              cond do
-                pv.visit_type in ["inpatient", "Full"] -> "bg-purple-100 text-purple-800"
-                pv.visit_type == "Triage Only" -> "bg-yellow-100 text-yellow-800"
-                pv.visit_type == "ANC" -> "bg-emerald-100 text-emerald-800"
-                pv.visit_type in ["Lab Test", "Pharmacy"] -> "bg-blue-100 text-blue-800"
-                pv.visit_type in ["referral in", "referral out"] -> "bg-orange-100 text-orange-800"
-                true -> "bg-gray-100 text-gray-700"
-              end
-            ]}>
-              {pv.visit_type || "—"}
-            </span>
-          </div>
+          <span class={[
+            "px-2 py-1 text-xs font-medium rounded-full",
+            cond do
+              pv.visit_type in ["inpatient", "Full"] -> "bg-purple-100 text-purple-800"
+              pv.visit_type == "Triage Only" -> "bg-yellow-100 text-yellow-800"
+              pv.visit_type == "ANC" -> "bg-emerald-100 text-emerald-800"
+              pv.visit_type in ["Lab Test", "Pharmacy"] -> "bg-blue-100 text-blue-800"
+              pv.visit_type in ["referral in", "referral out"] -> "bg-orange-100 text-orange-800"
+              true -> "bg-slate-100 text-slate-700"
+            end
+          ]}>
+            {pv.visit_type || "—"}
+          </span>
         </:col>
 
         <:col :let={pv} label="Status">
-          <div class="py-2">
-            <span class="inline-block px-1.5 py-0.5 text-xs rounded-full font-medium bg-brand-100 text-brand-primary">
-              {PatientVisit.status_label(pv.status)}
-            </span>
-          </div>
+          <span class="inline-block px-1.5 py-0.5 text-xs rounded-full font-medium bg-brand-100 text-brand-primary">
+            {PatientVisit.status_label(pv.status)}
+          </span>
         </:col>
 
         <:col :let={pv} label="Doctor">
-          <div class="py-2">
-            <%= if pv.doctor && pv.doctor.name do %>
-              <span class="px-2 py-1 text-xs rounded-full bg-brand-100 text-brand-primary">
-                Dr. {pv.doctor.name}
-              </span>
-            <% else %>
-              <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-500">
-                Not Assigned
-              </span>
-            <% end %>
-          </div>
+          <%= if pv.doctor && pv.doctor.name do %>
+            <span class="px-2 py-1 text-xs rounded-full bg-brand-100 text-brand-primary">
+              Dr. {pv.doctor.name}
+            </span>
+          <% else %>
+            <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-500">
+              Not Assigned
+            </span>
+          <% end %>
         </:col>
 
         <:col :let={pv} label="Receptionist">
-          <div class="py-2">
-            <span class="text-sm text-gray-700">{pv.creator.name}</span>
-          </div>
+          <span class="text-sm text-slate-700">{pv.creator.name}</span>
         </:col>
-      </.table>
-      <.pagination
-        page={@page}
-        total_pages={@total_pages}
-        total_count={@visit_count}
-        per_page={@per_page}
-      />
-    </div>
+        <:footer>
+          <.pagination
+            page={@page}
+            total_pages={@total_pages}
+            total_count={@visit_count}
+            per_page={@per_page}
+          />
+        </:footer>
+      </.data_table>
+    </.list_page>
     """
   end
 
@@ -430,16 +421,5 @@ defmodule MedcampWeb.AdminPatientVisitLive.Index do
     |> assign(:visit_count, visit_count)
     |> assign(:total_pages, total_pages)
     |> assign(:patient_visits, visits)
-  end
-
-  # The table is expandable, so it renders eagerly rather than under
-  # `phx-update="stream"` and must be fed a plain list. Replace the row in place
-  # when it is already listed, otherwise prepend it.
-  defp upsert(rows, row) do
-    if Enum.any?(rows, &(&1.id == row.id)) do
-      Enum.map(rows, &if(&1.id == row.id, do: row, else: &1))
-    else
-      [row | rows]
-    end
   end
 end

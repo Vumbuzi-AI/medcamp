@@ -56,9 +56,9 @@ defmodule MedcampWeb.LabPagesLabResultLive.GsrnPrintComponent do
 
                 <%= if @test && @test.name do %>
                   <div class="mt-2">
-                    <p class="text-xs font-medium text-gray-700 mb-1">Test Requested:</p>
+                    <p class="text-xs font-medium text-slate-700 mb-1">Test Requested:</p>
                     <div class="flex flex-wrap gap-1">
-                      <span class="text-xs  py-0.5 bg-gray-100 text-gray-700 rounded font-semibold">
+                      <span class="text-xs  py-0.5 bg-slate-100 text-slate-700 rounded font-semibold">
                         {@test.name}
                       </span>
                     </div>

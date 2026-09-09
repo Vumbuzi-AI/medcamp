@@ -84,13 +84,21 @@ sentry_logger_enabled =
 config :medcamp, :sentry_logger_enabled, sentry_logger_enabled
 
 if config_env() != :test do
+  real_postal_api_key = System.get_env("POSTAL_API_KEY")
+
   postal_api_key =
-    System.get_env("POSTAL_API_KEY") ||
-      if config_env() == :prod do
-        raise """
-        environment variable POSTAL_API_KEY is missing.
-        Create a MailSafi Postal server API key and expose it to the release.
-        """
+    real_postal_api_key ||
+      case config_env() do
+        :prod ->
+          raise """
+          environment variable POSTAL_API_KEY is missing.
+          Create a MailSafi Postal server API key and expose it to the release.
+          """
+
+        # Placeholder so Medcamp.Postal still runs its delivery path in dev;
+        # the send itself is redirected below when no real key is present.
+        _ ->
+          "dev-local"
       end
 
   config :medcamp, Medcamp.Postal,
@@ -99,7 +107,14 @@ if config_env() != :test do
         "https://postalmail.mailsafi.com/api/v1/send/message",
     api_key: postal_api_key,
     from: System.get_env("POSTAL_FROM_ADDRESS") || "no-reply@gs1kenya.org",
-    from_name: System.get_env("POSTAL_FROM_NAME") || "GHCE"
+    from_name: System.get_env("POSTAL_FROM_NAME") || "Tibasasa"
+
+  # Dev mail routing:
+  #   - no POSTAL_API_KEY  -> render into the Swoosh mailbox (/dev/mailbox)
+  #   - POSTAL_API_KEY set  -> real MailSafi send, same as prod
+  if config_env() == :dev and is_nil(real_postal_api_key) do
+    config :medcamp, Medcamp.Postal, http_client: Medcamp.Postal.LocalClient
+  end
 end
 
 if config_env() == :prod do

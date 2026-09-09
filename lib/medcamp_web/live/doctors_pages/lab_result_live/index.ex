@@ -81,8 +81,8 @@ defmodule MedcampWeb.DoctorsPagePatientLive.LabResultIndex do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      <.header class="text-brand-primary border-b border-gray-100 pb-4 mb-4">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
+      <.header class="text-brand-primary border-b border-slate-100 pb-4 mb-4">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -105,10 +105,10 @@ defmodule MedcampWeb.DoctorsPagePatientLive.LabResultIndex do
       </.header>
 
       <%= if @total_count == 0 do %>
-        <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+        <div class="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="mx-auto h-12 w-12 text-gray-400"
+            class="mx-auto h-12 w-12 text-slate-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -120,13 +120,13 @@ defmodule MedcampWeb.DoctorsPagePatientLive.LabResultIndex do
               d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
             />
           </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No lab results</h3>
-          <p class="mt-1 text-sm text-gray-500">
+          <h3 class="mt-2 text-sm font-medium text-slate-900">No lab results</h3>
+          <p class="mt-1 text-sm text-slate-500">
             No lab results have been recorded for this patient yet.
           </p>
         </div>
       <% else %>
-        <.table
+        <.data_table
           id="lab_results"
           rows={@lab_results}
           row_click={
@@ -152,7 +152,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.LabResultIndex do
 
           <:col :let={lab_result} label="Doctor">
             <div class="flex items-center py-3">
-              <span class="text-gray-700">
+              <span class="text-slate-700">
                 Dr. {lab_result.doctor.name}
               </span>
             </div>
@@ -186,7 +186,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.LabResultIndex do
           </:col>
 
           <:col :let={lab_result} label="Requested">
-            <p class="py-3 text-sm text-gray-700">
+            <p class="py-3 text-sm text-slate-700">
               {format_datetime_kenya(lab_result.inserted_at)}
             </p>
           </:col>
@@ -235,7 +235,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.LabResultIndex do
               View
             </.link>
           </:col>
-        </.table>
+        </.data_table>
         <.pagination
           page={@page}
           total_pages={@total_pages}

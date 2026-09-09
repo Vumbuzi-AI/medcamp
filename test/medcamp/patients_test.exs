@@ -182,7 +182,7 @@ defmodule Medcamp.PatientsTest do
 
       valid_attrs = %{
         first_name: "Some",
-        phone_number: "+254 712-345-678",
+        phone_number: "+254 (712) 345-678",
         date_of_birth: ~D[2025-02-21],
         gender: "some gender",
         home_address: "some home_address",
@@ -190,7 +190,23 @@ defmodule Medcamp.PatientsTest do
       }
 
       assert {:ok, patient} = Patients.create_patient(valid_attrs)
-      assert patient.phone_number == "+254 712-345-678"
+      assert patient.phone_number == "+254 (712) 345-678"
+    end
+
+    test "create_patient/1 rejects letters in phone numbers" do
+      creator = user_fixture()
+
+      valid_attrs = %{
+        first_name: "Some",
+        phone_number: "+254 712-CALL",
+        date_of_birth: ~D[2025-02-21],
+        gender: "some gender",
+        home_address: "some home_address",
+        creator_id: creator.id
+      }
+
+      assert {:error, changeset} = Patients.create_patient(valid_attrs)
+      assert "is not a valid phone number" in errors_on(changeset).phone_number
     end
 
     test "create_patient/1 rejects a garbage single-character first name" do
@@ -436,6 +452,33 @@ defmodule Medcamp.PatientsTest do
       Process.sleep(50)
 
       assert length(Medcamp.Postal.TestClient.calls()) == 1
+    end
+  end
+
+  describe "find_or_create_public_booking_patient/1" do
+    test "normalizes email before creating the patient" do
+      assert {:ok, patient} =
+               Patients.find_or_create_public_booking_patient(%{
+                 "first_name" => "Ada",
+                 "last_name" => "Camper",
+                 "email" => "  ADA.CAMPER@EXAMPLE.COM  ",
+                 "phone_number" => "0712345678"
+               })
+
+      assert patient.email == "ada.camper@example.com"
+    end
+
+    test "validates email and phone number" do
+      assert {:error, changeset} =
+               Patients.find_or_create_public_booking_patient(%{
+                 "first_name" => "Ada",
+                 "last_name" => "Camper",
+                 "email" => "not valid",
+                 "phone_number" => "12345"
+               })
+
+      assert "must be a valid email address" in errors_on(changeset).email
+      assert "is not a valid phone number" in errors_on(changeset).phone_number
     end
   end
 end

@@ -94,14 +94,14 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
       <%!-- Read-only insurance info --%>
       <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Payment Type</label>
-          <div class="mt-1 block w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700 cursor-not-allowed">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Payment Type</label>
+          <div class="mt-1 block w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700 cursor-not-allowed">
             Insurance
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Insurance Provider</label>
-          <div class="mt-1 block w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700 cursor-not-allowed">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Insurance Provider</label>
+          <div class="mt-1 block w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700 cursor-not-allowed">
             Human Development Fund ( HDF )
           </div>
         </div>
@@ -122,9 +122,9 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
             </.button>
           </div>
 
-          <div class="bg-gray-50 rounded-md p-3">
+          <div class="bg-slate-50 rounded-md p-3">
             <%= if Enum.empty?(@selected_drugs) do %>
-              <p class="text-gray-500 italic">No drugs selected yet</p>
+              <p class="text-slate-500 italic">No drugs selected yet</p>
             <% else %>
               <div class="space-y-3">
                 <%= for {drug, index} <- Enum.with_index(@selected_drugs) do %>
@@ -133,7 +133,7 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
                       <h4 class="font-medium">
                         {drug.inventory_received.strength} {drug.brand_name}
                       </h4>
-                      <p class="text-sm text-gray-600">{drug.generic_name}</p>
+                      <p class="text-sm text-slate-600">{drug.generic_name}</p>
                       <p class="text-sm">
                         {drug.quantity} | {drug.frequency} | {drug.duration_in_days} days | {drug.route_of_administration}
                       </p>
@@ -176,7 +176,7 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
             class="flex flex-col gap-2"
           >
             <div :if={@selected_drug == nil} class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Search For Drugs</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Search For Drugs</label>
               <.input
                 type="select"
                 field={@form[:query]}
@@ -193,7 +193,7 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
                 phx-change="search_drugs"
                 phx-target={@myself}
                 placeholder="Search by name..."
-                class="block mt-4 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                class="block mt-4 w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               />
             </div>
 
@@ -203,7 +203,7 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
                 <div class="max-h-48 overflow-y-auto border rounded-md">
                   <%= for {drug, index} <- Enum.with_index(@searched_drugs) do %>
                     <div
-                      class="p-2 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
+                      class="p-2 hover:bg-slate-100 cursor-pointer border-b last:border-b-0"
                       phx-click="select_drug"
                       phx-target={@myself}
                       phx-value-id={drug.id}
@@ -219,7 +219,7 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
                           Give this first
                         </span>
                       </div>
-                      <p class="text-sm text-gray-600">{drug.generic_name}</p>
+                      <p class="text-sm text-slate-600">{drug.generic_name}</p>
                       <.available_batches_preview drug={drug} />
                     </div>
                   <% end %>
@@ -243,10 +243,10 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
               <input type="hidden" name="drug_form[inventory_received_id]" value={@selected_drug.id} />
 
               <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Frequency</label>
                 <select
                   name="drug_form[frequency]"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 >
                   <option value="">Select frequency</option>
                   <option value="Once daily">Once daily</option>
@@ -259,22 +259,22 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
               </div>
 
               <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Duration (days)</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Duration (days)</label>
                 <input
                   name="drug_form[duration_in_days]"
                   type="number"
                   min="1"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
 
               <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">
+                <label class="block text-sm font-medium text-slate-700 mb-1">
                   Route of Administration
                 </label>
                 <select
                   name="drug_form[route_of_administration]"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 >
                   <option value="">Select route</option>
                   <option value="Oral">Oral</option>
@@ -291,21 +291,21 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
               </div>
 
               <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Quantity</label>
                 <input
                   name="drug_form[quantity]"
                   type="number"
                   min="1"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
 
               <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Prescription Note</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Prescription Note</label>
                 <textarea
                   name="drug_form[prescription_note]"
                   placeholder="Note to Print on Prescription eg 2 x 1"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 ></textarea>
               </div>
 
@@ -319,7 +319,7 @@ defmodule MedcampWeb.MedicalCampPages.PrescribeMedicineComponent do
                 type="button"
                 phx-click="close_drug_modal"
                 phx-target={@myself}
-                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-md text-gray-800"
+                class="px-4 py-2 bg-slate-300 hover:bg-slate-400 rounded-md text-slate-800"
               >
                 Cancel
               </button>

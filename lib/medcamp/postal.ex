@@ -384,88 +384,95 @@ defmodule Medcamp.Postal do
     format_phone(Integer.to_string(phone))
   end
 
-  # Generate the HTML template for emails
+  # Adapter kept for the confirm / reset / change-email callers.
   defp generate_email_html(user, type, url) do
+    {heading, intro, cta} =
+      case type do
+        "reset" ->
+          {"Reset your password",
+           "We received a request to reset the password for your account. Choose a new one with the button below.",
+           "Reset password"}
+
+        "confirm" ->
+          {"Confirm your email", "Confirm this address to finish setting up your account.",
+           "Confirm email"}
+
+        _ ->
+          {"Confirm your new email", "Confirm your new email address with the button below.",
+           "Confirm email"}
+      end
+
+    _ = user
+
+    tibasasa_email(%{
+      heading: heading,
+      intro: intro,
+      cta_label: cta,
+      url: url,
+      outro: "If you didn't request this, you can safely ignore this email."
+    })
+  end
+
+  @doc false
+  # The shared Tibasasa email shell, styled to match the app's utility pages
+  # (see error_html/*): logo lockup, one white card on an off-white ground,
+  # navy heading, navy pill CTA, monospace link fallback, a single hairline
+  # footer line - no dark bar. Table layout + inline styles only, so it holds
+  # up across email clients.
+  def tibasasa_email(%{} = a) do
+    font =
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+
+    logo = MedcampWeb.Endpoint.url() <> "/images/tibasasa-ai-logo.png"
+
+    outro = a[:outro] || "If you weren't expecting this, you can ignore this email."
+
     """
-    <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
-    <html xmlns='http://www.w3.org/1999/xhtml'>
+    <!DOCTYPE html>
+    <html lang='en'>
     <head>
-      <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
-      <title>Glocal Health Centre</title>
-      <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
-      <style type='text/css'>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-      </style>
+      <meta charset='utf-8' />
+      <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+      <title>#{a.heading}</title>
     </head>
-    <body style='margin: 0; padding: 0; background-color: #f8f8ff;'>
-      <div style='width: 100%; background-color: #f8f8ff; padding: 30px 0;'>
-        <table align='center' border='0' cellpadding='0' cellspacing='0' width='600' style='border-collapse: collapse; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);'>
+    <body style="margin:0; padding:0; background-color:#f6f8fb; font-family:#{font}; -webkit-font-smoothing:antialiased;">
+      <table role='presentation' width='100%' cellpadding='0' cellspacing='0' style='background-color:#f6f8fb;'>
+        <tr>
+          <td align='center' style='padding:40px 16px;'>
+            <table role='presentation' width='480' cellpadding='0' cellspacing='0' style='max-width:480px; width:100%; background-color:#ffffff; border:1px solid #e2e8f0; border-radius:16px;'>
+              <tr>
+                <td style='padding:36px 36px 28px 36px;'>
+                  <img src='#{logo}' width='30' height='30' alt='Tibasasa' style='display:block; border:0; border-radius:7px; margin-bottom:24px;' />
 
-          <!-- Content -->
-          <tr>
-            <td style='padding: 40px 30px;'>
-              <table border='0' cellpadding='0' cellspacing='0' width='100%'>
-                <tr>
-                  <td>
-                    <h2 style='color: #373896; margin-top: 0; margin-bottom: 20px; font-weight: 600;'>Hello #{user.email},</h2>
-                    <p style='color: #444; font-size: 16px; line-height: 1.6; margin-bottom: 15px;'>
-                      You can #{type} your account by clicking the button below:
-                    </p>
-                    <table border='0' cellpadding='0' cellspacing='0' width='100%' style='margin: 30px 0;'>
-                      <tr>
-                        <td align='center'>
-                          <a href='#{url}' target='_blank' style='display: inline-block; background-color: #6667ab; color: white; text-decoration: none; padding: 12px 30px; border-radius: 4px; font-weight: 500; font-size: 16px;'>
-                            #{String.capitalize(type)} Account
-                          </a>
-                        </td>
-                      </tr>
-                    </table>
-                    <p style='color: #444; font-size: 16px; line-height: 1.6; margin-bottom: 15px;'>
-                      If the button doesn't work, you can copy and paste the link below into your browser:
-                    </p>
-                    <p style='background-color: #f0f0ff; padding: 12px; border-radius: 4px; border: 1px solid #e7e7ff; font-size: 14px; word-break: break-all;'>
-                      #{url}
-                    </p>
-                    <p style='color: #444; font-size: 16px; line-height: 1.6; margin-top: 30px;'>
-                      If you didn't request this email, please ignore it or contact support if you have concerns.
-                    </p>
-                    <p style='color: #444; font-size: 16px; line-height: 1.6;'>
-                      Thank you,<br />
-                      <span style='color: #373896; font-weight: 500;'>The Glocal Health Centre Team</span>
-                    </p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
+                  <h1 style='margin:0 0 12px 0; font-size:22px; line-height:1.3; font-weight:700; letter-spacing:-0.01em; color:#0C2765;'>#{a.heading}</h1>
+                  <p style='margin:0 0 24px 0; font-size:15px; line-height:1.6; color:#475569;'>#{a.intro}</p>
 
-          <!-- Separator -->
-          <tr>
-            <td style='height: 2px; background-color: #f0f0ff;'></td>
-          </tr>
+                  <table role='presentation' cellpadding='0' cellspacing='0'>
+                    <tr>
+                      <td align='center' bgcolor='#0C2765' style='border-radius:9999px;'>
+                        <a href='#{a.url}' target='_blank' style='display:inline-block; padding:13px 30px; font-size:15px; font-weight:600; line-height:1; color:#ffffff; text-decoration:none; border-radius:9999px;'>#{a.cta_label}</a>
+                      </td>
+                    </tr>
+                  </table>
 
-          <!-- Footer -->
-          <tr>
-            <td bgcolor='#f8f8ff' style='padding: 20px 30px;'>
-              <table border='0' cellpadding='0' cellspacing='0' width='100%'>
-                <tr>
-                  <td style='color: #6c757d; font-size: 14px; text-align: center;'>
-                    &copy; <span id='year'></span> Glocal Health Centre. All Rights Reserved.
-                    <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
-                  </td>
-                </tr>
-                <tr>
-                  <td style='padding-top: 10px; text-align: center;'>
-                    <a href='#' style='color: #6667ab; text-decoration: none; font-size: 14px; margin: 0 10px;'>Privacy Policy</a>
-                    <a href='#' style='color: #6667ab; text-decoration: none; font-size: 14px; margin: 0 10px;'>Terms of Service</a>
-                    <a href='#' style='color: #6667ab; text-decoration: none; font-size: 14px; margin: 0 10px;'>Contact Us</a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </div>
+                  <p style='margin:22px 0 0 0; font-size:13px; line-height:1.6; color:#94a3b8;'>
+                    Button not working? Paste this link:<br />
+                    <a href='#{a.url}' style='color:#64748b; word-break:break-all;'>#{a.url}</a>
+                  </p>
+                  <p style='margin:16px 0 0 0; font-size:13px; line-height:1.6; color:#94a3b8;'>#{outro}</p>
+                </td>
+              </tr>
+              <tr>
+                <td style='padding:16px 36px; border-top:1px solid #eef2f7;'>
+                  <p style='margin:0; font-size:12px; color:#94a3b8;'>
+                    <span style='font-weight:600; color:#64748b;'>Tibasasa</span> &middot; Medical Camp Management
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
     </body>
     </html>
     """
@@ -894,6 +901,71 @@ defmodule Medcamp.Postal do
   """
   def deliver_reset_password_instructions(user, url) do
     deliver_with_template(user, "reset", "Reset password instructions", url)
+  end
+
+  @doc """
+  Invites a staff member (any role) to activate their account by choosing a
+  password. Framed as an invitation, not a password reset.
+  """
+  def deliver_staff_invitation_instructions(user, url, opts \\ []) do
+    role = opts[:role] || user.role
+    org = opts[:organisation_name]
+
+    org_phrase =
+      if is_binary(org) and org != "", do: " on #{org}", else: ""
+
+    role_phrase =
+      if is_binary(role) and role != "", do: " as a #{role}", else: ""
+
+    html =
+      tibasasa_email(%{
+        heading: "Set up your account",
+        intro:
+          "An administrator created an account for you#{org_phrase}#{role_phrase}. " <>
+            "Choose a password to activate it.",
+        cta_label: "Set your password",
+        url: url
+      })
+
+    send_email(user.email, "Set up your account", html_body: html)
+  end
+
+  @doc """
+  Invites a new organisation admin to set their password.
+  """
+  def deliver_admin_invitation_instructions(user, organisation, url) do
+    body = """
+    Hello #{user.name || user.email},
+
+    You have been invited to administer #{organisation.name} on Tibasasa Medical Camp.
+
+    Set your password using the secure link below, then sign in with #{user.email}:
+
+    #{url}
+
+    If you were not expecting this invitation, please ignore this email.
+    """
+
+    deliver(user.email, "Set up your #{organisation.name} admin account", body)
+  end
+
+  @doc """
+  Notifies a pending organisation's first admin that the tenant has been approved.
+  """
+  def deliver_organisation_approved_instructions(user, organisation, url) do
+    body = """
+    Hello #{user.name || user.email},
+
+    #{organisation.name} has been approved on Tibasasa Medical Camp.
+
+    Set your admin password using the secure link below, then sign in with #{user.email}:
+
+    #{url}
+
+    If you were not expecting this approval email, please contact support.
+    """
+
+    deliver(user.email, "#{organisation.name} is approved - set your admin password", body)
   end
 
   @doc """

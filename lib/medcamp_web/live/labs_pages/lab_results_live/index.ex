@@ -262,7 +262,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
       <.page_header
         icon_path="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
         title="Lab Results"
@@ -306,10 +306,10 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
 
           <:group label="Patient Details">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Age Group</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Age Group</label>
               <select
                 name="filters[age_group]"
-                class="w-full h-[40px] border-[1px] border-gray-300 focus:outline-none focus:ring-0 rounded-md p-2"
+                class="w-full h-[40px] border-[1px] border-slate-300 focus:outline-none focus:ring-0 rounded-md p-2"
               >
                 <option value="">All Ages</option>
                 <option value="<5" selected={@filters[:age_group] == "<5"}>{"<"}5 years</option>
@@ -317,10 +317,10 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Gender</label>
               <select
                 name="filters[gender]"
-                class="w-full h-[40px] border-[1px] border-gray-300 focus:outline-none focus:ring-0 rounded-md p-2"
+                class="w-full h-[40px] border-[1px] border-slate-300 focus:outline-none focus:ring-0 rounded-md p-2"
               >
                 <option value="">All Genders</option>
                 <option value="Male" selected={@filters[:gender] == "Male"}>Male</option>
@@ -331,10 +331,10 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
 
           <:group label="Lab Details">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Urgency</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Urgency</label>
               <select
                 name="filters[urgency]"
-                class="w-full h-[40px] border-[1px] border-gray-300 focus:outline-none focus:ring-0 rounded-md p-2"
+                class="w-full h-[40px] border-[1px] border-slate-300 focus:outline-none focus:ring-0 rounded-md p-2"
               >
                 <option value="">All Urgency Levels</option>
                 <option value="Urgent" selected={@filters[:urgency] == "Urgent"}>Urgent</option>
@@ -344,10 +344,10 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Report Status</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Report Status</label>
               <select
                 name="filters[report_complete]"
-                class="w-full h-[40px] border-[1px] border-gray-300 focus:outline-none focus:ring-0 rounded-md p-2"
+                class="w-full h-[40px] border-[1px] border-slate-300 focus:outline-none focus:ring-0 rounded-md p-2"
               >
                 <option value="">All Statuses</option>
                 <option value="true" selected={@filters[:report_complete] == "true"}>Complete</option>
@@ -357,10 +357,10 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Doctor</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Doctor</label>
               <select
                 name="filters[doctor_id]"
-                class="w-full h-[40px] border-[1px] border-gray-300 focus:outline-none focus:ring-0 rounded-md p-2"
+                class="w-full h-[40px] border-[1px] border-slate-300 focus:outline-none focus:ring-0 rounded-md p-2"
               >
                 <option value="">All Doctors</option>
                 <%= for doctor <- @doctors do %>
@@ -374,10 +374,10 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Test Name</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Test Name</label>
               <select
                 name="filters[test_name]"
-                class="w-full h-[40px] border-[1px] border-gray-300 focus:outline-none focus:ring-0 rounded-md p-2"
+                class="w-full h-[40px] border-[1px] border-slate-300 focus:outline-none focus:ring-0 rounded-md p-2"
               >
                 <option value="">All Tests</option>
                 <%= for test_name <- @test_names do %>
@@ -391,7 +391,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
         </.filter_drawer>
       </div>
 
-      <.table
+      <.data_table
         id="lab_results"
         rows={@lab_results}
         row_id={fn lab_result -> "lab-result-#{lab_result.id}" end}
@@ -404,14 +404,14 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl border border-[#d9dcff] bg-brand-50 text-brand-primary">
                   <Heroicons.icon name="magnifying-glass" type="outline" class="h-6 w-6" />
                 </div>
-                <h3 class="mt-4 text-base font-semibold text-gray-900">
+                <h3 class="mt-4 text-base font-semibold text-slate-900">
                   <%= if (@filters[:search] || "") != "" or count_active_filters(@filters) > 0 do %>
                     No matching lab results
                   <% else %>
                     No lab results available
                   <% end %>
                 </h3>
-                <p class="mt-2 text-sm text-gray-500">
+                <p class="mt-2 text-sm text-slate-500">
                   <%= if (@filters[:search] || "") != "" or count_active_filters(@filters) > 0 do %>
                     No records match the current search or filters.
                   <% else %>
@@ -446,7 +446,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
             <div class="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-medium mr-2 text-sm">
               {String.first(lab_result.patient.first_name || "")}
             </div>
-            <span class="font-medium text-gray-900">
+            <span class="font-medium text-slate-900">
               {[
                 lab_result.patient.first_name,
                 lab_result.patient.middle_name,
@@ -511,7 +511,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Index do
             </.link>
           </div>
         </:action>
-      </.table>
+      </.data_table>
 
       <.pagination
         page={@page}

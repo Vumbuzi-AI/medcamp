@@ -57,7 +57,8 @@ defmodule MedcampWeb.Router do
     end
 
     live_session :medical_camp,
-      layout: {MedcampWeb.Layouts, :medical_camp} do
+      layout: {MedcampWeb.Layouts, :medical_camp},
+      on_mount: [{MedcampWeb.MedicalCampAuth, :assign_active_camp}] do
       live "/8018/:gsrn/medical-camp", MedicalCampPages.Home, :index
       live "/8018/:gsrn/medical-camp/triages/new", MedicalCampPages.Home, :new_triage
       live "/8018/:gsrn/medical-camp/scan", MedicalCampPages.Scan, :index
@@ -65,7 +66,7 @@ defmodule MedcampWeb.Router do
 
     live_session :medical_camp_authenticated,
       layout: {MedcampWeb.Layouts, :medical_camp},
-      on_mount: [{MedcampWeb.MedicalCampAuth, :require_camp_auth}] do
+      on_mount: [{MedcampWeb.MedicalCampAuth, {:require_camp_role, ["doctor"]}}] do
       live "/8018/:gsrn/medical-camp/doctor_notes", MedicalCampPages.DoctorNotes, :index
       live "/8018/:gsrn/medical-camp/doctor_notes/new", MedicalCampPages.DoctorNoteNew, :index
 
@@ -348,7 +349,11 @@ defmodule MedcampWeb.Router do
     get "/admin/medical_camp/export/patients", MedicalCampExportController, :patients
     get "/admin/medical_camp/export/geography", MedicalCampExportController, :geography
     get "/admin/medical_camp/export/diagnoses", MedicalCampExportController, :diagnoses
-    get "/admin/users/:email", UsersController, :index
+    # "Sign in as this colleague" from the users directory. Kept under a
+    # distinct `access/` segment so it cannot shadow the LiveView routes
+    # `/admin/users/new` and `/admin/users/:id/...` (a bare `:email` param
+    # greedily matched "new", breaking the Add User button).
+    get "/admin/users/access/:email", UsersController, :index
 
     # The camp switcher in the admin layout: a session write, so it cannot be
     # a LiveView event.
@@ -420,7 +425,18 @@ defmodule MedcampWeb.Router do
 
     live_session :superadmin,
       on_mount: [{MedcampWeb.UserAuth, :ensure_superadmin}] do
+      live "/superadmin/dashboard", SuperadminDashboardLive.Index, :index
+      live "/superadmin/camps", SuperadminCampsLive.Index, :index
+      live "/superadmin/camps/:id", SuperadminCampsLive.Show, :show
       live "/superadmin/organisations", SuperadminOrganisationsLive.Index, :index
+      live "/superadmin/organisations/new", SuperadminOrganisationsLive.Index, :new
+
+      live "/superadmin/organisations/:id", SuperadminOrganisationsLive.Show, :show
+      live "/superadmin/organisations/:id/edit", SuperadminOrganisationsLive.Show, :edit
+      live "/superadmin/organisations/:id/admin/new", SuperadminOrganisationsLive.Show, :add_admin
+      live "/superadmin/organisations/:id/reject", SuperadminOrganisationsLive.Show, :reject
+
+      live "/superadmin/organisations/:id/medical-camp", SuperadminMedicalCampLive.Show, :show
     end
   end
 
@@ -443,6 +459,14 @@ defmodule MedcampWeb.Router do
 
     delete "/users/log_out", UserSessionController, :delete
     delete "/users/log_out/inactivity", UserSessionController, :delete_due_to_inactivity
+
+    # Setting a password from an emailed token is valid whatever the session
+    # state - an invited staff member (or anyone already signed in on a shared
+    # device) must still reach the form, not be bounced to a dashboard.
+    live_session :set_password_from_token,
+      on_mount: [{MedcampWeb.UserAuth, :mount_current_user}] do
+      live "/users/reset_password/:token", UserResetPasswordLive, :edit
+    end
   end
 
   scope "/", MedcampWeb do
@@ -456,7 +480,6 @@ defmodule MedcampWeb.Router do
       live "/organisations/register", OrganisationSignupLive, :new
 
       live "/users/reset_password", UserForgotPasswordLive, :new
-      live "/users/reset_password/:token", UserResetPasswordLive, :edit
     end
 
     post "/users/log_in", UserSessionController, :create

@@ -307,6 +307,19 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
     {:noreply, load_drugs(socket)}
   end
 
+  # The camera scanner hook in the New Drug form pushes to the LiveView, not
+  # the component, so forward its reading to the form component.
+  def handle_event("qr_scanned", %{"value" => value}, socket) do
+    if socket.assigns.live_action == :new and socket.assigns.drug do
+      send_update(MedcampWeb.PharmacistsLive.DrugFormComponent,
+        id: socket.assigns.drug.id || :new,
+        scanned_code: value
+      )
+    end
+
+    {:noreply, socket}
+  end
+
   defp batch_expired?(nil), do: false
 
   defp batch_expired?(expiry_string) when is_binary(expiry_string) do
@@ -345,7 +358,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
       <.page_header
         icon_path="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
         title="Drugs"
@@ -377,10 +390,10 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
         >
           <:group label="Item Details">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Category</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Category</label>
               <select
                 name="filters[category]"
-                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="" selected={@filters[:category] in [nil, ""]}>All</option>
                 <option
@@ -393,10 +406,10 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Supplier</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Supplier</label>
               <select
                 name="filters[supplier]"
-                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="" selected={@filters[:supplier] in [nil, ""]}>All</option>
                 <option
@@ -409,10 +422,10 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Type</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Type</label>
               <select
                 name="filters[type]"
-                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="" selected={@filters[:type] in [nil, ""]}>All</option>
                 <option :for={type <- @types} value={type} selected={@filters[:type] == type}>
@@ -432,10 +445,10 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
 
           <:group label="Stock & Registers">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Stock Status</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Stock Status</label>
               <select
                 name="filters[stock_filter]"
-                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="all" selected={@stock_filter == :all}>All</option>
                 <option value="in_stock" selected={@stock_filter == :in_stock}>In Stock</option>
@@ -446,10 +459,10 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">DDA Register</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">DDA Register</label>
               <select
                 name="filters[dda_filter]"
-                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="all" selected={@filters[:dda_filter] == :all}>All Drugs</option>
                 <option value="dda" selected={@filters[:dda_filter] == :dda}>DDA Only</option>
@@ -503,7 +516,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
           </:actions>
         </.blank_state>
       <% else %>
-        <.table
+        <.data_table
           id="drugs"
           rows={@drugs}
           row_click={fn drug -> JS.navigate(~p"/pharmacist/drugs/#{drug}") end}
@@ -511,7 +524,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
         >
           <:col :let={drug} label="Generic Name">
             <div class="flex min-w-0 items-center py-3">
-              <span class="font-medium text-gray-900 break-words">
+              <span class="font-medium text-slate-900 break-words">
                 {drug.generic_name || drug.inventory_received.generic_name}
               </span>
             </div>
@@ -519,7 +532,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
 
           <:col :let={drug} label="Brand Name">
             <div class="flex min-w-0 items-center py-3">
-              <span class="text-gray-700 break-words">
+              <span class="text-slate-700 break-words">
                 {drug.inventory_received.strength} {drug.brand_name ||
                   drug.inventory_received.brand_name}
               </span>
@@ -529,10 +542,10 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
           <:col :let={drug} label="Price">
             <div class="flex items-center py-3">
               <% price = latest_batch_price(drug) %>
-              <span :if={price} class="font-medium text-gray-900">
+              <span :if={price} class="font-medium text-slate-900">
                 KSh {Number.Delimit.number_to_delimited(price, delimiter: ",")}
               </span>
-              <span :if={!price} class="text-gray-400">—</span>
+              <span :if={!price} class="text-slate-400">—</span>
             </div>
           </:col>
 
@@ -572,7 +585,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
                   OTC
                 </span>
               <% else %>
-                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium">
+                <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-600 font-medium">
                   Non-OTC
                 </span>
               <% end %>
@@ -586,7 +599,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
                   In DDA
                 </span>
               <% else %>
-                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium">
+                <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-600 font-medium">
                   Not in DDA
                 </span>
               <% end %>
@@ -601,7 +614,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
                   {expired_count} expired
                 </span>
               <% else %>
-                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-500 font-medium">
+                <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-500 font-medium">
                   None
                 </span>
               <% end %>
@@ -640,7 +653,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
               </.link>
             </div>
           </:action>
-        </.table>
+        </.data_table>
         <.pagination
           page={@page}
           total_pages={@total_pages}

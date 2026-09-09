@@ -92,7 +92,7 @@ defmodule MedcampWeb.EditPatientComponent do
                     Current Document
                   </p>
 
-                  <p class="text-gray-700">
+                  <p class="text-slate-700">
                     {@birth_certificate.document_name}
                   </p>
 
@@ -106,7 +106,7 @@ defmodule MedcampWeb.EditPatientComponent do
                 </div>
               <% end %>
 
-              <label class="text-sm text-gray-500">
+              <label class="text-sm text-slate-500">
                 Upload new file to replace the current one
               </label>
 
@@ -138,7 +138,7 @@ defmodule MedcampWeb.EditPatientComponent do
                     Current Document
                   </p>
 
-                  <p class="text-gray-700">
+                  <p class="text-slate-700">
                     {@national_id_document.document_name}
                   </p>
 
@@ -153,7 +153,7 @@ defmodule MedcampWeb.EditPatientComponent do
                 </div>
               <% end %>
 
-              <label class="text-sm text-gray-500">
+              <label class="text-sm text-slate-500">
                 Upload new file to replace the current one
               </label>
 

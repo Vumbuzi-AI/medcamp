@@ -20,7 +20,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
       >
         <%= if @patient do %>
           <div class="mb-4">
-            <p class="text-sm font-medium text-gray-700">
+            <p class="text-sm font-medium text-slate-700">
               Patient: {[@patient.first_name, @patient.middle_name, @patient.last_name]
               |> Enum.filter(&(&1 != nil))
               |> Enum.join(" ")}
@@ -44,9 +44,9 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
             </.button>
           </div>
 
-          <div class="bg-gray-50 rounded-md p-3">
+          <div class="bg-slate-50 rounded-md p-3">
             <%= if Enum.empty?(@selected_drugs) do %>
-              <p class="text-gray-500 italic">No drugs selected yet</p>
+              <p class="text-slate-500 italic">No drugs selected yet</p>
             <% else %>
               <div class="space-y-3">
                 <%= for {drug, index} <- Enum.with_index(@selected_drugs) do %>
@@ -59,7 +59,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
                           {drug[:brand_name] || drug["brand_name"]}
                         <% end %>
                       </h4>
-                      <p class="text-sm text-gray-600">
+                      <p class="text-sm text-slate-600">
                         {drug[:generic_name] || drug["generic_name"]}
                       </p>
                       <p class="text-sm">
@@ -85,7 +85,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
                 <% end %>
 
                 <div class="mt-4 text-right">
-                  <span class="text-gray-600">Total:</span>
+                  <span class="text-slate-600">Total:</span>
                   <span class="font-bold text-lg ml-2">{@total_price || 0} KES</span>
                 </div>
               </div>
@@ -103,8 +103,8 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
             value="Human Development Fund ( HDF )"
           />
           <div class="mb-4">
-            <p class="text-sm font-medium text-gray-700">Payment Type</p>
-            <p class="text-sm text-gray-500 mt-1 bg-gray-50 rounded px-3 py-2">
+            <p class="text-sm font-medium text-slate-700">Payment Type</p>
+            <p class="text-sm text-slate-500 mt-1 bg-slate-50 rounded px-3 py-2">
               Insurance — Human Development Fund ( HDF )
             </p>
           </div>
@@ -143,14 +143,14 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
           <.header>Add Drug</.header>
           <.simple_form for={@drug_form} id="drug-form" phx-target={@myself} phx-submit="add_drug">
             <div :if={@selected_drug == nil} class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Search for drugs</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Search for drugs</label>
               <input
                 type="text"
                 name="query"
                 value={@searched_query}
                 phx-change="search_drugs"
                 phx-target={@myself}
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               />
             </div>
 
@@ -160,7 +160,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
                 <div class="max-h-48 overflow-y-auto border rounded-md">
                   <%= for {drug, index} <- Enum.with_index(@searched_drugs) do %>
                     <div
-                      class="p-2 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
+                      class="p-2 hover:bg-slate-100 cursor-pointer border-b last:border-b-0"
                       phx-click="select_drug"
                       phx-target={@myself}
                       phx-value-id={drug.id}
@@ -176,7 +176,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
                           Give this first
                         </span>
                       </div>
-                      <p class="text-sm text-gray-600">{drug.generic_name}</p>
+                      <p class="text-sm text-slate-600">{drug.generic_name}</p>
                       <.available_batches_preview drug={drug} />
                     </div>
                   <% end %>
@@ -199,13 +199,13 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
               />
 
               <div class="mb-4">
-                <label for="drug_form_frequency" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="drug_form_frequency" class="block text-sm font-medium text-slate-700 mb-1">
                   Frequency
                 </label>
                 <select
                   id="drug_form_frequency"
                   name="drug_form[frequency]"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 >
                   <option value="">Select frequency</option>
                   <option value="Once daily">Once daily</option>
@@ -220,7 +220,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
               <div class="mb-4">
                 <label
                   for="drug_form_duration_in_days"
-                  class="block text-sm font-medium text-gray-700 mb-1"
+                  class="block text-sm font-medium text-slate-700 mb-1"
                 >
                   Duration (days)
                 </label>
@@ -230,21 +230,21 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
                   type="number"
                   min="1"
                   value={@drug_form[:duration_in_days] && @drug_form[:duration_in_days].value}
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
 
               <div class="mb-4">
                 <label
                   for="drug_form_route_of_administration"
-                  class="block text-sm font-medium text-gray-700 mb-1"
+                  class="block text-sm font-medium text-slate-700 mb-1"
                 >
                   Route of Administration
                 </label>
                 <select
                   id="drug_form_route_of_administration"
                   name="drug_form[route_of_administration]"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 >
                   <option value="">Select route</option>
                   <option value="Oral">Oral</option>
@@ -265,7 +265,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
               </div>
 
               <div class="mb-4">
-                <label for="drug_form_quantity" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="drug_form_quantity" class="block text-sm font-medium text-slate-700 mb-1">
                   Quantity
                 </label>
                 <input
@@ -278,7 +278,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
                     "block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
                     if(@drug_form[:quantity] && @drug_form[:quantity].errors != [],
                       do: "border-red-300",
-                      else: "border-gray-300"
+                      else: "border-slate-300"
                     )
                   ]}
                 />
@@ -292,7 +292,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
               <div class="mb-4">
                 <label
                   for="drug_form_prescription_note"
-                  class="block text-sm font-medium text-gray-700 mb-1"
+                  class="block text-sm font-medium text-slate-700 mb-1"
                 >
                   Prescription note
                 </label>
@@ -302,7 +302,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
                   type="text"
                   placeholder="e.g. 2 x 1"
                   value={@drug_form[:prescription_note] && @drug_form[:prescription_note].value}
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
             <% end %>
@@ -312,7 +312,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
                 type="button"
                 phx-click="close_drug_modal"
                 phx-target={@myself}
-                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-md text-gray-800"
+                class="px-4 py-2 bg-slate-300 hover:bg-slate-400 rounded-md text-slate-800"
               >
                 Cancel
               </button>

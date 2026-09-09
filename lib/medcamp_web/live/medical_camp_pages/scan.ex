@@ -81,7 +81,7 @@ defmodule MedcampWeb.MedicalCampPages.Scan do
         </p>
       </div>
 
-      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+      <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-6">
         <div class="flex items-center mb-4">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +101,7 @@ defmodule MedcampWeb.MedicalCampPages.Scan do
         </div>
 
         <div id="qr-camera-scanner" phx-hook="QrCameraScanner" class="relative">
-          <video class="w-full rounded-lg border border-gray-300" autoplay playsinline muted></video>
+          <video class="w-full rounded-lg border border-slate-300" autoplay playsinline muted></video>
           <div class="qr-overlay hidden absolute inset-0 bg-green-500/20 rounded-lg items-center justify-center">
             <svg
               class="h-16 w-16 text-green-600"
@@ -117,7 +117,7 @@ defmodule MedcampWeb.MedicalCampPages.Scan do
               />
             </svg>
           </div>
-          <p class="qr-status text-sm text-center text-gray-500 mt-2">
+          <p class="qr-status text-sm text-center text-slate-500 mt-2">
             Point camera at patient's QR code...
           </p>
         </div>

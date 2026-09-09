@@ -9,7 +9,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :active_tab, :patients)}
+    {:ok, assign(socket, active_tab: :patients)}
   end
 
   @impl true
@@ -40,7 +40,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 -m-4 sm:-m-6 p-4 sm:p-6">
-      <div class="w-[90%] mx-auto  space-y-6">
+      <div class="space-y-6">
         <.patient_overview_to_show_all
           most_recent_triage={@most_recent_triage}
           patient={@patient}

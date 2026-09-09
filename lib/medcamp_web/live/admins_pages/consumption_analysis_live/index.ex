@@ -106,7 +106,7 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
       <.page_header
         icon_path="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
         title="Consumption Analysis"
@@ -122,6 +122,8 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
           />
         </form>
 
+        <.camp_switcher camps={assigns[:camp_options] || []} camp_filter={assigns[:camp_filter]} />
+
         <.filter_drawer
           id="consumption-analysis-filters-admin"
           title="Report Settings"
@@ -133,7 +135,7 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
           <:group label="Report Period">
             <select
               name="period"
-              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+              class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
             >
               <%= for p <- @period_options do %>
                 <option value={p} selected={@period == p}>{format_period(p)}</option>
@@ -141,7 +143,7 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
             </select>
             <select
               name="category"
-              class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+              class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
             >
               <%= for c <- @category_options do %>
                 <option value={c} selected={@category == c}>{format_category(c)}</option>
@@ -152,36 +154,36 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
           <:group label="Date">
             <%= if @period == "custom" do %>
               <div>
-                <label class="mb-1 block text-xs font-medium text-gray-600">From</label>
+                <label class="mb-1 block text-xs font-medium text-slate-600">From</label>
                 <input
                   type="date"
                   name="date_from"
                   value={@date_from}
-                  class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                  class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                 />
               </div>
               <div>
-                <label class="mb-1 block text-xs font-medium text-gray-600">To</label>
+                <label class="mb-1 block text-xs font-medium text-slate-600">To</label>
                 <input
                   type="date"
                   name="date_to"
                   value={@date_to}
-                  class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                  class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                 />
               </div>
             <% else %>
               <div class={if @period == "all_time", do: "col-span-2 opacity-40 pointer-events-none"}>
-                <label class="mb-1 block text-xs font-medium text-gray-600">
+                <label class="mb-1 block text-xs font-medium text-slate-600">
                   Anchor Date
                   <%= if @period == "all_time" do %>
-                    <span class="text-gray-400 font-normal">(ignored for All Time)</span>
+                    <span class="text-slate-400 font-normal">(ignored for All Time)</span>
                   <% end %>
                 </label>
                 <input
                   type="date"
                   name="anchor_date"
                   value={@anchor_date}
-                  class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                  class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                 />
               </div>
             <% end %>
@@ -199,11 +201,11 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
       <%= if not Enum.empty?(@results) do %>
         <div class="flex flex-wrap gap-4 mb-4">
           <div class="flex items-center gap-2 px-4 py-2 bg-brand-50 border border-brand-100 rounded-lg">
-            <span class="text-xs text-gray-500 font-medium">Distinct items</span>
+            <span class="text-xs text-slate-500 font-medium">Distinct items</span>
             <span class="text-lg font-bold text-brand-primary">{length(@results)}</span>
           </div>
           <div class="flex items-center gap-2 px-4 py-2 bg-brand-50 border border-brand-100 rounded-lg">
-            <span class="text-xs text-gray-500 font-medium">Total qty consumed</span>
+            <span class="text-xs text-slate-500 font-medium">Total qty consumed</span>
             <span class="text-lg font-bold text-brand-primary">
               {@results |> Enum.map(& &1.total_quantity) |> Enum.sum()}
             </span>
@@ -262,79 +264,38 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
           </:description_slot>
         </.blank_state>
       <% else %>
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rank
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Brand Name
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Generic Name
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  GTIN
-                </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Qty Consumed
-                </th>
-                <th
-                  :if={show_sales_data?(@category)}
-                  class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Sold For
-                </th>
-                <th
-                  :if={@category == "both"}
-                  class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Category
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <%= for {item, idx} <- Enum.with_index(@results, 1) do %>
-                <tr class={if rem(idx, 2) == 0, do: "bg-gray-50", else: "bg-white"}>
-                  <td class="px-4 py-3 text-sm text-gray-900">
-                    <span class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-primary font-medium">
-                      {item.rank}
-                    </span>
-                  </td>
-                  <td class="px-4 py-3 text-sm font-medium text-gray-900">
-                    {highlight_match(item.brand_name, @search)}
-                  </td>
-                  <td class="px-4 py-3 text-sm text-gray-600">
-                    {highlight_match(item.generic_name, @search)}
-                  </td>
-                  <td class="px-4 py-3 text-sm text-gray-500 font-mono">
-                    {item.gtin || "—"}
-                  </td>
-                  <td class="px-4 py-3 text-sm text-gray-900 text-right font-semibold">
-                    {item.total_quantity}
-                  </td>
-                  <td :if={show_sales_data?(@category)} class="px-4 py-3 text-sm text-right">
-                    <%= if is_nil(item.total_sold_amount) do %>
-                      <span class="text-gray-400">—</span>
-                    <% else %>
-                      <div class="font-semibold text-gray-900">{money(item.total_sold_amount)}</div>
-                      <div class="text-xs text-gray-500">
-                        Avg {money(item.average_unit_price)} / unit
-                      </div>
-                    <% end %>
-                  </td>
-                  <td :if={@category == "both"} class="px-4 py-3 text-sm">
-                    <span class={category_badge_class(item.category)}>
-                      {format_category_atom(item.category)}
-                    </span>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
+        <.data_table id="consumption-results" rows={@results} row_id={&"consumption-#{&1.rank}"}>
+          <:col :let={item} label="Rank">
+            <span class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-primary font-medium">
+              {item.rank}
+            </span>
+          </:col>
+          <:col :let={item} label="Brand Name" class="font-medium text-slate-900">
+            {highlight_match(item.brand_name, @search)}
+          </:col>
+          <:col :let={item} label="Generic Name" hide_below="sm">
+            {highlight_match(item.generic_name, @search)}
+          </:col>
+          <:col :let={item} label="GTIN" class="font-mono text-xs text-slate-500" hide_below="md">
+            {item.gtin || "—"}
+          </:col>
+          <:col :let={item} label="Qty Consumed" align="right" class="font-semibold text-slate-900">
+            {item.total_quantity}
+          </:col>
+          <:col :let={item} :if={show_sales_data?(@category)} label="Sold For" align="right">
+            <%= if is_nil(item.total_sold_amount) do %>
+              <span class="text-slate-400">—</span>
+            <% else %>
+              <div class="font-semibold text-slate-900">{money(item.total_sold_amount)}</div>
+              <div class="text-xs text-slate-500">Avg {money(item.average_unit_price)} / unit</div>
+            <% end %>
+          </:col>
+          <:col :let={item} :if={@category == "both"} label="Category">
+            <span class={category_badge_class(item.category)}>
+              {format_category_atom(item.category)}
+            </span>
+          </:col>
+        </.data_table>
       <% end %>
     </div>
     """
@@ -382,7 +343,7 @@ defmodule MedcampWeb.AdminConsumptionAnalysisLive.Index do
     do: "px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800"
 
   defp category_badge_class(_),
-    do: "px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-800"
+    do: "px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-800"
 
   defp show_sales_data?(category), do: category in ["pharmaceuticals", "both"]
 

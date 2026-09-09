@@ -116,8 +116,8 @@ defmodule MedcampWeb.NurseDashboardLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-50 -m-4 sm:-m-6 p-4 sm:p-6">
-      <div class="w-[95%] mx-auto space-y-6">
+    <div class="min-h-screen bg-slate-50 -m-4 sm:-m-6 p-4 sm:p-6">
+      <div class="space-y-6">
         <.dashboard_top_card
           title="Nurse Dashboard"
           subtitle={"Patient intake and bedside workflow for #{format_date(@date_from)} to #{format_date(@date_to)}"}
@@ -253,7 +253,7 @@ defmodule MedcampWeb.NurseDashboardLive.Index do
         "px-3 py-1.5 rounded-full text-xs font-semibold transition-colors",
         if(@is_active,
           do: "bg-brand-primary text-white",
-          else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          else: "bg-slate-100 text-slate-600 hover:bg-slate-200"
         )
       ]}
     >
@@ -370,9 +370,6 @@ defmodule MedcampWeb.NurseDashboardLive.Index do
     |> Enum.join(" ")
     |> String.downcase()
   end
-
-  defp room_label(%{room_number: room_number}) when is_binary(room_number), do: room_number
-  defp room_label(_), do: ""
 
   defp active_filter_count(period, search) do
     custom_count = if period == :custom, do: 1, else: 0

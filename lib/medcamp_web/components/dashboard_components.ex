@@ -16,21 +16,21 @@ defmodule MedcampWeb.DashboardComponents do
     assigns = assign(assigns, :color_classes, color_classes(assigns.color))
 
     ~H"""
-    <div class="bg-white rounded-[28px] shadow-[0_14px_32px_rgba(15,23,42,0.05)] border border-[#E8EEF8] p-6 hover:shadow-[0_18px_38px_rgba(15,23,42,0.08)] transition-shadow">
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-card transition-shadow hover:shadow-card-hover">
       <div class="flex items-start justify-between">
         <div class="flex-1">
-          <p class="text-xs font-medium uppercase tracking-wide text-gray-500 mb-2">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500 mb-2">
             {@label}
           </p>
           <p class={"text-3xl font-bold leading-none #{@color_classes[:text]}"}>
             {@value}
           </p>
           <%= if @trend do %>
-            <p class="text-sm text-[#5F7190] mt-3">{@trend}</p>
+            <p class="text-sm text-slate-500 mt-3">{@trend}</p>
           <% end %>
         </div>
-        <div class={@color_classes[:bg]}>
-          <.icon name={@icon} class="w-8 h-8 text-white" />
+        <div class="flex shrink-0 items-center justify-center rounded-full bg-brand-50 p-3">
+          <.icon name={@icon} class={"w-8 h-8 #{@color_classes[:text]}"} />
         </div>
       </div>
       {render_slot(@inner_block)}
@@ -47,8 +47,8 @@ defmodule MedcampWeb.DashboardComponents do
 
   def chart_card(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">{@title}</h3>
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-card">
+      <h3 class="text-lg font-semibold text-slate-900 mb-4">{@title}</h3>
       <canvas id={@id} class="w-full h-80"></canvas>
     </div>
     """
@@ -67,7 +67,7 @@ defmodule MedcampWeb.DashboardComponents do
 
     ~H"""
     <.link href={@href} class="block">
-      <div class={@bg_class <> " rounded-[22px] p-4 text-center hover:shadow-[0_16px_32px_rgba(15,23,42,0.12)] transition-shadow cursor-pointer"}>
+      <div class={@bg_class <> " rounded-xl p-4 text-center shadow-card transition-shadow hover:shadow-card-hover cursor-pointer"}>
         <.icon name={@icon} class="w-6 h-6 text-white mx-auto mb-2.5" />
         <p class="text-sm font-semibold text-white">{@label}</p>
       </div>
@@ -84,19 +84,19 @@ defmodule MedcampWeb.DashboardComponents do
 
   def recent_items(assigns) do
     ~H"""
-    <div class="bg-white rounded-[28px] shadow-[0_14px_32px_rgba(15,23,42,0.05)] border border-[#E8EEF8] p-6">
-      <h3 class="text-xl font-semibold text-gray-900 mb-5">{@title}</h3>
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-card">
+      <h3 class="text-xl font-semibold text-slate-900 mb-5">{@title}</h3>
       <%= if Enum.empty?(@items) do %>
-        <p class="text-center py-8 text-sm text-[#6C7E99]">{@empty_message}</p>
+        <p class="text-center py-8 text-sm text-slate-500">{@empty_message}</p>
       <% else %>
         <div class="space-y-3.5">
           <%= for item <- @items do %>
-            <div class="flex items-center justify-between p-4 border border-[#E8EEF8] rounded-[22px] hover:bg-[#F8FBFF] transition">
+            <div class="flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
               <div class="flex-1">
-                <p class="text-sm font-semibold text-gray-900">
+                <p class="text-sm font-semibold text-slate-900">
                   {item.title}
                 </p>
-                <p class="text-sm text-[#60718E] mt-1">{item.subtitle}</p>
+                <p class="text-sm text-slate-500 mt-1">{item.subtitle}</p>
               </div>
               <%= if item.badge do %>
                 <span class={"px-3 py-1 text-xs font-semibold rounded-full #{item.badge_color}"}>
@@ -111,33 +111,19 @@ defmodule MedcampWeb.DashboardComponents do
     """
   end
 
-  defp color_classes(color) do
-    case color do
-      "blue" -> %{text: "text-[#295FDE]", bg: "bg-[#295FDE] rounded-full p-3"}
-      "green" -> %{text: "text-[#0FAF8A]", bg: "bg-[#0FAF8A] rounded-full p-3"}
-      "red" -> %{text: "text-[#E0566F]", bg: "bg-[#E0566F] rounded-full p-3"}
-      "purple" -> %{text: "text-[#7C58E8]", bg: "bg-[#7C58E8] rounded-full p-3"}
-      "orange" -> %{text: "text-[#E5963A]", bg: "bg-[#E5963A] rounded-full p-3"}
-      "indigo" -> %{text: "text-brand-primary", bg: "bg-brand-primary rounded-full p-3"}
-      _ -> %{text: "text-[#5E6D86]", bg: "bg-[#5E6D86] rounded-full p-3"}
-    end
-  end
+  # Two-tone glyphs on the tint tile. The medic per-metric rainbow is gone;
+  # instead every metric resolves to navy or cyan (both from the org's
+  # `brand-*` palette) so a KPI row alternates without leaving the palette.
+  # "Cool"/primary counts read navy; activity/flow counts read cyan.
+  @cyan_metrics ~w(green emerald teal cyan blue amber orange)
+  defp color_classes(color) when color in @cyan_metrics,
+    do: %{text: "text-brand-accent", bg: "bg-brand-50 rounded-full p-3"}
 
-  defp quick_action_bg(color) do
-    case color do
-      "blue" -> "bg-[#2F66E2] shadow-[0_10px_20px_rgba(47,102,226,0.22)]"
-      "green" -> "bg-[#10B989] shadow-[0_10px_20px_rgba(16,185,137,0.22)]"
-      "red" -> "bg-[#E85D75] shadow-[0_10px_20px_rgba(232,93,117,0.2)]"
-      "purple" -> "bg-[#7C58E8] shadow-[0_10px_20px_rgba(124,88,232,0.24)]"
-      "orange" -> "bg-[#E39B41] shadow-[0_10px_20px_rgba(227,155,65,0.22)]"
-      "indigo" -> "bg-brand-primary shadow-[0_10px_20px_rgba(55,56,150,0.24)]"
-      "amber" -> "bg-[#D79B2B] shadow-[0_10px_20px_rgba(215,155,43,0.22)]"
-      "cyan" -> "bg-[#2AA8BD] shadow-[0_10px_20px_rgba(42,168,189,0.22)]"
-      "pink" -> "bg-[#D75AA5] shadow-[0_10px_20px_rgba(215,90,165,0.22)]"
-      "gray" -> "bg-[#64748B] shadow-[0_10px_20px_rgba(100,116,139,0.22)]"
-      _ -> "bg-[#64748B] shadow-[0_10px_20px_rgba(100,116,139,0.22)]"
-    end
-  end
+  defp color_classes(_color),
+    do: %{text: "text-brand-primary", bg: "bg-brand-50 rounded-full p-3"}
+
+  defp quick_action_bg(color) when color in @cyan_metrics, do: "bg-brand-accent"
+  defp quick_action_bg(_color), do: "bg-brand-primary"
 
   # ============================================================
   # Shared role-based dashboard widgets (Admin / Doctor / Reception)
@@ -178,15 +164,21 @@ defmodule MedcampWeb.DashboardComponents do
 
   slot :actions
 
+  attr :camps, :list,
+    default: [],
+    doc: "when non-empty, renders the camp view selector in the toolbar"
+
+  attr :camp_filter, :any, default: nil
+
   def dashboard_top_card(assigns) do
     ~H"""
-    <div class="bg-white rounded-[32px] shadow-[0_20px_42px_rgba(15,23,42,0.06)] border border-[#E6EDF8] p-5 sm:p-7">
+    <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-7 shadow-card">
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
+          <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">
             {@title}
           </h1>
-          <p :if={@subtitle} class="text-sm text-gray-500 mt-2">
+          <p :if={@subtitle} class="text-sm text-slate-500 mt-2">
             {@subtitle}
           </p>
         </div>
@@ -195,10 +187,16 @@ defmodule MedcampWeb.DashboardComponents do
         </div>
       </div>
 
-      <div :if={@search_name || @filter_id} class="flex flex-wrap items-center gap-3">
+      <div :if={@search_name || @filter_id || @camps != []} class="flex flex-wrap items-center gap-3">
         <form :if={@search_name} phx-change={@search_event} class="flex-1 min-w-[220px]">
           <.search_input name={@search_name} value={@search_value} placeholder={@search_placeholder} />
         </form>
+
+        <MedcampWeb.CampComponents.camp_switcher
+          :if={@camps != []}
+          camps={@camps}
+          camp_filter={@camp_filter}
+        />
 
         <.filter_drawer
           :if={@filter_id}
@@ -273,6 +271,30 @@ defmodule MedcampWeb.DashboardComponents do
     },
     low_stock_items: %{label: "Low Stock Items", icon: "exclamation-triangle", color: "rose"},
     drug_catalog: %{label: "Drugs in Catalog", icon: "archive-box", color: "cyan"},
+    platform_organisations: %{
+      label: "Total Organisations",
+      icon: "building-office-2",
+      color: "indigo"
+    },
+    platform_active_organisations: %{
+      label: "Active Organisations",
+      icon: "check-badge",
+      color: "blue"
+    },
+    platform_pending_approvals: %{
+      label: "Pending Approvals",
+      icon: "clock",
+      color: "amber"
+    },
+    platform_total_camps: %{label: "Total Camps", icon: "calendar-days", color: "indigo"},
+    platform_active_camps: %{label: "Active Camps", icon: "check-badge", color: "blue"},
+    platform_camp_patients: %{label: "Patients Across Camps", icon: "users", color: "teal"},
+    platform_camp_records: %{label: "Camp Records", icon: "document-text", color: "violet"},
+    platform_returning_patients: %{
+      label: "Returning Patients",
+      icon: "arrow-path",
+      color: "emerald"
+    },
     radiology_exams: %{label: "Radiology Exams", icon: "film", color: "indigo"},
     completed_radiology_reports: %{
       label: "Completed Reports",
@@ -347,16 +369,16 @@ defmodule MedcampWeb.DashboardComponents do
 
   defp summary_card(assigns) do
     ~H"""
-    <div class="w-full min-w-0 overflow-hidden bg-white rounded-[26px] border border-[#E7EDF8] shadow-[0_12px_28px_rgba(15,23,42,0.045)] px-5 sm:px-6 py-5 min-h-[128px] flex items-center">
+    <div class="w-full min-w-0 overflow-hidden bg-white rounded-2xl border border-slate-200 px-5 sm:px-6 py-5 min-h-[128px] flex items-center shadow-card">
       <div class="flex w-full min-w-0 items-center gap-5">
         <div class={[
-          "flex p-2 shrink-0 items-center justify-center rounded-full border border-[#DCE5F2] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]",
+          "flex p-2 shrink-0 items-center justify-center rounded-full border border-slate-200",
           summary_icon_bg(@color)
         ]}>
           <Heroicons.icon name={@icon} type="outline" class={"h-7 w-7 #{summary_icon_color(@color)}"} />
         </div>
         <div class="min-w-0 flex-1">
-          <p class="text-xs font-medium uppercase tracking-wide text-gray-500 truncate">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500 truncate">
             {@label}
           </p>
           <p class="text-2xl font-bold text-brand-primary leading-none mt-2 truncate">
@@ -364,7 +386,7 @@ defmodule MedcampWeb.DashboardComponents do
           </p>
           <p
             :if={@helper}
-            class="max-w-full whitespace-normal break-words text-sm text-gray-500 mt-2 leading-snug"
+            class="max-w-full whitespace-normal break-words text-sm text-slate-500 mt-2 leading-snug"
           >
             {@helper}
           </p>
@@ -374,25 +396,15 @@ defmodule MedcampWeb.DashboardComponents do
     """
   end
 
-  defp summary_icon_bg("indigo"), do: "bg-[#F8F9FF]"
-  defp summary_icon_bg("blue"), do: "bg-[#F7FAFF]"
-  defp summary_icon_bg("emerald"), do: "bg-[#F6FFFB]"
-  defp summary_icon_bg("amber"), do: "bg-[#FFFBF3]"
-  defp summary_icon_bg("violet"), do: "bg-[#FBF8FF]"
-  defp summary_icon_bg("teal"), do: "bg-[#F4FFFD]"
-  defp summary_icon_bg("cyan"), do: "bg-[#F5FDFF]"
-  defp summary_icon_bg("rose"), do: "bg-[#FFF8FA]"
-  defp summary_icon_bg(_), do: "bg-[#FAFBFD]"
+  # Every KPI icon tile is the brand tint; the glyph is navy or cyan (see
+  # color_classes/1). No per-metric background hue - that was medic-era slop.
+  defp summary_icon_bg(_), do: "bg-brand-50"
 
-  defp summary_icon_color("indigo"), do: "text-brand-primary"
-  defp summary_icon_color("blue"), do: "text-[#2C66E4]"
-  defp summary_icon_color("emerald"), do: "text-[#12B586]"
-  defp summary_icon_color("amber"), do: "text-[#D79B2B]"
-  defp summary_icon_color("violet"), do: "text-[#7C58E8]"
-  defp summary_icon_color("teal"), do: "text-[#14B8A6]"
-  defp summary_icon_color("cyan"), do: "text-[#2AA8BD]"
-  defp summary_icon_color("rose"), do: "text-[#E85D75]"
-  defp summary_icon_color(_), do: "text-[#64748B]"
+  # Two-tone glyphs, both from the org palette: activity/flow metrics read cyan,
+  # the rest navy - so a KPI row alternates. See docs/DESIGN.md.
+  @summary_cyan ~w(blue teal cyan emerald green amber orange)
+  defp summary_icon_color(color) when color in @summary_cyan, do: "text-brand-accent"
+  defp summary_icon_color(_), do: "text-brand-primary"
 
   @analytics_tab_labels %{revenue: "Revenue", patients: "Patients", operations: "Operations"}
 
@@ -406,7 +418,7 @@ defmodule MedcampWeb.DashboardComponents do
 
   def analytics_tab_toggle(assigns) do
     ~H"""
-    <div class="inline-flex flex-wrap items-center gap-1 rounded-full border border-[#D8E2F1] bg-[#F8FAFD] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+    <div class="inline-flex flex-wrap items-center gap-1 rounded-full border border-slate-200 bg-slate-50 p-1.5">
       <button
         :for={tab <- @visible_tabs}
         type="button"
@@ -415,8 +427,8 @@ defmodule MedcampWeb.DashboardComponents do
         class={[
           "px-5 py-2 rounded-full text-sm font-medium transition-all duration-150",
           if(@active_tab == tab,
-            do: "bg-brand-primary text-white shadow-[0_10px_22px_rgba(55,56,150,0.28)]",
-            else: "text-[#556781] hover:text-[#173052]"
+            do: "bg-brand-primary text-white",
+            else: "text-slate-500 hover:text-slate-900"
           )
         ]}
       >
@@ -435,13 +447,13 @@ defmodule MedcampWeb.DashboardComponents do
 
   def analytics_section(assigns) do
     ~H"""
-    <div class="bg-white rounded-[30px] shadow-[0_18px_38px_rgba(15,23,42,0.055)] border border-[#E6EDF8] p-5 sm:p-6">
+    <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-card">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
         <div>
-          <h2 class="text-xl font-semibold text-gray-900">
+          <h2 class="text-xl font-semibold text-slate-900">
             {@title}
           </h2>
-          <p class="text-sm text-gray-500 mt-2">{@subtitle}</p>
+          <p class="text-sm text-slate-500 mt-2">{@subtitle}</p>
         </div>
         <div :if={@actions != []} class="shrink-0">
           {render_slot(@actions)}
@@ -470,10 +482,10 @@ defmodule MedcampWeb.DashboardComponents do
       |> assign(:dom_id, chart_dom_id(assigns.title))
 
     ~H"""
-    <div class="bg-white rounded-[26px] shadow-[0_14px_32px_rgba(15,23,42,0.05)] border border-[#E8EEF8] p-5 sm:p-6 h-full">
+    <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 h-full shadow-card">
       <div class="mb-5">
-        <h3 class="text-lg font-semibold text-gray-900">{@title}</h3>
-        <p :if={@subtitle} class="text-sm text-gray-500 mt-1.5 leading-relaxed">
+        <h3 class="text-lg font-semibold text-slate-900">{@title}</h3>
+        <p :if={@subtitle} class="text-sm text-slate-500 mt-1.5 leading-relaxed">
           {@subtitle}
         </p>
       </div>
@@ -503,8 +515,8 @@ defmodule MedcampWeb.DashboardComponents do
 
   def age_group_breakdown_card(assigns) do
     ~H"""
-    <div class="bg-white rounded-[26px] shadow-[0_14px_32px_rgba(15,23,42,0.05)] border border-[#E8EEF8] p-6">
-      <h3 class="text-lg font-semibold text-gray-900 mb-5">
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-card">
+      <h3 class="text-lg font-semibold text-slate-900 mb-5">
         Age Group Breakdown
       </h3>
       <div class="space-y-3">
@@ -542,15 +554,15 @@ defmodule MedcampWeb.DashboardComponents do
 
     ~H"""
     <div class="flex items-center gap-3">
-      <span class="text-sm text-[#5F7190] w-32 shrink-0 truncate">{@label}</span>
-      <div class="flex-1 h-2.5 bg-[#EDF2F8] rounded-full overflow-hidden">
+      <span class="text-sm text-slate-500 w-32 shrink-0 truncate">{@label}</span>
+      <div class="flex-1 h-2.5 bg-slate-50 rounded-full overflow-hidden">
         <div
           class={["h-full rounded-full transition-all duration-500", age_bar_color(@color)]}
           style={"width: #{@pct}%"}
         >
         </div>
       </div>
-      <span class="text-sm font-semibold text-[#173052] w-8 text-right">{@count}</span>
+      <span class="text-sm font-semibold text-slate-900 w-8 text-right">{@count}</span>
     </div>
     """
   end
@@ -559,7 +571,7 @@ defmodule MedcampWeb.DashboardComponents do
   defp age_bar_color("green"), do: "bg-green-500"
   defp age_bar_color("blue"), do: "bg-blue-500"
   defp age_bar_color("rose"), do: "bg-rose-400"
-  defp age_bar_color(_), do: "bg-gray-400"
+  defp age_bar_color(_), do: "bg-slate-400"
 
   @doc """
   Geographic Spread table: location, patient count, % share.
@@ -568,50 +580,50 @@ defmodule MedcampWeb.DashboardComponents do
 
   def geographic_spread_table(assigns) do
     ~H"""
-    <div class="bg-white rounded-[26px] shadow-[0_14px_32px_rgba(15,23,42,0.05)] border border-[#E8EEF8] overflow-hidden">
-      <div class="px-5 py-4 border-b border-[#E8EEF8] bg-[#F8FAFD] flex items-center justify-between">
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-card">
+      <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
         <div>
-          <h3 class="text-lg font-semibold text-gray-900">
+          <h3 class="text-lg font-semibold text-slate-900">
             Geographic Spread
           </h3>
-          <p class="text-sm text-[#60718E] mt-1">Patient distribution by home address.</p>
+          <p class="text-sm text-slate-500 mt-1">Patient distribution by home address.</p>
         </div>
-        <span class="text-xs font-semibold text-[#60718E] bg-[#EEF3FA] px-3 py-1 rounded-full">
+        <span class="text-xs font-semibold text-slate-500 bg-slate-50 px-3 py-1 rounded-full">
           {length(@rows)} locations
         </span>
       </div>
       <%= if Enum.empty?(@rows) do %>
-        <div class="flex flex-col items-center justify-center py-12 text-[#8795AB]">
+        <div class="flex flex-col items-center justify-center py-12 text-slate-500">
           <p class="text-sm font-medium">No location data available</p>
         </div>
       <% else %>
         <div class="overflow-x-auto max-h-72 overflow-y-auto">
           <table class="min-w-full divide-y divide-[#E8EEF8] text-sm">
-            <thead class="bg-[#F8FAFD] sticky top-0">
+            <thead class="bg-slate-50 sticky top-0">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Location
                 </th>
-                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Patients
                 </th>
-                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
                   % Share
                 </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[#F1F5FB] bg-white">
               <%= for loc <- Enum.take(@rows, 15) do %>
-                <tr class="hover:bg-[#FAFCFF]">
-                  <td class="px-4 py-3 text-[#173052]">{loc.address}</td>
-                  <td class="px-4 py-3 text-right font-semibold text-[#173052]">{loc.count}</td>
+                <tr class="hover:bg-slate-50">
+                  <td class="px-4 py-3 text-slate-900">{loc.address}</td>
+                  <td class="px-4 py-3 text-right font-semibold text-slate-900">{loc.count}</td>
                   <td class="px-4 py-3 text-right">
                     <div class="flex items-center justify-end gap-2">
-                      <div class="w-16 h-1.5 bg-[#EDF2F8] rounded-full overflow-hidden">
+                      <div class="w-16 h-1.5 bg-slate-50 rounded-full overflow-hidden">
                         <div class="h-full bg-brand-primary rounded-full" style={"width: #{loc.pct}%"}>
                         </div>
                       </div>
-                      <span class="text-xs text-[#60718E] w-8 text-right">{loc.pct}%</span>
+                      <span class="text-xs text-slate-500 w-8 text-right">{loc.pct}%</span>
                     </div>
                   </td>
                 </tr>
@@ -635,19 +647,19 @@ defmodule MedcampWeb.DashboardComponents do
 
   def visit_breakdown_card(assigns) do
     ~H"""
-    <div class="bg-white rounded-[26px] shadow-[0_14px_32px_rgba(15,23,42,0.05)] border border-[#E8EEF8] p-6">
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-card">
       <div class="mb-4 flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h3 class="text-lg font-semibold text-gray-900">
+          <h3 class="text-lg font-semibold text-slate-900">
             {if @active_view == :visit_type, do: "Visits by Type", else: "Visits by Status"}
           </h3>
-          <p class="text-sm text-gray-500 mt-1.5 leading-relaxed">
+          <p class="text-sm text-slate-500 mt-1.5 leading-relaxed">
             {if @active_view == :visit_type,
               do: "See how patient visits are distributed by visit type.",
               else: "How patients paid for visits."}
           </p>
         </div>
-        <div class="inline-flex rounded-full border border-[#D8E2F1] bg-[#F8FAFD] p-1.5 overflow-hidden shrink-0">
+        <div class="inline-flex rounded-full border border-slate-200 bg-slate-50 p-1.5 overflow-hidden shrink-0">
           <button
             type="button"
             phx-click={@event}
@@ -655,8 +667,8 @@ defmodule MedcampWeb.DashboardComponents do
             class={[
               "px-4 py-2 rounded-full text-sm font-medium transition-all",
               if(@active_view == :visit_type,
-                do: "bg-brand-primary text-white shadow-[0_10px_22px_rgba(55,56,150,0.28)]",
-                else: "text-[#556781]"
+                do: "bg-brand-primary text-white",
+                else: "text-slate-500"
               )
             ]}
           >
@@ -669,8 +681,8 @@ defmodule MedcampWeb.DashboardComponents do
             class={[
               "px-4 py-2 rounded-full text-sm font-medium transition-all",
               if(@active_view == :visit_status,
-                do: "bg-brand-primary text-white shadow-[0_10px_22px_rgba(55,56,150,0.28)]",
-                else: "text-[#556781]"
+                do: "bg-brand-primary text-white",
+                else: "text-slate-500"
               )
             ]}
           >
@@ -735,7 +747,7 @@ defmodule MedcampWeb.DashboardComponents do
           %{
             label: "New Patients",
             data: Enum.map(rows, & &1.count),
-            backgroundColor: "rgba(55, 56, 150, 0.75)",
+            backgroundColor: "rgba(12, 39, 101, 0.75)",
             borderRadius: 6
           }
         ]
@@ -906,7 +918,7 @@ defmodule MedcampWeb.DashboardComponents do
 
   defp doughnut_palette do
     [
-      "#373896",
+      "#0C2765",
       "#0ea5e9",
       "#8b5cf6",
       "#14b8a6",

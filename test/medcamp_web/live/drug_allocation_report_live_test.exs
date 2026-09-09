@@ -15,13 +15,14 @@ defmodule MedcampWeb.DrugAllocationReportLiveTest do
     {:ok, view, html} = live(log_in_user(conn, admin), ~p"/admin/drug_allocations")
 
     assert html =~ "Drug Allocations"
+    assert html =~ "Filters"
     assert html =~ "Antibiotics"
     assert html =~ "Amoxil"
     assert has_element?(view, "#drug-allocation-category-summary", "12")
 
     view
-    |> form("#drug-allocation-report-filters", %{category: "Analgesics"})
-    |> render_change()
+    |> form("#drug-allocation-report-filters-form", %{category: "Analgesics"})
+    |> render_submit()
 
     assert has_element?(view, "#issued-drug-details", "Panadol")
     refute has_element?(view, "#issued-drug-details", "Amoxil")

@@ -19,9 +19,9 @@ defmodule MedcampWeb.LabTestLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:name]} type="text" label="Name" />
-        <.input field={@form[:desription]} type="textarea" label="Desription" />
+        <.input field={@form[:description]} type="textarea" label="Description" />
         <div class="mb-4">
-          <h4 class="text-sm font-medium text-gray-700 mb-2">Rates</h4>
+          <h4 class="text-sm font-medium text-slate-700 mb-2">Rates</h4>
           <div class="space-y-3">
             <.input field={@form[:price]} type="number" label="Standard rate (KES)" />
             <.input

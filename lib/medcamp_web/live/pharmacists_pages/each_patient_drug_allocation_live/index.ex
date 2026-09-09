@@ -100,8 +100,8 @@ defmodule MedcampWeb.PharmacistsLive.EachPatientDrugAllocationsIndex do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      <.header class="text-brand-primary border-b border-gray-100 pb-4 mb-4">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
+      <.header class="text-brand-primary border-b border-slate-100 pb-4 mb-4">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -128,10 +128,10 @@ defmodule MedcampWeb.PharmacistsLive.EachPatientDrugAllocationsIndex do
       </.header>
 
       <%= if @total_count == 0 do %>
-        <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+        <div class="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="mx-auto h-12 w-12 text-gray-400"
+            class="mx-auto h-12 w-12 text-slate-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -143,13 +143,13 @@ defmodule MedcampWeb.PharmacistsLive.EachPatientDrugAllocationsIndex do
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
             />
           </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No drug allocations</h3>
-          <p class="mt-1 text-sm text-gray-500">
+          <h3 class="mt-2 text-sm font-medium text-slate-900">No drug allocations</h3>
+          <p class="mt-1 text-sm text-slate-500">
             No drug allocations have been recorded for this patient yet.
           </p>
         </div>
       <% else %>
-        <.table
+        <.data_table
           id="drug_allocations"
           rows={@drug_allocations}
           row_click={
@@ -161,7 +161,7 @@ defmodule MedcampWeb.PharmacistsLive.EachPatientDrugAllocationsIndex do
         >
           <:col :let={drug_allocation} label="Prescription">
             <div class="max-w-xs py-3">
-              <span class="text-gray-700 line-clamp-2">{drug_allocation.prescription}</span>
+              <span class="text-slate-700 line-clamp-2">{drug_allocation.prescription}</span>
             </div>
           </:col>
 
@@ -216,7 +216,7 @@ defmodule MedcampWeb.PharmacistsLive.EachPatientDrugAllocationsIndex do
                   {drug_allocation.pharmacist.name}
                 </span>
               <% else %>
-                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-500">
+                <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-500">
                   Not Assigned
                 </span>
               <% end %>
@@ -225,7 +225,7 @@ defmodule MedcampWeb.PharmacistsLive.EachPatientDrugAllocationsIndex do
 
           <:col :let={drug_allocation} label="Amount Paid">
             <div class="flex items-center py-3">
-              <span class="font-medium text-gray-900">
+              <span class="font-medium text-slate-900">
                 KSh {drug_allocation.total_amount_paid || 0}
               </span>
             </div>
@@ -236,7 +236,7 @@ defmodule MedcampWeb.PharmacistsLive.EachPatientDrugAllocationsIndex do
               <%= if drug_allocation.if_prompted_by_pharmacist do %>
                 <span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-800">Yes</span>
               <% else %>
-                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">No</span>
+                <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-600">No</span>
               <% end %>
             </div>
           </:col>
@@ -256,7 +256,7 @@ defmodule MedcampWeb.PharmacistsLive.EachPatientDrugAllocationsIndex do
                 <button
                   phx-click="delete"
                   phx-value-id={drug_allocation.id}
-                  data-confirm="Are you sure you want to delete this drug allocation?"
+                  data-confirm-message="Are you sure you want to delete this drug allocation?"
                   class="text-red-600 hover:text-red-800"
                 >
                   <.icon name="hero-trash" class="h-4 w-4" />
@@ -264,7 +264,7 @@ defmodule MedcampWeb.PharmacistsLive.EachPatientDrugAllocationsIndex do
               <% end %>
             </div>
           </:col>
-        </.table>
+        </.data_table>
         <.pagination
           page={@page}
           total_pages={@total_pages}

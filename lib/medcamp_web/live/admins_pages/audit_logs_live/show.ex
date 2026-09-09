@@ -19,7 +19,7 @@ defmodule MedcampWeb.AuditLogLive.Show do
   def render(assigns) do
     ~H"""
     <div>
-      <.header class="text-brand-primary border-b border-gray-100 pb-4 mb-6">
+      <.header class="text-brand-primary border-b border-slate-100 pb-4 mb-6">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -67,8 +67,8 @@ defmodule MedcampWeb.AuditLogLive.Show do
       </div>
       
     <!-- User Information -->
-      <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+      <div class="bg-white border border-slate-200 rounded-lg p-6 mb-6">
+        <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 mr-2 text-brand-accent"
@@ -91,17 +91,17 @@ defmodule MedcampWeb.AuditLogLive.Show do
               {String.first(@audit_log.user.email) |> String.upcase()}
             </div>
             <div class="ml-4">
-              <p class="text-base font-semibold text-gray-900">{@audit_log.user.email}</p>
-              <p class="text-sm text-gray-500">
+              <p class="text-base font-semibold text-slate-900">{@audit_log.user.email}</p>
+              <p class="text-sm text-slate-500">
                 Role:
                 <span class="font-medium">{String.capitalize(@audit_log.user.role || "N/A")}</span>
               </p>
-              <p class="text-xs text-gray-400 mt-1">User ID: {@audit_log.user_id}</p>
+              <p class="text-xs text-slate-400 mt-1">User ID: {@audit_log.user_id}</p>
             </div>
           </div>
         <% else %>
-          <div class="flex items-center text-gray-400">
-            <div class="flex-shrink-0 h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-lg">
+          <div class="flex items-center text-slate-400">
+            <div class="flex-shrink-0 h-12 w-12 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-lg">
               ?
             </div>
             <div class="ml-4">
@@ -114,8 +114,8 @@ defmodule MedcampWeb.AuditLogLive.Show do
       
     <!-- Changed Fields (for updates) -->
       <%= if @audit_log.action == "update" && @audit_log.changed_fields && length(@audit_log.changed_fields) > 0 do %>
-        <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <div class="bg-white border border-slate-200 rounded-lg p-6 mb-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-5 w-5 mr-2 text-brand-accent"
@@ -144,8 +144,8 @@ defmodule MedcampWeb.AuditLogLive.Show do
       
     <!-- State Comparison (for updates) -->
       <%= if @audit_log.action == "update" && @audit_log.previous_state && @audit_log.new_state do %>
-        <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <div class="bg-white border border-slate-200 rounded-lg p-6 mb-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-5 w-5 mr-2 text-brand-accent"
@@ -171,8 +171,8 @@ defmodule MedcampWeb.AuditLogLive.Show do
                   Map.get(@audit_log.previous_state, field) %>
               <% new_value =
                 Map.get(@audit_log.new_state, field_atom) || Map.get(@audit_log.new_state, field) %>
-              <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                <p class="text-sm font-semibold text-gray-700 mb-2">
+              <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                <p class="text-sm font-semibold text-slate-700 mb-2">
                   {String.replace(field, "_", " ") |> String.capitalize()}
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -231,8 +231,8 @@ defmodule MedcampWeb.AuditLogLive.Show do
       
     <!-- Previous State (for deletes) -->
       <%= if @audit_log.action == "delete" && @audit_log.previous_state do %>
-        <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <div class="bg-white border border-slate-200 rounded-lg p-6 mb-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-5 w-5 mr-2 text-red-600"
@@ -250,15 +250,15 @@ defmodule MedcampWeb.AuditLogLive.Show do
             Deleted Record State
           </h3>
           <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-            <pre class="text-sm text-gray-800 overflow-x-auto">{Jason.encode!(@audit_log.previous_state, pretty: true)}</pre>
+            <pre class="text-sm text-slate-800 overflow-x-auto">{Jason.encode!(@audit_log.previous_state, pretty: true)}</pre>
           </div>
         </div>
       <% end %>
       
     <!-- New State (for inserts) -->
       <%= if @audit_log.action == "insert" && @audit_log.new_state do %>
-        <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <div class="bg-white border border-slate-200 rounded-lg p-6 mb-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-5 w-5 mr-2 text-green-600"
@@ -276,14 +276,14 @@ defmodule MedcampWeb.AuditLogLive.Show do
             Created Record State
           </h3>
           <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-            <pre class="text-sm text-gray-800 overflow-x-auto">{Jason.encode!(@audit_log.new_state, pretty: true)}</pre>
+            <pre class="text-sm text-slate-800 overflow-x-auto">{Jason.encode!(@audit_log.new_state, pretty: true)}</pre>
           </div>
         </div>
       <% end %>
       
     <!-- Raw Data (Collapsible) -->
-      <details class="bg-white border border-gray-200 rounded-lg p-6">
-        <summary class="text-lg font-semibold text-gray-900 cursor-pointer flex items-center">
+      <details class="bg-white border border-slate-200 rounded-lg p-6">
+        <summary class="text-lg font-semibold text-slate-900 cursor-pointer flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 mr-2 text-brand-accent"
@@ -301,7 +301,7 @@ defmodule MedcampWeb.AuditLogLive.Show do
           Raw JSON Data
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 ml-2 text-gray-400"
+            class="h-4 w-4 ml-2 text-slate-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -312,16 +312,16 @@ defmodule MedcampWeb.AuditLogLive.Show do
         <div class="mt-4 space-y-4">
           <%= if @audit_log.previous_state do %>
             <div>
-              <h4 class="text-sm font-medium text-gray-700 mb-2">Previous State</h4>
-              <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+              <h4 class="text-sm font-medium text-slate-700 mb-2">Previous State</h4>
+              <div class="bg-slate-900 rounded-lg p-4 overflow-x-auto">
                 <pre class="text-sm text-green-400">{Jason.encode!(@audit_log.previous_state, pretty: true)}</pre>
               </div>
             </div>
           <% end %>
           <%= if @audit_log.new_state do %>
             <div>
-              <h4 class="text-sm font-medium text-gray-700 mb-2">New State</h4>
-              <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+              <h4 class="text-sm font-medium text-slate-700 mb-2">New State</h4>
+              <div class="bg-slate-900 rounded-lg p-4 overflow-x-auto">
                 <pre class="text-sm text-green-400">{Jason.encode!(@audit_log.new_state, pretty: true)}</pre>
               </div>
             </div>
@@ -333,7 +333,7 @@ defmodule MedcampWeb.AuditLogLive.Show do
       <div class="mt-6 flex justify-end gap-3">
         <.link
           patch={@patch}
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+          class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
         >
           Close
         </.link>
