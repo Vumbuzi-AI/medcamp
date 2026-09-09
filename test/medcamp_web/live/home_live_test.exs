@@ -15,29 +15,34 @@ defmodule MedcampWeb.HomeLiveTest do
 
     # Every section anchor present.
     for id <- ~w(features stations analysis) do
-      assert html =~ ~s(id="#{id}")
+      for id <- ~w(features departments workflow analysis) do
+        assert html =~ ~s(id="#{id}")
+      end
+
+      # Story beats.
+      assert html =~ "One record, from registration to dispensing."
+      assert html =~ "Every department, working from the same patient story."
+      assert html =~ "Better coordination means more time for patients."
+
+      # Both hero calls to action — org signup + staff portal (login when anon).
+      assert html =~ ~s(href="/organisations/register")
+      # Anonymous visitor: staff portal CTA routes to login.
+      assert html =~ ~s(href="/users/log_in")
+      refute html =~ ~s(href="/organisations/register")
+
+      # Current medical-camp product copy + imagery.
+      assert html =~ "Laboratory"
+      assert html =~ "/images/public/african-hospital-reception.png"
     end
 
-    # Story beats.
-    assert html =~ "One record, from registration to dispensing."
-    assert html =~ "Better coordination means more time for patients."
+    test "points a signed-in user at their portal instead of the login page", %{conn: conn} do
+      user = user_fixture(%{role: "admin"})
+      conn = log_in_user(conn, user)
 
-    # Both hero calls to action — org signup + staff portal (login when anon).
-    assert html =~ ~s(href="/organisations/register")
-    assert html =~ ~s(href="/users/log_in")
+      {:ok, _view, html} = live(conn, ~p"/")
 
-    # Current medical-camp product copy + imagery.
-    assert html =~ "Laboratory"
-    assert html =~ "/images/public/african-hospital-reception.png"
-  end
-
-  test "points a signed-in user at their portal instead of the login page", %{conn: conn} do
-    user = user_fixture(%{role: "admin"})
-    conn = log_in_user(conn, user)
-
-    {:ok, _view, html} = live(conn, ~p"/")
-
-    assert html =~ ~s(href="/admin/dashboard")
-    refute html =~ ~s(href="/users/log_in")
+      assert html =~ ~s(href="/admin/dashboard")
+      refute html =~ ~s(href="/users/log_in")
+    end
   end
 end
