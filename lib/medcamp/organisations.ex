@@ -18,6 +18,64 @@ defmodule Medcamp.Organisations do
     Repo.all(from o in Organisation, order_by: [desc: o.inserted_at])
   end
 
+  @doc """
+  Paginated, optionally name/slug-searched organisation list. Superadmin only.
+
+  Returns `%{rows: [...], count: total_matching, page:, per_page:}`.
+  """
+  def paged_organisations(opts \\ []) do
+    page = Medcamp.Pagination.normalize_page(opts[:page])
+    per_page = Medcamp.Pagination.normalize_per_page(opts[:per_page])
+
+    query =
+      from(o in Organisation, order_by: [desc: o.inserted_at])
+      |> org_search(opts[:search])
+
+    count = Repo.aggregate(query, :count, :id)
+
+    rows =
+      query
+      |> limit(^per_page)
+      |> offset(^((page - 1) * per_page))
+      |> Repo.all()
+
+    %{rows: rows, count: count, page: page, per_page: per_page}
+  end
+
+  defp org_search(query, term) when is_binary(term) do
+    case String.trim(term) do
+      "" -> query
+      t -> from(o in query, where: ilike(o.name, ^"%#{t}%") or ilike(o.slug, ^"%#{t}%"))
+    end
+  end
+
+  defp org_search(query, _), do: query
+
+  @doc "Platform-level counts for the superadmin dashboard. Superadmin only."
+  def organisation_stats do
+    %{
+      total: Repo.aggregate(Organisation, :count, :id),
+      active: Repo.aggregate(from(o in Organisation, where: o.is_active == true), :count, :id),
+      # "Pending" is only ever *unreviewed* - a rejected signup is also inactive
+      # with no `approved_at`, so it must be excluded here the same way
+      # `list_pending_organisations/0` does.
+      pending:
+        Repo.aggregate(
+          from(o in Organisation,
+            where: o.is_active == false and is_nil(o.approved_at) and is_nil(o.rejected_at)
+          ),
+          :count,
+          :id
+        ),
+      rejected:
+        Repo.aggregate(
+          from(o in Organisation, where: not is_nil(o.rejected_at)),
+          :count,
+          :id
+        )
+    }
+  end
+
   @doc "Organisations that can still be logged into."
   def list_active_organisations do
     Repo.all(from o in Organisation, where: o.is_active == true, order_by: [asc: o.name])
@@ -97,13 +155,52 @@ defmodule Medcamp.Organisations do
   end
 
   defp create_pending_organisation(attrs) do
+    base_slug = Organisation.slugify(attrs["name"] || attrs[:name])
+    slug = available_signup_slug(base_slug, 1)
+
+    if slug do
+      insert_pending_organisation(attrs, slug)
+    else
+      {:error, :organisation, generated_slug_error_changeset()}
+    end
+  end
+
+  defp insert_pending_organisation(attrs, slug) do
     %Organisation{}
-    |> Organisation.signup_changeset(attrs)
+    |> Organisation.signup_changeset(attrs, slug: slug)
     |> Repo.insert()
     |> case do
-      {:ok, organisation} -> {:ok, organisation}
-      {:error, changeset} -> {:error, :organisation, changeset}
+      {:ok, organisation} ->
+        {:ok, organisation}
+
+      {:error, changeset} ->
+        {:error, :organisation, changeset}
     end
+  end
+
+  defp available_signup_slug(_base_slug, attempt) when attempt > 50, do: nil
+
+  defp available_signup_slug(base_slug, attempt) do
+    candidate = slug_candidate(base_slug, attempt)
+
+    if Repo.exists?(from o in Organisation, where: o.slug == ^candidate) do
+      available_signup_slug(base_slug, attempt + 1)
+    else
+      candidate
+    end
+  end
+
+  defp slug_candidate(base_slug, 1), do: base_slug
+
+  defp slug_candidate(base_slug, attempt) do
+    suffix = "-#{attempt}"
+    String.slice(base_slug, 0, 60 - String.length(suffix)) <> suffix
+  end
+
+  defp generated_slug_error_changeset do
+    %Organisation{}
+    |> Organisation.signup_changeset(%{})
+    |> Ecto.Changeset.add_error(:slug, "could not be generated")
   end
 
   defp create_first_admin(organisation, attrs) do
@@ -141,7 +238,22 @@ defmodule Medcamp.Organisations do
   def approve(%Organisation{} = organisation) do
     update_organisation(organisation, %{
       is_active: true,
-      approved_at: DateTime.utc_now() |> DateTime.truncate(:second)
+      approved_at: DateTime.utc_now() |> DateTime.truncate(:second),
+      rejected_at: nil,
+      rejection_reason: nil
+    })
+  end
+
+  @doc """
+  Rejects a self-serve signup with a reason. The organisation stays inactive
+  and unapproved; the reason is kept so it can be shown and emailed.
+  """
+  def reject_organisation(%Organisation{} = organisation, reason) do
+    update_organisation(organisation, %{
+      is_active: false,
+      approved_at: nil,
+      rejected_at: DateTime.utc_now() |> DateTime.truncate(:second),
+      rejection_reason: reason
     })
   end
 
@@ -149,13 +261,19 @@ defmodule Medcamp.Organisations do
   def list_pending_organisations do
     Repo.all(
       from o in Organisation,
-        where: o.is_active == false and is_nil(o.approved_at),
+        where: o.is_active == false and is_nil(o.approved_at) and is_nil(o.rejected_at),
         order_by: [asc: o.inserted_at]
     )
   end
 
-  def pending?(%Organisation{is_active: false, approved_at: nil}), do: true
+  def pending?(%Organisation{is_active: false, approved_at: nil, rejected_at: nil}), do: true
   def pending?(_), do: false
+
+  @doc "The lifecycle state of an organisation, for status pills and copy."
+  def status(%Organisation{is_active: true}), do: :active
+  def status(%Organisation{rejected_at: %DateTime{}}), do: :rejected
+  def status(%Organisation{approved_at: nil}), do: :pending
+  def status(_), do: :suspended
 
   @doc """
   Deactivates an organisation rather than deleting it - its clinical records
@@ -191,8 +309,19 @@ defmodule Medcamp.Organisations do
     |> Enum.map_join(" ", fn {var, value} -> "#{var}: #{value};" end)
   end
 
-  @default_name "Medcamp"
-  @default_logo "/images/logo.png"
+  @default_name "Tibasasa"
+  @default_logo "/images/tibasasa-ai-logo.png"
+  @platform_primary "#0c2765"
+  @platform_accent "#52b2d8"
+
+  @doc "True while the organisation is still on the stock Tibasasa colours."
+  def using_default_colours?(%Organisation{primary_color: p, accent_color: a}) do
+    norm = fn c -> c && c |> String.trim() |> String.downcase() end
+    norm.(p) in [nil, "", @platform_primary] and norm.(a) in [nil, "", @platform_accent]
+  end
+
+  @doc "True while the organisation is still on the stock Tibasasa logo."
+  def using_default_logo?(%Organisation{logo: logo}), do: logo in [nil, "", @default_logo]
 
   @doc "An organisation's name, or a neutral fallback when there isn't one."
   def display_name(%Organisation{name: name}) when is_binary(name) and name != "", do: name

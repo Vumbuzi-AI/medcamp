@@ -9,6 +9,9 @@ defmodule Medcamp.Organisations.Organisation do
   use Ecto.Schema
   import Ecto.Changeset
 
+  import Medcamp.Validation, only: [validate_phone_number: 2]
+  alias Medcamp.Validation
+
   # Interpolated into a <style> block in the root layout, so anything that is
   # not literally a hex colour is refused here rather than sanitised later.
   @hex_color ~r/^#[0-9a-fA-F]{6}$/
@@ -21,10 +24,12 @@ defmodule Medcamp.Organisations.Organisation do
     field :phone_number, :string
     field :location, :string
     field :logo, :string
-    field :primary_color, :string, default: "#373896"
-    field :accent_color, :string, default: "#6667ab"
+    field :primary_color, :string, default: "#0C2765"
+    field :accent_color, :string, default: "#52B2D8"
     field :is_active, :boolean, default: true
     field :approved_at, :utc_datetime
+    field :rejected_at, :utc_datetime
+    field :rejection_reason, :string
     field :contact_name, :string
 
     timestamps(type: :utc_datetime)
@@ -38,11 +43,11 @@ defmodule Medcamp.Organisations.Organisation do
   derived from the name rather than asked for, since the person signing up has
   no reason to care what it is.
   """
-  def signup_changeset(organisation, attrs) do
+  def signup_changeset(organisation, attrs, opts \\ []) do
     organisation
     |> cast(attrs, [:name, :email, :phone_number, :location, :contact_name])
     |> validate_required([:name, :email, :contact_name])
-    |> put_slug_from_name()
+    |> put_slug_from_name(opts[:slug])
     |> put_change(:is_active, false)
     |> put_change(:approved_at, nil)
     |> validate_format(:slug, @slug_format, message: "must contain some letters or numbers")
@@ -50,16 +55,19 @@ defmodule Medcamp.Organisations.Organisation do
     |> shared_validations()
   end
 
-  defp put_slug_from_name(changeset) do
+  defp put_slug_from_name(changeset, slug) do
     case get_field(changeset, :slug) do
-      nil -> put_change(changeset, :slug, slugify(get_field(changeset, :name)))
+      nil -> put_change(changeset, :slug, slug || slugify(get_field(changeset, :name)))
       _already_set -> changeset
     end
   end
 
   @doc """
-  Turns an organisation name into a URL-safe slug, with a short random suffix
-  so two "Nairobi Health Camp" signups do not collide.
+  Turns an organisation name into a URL-safe slug.
+
+  Collision handling lives in `Medcamp.Organisations.register_organisation/2`,
+  where database uniqueness can be checked. Most signups therefore get the
+  readable slug the name naturally implies, such as `nairobi-health-camp`.
   """
   def slugify(nil), do: nil
 
@@ -70,15 +78,9 @@ defmodule Medcamp.Organisations.Organisation do
       |> String.replace(~r/[^a-z0-9]+/, "-")
       |> String.trim("-")
 
-    suffix =
-      100_000
-      |> :rand.uniform()
-      |> Integer.to_string(36)
-      |> String.downcase()
-
     case base do
-      "" -> "org-#{suffix}"
-      base -> "#{String.slice(base, 0, 40)}-#{suffix}"
+      "" -> "org"
+      base -> String.slice(base, 0, 40)
     end
   end
 
@@ -99,7 +101,9 @@ defmodule Medcamp.Organisations.Organisation do
       :primary_color,
       :accent_color,
       :is_active,
-      :approved_at
+      :approved_at,
+      :rejected_at,
+      :rejection_reason
     ])
     |> validate_required([:name, :slug])
     |> validate_format(:slug, @slug_format,
@@ -111,13 +115,15 @@ defmodule Medcamp.Organisations.Organisation do
   end
 
   @doc """
-  Editing an organisation's own profile, from the admin panel. Same fields
-  minus `slug` and `is_active`, which only a superadmin may change.
+  Editing an organisation's own profile, from the admin panel. `is_active`
+  stays superadmin-only; `slug` is editable here (it identifies the
+  organisation but is not part of any user-facing URL).
   """
   def profile_changeset(organisation, attrs) do
     organisation
     |> cast(attrs, [
       :name,
+      :slug,
       :email,
       :phone_number,
       :location,
@@ -125,16 +131,21 @@ defmodule Medcamp.Organisations.Organisation do
       :primary_color,
       :accent_color
     ])
-    |> validate_required([:name])
+    |> update_change(:slug, &(&1 && slugify(&1)))
+    |> validate_required([:name, :slug])
+    |> validate_format(:slug, @slug_format,
+      message: "use lowercase letters, numbers and single hyphens"
+    )
+    |> validate_length(:slug, min: 2, max: 60)
+    |> unique_constraint(:slug)
     |> shared_validations()
   end
 
   defp shared_validations(changeset) do
     changeset
     |> validate_length(:name, min: 2, max: 120)
-    |> validate_format(:email, ~r/^[^@,;\s]+@[^@,;\s]+\.[^@,;\s]+$/,
-      message: "must be a valid email address"
-    )
+    |> Validation.validate_email()
+    |> validate_phone_number(:phone_number)
     |> validate_format(:primary_color, @hex_color, message: "must be a hex colour like #1D3557")
     |> validate_format(:accent_color, @hex_color, message: "must be a hex colour like #1D3557")
   end
@@ -146,11 +157,11 @@ defmodule Medcamp.Organisations.Organisation do
   item, hover background, ring) are derived here so nobody has to choose seven
   hex codes that go together. The tints keep the primary colour's hue and are
   placed at fixed lightnesses, which is what makes the derivation work for a
-  teal or maroon brand as well as the stock indigo.
+  teal or maroon brand as well as the stock Tibasasa navy.
   """
   def css_variables(%__MODULE__{} = organisation) do
-    primary = organisation.primary_color || "#373896"
-    accent = organisation.accent_color || "#6667ab"
+    primary = organisation.primary_color || "#0C2765"
+    accent = organisation.accent_color || "#52B2D8"
 
     %{
       "--brand-primary" => primary,

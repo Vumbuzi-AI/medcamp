@@ -8,7 +8,6 @@ defmodule MedcampWeb.OrganisationSignupLiveTest do
 
   @org %{
     "name" => "Coast Outreach Camp",
-    "email" => "coast@example.com",
     "phone_number" => "0712000111",
     "location" => "Mombasa",
     "contact_name" => "Ada Lead"
@@ -20,15 +19,21 @@ defmodule MedcampWeb.OrganisationSignupLiveTest do
     "password_confirmation" => "correct horse battery"
   }
 
-  defp change(lv, org, admin) do
+  defp change(lv, org, admin, extra \\ %{}) do
     lv
-    |> form("#organisation-signup-form", %{"organisation" => org, "admin" => admin})
+    |> form(
+      "#organisation-signup-form",
+      Map.merge(%{"organisation" => org, "admin" => admin}, extra)
+    )
     |> render_change()
   end
 
-  defp submit(lv, org, admin) do
+  defp submit(lv, org, admin, extra \\ %{}) do
     lv
-    |> form("#organisation-signup-form", %{"organisation" => org, "admin" => admin})
+    |> form(
+      "#organisation-signup-form",
+      Map.merge(%{"organisation" => org, "admin" => admin}, extra)
+    )
     |> render_submit()
   end
 
@@ -48,10 +53,10 @@ defmodule MedcampWeb.OrganisationSignupLiveTest do
   end
 
   describe "step 1 → step 2" do
-    test "Continue is blocked until the organisation name and email are given", %{conn: conn} do
+    test "Continue is blocked until the organisation name is given", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/organisations/register")
 
-      change(lv, %{"name" => "", "email" => ""}, %{})
+      change(lv, %{"name" => ""}, %{})
       lv |> element("button", "Continue") |> render_click()
       assert render(lv) =~ "Step 1 of 2"
 
@@ -92,6 +97,13 @@ defmodule MedcampWeb.OrganisationSignupLiveTest do
       assert html =~ "must be a valid email address"
     end
 
+    test "the organisation email field is hidden while 'same as mine' is ticked", %{lv: lv} do
+      refute render(lv) =~ "Organisation email"
+
+      html = change(lv, @org, @admin, %{"email_same" => "false"})
+      assert html =~ "Organisation email"
+    end
+
     test "a valid step 2 shows no field errors", %{lv: lv} do
       html = change(lv, @org, @admin)
       refute html =~ "must be at least 6 characters"
@@ -101,8 +113,7 @@ defmodule MedcampWeb.OrganisationSignupLiveTest do
   end
 
   describe "submitting" do
-    test "creates a pending organisation and an admin who can sign in with the chosen password",
-         %{conn: conn} do
+    test "reuses the admin's email as the organisation contact email by default", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/organisations/register")
 
       html = lv |> to_step_two() |> submit(@org, @admin)
@@ -117,8 +128,26 @@ defmodule MedcampWeb.OrganisationSignupLiveTest do
 
       org = Organisations.get_organisation!(admin.organisation_id)
       assert org.name == "Coast Outreach Camp"
+      assert org.email == "lead@example.com"
       refute org.is_active
       assert Organisations.pending?(org)
+    end
+
+    test "keeps a separate organisation email when 'same as mine' is unticked", %{conn: conn} do
+      {:ok, lv, _html} = live(conn, ~p"/organisations/register")
+      lv = to_step_two(lv)
+
+      # Unticking "same as mine" reveals the separate organisation email field.
+      change(lv, @org, @admin, %{"email_same" => "false"})
+
+      html =
+        submit(lv, Map.put(@org, "email", "camp@example.com"), @admin, %{"email_same" => "false"})
+
+      assert html =~ "in the queue"
+
+      admin = Accounts.get_user_by_email_and_password("lead@example.com", "correct horse battery")
+      org = Organisations.get_organisation!(admin.organisation_id)
+      assert org.email == "camp@example.com"
     end
 
     test "surfaces a duplicate administrator email on the form", %{conn: conn} do
@@ -130,10 +159,7 @@ defmodule MedcampWeb.OrganisationSignupLiveTest do
       html =
         second
         |> to_step_two()
-        |> submit(
-          %{"name" => "Another Camp", "email" => "another@example.com", "contact_name" => "Bob"},
-          @admin
-        )
+        |> submit(%{"name" => "Another Camp", "contact_name" => "Bob"}, @admin)
 
       assert html =~ "has already been taken"
       refute html =~ "in the queue"

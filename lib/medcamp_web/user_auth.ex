@@ -37,7 +37,7 @@ defmodule MedcampWeb.UserAuth do
     # the login-session record in particular - is written into it.
     Tenancy.put_org_id(user.organisation_id)
 
-    case login_block_reason(user) do
+    case login_block_message(user) do
       nil ->
         token = Accounts.generate_user_session_token(user)
 
@@ -63,10 +63,25 @@ defmodule MedcampWeb.UserAuth do
   @suspended_message "Your organisation is not active. Please contact support."
   @deactivated_message "Your account has been deactivated. Please contact admin."
 
+  @doc """
+  Returns the message explaining why a verified user cannot start a session.
+
+  This is intentionally safe to call only after the password or signed login
+  token has already identified the user. Invalid credentials should still use a
+  generic failure so the login form does not reveal whether an email exists.
+  """
+  def login_block_message(user), do: login_block_reason(user)
+
   # An organisation that has been deactivated - or a self-serve signup that has
   # not been approved yet - must not be usable, however the login is reached.
   # Checking the user's flag alone would have left the superadmin console's
   # "Deactivate" button doing nothing.
+  # Superadmins sit outside every tenant (their organisation is storage-only),
+  # so an inactive/pending organisation must not lock them out - otherwise
+  # deactivating the org their account lives in would be a one-way door.
+  defp login_block_reason(%{is_superadmin: true, is_active: true}), do: nil
+  defp login_block_reason(%{is_superadmin: true}), do: @deactivated_message
+
   defp login_block_reason(user) do
     organisation = Organisations.get_user_organisation(user)
 
@@ -205,6 +220,10 @@ defmodule MedcampWeb.UserAuth do
   """
   def reject_inactive_organisation(nil), do: nil
 
+  # Superadmins are not bound to any tenant's active state (see
+  # `login_block_reason/1`).
+  def reject_inactive_organisation(%{is_superadmin: true} = user), do: user
+
   def reject_inactive_organisation(user) do
     case Organisations.get_user_organisation(user) do
       %{is_active: true} -> user
@@ -299,10 +318,7 @@ defmodule MedcampWeb.UserAuth do
     end
   end
 
-  @doc """
-  `on_mount` counterpart to `require_superadmin/2`, for the superadmin
-  LiveViews.
-  """
+  # LiveView counterpart to `require_superadmin/2` for the platform console.
   def on_mount(:ensure_superadmin, _params, session, socket) do
     socket = mount_current_user(socket, session)
 
@@ -432,7 +448,7 @@ defmodule MedcampWeb.UserAuth do
   defp require_role(conn, role) do
     case conn.assigns[:current_user] do
       %{is_superadmin: true} ->
-        redirect_to_page_conn(conn, ~p"/superadmin/organisations")
+        redirect_to_page_conn(conn, ~p"/superadmin/dashboard")
 
       %{role: ^role} ->
         conn
@@ -476,13 +492,13 @@ defmodule MedcampWeb.UserAuth do
   def redirect_to_correct_page(conn, _opts) do
     case conn.assigns[:current_user] do
       nil -> conn
-      %{is_superadmin: true} -> redirect_to_page_conn(conn, ~p"/superadmin/organisations")
+      %{is_superadmin: true} -> redirect_to_page_conn(conn, ~p"/superadmin/dashboard")
       %{role: role} -> redirect_to_page_conn_case(conn, role)
     end
   end
 
   @doc "The correct landing page for a signed-in user."
-  def landing_path_for_user(%{is_superadmin: true}), do: "/superadmin/organisations"
+  def landing_path_for_user(%{is_superadmin: true}), do: "/superadmin/dashboard"
   def landing_path_for_user(%{role: role}), do: default_path_for_role(role)
   def landing_path_for_user(_user), do: "/users/log_in"
 
@@ -530,6 +546,8 @@ defmodule MedcampWeb.UserAuth do
     signed_in_path_for_user(assigns[:current_user])
   end
 
+  # A just-logged-in user goes to their own workspace, never to `/` - which is
+  # now the public marketing page, not a redirect to login.
   defp signed_in_path_for_user(%{is_superadmin: true}), do: "/superadmin/organisations"
   defp signed_in_path_for_user(user), do: landing_path_for_user(user)
 end

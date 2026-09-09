@@ -60,17 +60,17 @@ defmodule Medcamp.OrganisationSignupTest do
 
     test "derives a slug from the name" do
       assert {:ok, %{organisation: org}} = signup()
-      assert org.slug =~ ~r/^nairobi-health-camp-[a-z0-9]+$/
+      assert org.slug == "nairobi-health-camp"
     end
 
-    test "generates a lowercase slug suffix" do
+    test "generates a clean lowercase slug" do
       slug = Medcamp.Organisations.Organisation.slugify("Jkuat")
 
-      assert slug =~ ~r/^jkuat-[a-z0-9]+$/
+      assert slug == "jkuat"
       refute slug =~ ~r/[A-Z]/
     end
 
-    test "two organisations with the same name get distinct slugs" do
+    test "two organisations with the same name use readable numbered slugs" do
       assert {:ok, %{organisation: first}} = signup(%{"email" => "first@example.com"})
 
       assert {:ok, %{organisation: second}} =
@@ -83,7 +83,8 @@ defmodule Medcamp.OrganisationSignupTest do
                  admin_attrs("grace@example.com")
                )
 
-      refute first.slug == second.slug
+      assert first.slug == "nairobi-health-camp"
+      assert second.slug == "nairobi-health-camp-2"
     end
 
     test "a duplicate admin email leaves no orphaned organisation behind" do
@@ -108,6 +109,29 @@ defmodule Medcamp.OrganisationSignupTest do
     test "rejects an organisation with no contact name" do
       assert {:error, :organisation, changeset} = signup(%{"contact_name" => ""})
       assert "can't be blank" in errors_on(changeset).contact_name
+    end
+
+    test "normalizes organisation and admin emails" do
+      assert {:ok, %{organisation: org, admin: admin}} =
+               Organisations.register_organisation(
+                 %{
+                   "name" => "Uppercase Email Camp",
+                   "email" => "  CAMP.OPS@EXAMPLE.COM  ",
+                   "contact_name" => "Ada Lovelace"
+                 },
+                 admin_attrs("  ADA.ADMIN@EXAMPLE.COM  ")
+               )
+
+      assert org.email == "camp.ops@example.com"
+      assert admin.email == "ada.admin@example.com"
+    end
+
+    test "rejects invalid organisation email and phone" do
+      assert {:error, :organisation, changeset} =
+               signup(%{"email" => "not valid", "phone_number" => "12345"})
+
+      assert "must be a valid email address" in errors_on(changeset).email
+      assert "is not a valid phone number" in errors_on(changeset).phone_number
     end
   end
 

@@ -15,6 +15,11 @@ defmodule Medcamp.AccountsTest do
       %{id: id} = user = user_fixture()
       assert %User{id: ^id} = Accounts.get_user_by_email(user.email)
     end
+
+    test "normalizes the email before lookup" do
+      %{id: id} = user = user_fixture()
+      assert %User{id: ^id} = Accounts.get_user_by_email("  #{String.upcase(user.email)}  ")
+    end
   end
 
   describe "get_user_by_email_and_password/2" do
@@ -32,6 +37,16 @@ defmodule Medcamp.AccountsTest do
 
       assert %User{id: ^id} =
                Accounts.get_user_by_email_and_password(user.email, valid_user_password())
+    end
+
+    test "normalizes the email before password lookup" do
+      %{id: id} = user = user_fixture()
+
+      assert %User{id: ^id} =
+               Accounts.get_user_by_email_and_password(
+                 "  #{String.upcase(user.email)}  ",
+                 valid_user_password()
+               )
     end
   end
 
@@ -97,15 +112,15 @@ defmodule Medcamp.AccountsTest do
     end
 
     test "role-based staff lists contain only active users" do
-      active_staff = user_fixture(%{name: "Active Housekeeper", role: "housekeeping"})
-      inactive_staff = user_fixture(%{name: "Inactive Housekeeper", role: "housekeeping"})
+      active_staff = user_fixture(%{name: "Active Nurse", role: "nurse"})
+      inactive_staff = user_fixture(%{name: "Inactive Nurse", role: "nurse"})
 
       {:ok, inactive_staff} = Accounts.update_user(inactive_staff, %{is_active: false})
 
-      staff = Accounts.list_housekeeping_staff()
+      staff = Accounts.list_active_users()
 
-      assert Enum.any?(staff, &(&1.id == active_staff.id))
-      refute Enum.any?(staff, &(&1.id == inactive_staff.id))
+      assert {active_staff.name, active_staff.id} in staff
+      refute {inactive_staff.name, inactive_staff.id} in staff
     end
   end
 
@@ -134,7 +149,7 @@ defmodule Medcamp.AccountsTest do
       {:error, changeset} =
         Accounts.register_user(%{name: "Test User", email: "not valid", password: "not valid"})
 
-      assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)
+      assert %{email: ["must be a valid email address"]} = errors_on(changeset)
     end
 
     test "validates maximum values for email and password for security" do
@@ -162,6 +177,35 @@ defmodule Medcamp.AccountsTest do
       assert is_nil(user.confirmed_at)
       assert is_nil(user.password)
     end
+
+    test "normalizes email before insert" do
+      raw_email = "  MIXED.CASE#{System.unique_integer()}@EXAMPLE.COM  "
+
+      {:ok, user} =
+        Accounts.register_user(valid_user_attributes(email: raw_email))
+
+      assert user.email == String.trim(String.downcase(raw_email))
+    end
+
+    test "validates user phone number when present" do
+      changeset =
+        User.changeset(
+          %User{},
+          valid_user_attributes(email: unique_user_email(), phone_number: "12345")
+        )
+
+      assert "is not a valid phone number" in errors_on(changeset).phone_number
+    end
+
+    test "rejects letters in user phone number" do
+      changeset =
+        User.changeset(
+          %User{},
+          valid_user_attributes(email: unique_user_email(), phone_number: "+254 712 CALL")
+        )
+
+      assert "is not a valid phone number" in errors_on(changeset).phone_number
+    end
   end
 
   describe "change_user_registration/2" do
@@ -184,6 +228,16 @@ defmodule Medcamp.AccountsTest do
       assert get_change(changeset, :email) == email
       assert get_change(changeset, :password) == password
       assert is_nil(get_change(changeset, :hashed_password))
+    end
+
+    test "normalizes email in registration changesets" do
+      changeset =
+        Accounts.change_user_registration(
+          %User{},
+          valid_user_attributes(email: "  CAMP.ADMIN@EXAMPLE.COM  ")
+        )
+
+      assert get_change(changeset, :email) == "camp.admin@example.com"
     end
   end
 
@@ -208,7 +262,7 @@ defmodule Medcamp.AccountsTest do
       {:error, changeset} =
         Accounts.apply_user_email(user, valid_user_password(), %{email: "not valid"})
 
-      assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)
+      assert %{email: ["must be a valid email address"]} = errors_on(changeset)
     end
 
     test "validates maximum value for email for security", %{user: user} do
@@ -303,6 +357,29 @@ defmodule Medcamp.AccountsTest do
       assert Accounts.update_user_email(user, token) == :error
       assert Repo.get!(User, user.id).email == user.email
       assert Repo.get_by(UserToken, user_id: user.id)
+    end
+  end
+
+  describe "update_user_profile/2" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "validates phone number when present", %{user: user} do
+      assert {:error, changeset} =
+               Accounts.update_user_profile(user, %{name: user.name, phone_number: "12345"})
+
+      assert "is not a valid phone number" in errors_on(changeset).phone_number
+    end
+
+    test "accepts a valid phone number", %{user: user} do
+      assert {:ok, updated} =
+               Accounts.update_user_profile(user, %{
+                 name: user.name,
+                 phone_number: "+254 712-345-678"
+               })
+
+      assert updated.phone_number == "+254 712-345-678"
     end
   end
 

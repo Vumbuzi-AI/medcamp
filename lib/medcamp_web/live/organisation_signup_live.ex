@@ -15,6 +15,7 @@ defmodule MedcampWeb.OrganisationSignupLive do
 
   alias Medcamp.Organisations
   alias Medcamp.Organisations.Organisation
+  alias Medcamp.Validation
 
   @impl true
   def mount(_params, _session, socket) do
@@ -24,15 +25,20 @@ defmodule MedcampWeb.OrganisationSignupLive do
      |> assign(:current_organisation, nil)
      |> assign(:submitted, false)
      |> assign(:step, 1)
+     |> assign(:org_email_same, true)
      |> assign_forms(%{}, %{}), layout: false}
   end
 
   @impl true
   def handle_event("validate", params, socket) do
+    same = email_same?(params)
+    admin_params = Map.get(params, "admin", %{})
+
     {:noreply,
      socket
-     |> assign_org_form(org_params(params), :validate)
-     |> assign_admin_form(Map.get(params, "admin", %{}), :validate)}
+     |> assign(:org_email_same, same)
+     |> assign_org_form(merged_org_params(org_params(params), admin_params, same), :validate)
+     |> assign_admin_form(admin_params, :validate)}
   end
 
   # Step 1: hitting Enter or "Continue" moves to the admin-account step once the
@@ -45,7 +51,8 @@ defmodule MedcampWeb.OrganisationSignupLive do
   end
 
   def handle_event("register", params, socket) do
-    org_attrs = org_params(params)
+    admin_params = Map.get(params, "admin", %{})
+    org_attrs = merged_org_params(org_params(params), admin_params, email_same?(params))
 
     case Organisations.register_organisation(org_attrs, admin_attrs(params, org_attrs)) do
       {:ok, %{organisation: organisation}} ->
@@ -66,6 +73,17 @@ defmodule MedcampWeb.OrganisationSignupLive do
   end
 
   defp org_params(params), do: Map.get(params, "organisation", %{})
+
+  # The "same as my email" checkbox is checked by default; it only sends a value
+  # while ticked, so an absent key means the person wants a separate address.
+  defp email_same?(params), do: Map.get(params, "email_same") == "true"
+
+  # When the organisation reuses the admin's address, the org email field is not
+  # shown, so fill it in from what they typed for their own account.
+  defp merged_org_params(org_attrs, admin_attrs, true),
+    do: Map.put(org_attrs, "email", Map.get(admin_attrs, "email", ""))
+
+  defp merged_org_params(org_attrs, _admin_attrs, false), do: org_attrs
 
   # The person signing up gives their name once, on the organisation record as
   # the contact; it doubles as the admin account's name so they are not asked
@@ -91,9 +109,7 @@ defmodule MedcampWeb.OrganisationSignupLive do
     changeset =
       {%{}, %{email: :string, password: :string, password_confirmation: :string}}
       |> Ecto.Changeset.cast(attrs, [:email, :password, :password_confirmation])
-      |> Ecto.Changeset.validate_format(:email, ~r/^[^\s]+@[^\s]+$/,
-        message: "must be a valid email address"
-      )
+      |> Validation.validate_email()
       |> Ecto.Changeset.validate_length(:password,
         min: 6,
         message: "must be at least 6 characters"
@@ -115,9 +131,9 @@ defmodule MedcampWeb.OrganisationSignupLive do
   defp advance(socket) do
     changeset = socket.assigns.org_form.source
 
-    # `contact_name` ("Your name") is collected on step 2 with the admin
-    # account, so a blank contact name must not block leaving step 1.
-    if Keyword.drop(changeset.errors, [:contact_name]) == [] do
+    # `contact_name` ("Your name") and `email` (defaulted from the admin's own
+    # address) are both settled on step 2, so neither may block leaving step 1.
+    if Keyword.drop(changeset.errors, [:contact_name, :email]) == [] do
       assign(socket, :step, 2)
     else
       assign(
@@ -183,7 +199,6 @@ defmodule MedcampWeb.OrganisationSignupLive do
 
           <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <.input field={@org_form[:name]} type="text" label="Organisation name" />
-            <.input field={@org_form[:email]} type="email" label="Organisation email" />
             <.input field={@org_form[:phone_number]} type="text" label="Phone number" />
             <.input field={@org_form[:location]} type="text" label="Location" />
           </div>
@@ -198,6 +213,27 @@ defmodule MedcampWeb.OrganisationSignupLive do
           <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <.input field={@org_form[:contact_name]} type="text" label="Your name" />
             <.input field={@admin_form[:email]} type="email" label="Your email" />
+          </div>
+
+          <label class="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <input type="hidden" name="email_same" value="false" />
+            <input
+              type="checkbox"
+              name="email_same"
+              value="true"
+              checked={@org_email_same}
+              class="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#0C2765] focus:ring-[#52B2D8]"
+            />
+            <span class="text-sm text-slate-700">
+              Use this as the organisation's contact email too
+              <span class="mt-0.5 block text-xs text-slate-500">
+                Camp approval and account notices are sent here. Uncheck to use a different address.
+              </span>
+            </span>
+          </label>
+
+          <div :if={not @org_email_same} class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <.input field={@org_form[:email]} type="email" label="Organisation email" />
           </div>
 
           <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">

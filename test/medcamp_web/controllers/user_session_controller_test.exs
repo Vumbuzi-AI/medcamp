@@ -2,6 +2,7 @@ defmodule MedcampWeb.UserSessionControllerTest do
   use MedcampWeb.ConnCase, async: true
 
   import Medcamp.AccountsFixtures
+  alias Medcamp.Organisations
   alias Medcamp.Accounts.LoginOtp
 
   setup do
@@ -46,7 +47,8 @@ defmodule MedcampWeb.UserSessionControllerTest do
       assert redirected_to(conn) == ~p"/doctor/scan"
     end
 
-    test "a valid verification code logs the user in", %{conn: conn, user: user} do
+    test "a valid verification code logs the user in", %{conn: conn} do
+      user = user_fixture(%{role: "doctor"})
       challenge = LoginOtp.build_challenge(user, "123456", false)
 
       conn =
@@ -126,6 +128,27 @@ defmodule MedcampWeb.UserSessionControllerTest do
         })
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) == "Invalid email or password"
+      assert redirected_to(conn) == ~p"/users/log_in"
+    end
+
+    test "shows pending organisation message after valid credentials", %{
+      conn: conn,
+      organisation: organisation
+    } do
+      {:ok, _organisation} =
+        Organisations.update_organisation(organisation, %{is_active: false, approved_at: nil})
+
+      email = unique_user_email()
+      user_fixture(email: email, role: "admin")
+
+      conn =
+        post(conn, ~p"/users/log_in", %{
+          "user" => %{"email" => email, "password" => valid_user_password()}
+        })
+
+      refute get_session(conn, :user_token)
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "awaiting approval"
+      assert Phoenix.Flash.get(conn.assigns.flash, :email) == email
       assert redirected_to(conn) == ~p"/users/log_in"
     end
 

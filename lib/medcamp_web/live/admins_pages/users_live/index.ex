@@ -168,216 +168,188 @@ defmodule MedcampWeb.AdminUsersLive.Index do
   end
 
   defp is_active_label("true"), do: "Active"
+  defp is_active_label("pending"), do: "Pending"
   defp is_active_label("false"), do: "Inactive"
   defp is_active_label(other), do: other
+
+  @tone %{
+    active: %{light: "bg-green-50 text-green-700 ring-green-600/20", dot: "bg-green-500"},
+    pending: %{light: "bg-amber-50 text-amber-700 ring-amber-600/20", dot: "bg-amber-500"},
+    inactive: %{light: "bg-red-50 text-red-700 ring-red-600/20", dot: "bg-red-500"}
+  }
+
+  attr :user, :any, required: true
+
+  defp status_badge(assigns) do
+    status = Accounts.User.status(assigns.user)
+    assigns = assign(assigns, status: status, tone: @tone[status])
+
+    ~H"""
+    <span class={[
+      "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1",
+      @tone.light
+    ]}>
+      <span class={["h-1.5 w-1.5 rounded-full", @tone.dot]}></span>
+      {@status |> to_string() |> String.capitalize()}
+    </span>
+    """
+  end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="space-y-4">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 px-6 py-5">
-        <.page_header
-          icon_path="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
-          title="System Users"
-          subtitle={"#{@user_count} user#{if @user_count != 1, do: "s", else: ""} found"}
-        >
-          <:actions>
-            <.link patch="/admin/users/new">
-              <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2d2d7a]">
-                <Heroicons.icon name="plus" type="outline" class="h-4 w-4" /> Add User
-              </button>
-            </.link>
-          </:actions>
-        </.page_header>
+    <.list_page
+      icon_path="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
+      title="System Users"
+      subtitle={"#{@user_count} user#{if @user_count != 1, do: "s", else: ""} found"}
+    >
+      <:actions>
+        <.link patch="/admin/users/new">
+          <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2d2d7a]">
+            <Heroicons.icon name="plus" type="outline" class="h-4 w-4" /> Add User
+          </button>
+        </.link>
+      </:actions>
 
-        <div class="flex flex-wrap items-center gap-3">
-          <form phx-change="filter" class="flex-1">
-            <.search_input
-              name="filters[search]"
-              value={@filters.search}
-              placeholder="Search by name or email"
-            />
-          </form>
-
-          <.filter_drawer
-            id="users-filters"
-            title="Filter users"
-            apply_event="filter"
-            active_count={count_active_filters(@filters)}
-          >
-            <:group label="Status and Role">
-              <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
-                <select
-                  name="filters[is_active]"
-                  class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
-                >
-                  <option value="">All statuses</option>
-                  <option value="true" selected={@filters.is_active == "true"}>Active</option>
-                  <option value="false" selected={@filters.is_active == "false"}>Inactive</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Role</label>
-                <select
-                  name="filters[role]"
-                  class="w-full h-9 rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
-                >
-                  <option value="">All roles</option>
-                  <%= for role <- @roles do %>
-                    <option value={role} selected={@filters.role == role}>{role}</option>
-                  <% end %>
-                </select>
-              </div>
-            </:group>
-
-            <:chip
-              :for={chip <- filter_chips(@filters)}
-              label={chip.label}
-              clear={JS.push("clear_chip", value: %{"field" => chip.field})}
-            />
-          </.filter_drawer>
-        </div>
-      </div>
-
-      <%!-- Table --%>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
-        <%= if Enum.empty?(@users) do %>
-          <.blank_state
-            icon_path="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
-            title="No users found"
-            description={
-              if @filters.search != "" or count_active_filters(@filters) > 0,
-                do: "No users match the current filters.",
-                else: "No users have been registered yet."
-            }
-          >
-            <:actions :if={@filters.search != "" or count_active_filters(@filters) > 0}>
-              <button phx-click="clear_filters" class="text-xs text-brand-accent hover:underline">
-                Clear filters
-              </button>
-            </:actions>
-          </.blank_state>
-        <% else %>
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  User
-                </th>
-                <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Role
-                </th>
-                <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Status
-                </th>
-                <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  OTP
-                </th>
-                <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Last Login
-                </th>
-                <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 bg-white" id="users-table">
-              <%= for user <- @users do %>
-                <tr
-                  id={"user-#{user.id}"}
-                  class="hover:bg-gray-50 cursor-pointer transition-colors"
-                  phx-click="show_user_details"
-                  phx-value-id={user.id}
-                >
-                  <%!-- User --%>
-                  <td class="px-5 py-3">
-                    <div class="flex items-center gap-3">
-                      <%= if user.image do %>
-                        <img src={user.image} class="h-9 w-9 rounded-full object-cover shrink-0" />
-                      <% else %>
-                        <div class="h-9 w-9 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-semibold text-sm shrink-0">
-                          {String.first(user.name || "?")}
-                        </div>
-                      <% end %>
-                      <div>
-                        <p class="font-medium text-gray-900 text-sm">{user.name}</p>
-                        <p class="text-xs text-gray-500">{user.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <%!-- Role --%>
-                  <td class="px-5 py-3">
-                    <span class="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-primary">
-                      {user.role}
-                    </span>
-                  </td>
-                  <%!-- Status --%>
-                  <td class="px-5 py-3">
-                    <%= if user.is_active do %>
-                      <span class="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-600/20">
-                        <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Active
-                      </span>
-                    <% else %>
-                      <span class="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-600/20">
-                        <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span> Inactive
-                      </span>
-                    <% end %>
-                  </td>
-                  <%!-- OTP --%>
-                  <td class="px-5 py-3">
-                    <%= if user.otp do %>
-                      <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-mono font-semibold text-amber-700 ring-1 ring-amber-600/20">
-                        {user.otp}
-                      </span>
-                    <% else %>
-                      <span class="text-xs text-gray-400">—</span>
-                    <% end %>
-                  </td>
-                  <%!-- Last Login --%>
-                  <td class="px-5 py-3 text-xs text-gray-500">
-                    {format_datetime_kenya(user.last_logged_in_at)}
-                  </td>
-                  <%!-- Actions — stop propagation so row-click doesn't fire --%>
-                  <td class="px-5 py-3 text-right" phx-click="" phx-stop-propagation="">
-                    <div class="flex items-center justify-end gap-2">
-                      <.link
-                        navigate={~p"/admin/users/#{user}/edit"}
-                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-brand-accent hover:bg-brand-50"
-                        phx-click=""
-                      >
-                        <Heroicons.icon name="pencil-square" type="outline" class="h-3.5 w-3.5" />
-                        Edit
-                      </.link>
-                      <.link
-                        navigate={~p"/admin/users/#{user}/permissions"}
-                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-brand-accent hover:bg-brand-50"
-                        phx-click=""
-                      >
-                        <Heroicons.icon name="key" type="outline" class="h-3.5 w-3.5" /> Panels
-                      </.link>
-                      <.link
-                        navigate={~p"/admin/users/#{user.email}"}
-                        class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-white bg-brand-primary hover:bg-[#2d2d7a]"
-                        phx-click=""
-                      >
-                        Access
-                      </.link>
-                    </div>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-          <.pagination
-            page={@page}
-            total_pages={@total_pages}
-            total_count={@user_count}
-            per_page={@per_page}
+      <:toolbar>
+        <form phx-change="filter" class="flex-1">
+          <.search_input
+            name="filters[search]"
+            value={@filters.search}
+            placeholder="Search by name or email"
           />
-        <% end %>
-      </div>
-    </div>
+        </form>
+
+        <.filter_drawer
+          id="users-filters"
+          title="Filter users"
+          apply_event="filter"
+          active_count={count_active_filters(@filters)}
+        >
+          <:group label="Status and Role">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Status</label>
+              <select
+                name="filters[is_active]"
+                class="w-full h-9 rounded-md border border-slate-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
+              >
+                <option value="">All statuses</option>
+                <option value="true" selected={@filters.is_active == "true"}>Active</option>
+                <option value="pending" selected={@filters.is_active == "pending"}>Pending</option>
+                <option value="false" selected={@filters.is_active == "false"}>Inactive</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Role</label>
+              <select
+                name="filters[role]"
+                class="w-full h-9 rounded-md border border-slate-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
+              >
+                <option value="">All roles</option>
+                <%= for role <- @roles do %>
+                  <option value={role} selected={@filters.role == role}>{role}</option>
+                <% end %>
+              </select>
+            </div>
+          </:group>
+
+          <:chip
+            :for={chip <- filter_chips(@filters)}
+            label={chip.label}
+            clear={JS.push("clear_chip", value: %{"field" => chip.field})}
+          />
+        </.filter_drawer>
+      </:toolbar>
+
+      <%= if Enum.empty?(@users) do %>
+        <.blank_state
+          icon_path="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
+          title="No users found"
+          description={
+            if @filters.search != "" or count_active_filters(@filters) > 0,
+              do: "No users match the current filters.",
+              else: "No users have been registered yet."
+          }
+        >
+          <:actions :if={@filters.search != "" or count_active_filters(@filters) > 0}>
+            <button phx-click="clear_filters" class="text-xs text-brand-accent hover:underline">
+              Clear filters
+            </button>
+          </:actions>
+        </.blank_state>
+      <% else %>
+        <.data_table
+          id="users-table"
+          rows={@users}
+          row_id={&"user-#{&1.id}"}
+          row_click={&JS.push("show_user_details", value: %{id: &1.id})}
+        >
+          <:col :let={user} label="User">
+            <div class="flex items-center gap-3">
+              <%= if user.image do %>
+                <img src={user.image} class="h-9 w-9 rounded-full object-cover shrink-0" />
+              <% else %>
+                <div class="h-9 w-9 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-semibold text-sm shrink-0">
+                  {String.first(user.name || "?")}
+                </div>
+              <% end %>
+              <div>
+                <p class="font-medium text-slate-900 text-sm">{user.name}</p>
+                <p class="text-xs text-slate-500">{user.email}</p>
+              </div>
+            </div>
+          </:col>
+          <:col :let={user} label="Role">
+            <span class="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-primary">
+              {user.role}
+            </span>
+          </:col>
+          <:col :let={user} label="Status">
+            <.status_badge user={user} />
+          </:col>
+          <:col :let={user} label="OTP">
+            <%= if user.otp do %>
+              <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-mono font-semibold text-amber-700 ring-1 ring-amber-600/20">
+                {user.otp}
+              </span>
+            <% else %>
+              <span class="text-xs text-slate-400">—</span>
+            <% end %>
+          </:col>
+          <:col :let={user} label="Last Login" class="text-xs text-slate-500">
+            {format_datetime_kenya(user.last_logged_in_at)}
+          </:col>
+          <:action :let={user}>
+            <.link
+              navigate={~p"/admin/users/#{user}/edit"}
+              class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-brand-accent hover:bg-brand-50"
+            >
+              <Heroicons.icon name="pencil-square" type="outline" class="h-3.5 w-3.5" /> Edit
+            </.link>
+            <.link
+              navigate={~p"/admin/users/#{user}/permissions"}
+              class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-brand-accent hover:bg-brand-50"
+            >
+              <Heroicons.icon name="key" type="outline" class="h-3.5 w-3.5" /> Panels
+            </.link>
+            <.link
+              navigate={~p"/admin/users/access/#{user.email}"}
+              class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-white bg-brand-primary hover:bg-[#2d2d7a]"
+            >
+              Access
+            </.link>
+          </:action>
+          <:footer>
+            <.pagination
+              page={@page}
+              total_pages={@total_pages}
+              total_count={@user_count}
+              per_page={@per_page}
+            />
+          </:footer>
+        </.data_table>
+      <% end %>
+    </.list_page>
 
     <%!-- ── User Detail Popup ── --%>
     <%= if @selected_user do %>
@@ -409,15 +381,22 @@ defmodule MedcampWeb.AdminUsersLive.Index do
                 <span class="inline-flex items-center rounded-full bg-white/20 px-2 py-0.5 text-xs font-medium text-white">
                   {u.role}
                 </span>
-                <%= if u.is_active do %>
-                  <span class="inline-flex items-center gap-1 rounded-full bg-green-400/30 px-2 py-0.5 text-xs font-medium text-green-100">
-                    <span class="h-1.5 w-1.5 rounded-full bg-green-300"></span> Active
+                <% status = Accounts.User.status(u) %>
+                <span class={[
+                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+                  status == :active && "bg-green-400/30 text-green-100",
+                  status == :pending && "bg-amber-400/30 text-amber-100",
+                  status == :inactive && "bg-red-400/30 text-red-100"
+                ]}>
+                  <span class={[
+                    "h-1.5 w-1.5 rounded-full",
+                    status == :active && "bg-green-300",
+                    status == :pending && "bg-amber-300",
+                    status == :inactive && "bg-red-300"
+                  ]}>
                   </span>
-                <% else %>
-                  <span class="inline-flex items-center gap-1 rounded-full bg-red-400/30 px-2 py-0.5 text-xs font-medium text-red-100">
-                    <span class="h-1.5 w-1.5 rounded-full bg-red-300"></span> Inactive
-                  </span>
-                <% end %>
+                  {status |> to_string() |> String.capitalize()}
+                </span>
               </div>
             </div>
             <button
@@ -431,60 +410,60 @@ defmodule MedcampWeb.AdminUsersLive.Index do
           <%!-- Detail grid --%>
           <div class="px-6 py-5 grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <div>
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Phone</p>
-              <p class="text-gray-800">{u.phone_number || "—"}</p>
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Phone</p>
+              <p class="text-slate-800">{u.phone_number || "—"}</p>
             </div>
             <div>
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">
                 ID Number
               </p>
-              <p class="text-gray-800">{u.id_number || "—"}</p>
+              <p class="text-slate-800">{u.id_number || "—"}</p>
             </div>
             <div>
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">
                 License No.
               </p>
-              <p class="text-gray-800">{u.license_number || "—"}</p>
+              <p class="text-slate-800">{u.license_number || "—"}</p>
             </div>
             <div>
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">GSRN</p>
-              <p class="font-mono text-gray-800 text-xs">{u.gsrn || "—"}</p>
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">GSRN</p>
+              <p class="font-mono text-slate-800 text-xs">{u.gsrn || "—"}</p>
             </div>
             <div>
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">OTP</p>
-              <p class="font-mono text-gray-800 text-sm font-semibold">{u.otp || "—"}</p>
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">OTP</p>
+              <p class="font-mono text-slate-800 text-sm font-semibold">{u.otp || "—"}</p>
             </div>
             <div>
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">
                 Last Login
               </p>
-              <p class="text-gray-800">{format_datetime_kenya(u.last_logged_in_at)}</p>
+              <p class="text-slate-800">{format_datetime_kenya(u.last_logged_in_at)}</p>
             </div>
             <div>
-              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">
                 Last Logout
               </p>
-              <p class="text-gray-800">{format_datetime_kenya(u.last_logged_out_at)}</p>
+              <p class="text-slate-800">{format_datetime_kenya(u.last_logged_out_at)}</p>
             </div>
           </div>
 
           <%!-- Action buttons --%>
-          <div class="border-t border-gray-100 px-6 py-4 flex flex-wrap items-center gap-2 bg-gray-50">
+          <div class="border-t border-slate-100 px-6 py-4 flex flex-wrap items-center gap-2 bg-slate-50">
             <.link
               navigate={~p"/admin/users/#{u}/edit"}
-              class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               <Heroicons.icon name="pencil-square" type="outline" class="h-4 w-4" /> Edit
             </.link>
             <.link
               navigate={"/admin/users/#{u.id}/user_code"}
-              class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               <Heroicons.icon name="qr-code" type="outline" class="h-4 w-4" /> User Code
             </.link>
             <.link
               navigate={"/admin/users/#{u.id}/permissions"}
-              class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               <Heroicons.icon name="key" type="outline" class="h-4 w-4" /> Panels
             </.link>
@@ -497,7 +476,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
               <Heroicons.icon name="key" type="outline" class="h-4 w-4" /> Reset Password
             </button>
             <.link
-              navigate={~p"/admin/users/#{u.email}"}
+              navigate={~p"/admin/users/access/#{u.email}"}
               class="inline-flex items-center gap-1.5 rounded-lg bg-brand-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-[#2d2d7a]"
             >
               <Heroicons.icon name="arrow-right-on-rectangle" type="outline" class="h-4 w-4" />
@@ -520,6 +499,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
         id={:new}
         title={@page_title}
         current_user={@current_user}
+        current_organisation={@current_organisation}
         user={@user}
         action={@live_action}
         patch={~p"/admin/users"}

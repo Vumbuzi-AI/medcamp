@@ -190,14 +190,14 @@ defmodule MedcampWeb.AdminUsersLive.PermissionsIndex do
           <:actions>
             <.link
               navigate={~p"/admin/users"}
-              class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               Back to Users
             </.link>
           </:actions>
         </.page_header>
 
-        <p class="text-sm text-gray-500 mb-6">
+        <p class="text-sm text-slate-500 mb-6">
           These are the panels in the {@user.role} sidebar. Unticking one hides it from this
           user's sidebar and blocks its pages if they type the URL directly. Toggling a box back
           to what the role would already give removes the override, so this user goes back to
@@ -206,9 +206,9 @@ defmodule MedcampWeb.AdminUsersLive.PermissionsIndex do
 
         <div
           :if={@groups == []}
-          class="rounded-lg border border-dashed border-gray-200 px-4 py-8 text-center"
+          class="rounded-lg border border-dashed border-slate-200 px-4 py-8 text-center"
         >
-          <p class="text-sm text-gray-500">
+          <p class="text-sm text-slate-500">
             The {@user.role} role has no permission-controlled sidebar panels.
           </p>
         </div>
@@ -216,13 +216,13 @@ defmodule MedcampWeb.AdminUsersLive.PermissionsIndex do
         <div class="space-y-6">
           <section :for={group <- @groups}>
             <div class="flex items-center gap-2 mb-2">
-              <h3 class="text-sm font-semibold text-gray-900">{group.name}</h3>
+              <h3 class="text-sm font-semibold text-slate-900">{group.name}</h3>
               <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-500">
                 {Enum.count(group.tabs, & &1.granted)}/{length(group.tabs)}
               </span>
             </div>
 
-            <div class="divide-y divide-gray-100 border border-gray-100 rounded-lg overflow-hidden">
+            <div class="divide-y divide-slate-100 border border-slate-100 rounded-lg overflow-hidden">
               <div :for={tab <- group.tabs} class="flex items-center gap-4 px-4 py-3 bg-white">
                 <input
                   type="checkbox"
@@ -231,11 +231,11 @@ defmodule MedcampWeb.AdminUsersLive.PermissionsIndex do
                   phx-click="toggle_permission"
                   phx-value-slug={tab.slug}
                   phx-value-granted={to_string(!tab.granted)}
-                  class="h-4 w-4 rounded border-gray-300 text-brand-primary focus:ring-brand-accent"
+                  class="h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-accent"
                 />
                 <label for={"permission-#{tab.slug}"} class="flex-1 min-w-0 cursor-pointer">
-                  <p class="text-sm font-medium text-gray-900">{tab.name}</p>
-                  <p class="text-xs text-gray-400">{tab.url}</p>
+                  <p class="text-sm font-medium text-slate-900">{tab.name}</p>
+                  <p class="text-xs text-slate-400">{tab.url}</p>
                 </label>
                 <div class="text-right shrink-0">
                   <span
@@ -244,7 +244,7 @@ defmodule MedcampWeb.AdminUsersLive.PermissionsIndex do
                   >
                     Overridden
                   </span>
-                  <p class="text-xs text-gray-500 mt-1">{source_label(tab)}</p>
+                  <p class="text-xs text-slate-500 mt-1">{source_label(tab)}</p>
                 </div>
               </div>
             </div>
