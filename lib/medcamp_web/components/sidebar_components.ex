@@ -6,6 +6,43 @@ defmodule MedcampWeb.SidebarComponents do
 
   alias MedcampWeb.SidebarCatalog
 
+  @doc """
+  Sticky mobile top bar: just the hamburger that opens the off-canvas sidebar,
+  plus the click-catching backdrop behind it. Every authenticated layout
+  renders this once, directly after `flash_group`; it is `lg:hidden` because
+  at `lg`+ the sidebar is always on screen. The behaviour lives in the
+  `SidebarCollapse` JS hook, which wires `#sidebar-mobile-open-btn` and
+  `#sidebar-backdrop` and toggles `body.sidebar-mobile-open`.
+  """
+  attr :variant, :string, default: "tenant", values: ~w(tenant platform)
+
+  def mobile_nav_bar(assigns) do
+    ~H"""
+    <div
+      id="sidebar-backdrop"
+      class="pointer-events-none fixed inset-0 z-40 bg-[#1f2433]/40 opacity-0 transition-opacity duration-200 lg:hidden"
+      aria-hidden="true"
+    >
+    </div>
+
+    <div class="sticky top-0 z-30 flex items-center border-b border-slate-200 bg-white/95 px-3 py-2.5 shadow-sm backdrop-blur lg:hidden">
+      <button
+        id="sidebar-mobile-open-btn"
+        type="button"
+        class={[
+          "flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+          @variant == "platform" && "text-[#0C2765] hover:bg-slate-50 focus-visible:ring-[#52B2D8]",
+          @variant == "tenant" &&
+            "text-brand-primary hover:bg-brand-50 focus-visible:ring-brand-accent"
+        ]}
+        aria-label="Open navigation"
+      >
+        <Heroicons.icon name="bars-3" type="outline" class="h-5 w-5" />
+      </button>
+    </div>
+    """
+  end
+
   def navbar_user(assigns) do
     ~H"""
     <nav class="shadow-sm sticky top-0 z-40 bg-white">
@@ -122,19 +159,18 @@ defmodule MedcampWeb.SidebarComponents do
     <aside
       id="main-sidebar"
       phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
+      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full lg:translate-x-0"
       aria-label="Sidebar"
     >
       <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
         <.top_base_sidebar current_user={@current_user} name="Doctor's Panel" />
 
         <ul class="space-y-1 font-medium flex-1">
-          <%!-- Standalone Dashboard link --%>
           <.sidebar_card
             tab={
               %{
                 name: "Dashboard",
-                icon: "home-modern",
+                icon: "squares-2x2",
                 url: "/doctor/dashboard",
                 tab_name: :dashboard
               }
@@ -143,9 +179,8 @@ defmodule MedcampWeb.SidebarComponents do
             current_user={@current_user}
           />
 
-          <%!-- Grouped sections --%>
           <%= for group <- @groups do %>
-            <.sidebar_group group={group} active_tab={@active_tab} current_user={@current_user} />
+            <.sidebar_section group={group} active_tab={@active_tab} current_user={@current_user} />
           <% end %>
         </ul>
 
@@ -167,25 +202,28 @@ defmodule MedcampWeb.SidebarComponents do
     <aside
       id="main-sidebar"
       phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
+      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full lg:translate-x-0"
       aria-label="Sidebar"
     >
       <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
         <.top_base_sidebar current_user={@current_user} name="Nurse's Panel" />
 
         <ul class="space-y-1 font-medium flex-1">
-          <%!-- Standalone Dashboard link --%>
           <.sidebar_card
             tab={
-              %{name: "Dashboard", icon: "home-modern", url: "/nurse/dashboard", tab_name: :dashboard}
+              %{
+                name: "Dashboard",
+                icon: "squares-2x2",
+                url: "/nurse/dashboard",
+                tab_name: :dashboard
+              }
             }
             active_tab={@active_tab}
             current_user={@current_user}
           />
 
-          <%!-- Grouped sections --%>
           <%= for group <- @groups do %>
-            <.sidebar_group group={group} active_tab={@active_tab} current_user={@current_user} />
+            <.sidebar_section group={group} active_tab={@active_tab} current_user={@current_user} />
           <% end %>
         </ul>
 
@@ -207,7 +245,7 @@ defmodule MedcampWeb.SidebarComponents do
     <aside
       id="main-sidebar"
       phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
+      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full lg:translate-x-0"
       aria-label="Sidebar"
     >
       <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
@@ -225,13 +263,150 @@ defmodule MedcampWeb.SidebarComponents do
 
           <%!-- Grouped sections --%>
           <%= for group <- @groups do %>
-            <.sidebar_group group={group} active_tab={@active_tab} current_user={@current_user} />
+            <.sidebar_section group={group} active_tab={@active_tab} current_user={@current_user} />
           <% end %>
         </ul>
 
         <.bottom_base_sidebar current_user={@current_user} />
       </div>
     </aside>
+    """
+  end
+
+  # The platform console sits outside every tenant, so it wears the fixed
+  # Tibasasa palette (docs/DESIGN.md) rather than the tenant `brand-*` tokens
+  # the role sidebars use. Self-contained on purpose — it keeps the
+  # `sidebar-*` class hooks the collapse CSS needs but none of the brand
+  # colours.
+  def superadmin_sidebar(assigns) do
+    ~H"""
+    <aside
+      id="main-sidebar"
+      phx-hook="SidebarCollapse"
+      class="sidebar-platform fixed left-0 top-0 z-40 h-screen w-72 -translate-x-full transition-transform lg:translate-x-0"
+      aria-label="Sidebar"
+    >
+      <div class="flex h-full flex-col overflow-y-auto border-r border-slate-200 bg-white px-5 py-6">
+        <div class="mb-6">
+          <div class="sidebar-top-section sidebar-brand-row mb-4 flex items-center justify-between gap-3">
+            <a href="/" class="flex min-w-0 items-center gap-2.5">
+              <img
+                src="/images/tibasasa-ai-logo.png"
+                alt="Tibasasa"
+                class="h-10 w-10 shrink-0 object-contain"
+              />
+              <span class="sidebar-brand-copy min-w-0 leading-tight">
+                <span class="block truncate text-base font-bold text-[#0C2765]">Tibasasa</span>
+                <span class="block truncate text-xs font-medium text-slate-500">
+                  Platform Console
+                </span>
+              </span>
+            </a>
+
+            <button
+              id="sidebar-toggle-btn"
+              type="button"
+              title="Toggle sidebar"
+              aria-label="Toggle sidebar"
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#0C2765] transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52B2D8] focus-visible:ring-offset-2"
+            >
+              <Heroicons.icon name="chevron-left" type="outline" class="sidebar-chevron h-4 w-4" />
+            </button>
+          </div>
+
+          <div class="sidebar-account-card rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5">
+            <div class="flex items-center gap-3">
+              <div class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#0C2765] text-[15px] font-bold text-white">
+                <%= if @current_user.image do %>
+                  <img src={@current_user.image} alt="" class="h-full w-full object-cover" />
+                <% else %>
+                  {user_initials(@current_user)}
+                <% end %>
+              </div>
+              <div class="min-w-0">
+                <p class="truncate text-[15px] font-bold leading-tight text-slate-900">
+                  {@current_user.name}
+                </p>
+                <p class="truncate text-[13px] font-medium leading-snug text-slate-500">
+                  Signed-in account
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ul class="flex-1 space-y-1 font-medium">
+          <.superadmin_nav_item
+            label="Dashboard"
+            icon="home-modern"
+            url="/superadmin/dashboard"
+            active={@active_tab == :dashboard}
+          />
+          <.superadmin_nav_item
+            label="Organisations"
+            icon="building-office-2"
+            url="/superadmin/organisations"
+            active={@active_tab == :organisations}
+          />
+          <.superadmin_nav_item
+            label="Camps"
+            icon="calendar-days"
+            url="/superadmin/camps"
+            active={@active_tab == :camps}
+          />
+        </ul>
+
+        <div class="mt-auto border-t border-slate-200 pt-6">
+          <.link
+            href="/users/log_out"
+            method="delete"
+            class="sidebar-nav-item group relative flex min-h-[48px] items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-[#0C2765] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52B2D8] focus-visible:ring-offset-2"
+          >
+            <Heroicons.icon
+              name="arrow-right-on-rectangle"
+              type="outline"
+              class="h-5 w-5 shrink-0 stroke-2"
+            />
+            <span class="sidebar-label truncate">Sign out</span>
+            <span class="sidebar-tooltip" role="tooltip">Sign out</span>
+          </.link>
+        </div>
+      </div>
+    </aside>
+    """
+  end
+
+  attr :label, :string, required: true
+  attr :icon, :string, required: true
+  attr :url, :string, required: true
+  attr :active, :boolean, default: false
+
+  defp superadmin_nav_item(assigns) do
+    ~H"""
+    <li class="relative">
+      <.link
+        navigate={@url}
+        aria-current={if @active, do: "page", else: nil}
+        class={[
+          "sidebar-nav-item group relative flex min-h-[48px] items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52B2D8] focus-visible:ring-offset-2",
+          if(@active,
+            do: "bg-[#e9f6fb] text-[#0C2765]",
+            else: "text-slate-600 hover:bg-slate-50 hover:text-[#0C2765]"
+          )
+        ]}
+      >
+        <Heroicons.icon
+          name={@icon}
+          type="outline"
+          class={[
+            "h-5 w-5 shrink-0 stroke-[2]",
+            if(@active, do: "text-[#0C2765]", else: "text-slate-500 group-hover:text-[#0C2765]")
+          ]}
+        />
+        <span class="sidebar-label truncate">{@label}</span>
+        <span class="sidebar-tooltip" role="tooltip">{@label}</span>
+      </.link>
+    </li>
     """
   end
 
@@ -248,14 +423,13 @@ defmodule MedcampWeb.SidebarComponents do
     <aside
       id="main-sidebar"
       phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
+      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full lg:translate-x-0"
       aria-label="Sidebar"
     >
       <div class="flex h-full flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
         <.top_base_sidebar current_user={@current_user} name="Lab Technologist's Panel" />
 
         <ul class="flex-1 space-y-1 font-medium">
-          <%!-- Standalone Dashboard link --%>
           <.sidebar_card
             tab={
               %{name: "Dashboard", icon: "squares-2x2", url: "/lab/dashboard", tab_name: :dashboard}
@@ -264,9 +438,8 @@ defmodule MedcampWeb.SidebarComponents do
             current_user={@current_user}
           />
 
-          <%!-- Grouped sections --%>
           <%= for group <- @groups do %>
-            <.sidebar_group group={group} active_tab={@active_tab} current_user={@current_user} />
+            <.sidebar_section group={group} active_tab={@active_tab} current_user={@current_user} />
           <% end %>
         </ul>
 
@@ -288,19 +461,18 @@ defmodule MedcampWeb.SidebarComponents do
     <aside
       id="main-sidebar"
       phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
+      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full lg:translate-x-0"
       aria-label="Sidebar"
     >
       <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
         <.top_base_sidebar current_user={@current_user} name="Pharmacist's Panel" />
 
         <ul class="space-y-1 font-medium flex-1">
-          <%!-- Standalone Dashboard link --%>
           <.sidebar_card
             tab={
               %{
                 name: "Dashboard",
-                icon: "home-modern",
+                icon: "squares-2x2",
                 url: "/pharmacist/dashboard",
                 tab_name: :dashboard
               }
@@ -309,9 +481,8 @@ defmodule MedcampWeb.SidebarComponents do
             current_user={@current_user}
           />
 
-          <%!-- Grouped sections --%>
           <%= for group <- @groups do %>
-            <.sidebar_group group={group} active_tab={@active_tab} current_user={@current_user} />
+            <.sidebar_section group={group} active_tab={@active_tab} current_user={@current_user} />
           <% end %>
         </ul>
 
@@ -333,7 +504,7 @@ defmodule MedcampWeb.SidebarComponents do
     <aside
       id="main-sidebar"
       phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
+      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full lg:translate-x-0"
       aria-label="Sidebar"
     >
       <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
@@ -356,7 +527,7 @@ defmodule MedcampWeb.SidebarComponents do
     <aside
       id="main-sidebar"
       phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
+      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full lg:translate-x-0"
       aria-label="Sidebar"
     >
       <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
@@ -386,7 +557,7 @@ defmodule MedcampWeb.SidebarComponents do
     <aside
       id="main-sidebar"
       phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
+      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full lg:translate-x-0"
       aria-label="Sidebar"
     >
       <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
@@ -420,7 +591,7 @@ defmodule MedcampWeb.SidebarComponents do
     <aside
       id="main-sidebar"
       phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
+      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full lg:translate-x-0"
       aria-label="Sidebar"
     >
       <div class="flex h-full flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
@@ -450,7 +621,7 @@ defmodule MedcampWeb.SidebarComponents do
     <aside
       id="main-sidebar"
       phx-hook="SidebarCollapse"
-      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full md:translate-x-0"
+      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full lg:translate-x-0"
       aria-label="Sidebar"
     >
       <div class="h-full flex flex-col overflow-y-auto border-r border-[#edf0f8] bg-white px-5 py-6">
@@ -514,6 +685,20 @@ defmodule MedcampWeb.SidebarComponents do
   attr :group, :map, required: true
   attr :active_tab, :any, required: true
   attr :current_user, :map, required: true
+
+  defp sidebar_section(%{group: %{tabs: [tab]}} = assigns) do
+    assigns = assign(assigns, :tab, tab)
+
+    ~H"""
+    <.sidebar_card tab={@tab} active_tab={@active_tab} current_user={@current_user} />
+    """
+  end
+
+  defp sidebar_section(assigns) do
+    ~H"""
+    <.sidebar_group group={@group} active_tab={@active_tab} current_user={@current_user} />
+    """
+  end
 
   defp sidebar_group(assigns) do
     group_active? =

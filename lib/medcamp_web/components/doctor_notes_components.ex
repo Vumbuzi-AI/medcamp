@@ -7,14 +7,14 @@ defmodule MedcampWeb.DoctorNotesComponents do
 
   def doctor_note_tabs(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-1 mb-6">
-      <div class="flex border-b border-gray-100">
+    <div class="bg-white rounded-lg border border-slate-100 p-1 mb-6">
+      <div class="flex border-b border-slate-100">
         <%= for tab <- @tabs do %>
           <div
             phx-click="change-tab"
             phx-value-tab={tab.id}
             class={"px-4 py-3 text-sm font-medium cursor-pointer border-b-2 transition-colors " <>
-            if(@current_tab == tab.id, do: "border-brand-primary text-brand-primary", else: "border-transparent text-gray-500 hover:text-brand-accent")}
+            if(@current_tab == tab.id, do: "border-brand-primary text-brand-primary", else: "border-transparent text-slate-500 hover:text-brand-accent")}
           >
             <div class="flex items-center gap-1">
               <%= if tab.icon_name do %>
@@ -34,14 +34,14 @@ defmodule MedcampWeb.DoctorNotesComponents do
   attr :add_note_click, :string, default: nil
   attr :new_note_url, :string, default: nil
   attr :route_prefix, :string, required: true
-  attr :streams, :map, required: true
+  attr :doctor_notes, :list, required: true
   attr :patient, :map, required: true
   attr :count, :integer, required: true
 
   def doctor_notes_table(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      <.header class="text-brand-primary text-base border-b flex-col md:flex-row gap-6 border-gray-100 pb-4 mb-4">
+    <div class="bg-white rounded-lg border border-slate-100 p-4">
+      <.header class="text-brand-primary text-base border-b flex-col md:flex-row gap-6 border-slate-100 pb-4 mb-4">
         <div class="flex  items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -120,7 +120,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
         description="No doctor notes have been recorded for this patient yet."
       />
 
-      <.table
+      <.data_table
         :if={@count > 0}
         id="doctor_notes"
         rows={@doctor_notes}
@@ -152,8 +152,8 @@ defmodule MedcampWeb.DoctorNotesComponents do
               />
             </svg>
             <div class="flex flex-col gap-2">
-              <span class="text-gray-700">{doctor_note.date}</span>
-              <span class="text-gray-700">{doctor_note.time}</span>
+              <span class="text-slate-700">{doctor_note.date}</span>
+              <span class="text-slate-700">{doctor_note.time}</span>
             </div>
           </div>
         </:col>
@@ -190,20 +190,20 @@ defmodule MedcampWeb.DoctorNotesComponents do
             </.link>
           </div>
         </:col>
-      </.table>
+      </.data_table>
     </div>
     """
   end
 
   attr :route_prefix, :string, required: true
-  attr :streams, :map, required: true
+  attr :doctor_notes, :list, required: true
   attr :patient, :map, required: true
   attr :count, :integer, required: true
 
   def nurse_doctor_notes_table(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      <.header class="text-brand-primary border-b border-gray-100 pb-4 mb-4">
+    <div class="bg-white rounded-lg border border-slate-100 p-4">
+      <.header class="text-brand-primary border-b border-slate-100 pb-4 mb-4">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -232,7 +232,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
         description="No doctor notes have been recorded for this patient yet."
       />
 
-      <.table
+      <.data_table
         :if={@count > 0}
         id="doctor_notes"
         rows={@doctor_notes}
@@ -263,7 +263,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <span class="text-gray-700">{doctor_note.date}</span>
+            <span class="text-slate-700">{doctor_note.date}</span>
           </div>
         </:col>
 
@@ -283,13 +283,13 @@ defmodule MedcampWeb.DoctorNotesComponents do
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span class="text-gray-700">{doctor_note.time}</span>
+            <span class="text-slate-700">{doctor_note.time}</span>
           </div>
         </:col>
 
         <:col :let={doctor_note} label="Reason">
           <div class="py-3 max-w-xs">
-            <p class="text-gray-700 truncate" title={doctor_note.reason_for_consulatation}>
+            <p class="text-slate-700 truncate" title={doctor_note.reason_for_consulatation}>
               {doctor_note.reason_for_consulatation}
             </p>
           </div>
@@ -302,12 +302,12 @@ defmodule MedcampWeb.DoctorNotesComponents do
                 {doctor_note.diagnosis}
               </span>
               <%= if Map.get(doctor_note, :diagnosis_icd_code) && doctor_note.diagnosis_icd_code != "" do %>
-                <span class="text-xs text-gray-500 whitespace-nowrap">
+                <span class="text-xs text-slate-500 whitespace-nowrap">
                   ICD-11: {doctor_note.diagnosis_icd_code}
                 </span>
               <% end %>
             <% else %>
-              <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-500 font-medium">
+              <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-500 font-medium">
                 No diagnosis
               </span>
             <% end %>
@@ -346,7 +346,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             </.link>
           </div>
         </:col>
-      </.table>
+      </.data_table>
     </div>
     """
   end
@@ -389,14 +389,14 @@ defmodule MedcampWeb.DoctorNotesComponents do
         aria-labelledby={"voice-language-title-#{@field.id}"}
         class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
       >
-        <div class="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl" data-role="voice-dialog">
+        <div class="w-full max-w-lg rounded-xl bg-white p-6" data-role="voice-dialog">
           <h3
             id={"voice-language-title-#{@field.id}"}
             class="text-lg font-semibold text-brand-primary"
           >
             Voice dictation
           </h3>
-          <p class="mt-2 text-sm text-gray-600">
+          <p class="mt-2 text-sm text-slate-600">
             Record, review, and edit the English text before adding it to the note.
           </p>
 
@@ -408,7 +408,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
 
           <div data-role="voice-setup">
             <label
-              class="mt-5 block text-sm font-medium text-gray-800"
+              class="mt-5 block text-sm font-medium text-slate-800"
               for={"voice-language-#{@field.id}"}
             >
               Spoken language
@@ -416,7 +416,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
             <select
               id={"voice-language-#{@field.id}"}
               data-role="voice-language"
-              class="mt-2 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent/20"
+              class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent/20"
             >
               <optgroup label="Kenyan languages">
                 <option :for={{code, name} <- VoiceDictation.kenyan_languages()} value={code}>
@@ -429,7 +429,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
                 </option>
               </optgroup>
             </select>
-            <p class="mt-2 text-xs text-gray-500">
+            <p class="mt-2 text-xs text-slate-500">
               Experimental languages may be less accurate. Always review clinical details before saving.
             </p>
 
@@ -437,7 +437,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
               <button
                 type="button"
                 data-role="voice-cancel"
-                class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Cancel
               </button>
@@ -462,15 +462,17 @@ defmodule MedcampWeb.DoctorNotesComponents do
                 />
               </svg>
             </div>
-            <p data-role="voice-status" class="mt-4 text-sm font-medium text-gray-800">
+            <p data-role="voice-status" class="mt-4 text-sm font-medium text-slate-800">
               Recording…
             </p>
-            <p class="mt-1 text-xs text-gray-500">Speak clearly and include punctuation naturally.</p>
+            <p class="mt-1 text-xs text-slate-500">
+              Speak clearly and include punctuation naturally.
+            </p>
             <div class="mt-6 flex justify-center gap-3">
               <button
                 type="button"
                 data-role="voice-progress-cancel"
-                class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Cancel
               </button>
@@ -486,7 +488,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
 
           <div data-role="voice-result" class="hidden mt-5">
             <label
-              class="block text-sm font-medium text-gray-800"
+              class="block text-sm font-medium text-slate-800"
               for={"voice-transcript-#{@field.id}"}
             >
               English transcription
@@ -495,24 +497,24 @@ defmodule MedcampWeb.DoctorNotesComponents do
               id={"voice-transcript-#{@field.id}"}
               data-role="voice-transcript"
               rows="7"
-              class="mt-2 block w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent/20"
+              class="mt-2 block w-full resize-y rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent/20"
               placeholder="Your English transcription will appear here for review."
             ></textarea>
-            <p class="mt-2 text-xs text-gray-500">
+            <p class="mt-2 text-xs text-slate-500">
               Review clinical terms, medication names, doses, and negations before saving.
             </p>
             <div class="mt-6 flex flex-wrap justify-end gap-3">
               <button
                 type="button"
                 data-role="voice-retry"
-                class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Record again
               </button>
               <button
                 type="button"
                 data-role="voice-result-cancel"
-                class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Cancel
               </button>
@@ -547,8 +549,8 @@ defmodule MedcampWeb.DoctorNotesComponents do
       data-draft-key={@draft_key}
       class="space-y-6"
     >
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center mb-6 pb-2 border-b border-gray-100">
+      <div class="bg-white rounded-lg border border-slate-200 p-6">
+        <div class="flex items-center mb-6 pb-2 border-b border-slate-100">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 mr-2 text-brand-accent"
@@ -648,10 +650,10 @@ defmodule MedcampWeb.DoctorNotesComponents do
           />
 
           <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Diagnosis (ICD-11)</label>
+            <label class="block text-sm font-medium text-slate-700">Diagnosis (ICD-11)</label>
             <select
               name="doctor_note[diagnosis_icd_code]"
-              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-brand-accent focus:border-brand-accent"
+              class="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-brand-accent focus:border-brand-accent"
             >
               <option value="">Select diagnosis code...</option>
               <%= for {label, code} <- @icd_options do %>
@@ -673,9 +675,9 @@ defmodule MedcampWeb.DoctorNotesComponents do
 
       <div
         :if={@form.data.lab_imaging_request}
-        class="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+        class="bg-white rounded-lg border border-slate-200 p-6"
       >
-        <div class="flex items-center mb-6 pb-2 border-b border-gray-100">
+        <div class="flex items-center mb-6 pb-2 border-b border-slate-100">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 mr-2 text-brand-accent"
@@ -701,18 +703,18 @@ defmodule MedcampWeb.DoctorNotesComponents do
           type="textarea"
           label="Lab imaging request"
           rows={4}
-          class="bg-gray-50"
+          class="bg-slate-50"
         />
       </div>
 
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center mb-4 pb-2 border-b border-gray-100">
+      <div class="bg-white rounded-lg border border-slate-200 p-6">
+        <div class="flex items-center mb-4 pb-2 border-b border-slate-100">
           <h2 class="text-lg font-semibold text-brand-primary">
             Doctor's Signature
           </h2>
         </div>
 
-        <p class="mb-3 text-xs text-gray-500">
+        <p class="mb-3 text-xs text-slate-500">
           Sign to certify this note. Signing is optional when saving a draft, but the note
           should be signed before it is treated as final.
         </p>
@@ -724,7 +726,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           value={@form[:doctor_signature].value}
         />
 
-        <p :if={@form[:signed_at].value} class="mt-2 text-xs text-gray-400">
+        <p :if={@form[:signed_at].value} class="mt-2 text-xs text-slate-400">
           Signed {Calendar.strftime(@form[:signed_at].value, "%d %b %Y, %H:%M")}
         </p>
       </div>
@@ -769,8 +771,8 @@ defmodule MedcampWeb.DoctorNotesComponents do
       phx-submit="save"
       class="space-y-6"
     >
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center mb-6 pb-2 border-b border-gray-100">
+      <div class="bg-white rounded-lg border border-slate-200 p-6">
+        <div class="flex items-center mb-6 pb-2 border-b border-slate-100">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 mr-2 text-brand-accent"
@@ -903,9 +905,9 @@ defmodule MedcampWeb.DoctorNotesComponents do
 
       <div
         :if={@form.data.lab_imaging_request}
-        class="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+        class="bg-white rounded-lg border border-slate-200 p-6"
       >
-        <div class="flex items-center mb-6 pb-2 border-b border-gray-100">
+        <div class="flex items-center mb-6 pb-2 border-b border-slate-100">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 mr-2 text-brand-accent"
@@ -932,7 +934,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
           disabled
           label="Lab imaging request"
           rows={4}
-          class="bg-gray-50"
+          class="bg-slate-50"
         />
       </div>
 
@@ -940,7 +942,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
         <button
           type="button"
           phx-click="toggle_edit"
-          class="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
         >
           Cancel
         </button>
@@ -976,7 +978,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
 
   def child_doctor_notes_section(assigns) do
     ~H"""
-    <div class="mt-6 border-t border-gray-100 pt-4">
+    <div class="mt-6 border-t border-slate-100 pt-4">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-sm font-semibold text-brand-primary flex items-center gap-2">
           <Heroicons.icon name="document-duplicate" type="outline" class="h-4 w-4" /> Sub-notes
@@ -994,18 +996,18 @@ defmodule MedcampWeb.DoctorNotesComponents do
       </div>
 
       <%= if @child_notes == [] do %>
-        <div class="text-center py-6 text-gray-400 text-sm bg-gray-50 rounded-lg border border-dashed border-gray-200">
+        <div class="text-center py-6 text-slate-400 text-sm bg-slate-50 rounded-lg border border-dashed border-slate-200">
           No sub-notes yet. Add one to collaborate on this note.
         </div>
       <% else %>
         <div class="space-y-2">
           <%= for note <- @child_notes do %>
-            <div class="border border-gray-200 rounded-lg overflow-hidden">
+            <div class="border border-slate-200 rounded-lg overflow-hidden">
               <button
                 type="button"
                 phx-click="toggle_sub_note"
                 phx-value-id={note.id}
-                class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-brand-50 transition-colors text-left"
+                class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-brand-50 transition-colors text-left"
               >
                 <div class="flex items-center gap-3">
                   <Heroicons.icon
@@ -1014,10 +1016,10 @@ defmodule MedcampWeb.DoctorNotesComponents do
                     class="h-4 w-4 text-brand-accent"
                   />
                   <div>
-                    <span class="text-sm font-medium text-gray-800">
+                    <span class="text-sm font-medium text-slate-800">
                       Dr. {note.doctor.name}
                     </span>
-                    <span class="ml-2 text-xs text-gray-500">
+                    <span class="ml-2 text-xs text-slate-500">
                       {note.date} at {note.time}
                     </span>
                   </div>
@@ -1030,23 +1032,23 @@ defmodule MedcampWeb.DoctorNotesComponents do
                 <Heroicons.icon
                   name={if note.id in @expanded_ids, do: "chevron-up", else: "chevron-down"}
                   type="outline"
-                  class="h-4 w-4 text-gray-400 flex-shrink-0"
+                  class="h-4 w-4 text-slate-400 flex-shrink-0"
                 />
               </button>
 
-              <div :if={note.id in @expanded_ids} class="px-4 py-4 bg-white border-t border-gray-100">
+              <div :if={note.id in @expanded_ids} class="px-4 py-4 bg-white border-t border-slate-100">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
                       Doctor
                     </p>
-                    <p class="text-sm text-gray-800">Dr. {note.doctor.name}</p>
+                    <p class="text-sm text-slate-800">Dr. {note.doctor.name}</p>
                   </div>
                   <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
                       Date & Time
                     </p>
-                    <p class="text-sm text-gray-800">{note.date} at {note.time}</p>
+                    <p class="text-sm text-slate-800">{note.date} at {note.time}</p>
                   </div>
                 </div>
 
@@ -1061,19 +1063,19 @@ defmodule MedcampWeb.DoctorNotesComponents do
                   {"Diagnosis", note.diagnosis}
                 ], value && value != "" do %>
                   <div class="mb-3">
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
                       {label}
                     </p>
-                    <p class="text-sm text-gray-700 whitespace-pre-wrap">{value}</p>
+                    <p class="text-sm text-slate-700 whitespace-pre-wrap">{value}</p>
                   </div>
                 <% end %>
 
                 <%= if note.diagnosis_icd_code && note.diagnosis_icd_code != "" do %>
                   <div class="mb-3">
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
                       ICD-11 Code
                     </p>
-                    <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+                    <span class="px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-700">
                       {note.diagnosis_icd_code}
                     </span>
                   </div>
@@ -1193,10 +1195,10 @@ defmodule MedcampWeb.DoctorNotesComponents do
         />
 
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Diagnosis (ICD-11)</label>
+          <label class="block text-sm font-medium text-slate-700">Diagnosis (ICD-11)</label>
           <select
             name="sub_doctor_note[diagnosis_icd_code]"
-            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-brand-accent focus:border-brand-accent"
+            class="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-brand-accent focus:border-brand-accent"
           >
             <option value="">Select diagnosis code...</option>
             <%= for {label, code} <- @icd_options do %>

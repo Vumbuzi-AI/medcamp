@@ -129,6 +129,9 @@ button {
   body.sidebar-collapsed #main-sidebar > div {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
+    /* Let hover tooltips escape the icon strip instead of being clipped by the
+       scroll container. Collapsed = icons only, so nothing needs to scroll. */
+    overflow: visible;
   }
 
   /* Content margin: the sidebar is fixed-positioned (w-72 = 18rem).
@@ -237,14 +240,21 @@ button {
   opacity: 0;
   pointer-events: none;
   white-space: nowrap;
-  border-radius: 0.75rem;
+  border-radius: 0.625rem;
   background: var(--brand-primary);
-  padding: 0.5rem 0.75rem;
+  padding: 0.375rem 0.625rem;
   font-size: 0.75rem;
   font-weight: 600;
-  line-height: 1;
+  line-height: 1.35;
   color: #fff;
   box-shadow: 0 12px 24px rgba(55, 56, 150, 0.18);
+}
+
+/* Platform console (superadmin) sits outside every tenant — fixed navy, not
+   the brand-* tokens. */
+#main-sidebar.sidebar-platform .sidebar-tooltip {
+  background: #0c2765;
+  box-shadow: 0 12px 24px rgba(12, 39, 101, 0.18);
 }
 
 #main-sidebar .sidebar-scrollbar {

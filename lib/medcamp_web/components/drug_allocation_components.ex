@@ -5,8 +5,8 @@ defmodule MedcampWeb.DrugAllocationComponents do
 
   def drug_allocations_section(assigns) do
     ~H"""
-    <div class="bg-white mt-4 rounded-lg shadow border border-gray-200 overflow-hidden">
-      <div class="px-6 py-4 bg-gradient-to-r from-brand-50 to-brand-100 border-b border-gray-200">
+    <div class="bg-white mt-4 rounded-lg shadow border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-brand-50 border-b border-slate-200">
         <h2 class="text-xl font-semibold text-brand-primary">Drug Prescriptions</h2>
       </div>
 
@@ -38,10 +38,10 @@ defmodule MedcampWeb.DrugAllocationComponents do
         </div>
 
         <%= if Enum.empty?(@drug_allocations) do %>
-          <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+          <div class="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="mx-auto h-12 w-12 text-gray-400"
+              class="mx-auto h-12 w-12 text-slate-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -53,8 +53,8 @@ defmodule MedcampWeb.DrugAllocationComponents do
                 d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
               />
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No medications</h3>
-            <p class="mt-1 text-sm text-gray-500">
+            <h3 class="mt-2 text-sm font-medium text-slate-900">No medications</h3>
+            <p class="mt-1 text-sm text-slate-500">
               No medications have been prescribed for this patient yet.
             </p>
           </div>
@@ -77,8 +77,8 @@ defmodule MedcampWeb.DrugAllocationComponents do
 
   def drug_allocations_section_for_nurse(assigns) do
     ~H"""
-    <div class="bg-white mt-4 rounded-lg shadow border border-gray-200 overflow-hidden">
-      <div class="px-6 py-4 bg-gradient-to-r from-brand-50 to-brand-100 border-b border-gray-200">
+    <div class="bg-white mt-4 rounded-lg shadow border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-brand-50 border-b border-slate-200">
         <h2 class="text-xl font-semibold text-brand-primary">Drug Prescriptions</h2>
       </div>
 
@@ -88,10 +88,10 @@ defmodule MedcampWeb.DrugAllocationComponents do
         </div>
 
         <%= if Enum.empty?(@drug_allocations) do %>
-          <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+          <div class="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="mx-auto h-12 w-12 text-gray-400"
+              class="mx-auto h-12 w-12 text-slate-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -103,8 +103,8 @@ defmodule MedcampWeb.DrugAllocationComponents do
                 d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
               />
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No medications</h3>
-            <p class="mt-1 text-sm text-gray-500">
+            <h3 class="mt-2 text-sm font-medium text-slate-900">No medications</h3>
+            <p class="mt-1 text-sm text-slate-500">
               No medications have been prescribed for this patient yet.
             </p>
           </div>
@@ -126,8 +126,8 @@ defmodule MedcampWeb.DrugAllocationComponents do
 
   def drug_allocation_card(assigns) do
     ~H"""
-    <div class="border border-gray-200 rounded-lg overflow-hidden mb-4">
-      <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+    <div class="border border-slate-200 rounded-lg overflow-hidden mb-4">
+      <div class="px-4 py-3 bg-slate-50 border-b border-slate-200">
         <div class="mb-4">
           <div class="w-[100%] flex justify-between items-center">
             <h4 class="font-medium text-brand-primary">Prescription from Doctor</h4>
@@ -140,13 +140,13 @@ defmodule MedcampWeb.DrugAllocationComponents do
               type="button"
               class="text-red-500 hover:text-red-700"
               phx-click="remove_drug_allocation"
-              data-confirm="Are you sure you want to delete this prescription? This action cannot be undone."
+              data-confirm-message="Are you sure you want to delete this prescription? This action cannot be undone."
               phx-value-id={@drug_allocation.id}
             >
               Delete Prescription <.icon name="hero-trash" class="h-5 w-5" />
             </button>
           </div>
-          <div class="p-3 mt-2 bg-[#f8f8ff] rounded-lg border border-brand-100 whitespace-pre-line text-gray-800">
+          <div class="p-3 mt-2 bg-[#f8f8ff] rounded-lg border border-brand-100 whitespace-pre-line text-slate-800">
             {@drug_allocation.prescription}
           </div>
         </div>
@@ -179,10 +179,10 @@ defmodule MedcampWeb.DrugAllocationComponents do
         </div>
 
         <%= if Enum.empty?(@drug_allocation.drugs_assigned) do %>
-          <div class="text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+          <div class="text-center py-6 bg-slate-50 rounded-lg border border-dashed border-slate-300">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="mx-auto h-10 w-10 text-gray-400"
+              class="mx-auto h-10 w-10 text-slate-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -194,18 +194,18 @@ defmodule MedcampWeb.DrugAllocationComponents do
                 d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
               />
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No drugs assigned</h3>
-            <p class="mt-1 text-sm text-gray-500">
+            <h3 class="mt-2 text-sm font-medium text-slate-900">No drugs assigned</h3>
+            <p class="mt-1 text-sm text-slate-500">
               Click "Add Drug" to assign medications to this prescription.
             </p>
           </div>
         <% else %>
           <div class="space-y-4">
             <%= for drug_assigned <- @drug_allocation.drugs_assigned do %>
-              <div class="border border-gray-200 rounded-lg overflow-hidden">
-                <div class="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-start">
+              <div class="border border-slate-200 rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex justify-between items-start">
                   <div>
-                    <h4 class="font-medium text-gray-900">
+                    <h4 class="font-medium text-slate-900">
                       {Medcamp.InventoriesReceived.get_inventory_received!(
                         drug_assigned.inventory_received_id
                       ).strength} {Medcamp.InventoriesReceived.get_inventory_received!(
@@ -214,7 +214,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
                         drug_assigned.inventory_received_id
                       ).uom} {drug_assigned.brand_name}
                     </h4>
-                    <p class="text-sm text-gray-600">{drug_assigned.generic_name}</p>
+                    <p class="text-sm text-slate-600">{drug_assigned.generic_name}</p>
                   </div>
                   <div class="flex items-center space-x-2">
                     <span class="px-2 py-1 bg-brand-50 text-brand-primary rounded-full text-sm">
@@ -224,7 +224,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
                       <button
                         type="button"
                         phx-click="delete_drug_assigned"
-                        data-confirm="Are you sure?"
+                        data-confirm-message="Are you sure?"
                         phx-value-id={drug_assigned.id}
                         phx-value-drug_allocation_id={@drug_allocation.id}
                         class="text-red-500 flex gap-2 items-center hover:text-red-700"
@@ -253,33 +253,33 @@ defmodule MedcampWeb.DrugAllocationComponents do
 
                 <div class="p-4">
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-                    <div class="bg-gray-50 rounded p-3 border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-semibold">Quantity</p>
-                      <p class="font-medium text-gray-900">
+                    <div class="bg-slate-50 rounded p-3 border border-slate-100">
+                      <p class="text-xs text-slate-500 uppercase font-semibold">Quantity</p>
+                      <p class="font-medium text-slate-900">
                         {drug_assigned.quantity} {drug_assigned.unit_of_measurement}
                       </p>
                     </div>
 
-                    <div class="bg-gray-50 rounded p-3 border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-semibold">Frequency</p>
-                      <p class="font-medium text-gray-900">{drug_assigned.frequency}</p>
+                    <div class="bg-slate-50 rounded p-3 border border-slate-100">
+                      <p class="text-xs text-slate-500 uppercase font-semibold">Frequency</p>
+                      <p class="font-medium text-slate-900">{drug_assigned.frequency}</p>
                     </div>
 
-                    <div class="bg-gray-50 rounded p-3 border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-semibold">Duration</p>
-                      <p class="font-medium text-gray-900">{drug_assigned.duration_in_days} days</p>
+                    <div class="bg-slate-50 rounded p-3 border border-slate-100">
+                      <p class="text-xs text-slate-500 uppercase font-semibold">Duration</p>
+                      <p class="font-medium text-slate-900">{drug_assigned.duration_in_days} days</p>
                     </div>
 
-                    <div class="bg-gray-50 rounded p-3 border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-semibold">Prescription Note</p>
-                      <p class="font-medium text-gray-900">
+                    <div class="bg-slate-50 rounded p-3 border border-slate-100">
+                      <p class="text-xs text-slate-500 uppercase font-semibold">Prescription Note</p>
+                      <p class="font-medium text-slate-900">
                         {drug_assigned.prescription_note || "None"}
                       </p>
                     </div>
 
-                    <div class="bg-gray-50 rounded p-3 border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-semibold">Price</p>
-                      <p class="font-medium text-gray-900">KSh {drug_assigned.price}</p>
+                    <div class="bg-slate-50 rounded p-3 border border-slate-100">
+                      <p class="text-xs text-slate-500 uppercase font-semibold">Price</p>
+                      <p class="font-medium text-slate-900">KSh {drug_assigned.price}</p>
                     </div>
                   </div>
 
@@ -339,7 +339,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
       <div class="mt-2 space-y-2">
         <div
           :for={{drug_batch, index} <- Enum.with_index(@available_batches)}
-          class="rounded-md bg-white px-3 py-2 shadow-sm ring-1 ring-amber-100"
+          class="rounded-md bg-white px-3 py-2 ring-1 ring-amber-100"
         >
           <div class="flex items-center justify-between gap-3">
             <div>
@@ -376,16 +376,16 @@ defmodule MedcampWeb.DrugAllocationComponents do
 
   def pharmacist_drug_allocation_card(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+    <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
       <div class="px-4 py-5 sm:px-6 bg-blue-50 border-b border-blue-100">
         <h2 class="text-xl font-semibold text-blue-800">Drug Prescription</h2>
       </div>
 
       <div class="p-4 sm:p-6">
-        <div class="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-200">
-          <h3 class="text-sm font-medium text-gray-500 mb-2">Prescription from Doctor</h3>
+        <div class="bg-slate-50 rounded-lg p-4 mb-6 border border-slate-200">
+          <h3 class="text-sm font-medium text-slate-500 mb-2">Prescription from Doctor</h3>
           <div class="p-3 bg-white rounded border">
-            <p class="text-gray-800 whitespace-pre-line">{@drug_allocation.prescription}</p>
+            <p class="text-slate-800 whitespace-pre-line">{@drug_allocation.prescription}</p>
           </div>
         </div>
 
@@ -394,10 +394,10 @@ defmodule MedcampWeb.DrugAllocationComponents do
 
           <div class="space-y-6">
             <%= for drug_assigned <- @drug_allocation.drugs_assigned do %>
-              <div class="border border-gray-200 rounded-lg overflow-hidden">
-                <div class="px-4 py-3 bg-gray-50 border-b flex justify-between items-center">
+              <div class="border border-slate-200 rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-slate-50 border-b flex justify-between items-center">
                   <div>
-                    <h4 class="font-medium text-gray-900">
+                    <h4 class="font-medium text-slate-900">
                       {Medcamp.InventoriesReceived.get_inventory_received!(
                         drug_assigned.inventory_received_id
                       ).strength} {Medcamp.InventoriesReceived.get_inventory_received!(
@@ -406,7 +406,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
                         drug_assigned.inventory_received_id
                       ).uom} {drug_assigned.brand_name}
                     </h4>
-                    <p class="text-sm text-gray-600">{drug_assigned.generic_name}</p>
+                    <p class="text-sm text-slate-600">{drug_assigned.generic_name}</p>
                   </div>
                   <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
                     {drug_assigned.route_of_administration}
@@ -415,26 +415,26 @@ defmodule MedcampWeb.DrugAllocationComponents do
 
                 <div class="p-5 sm:p-6">
                   <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-semibold">Quantity</p>
-                      <p class="font-medium text-gray-900">
+                    <div class="bg-slate-50 rounded-md p-3 border border-slate-100">
+                      <p class="text-xs text-slate-500 uppercase font-semibold">Quantity</p>
+                      <p class="font-medium text-slate-900">
                         {drug_assigned.quantity} {drug_assigned.unit_of_measurement}
                       </p>
                     </div>
 
-                    <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-semibold">Frequency</p>
-                      <p class="font-medium text-gray-900">{drug_assigned.frequency}</p>
+                    <div class="bg-slate-50 rounded-md p-3 border border-slate-100">
+                      <p class="text-xs text-slate-500 uppercase font-semibold">Frequency</p>
+                      <p class="font-medium text-slate-900">{drug_assigned.frequency}</p>
                     </div>
 
-                    <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-semibold">Duration</p>
-                      <p class="font-medium text-gray-900">{drug_assigned.duration_in_days} days</p>
+                    <div class="bg-slate-50 rounded-md p-3 border border-slate-100">
+                      <p class="text-xs text-slate-500 uppercase font-semibold">Duration</p>
+                      <p class="font-medium text-slate-900">{drug_assigned.duration_in_days} days</p>
                     </div>
 
-                    <div class="bg-gray-50 rounded-md p-3 border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-semibold">Price</p>
-                      <p class="font-medium text-gray-900">KSh {drug_assigned.price}</p>
+                    <div class="bg-slate-50 rounded-md p-3 border border-slate-100">
+                      <p class="text-xs text-slate-500 uppercase font-semibold">Price</p>
+                      <p class="font-medium text-slate-900">KSh {drug_assigned.price}</p>
                     </div>
                   </div>
 
@@ -541,7 +541,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
           :if={!@drug_allocation.has_been_assigned}
           navigate={"/pharmacist/drug_allocations/#{@drug_allocation.id}/confirm"}
         >
-          <.button class="bg-brand-primary px-4 py-2.5 shadow-sm hover:bg-[#2d2f7d]">
+          <.button class="bg-brand-primary px-4 py-2.5 hover:bg-[#2d2f7d]">
             <div class="flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -564,8 +564,8 @@ defmodule MedcampWeb.DrugAllocationComponents do
       </div>
       <div class="space-y-4">
         <%= for item <- @complete_drugs_info do %>
-          <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50 px-5 py-5 sm:px-6">
+          <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div class="border-b border-slate-200 bg-slate-50 px-5 py-5 sm:px-6">
               <div class="flex justify-between items-center">
                 <h3 class="text-lg font-bold text-brand-primary">
                   {item.complete_info.brand_name}
@@ -580,25 +580,25 @@ defmodule MedcampWeb.DrugAllocationComponents do
             <div class="px-5 py-5 sm:p-6">
               <dl class="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">Quantity</dt>
-                  <dd class="mt-1 text-sm text-gray-900">
+                  <dt class="text-sm font-medium text-slate-500">Quantity</dt>
+                  <dd class="mt-1 text-sm text-slate-900">
                     {item.complete_info.quantity} {item.complete_info.unit_of_measurement}
                   </dd>
                 </div>
 
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">Price</dt>
-                  <dd class="mt-1 text-sm text-gray-900">KSh {item.complete_info.price}</dd>
+                  <dt class="text-sm font-medium text-slate-500">Price</dt>
+                  <dd class="mt-1 text-sm text-slate-900">KSh {item.complete_info.price}</dd>
                 </div>
 
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">Frequency</dt>
-                  <dd class="mt-1 text-sm text-gray-900">{item.complete_info.frequency}</dd>
+                  <dt class="text-sm font-medium text-slate-500">Frequency</dt>
+                  <dd class="mt-1 text-sm text-slate-900">{item.complete_info.frequency}</dd>
                 </div>
 
                 <div>
-                  <dt class="text-sm font-medium text-gray-500">Duration</dt>
-                  <dd class="mt-1 text-sm text-gray-900">
+                  <dt class="text-sm font-medium text-slate-500">Duration</dt>
+                  <dd class="mt-1 text-sm text-slate-900">
                     {item.complete_info.duration_in_days} days
                   </dd>
                 </div>
@@ -606,8 +606,8 @@ defmodule MedcampWeb.DrugAllocationComponents do
 
               <%= if item.complete_info.prescription_note do %>
                 <div class="mt-4">
-                  <h4 class="text-sm font-medium text-gray-500">Doctor Prescription Note</h4>
-                  <p class="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                  <h4 class="text-sm font-medium text-slate-500">Doctor Prescription Note</h4>
+                  <p class="mt-1 text-sm text-slate-900 bg-slate-50 p-2 rounded">
                     {item.complete_info.prescription_note}
                   </p>
                 </div>
@@ -615,16 +615,16 @@ defmodule MedcampWeb.DrugAllocationComponents do
 
               <%= if item.complete_info.pharmacist_note do %>
                 <div class="mt-4">
-                  <h4 class="text-sm font-medium text-gray-500">Pharmacist Note</h4>
-                  <p class="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                  <h4 class="text-sm font-medium text-slate-500">Pharmacist Note</h4>
+                  <p class="mt-1 text-sm text-slate-900 bg-slate-50 p-2 rounded">
                     {item.complete_info.pharmacist_note}
                   </p>
                 </div>
               <% end %>
 
-              <div class="border-t border-gray-200 mt-4 pt-4">
+              <div class="border-t border-slate-200 mt-4 pt-4">
                 <div class="flex justify-between items-center">
-                  <div class="text-sm text-gray-500">
+                  <div class="text-sm text-slate-500">
                     <span>Dispensed by {item.complete_info.pharmacist_name}</span>
                     <span class="block text-xs">
                       {Calendar.strftime(item.complete_info.inserted_at, "%d %b %Y, %H:%M")}
@@ -656,7 +656,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
                     </.link>
                     <button
                       phx-click="undo_drug_given"
-                      data-confirm="Are you sure you want to undo this drug given?"
+                      data-confirm-message="Are you sure you want to undo this drug given?"
                       phx-value-id={item.drug_given.id}
                       class="inline-flex items-center px-3 py-2 border border-red-300 text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     >
@@ -686,67 +686,67 @@ defmodule MedcampWeb.DrugAllocationComponents do
                 Batch allocations
               </h4>
               <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                  <thead class="bg-gray-100">
+                <table class="min-w-full divide-y divide-slate-200">
+                  <thead class="bg-slate-100">
                     <tr>
                       <th
                         scope="col"
-                        class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                       >
                         Batch
                       </th>
                       <th
                         scope="col"
-                        class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                       >
                         GTIN
                       </th>
                       <th
                         scope="col"
-                        class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                       >
                         Expiry Date
                       </th>
                       <th
                         scope="col"
-                        class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                       >
                         Quantity
                       </th>
                       <th
                         scope="col"
-                        class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                       >
                         Unit Price
                       </th>
                       <th
                         scope="col"
-                        class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                       >
                         Subtotal
                       </th>
                       <th
                         scope="col"
-                        class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                       >
                         Status
                       </th>
                       <th
                         scope="col"
-                        class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                       >
                         Action
                       </th>
                     </tr>
                   </thead>
-                  <tbody class="bg-white divide-y divide-gray-200">
+                  <tbody class="bg-white divide-y divide-slate-200">
                     <%= for allocation <- item.drug_given.batch_allocations do %>
                       <% batch = Medcamp.Batches.get_batch!(allocation.batch_id) %>
                       <% is_expired = check_if_expired(batch.expiry) %>
                       <% days_to_expiry = calculate_days_to_expiry(batch.expiry) %>
 
                       <tr class={if is_expired, do: "bg-red-50", else: ""}>
-                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-900">
+                        <td class="px-3 py-2 whitespace-nowrap text-xs text-slate-900">
                           <div class="flex items-center">
                             <span class="font-medium">Batch #{batch.batch}</span>
                             <%= if is_expired do %>
@@ -761,16 +761,16 @@ defmodule MedcampWeb.DrugAllocationComponents do
                             <% end %>
                           </div>
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-600 font-mono">
+                        <td class="px-3 py-2 whitespace-nowrap text-xs text-slate-600 font-mono">
                           {batch.gtin || (batch.inventory_received && batch.inventory_received.gtin) ||
                             "—"}
                         </td>
                         <td class="px-3 py-2 whitespace-nowrap text-xs">
-                          <div class={"font-medium " <> if(is_expired, do: "text-red-600", else: if(days_to_expiry && days_to_expiry <= 30, do: "text-yellow-600", else: "text-gray-900"))}>
+                          <div class={"font-medium " <> if(is_expired, do: "text-red-600", else: if(days_to_expiry && days_to_expiry <= 30, do: "text-yellow-600", else: "text-slate-900"))}>
                             {batch.expiry}
                           </div>
                           <%= if days_to_expiry do %>
-                            <div class="text-gray-500">
+                            <div class="text-slate-500">
                               <%= cond do %>
                                 <% days_to_expiry < 0 -> %>
                                   Expired {abs(days_to_expiry)} days ago
@@ -784,15 +784,15 @@ defmodule MedcampWeb.DrugAllocationComponents do
                             </div>
                           <% end %>
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-900 font-medium">
+                        <td class="px-3 py-2 whitespace-nowrap text-xs text-slate-900 font-medium">
                           {allocation.quantity}
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-900">
+                        <td class="px-3 py-2 whitespace-nowrap text-xs text-slate-900">
                           KSh {Number.Delimit.number_to_delimited(allocation.unit_price,
                             delimiter: ","
                           )}
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-900 font-medium">
+                        <td class="px-3 py-2 whitespace-nowrap text-xs text-slate-900 font-medium">
                           KSh {Number.Delimit.number_to_delimited(
                             allocation.quantity * allocation.unit_price,
                             delimiter: ","
@@ -825,7 +825,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
                         </td>
                         <td class="px-3 py-2 whitespace-nowrap text-xs">
                           <%= if allocation.is_verified do %>
-                            <span class="text-gray-400">Verified</span>
+                            <span class="text-slate-400">Verified</span>
                           <% else %>
                           <% end %>
                         </td>
@@ -846,7 +846,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
     ~H"""
     <div class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true">
+        <div class="fixed inset-0 transition-opacity bg-slate-500 bg-opacity-75" aria-hidden="true">
         </div>
 
         <span
@@ -858,20 +858,20 @@ defmodule MedcampWeb.DrugAllocationComponents do
         </span>
 
         <div
-          class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
+          class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
           phx-click-away="close_scan_modal"
           phx-window-keydown="close_scan_modal"
           phx-key="escape"
         >
           <div>
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-medium leading-6 text-gray-900">
+              <h3 class="text-lg font-medium leading-6 text-slate-900">
                 Verify Batch Allocation
               </h3>
               <button
                 type="button"
                 phx-click="close_scan_modal"
-                class="text-gray-400 hover:text-gray-500"
+                class="text-slate-400 hover:text-slate-500"
               >
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
@@ -884,26 +884,26 @@ defmodule MedcampWeb.DrugAllocationComponents do
               </button>
             </div>
 
-            <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+            <div class="mb-4 p-4 bg-slate-50 rounded-lg">
               <div class="text-sm space-y-2">
                 <div class="flex justify-between">
-                  <span class="text-gray-600">Drug:</span>
-                  <span class="font-medium text-gray-900">{@scan_data.drug_name}</span>
+                  <span class="text-slate-600">Drug:</span>
+                  <span class="font-medium text-slate-900">{@scan_data.drug_name}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-gray-600">Batch Number:</span>
-                  <span class="font-medium text-gray-900">{@scan_data.batch_number}</span>
+                  <span class="text-slate-600">Batch Number:</span>
+                  <span class="font-medium text-slate-900">{@scan_data.batch_number}</span>
                 </div>
                 <%= if @scan_data.allocation do %>
                   <div class="flex justify-between">
-                    <span class="text-gray-600">Quantity:</span>
-                    <span class="font-medium text-gray-900">
+                    <span class="text-slate-600">Quantity:</span>
+                    <span class="font-medium text-slate-900">
                       {@scan_data.allocation.quantity}
                     </span>
                   </div>
                   <div class="flex justify-between">
-                    <span class="text-gray-600">Unit Price:</span>
-                    <span class="font-medium text-gray-900">
+                    <span class="text-slate-600">Unit Price:</span>
+                    <span class="font-medium text-slate-900">
                       KSh {Number.Delimit.number_to_delimited(@scan_data.allocation.unit_price,
                         delimiter: ","
                       )}
@@ -916,7 +916,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
             <.form for={@scan_form} phx-submit="verify_allocation">
               <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <label class="block text-sm font-medium text-slate-700 mb-2">
                     Scan QR Code or Enter Batch Number
                   </label>
                   <input
@@ -926,7 +926,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
                     autocomplete="off"
                     autofocus
                     phx-debounce="300"
-                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
+                    class="block w-full rounded-md border-slate-300 focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
                   />
                 </div>
 
@@ -952,13 +952,13 @@ defmodule MedcampWeb.DrugAllocationComponents do
                 <button
                   type="button"
                   phx-click="close_scan_modal"
-                  class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                  class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 ring-1 ring-inset ring-slate-300 hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  class="rounded-md bg-brand-accent px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-accent-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+                  class="rounded-md bg-brand-accent px-3 py-2 text-sm font-semibold text-white hover:bg-brand-accent-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
                 >
                   Verify Batch
                 </button>

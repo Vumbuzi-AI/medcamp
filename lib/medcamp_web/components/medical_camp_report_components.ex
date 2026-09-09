@@ -19,11 +19,11 @@ defmodule MedcampWeb.MedicalCampReportComponents do
     </style>
 
     <div class="space-y-0" id="medical-camp-report-sheet">
-      <div class="mx-auto max-w-4xl space-y-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm print:border-0 print:shadow-none">
-        <div class="flex items-center justify-between border-b border-gray-200 bg-white px-8 py-4">
+      <div class="mx-auto max-w-4xl space-y-0 overflow-hidden rounded-xl border border-slate-200 bg-white print:border-0 print:shadow-none">
+        <div class="flex items-center justify-between border-b border-slate-200 bg-white px-8 py-4">
           <.brand_mark subtitle={@report.cohort_name} />
-          <div class="text-right text-xs text-gray-400">
-            <p class="text-sm font-semibold text-gray-700">Medical Camp Claim Statement</p>
+          <div class="text-right text-xs text-slate-400">
+            <p class="text-sm font-semibold text-slate-700">Medical Camp Claim Statement</p>
             <p>Generated: {format_generated_at(@report.generated_at)}</p>
           </div>
         </div>
@@ -59,8 +59,8 @@ defmodule MedcampWeb.MedicalCampReportComponents do
 
         <%= if Enum.empty?(@report.claim_data) do %>
           <div class="flex flex-col items-center justify-center py-16 text-center">
-            <Heroicons.icon name="document-text" type="outline" class="h-10 w-10 text-gray-300" />
-            <p class="mt-3 text-sm text-gray-500">No records found for this medical camp claim.</p>
+            <Heroicons.icon name="document-text" type="outline" class="h-10 w-10 text-slate-300" />
+            <p class="mt-3 text-sm text-slate-500">No records found for this medical camp claim.</p>
           </div>
         <% else %>
           <%= for {entry, idx} <- Enum.with_index(@report.claim_data) do %>
@@ -74,8 +74,10 @@ defmodule MedcampWeb.MedicalCampReportComponents do
                     {idx + 1}
                   </div>
                   <div>
-                    <p class="text-base font-semibold text-gray-900">{patient_name(entry.patient)}</p>
-                    <div class="mt-0.5 flex items-center gap-3 text-xs text-gray-500">
+                    <p class="text-base font-semibold text-slate-900">
+                      {patient_name(entry.patient)}
+                    </p>
+                    <div class="mt-0.5 flex items-center gap-3 text-xs text-slate-500">
                       <%= if entry.patient.gsrn do %>
                         <span class="font-mono">GSRN: {entry.patient.gsrn}</span>
                       <% end %>
@@ -83,11 +85,11 @@ defmodule MedcampWeb.MedicalCampReportComponents do
                   </div>
                 </div>
                 <div class="text-right">
-                  <p class="text-xs uppercase tracking-wide text-gray-400">Patient Total</p>
+                  <p class="text-xs uppercase tracking-wide text-slate-400">Patient Total</p>
                   <p class="text-xl font-bold tabular-nums text-emerald-700">
                     KSh {format_currency(entry.total_amount)}
                   </p>
-                  <p class="mt-0.5 text-xs text-gray-400">
+                  <p class="mt-0.5 text-xs text-slate-400">
                     {length(entry.records)} item{if length(entry.records) != 1, do: "s", else: ""}
                   </p>
                 </div>
@@ -96,24 +98,24 @@ defmodule MedcampWeb.MedicalCampReportComponents do
               <% summary_rows = patient_summary_rows(entry.records) %>
 
               <%= if Enum.empty?(summary_rows) do %>
-                <p class="text-sm italic text-gray-400">No records found.</p>
+                <p class="text-sm italic text-slate-400">No records found.</p>
               <% else %>
-                <div class="overflow-hidden rounded-lg border border-gray-200">
-                  <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-100">
+                <div class="overflow-hidden rounded-lg border border-slate-200">
+                  <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="bg-slate-100">
                       <tr>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                           Category
                         </th>
-                        <th class="w-24 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        <th class="w-24 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">
                           Items
                         </th>
-                        <th class="w-36 px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        <th class="w-36 px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
                           Amount (KSh)
                         </th>
                       </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 bg-white">
+                    <tbody class="divide-y divide-slate-100 bg-white">
                       <%= for row <- summary_rows do %>
                         <tr>
                           <td class="px-4 py-3">
@@ -121,20 +123,20 @@ defmodule MedcampWeb.MedicalCampReportComponents do
                               {row.label}
                             </span>
                           </td>
-                          <td class="px-4 py-3 text-center tabular-nums text-gray-500">
+                          <td class="px-4 py-3 text-center tabular-nums text-slate-500">
                             {row.count} item{if row.count != 1, do: "s", else: ""}
                           </td>
-                          <td class="px-4 py-3 text-right font-semibold tabular-nums text-gray-900">
+                          <td class="px-4 py-3 text-right font-semibold tabular-nums text-slate-900">
                             {format_currency(row.total)}
                           </td>
                         </tr>
                       <% end %>
                     </tbody>
-                    <tfoot class="border-t border-gray-200 bg-gray-50">
+                    <tfoot class="border-t border-slate-200 bg-slate-50">
                       <tr>
                         <td
                           colspan="2"
-                          class="px-4 py-2.5 text-right text-sm font-semibold text-gray-700"
+                          class="px-4 py-2.5 text-right text-sm font-semibold text-slate-700"
                         >
                           Patient Subtotal
                         </td>
@@ -149,7 +151,7 @@ defmodule MedcampWeb.MedicalCampReportComponents do
             </div>
 
             <%= if idx < length(@report.claim_data) - 1 do %>
-              <div class="mx-8 border-t border-dashed border-gray-300" />
+              <div class="mx-8 border-t border-dashed border-slate-300" />
             <% end %>
           <% end %>
 

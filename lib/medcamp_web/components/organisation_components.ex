@@ -43,13 +43,13 @@ defmodule MedcampWeb.OrganisationComponents do
       <h1 class="text-2xl font-bold text-brand-primary tracking-wide mb-2 uppercase">
         {Organisations.display_name(@organisation)}
       </h1>
-      <p :if={@organisation && @organisation.location} class="text-gray-800 text-base font-medium">
+      <p :if={@organisation && @organisation.location} class="text-slate-800 text-base font-medium">
         {@organisation.location}
       </p>
-      <p :if={@organisation && @organisation.phone_number} class="mt-1 text-base text-gray-700">
+      <p :if={@organisation && @organisation.phone_number} class="mt-1 text-base text-slate-700">
         Tel: {@organisation.phone_number}
       </p>
-      <p :if={@organisation && @organisation.email} class="mt-1 text-base text-gray-700">
+      <p :if={@organisation && @organisation.email} class="mt-1 text-base text-slate-700">
         {@organisation.email}
       </p>
     </div>
@@ -74,8 +74,8 @@ defmodule MedcampWeb.OrganisationComponents do
         class="h-12 w-auto object-contain"
       />
       <div>
-        <p class="font-medium text-gray-900">{Organisations.display_name(@organisation)}</p>
-        <p :if={@subtitle} class="text-xs uppercase tracking-wide text-gray-500">{@subtitle}</p>
+        <p class="font-medium text-slate-900">{Organisations.display_name(@organisation)}</p>
+        <p :if={@subtitle} class="text-xs uppercase tracking-wide text-slate-500">{@subtitle}</p>
       </div>
     </div>
     """

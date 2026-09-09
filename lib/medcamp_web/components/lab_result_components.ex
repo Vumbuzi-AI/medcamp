@@ -39,10 +39,10 @@ defmodule MedcampWeb.LabResultComponents do
       </div>
 
       <%= if Enum.empty?(@lab_results) do %>
-        <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+        <div class="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="mx-auto h-12 w-12 text-gray-400"
+            class="mx-auto h-12 w-12 text-slate-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -54,8 +54,8 @@ defmodule MedcampWeb.LabResultComponents do
               d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
             />
           </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No lab results</h3>
-          <p class="mt-1 text-sm text-gray-500">
+          <h3 class="mt-2 text-sm font-medium text-slate-900">No lab results</h3>
+          <p class="mt-1 text-sm text-slate-500">
             No lab results have been added for this patient yet.
           </p>
         </div>
@@ -83,10 +83,10 @@ defmodule MedcampWeb.LabResultComponents do
       </div>
 
       <%= if Enum.empty?(@lab_results) do %>
-        <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+        <div class="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="mx-auto h-12 w-12 text-gray-400"
+            class="mx-auto h-12 w-12 text-slate-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -98,8 +98,8 @@ defmodule MedcampWeb.LabResultComponents do
               d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
             />
           </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No lab results</h3>
-          <p class="mt-1 text-sm text-gray-500">
+          <h3 class="mt-2 text-sm font-medium text-slate-900">No lab results</h3>
+          <p class="mt-1 text-sm text-slate-500">
             No lab results have been added for this patient yet.
           </p>
         </div>
@@ -126,17 +126,17 @@ defmodule MedcampWeb.LabResultComponents do
     assigns = assign(assigns, :test_entries, test_entries)
 
     ~H"""
-    <div class="border border-gray-200 rounded-lg overflow-hidden mb-4">
-      <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+    <div class="border border-slate-200 rounded-lg overflow-hidden mb-4">
+      <div class="px-4 py-3 bg-slate-50 border-b border-slate-200">
         <div class="flex justify-between items-start">
           <div>
-            <h4 class="font-medium text-gray-900">
+            <h4 class="font-medium text-slate-900">
               Lab Result
               <span class={"ml-2 px-2 py-1 #{urgency_color_class(@lab_result.urgency)} text-xs rounded-full"}>
                 {@lab_result.urgency}
               </span>
             </h4>
-            <div class="flex items-center mt-1 text-sm text-gray-500">
+            <div class="flex items-center mt-1 text-sm text-slate-500">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-4 w-4 mr-1"
@@ -180,11 +180,11 @@ defmodule MedcampWeb.LabResultComponents do
                     stroke-width="2"
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
-                </svg>fix t
+                </svg>
                 Pending
               </span>
             <% end %>
-            <span class="text-sm font-semibold text-gray-700">
+            <span class="text-sm font-semibold text-slate-700">
               {count_completed_tests(@test_entries)} / {length(@lab_result.tests)}
             </span>
           </div>
@@ -244,10 +244,15 @@ defmodule MedcampWeb.LabResultComponents do
 
             <div class="mt-3 space-y-3">
               <%= for report <- String.split(@lab_result.lab_report, ",") do %>
-                <div class="pdf-container h-[70vh] overflow-y-auto bg-gray-100 rounded border border-gray-200">
-                  <object data={report} width="100%" height="100%" class="shadow-sm">
+                <div class="pdf-container h-[70vh] overflow-y-auto bg-slate-100 rounded border border-slate-200">
+                  <object
+                    data={report}
+                    width="100%"
+                    height="100%"
+                    class="rounded-xl border border-slate-200"
+                  >
                     <div class="flex flex-col items-center justify-center h-full p-6 text-center">
-                      <p class="text-gray-700 mb-3">
+                      <p class="text-slate-700 mb-3">
                         Unable to display PDF in this browser.
                       </p>
 
@@ -273,9 +278,9 @@ defmodule MedcampWeb.LabResultComponents do
             <div class="space-y-3">
               <%= for entry <- @test_entries do %>
                 <%= if entry.status in ["completed", "verified"] do %>
-                  <div class="border border-gray-200 rounded-lg overflow-hidden">
+                  <div class="border border-slate-200 rounded-lg overflow-hidden">
                     <!-- Test Entry Header -->
-                    <div class="bg-gray-50 px-3 py-2 border-b border-gray-200 flex justify-between items-center">
+                    <div class="bg-slate-50 px-3 py-2 border-b border-slate-200 flex justify-between items-center">
                       <div class="flex items-center gap-2">
                         <div class="p-1 rounded">
                           <%= if entry.status == "verified" do %>
@@ -309,11 +314,11 @@ defmodule MedcampWeb.LabResultComponents do
                           <% end %>
                         </div>
                         <div>
-                          <h6 class="font-semibold text-sm text-gray-900">
+                          <h6 class="font-semibold text-sm text-slate-900">
                             {entry.template.name}
                           </h6>
                           <%= if entry.template.short_name do %>
-                            <span class="text-xs text-gray-500">({entry.template.short_name})</span>
+                            <span class="text-xs text-slate-500">({entry.template.short_name})</span>
                           <% end %>
                         </div>
                       </div>
@@ -323,7 +328,7 @@ defmodule MedcampWeb.LabResultComponents do
                           case entry.status do
                             "verified" -> "bg-blue-100 text-blue-800"
                             "completed" -> "bg-green-100 text-green-800"
-                            _ -> "bg-gray-100 text-gray-800"
+                            _ -> "bg-slate-100 text-slate-800"
                           end
                         ]}>
                           {String.capitalize(entry.status)}
@@ -358,8 +363,8 @@ defmodule MedcampWeb.LabResultComponents do
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                           <%= for {field_name, result_data} <- entry.results do %>
                             <% field_def = find_field_def(entry.template, field_name) %>
-                            <div class="bg-gray-50 rounded p-2 border border-gray-200">
-                              <p class="text-xs text-gray-500 mb-1">
+                            <div class="bg-slate-50 rounded p-2 border border-slate-200">
+                              <p class="text-xs text-slate-500 mb-1">
                                 {field_def["label"] || field_name}
                               </p>
                               <div class="flex items-baseline justify-between">
@@ -368,7 +373,7 @@ defmodule MedcampWeb.LabResultComponents do
                                   case result_data["flag"] do
                                     "low" -> "text-blue-600"
                                     "high" -> "text-red-600"
-                                    _ -> "text-gray-900"
+                                    _ -> "text-slate-900"
                                   end
                                 ]}>
                                   {result_data["value"]}
@@ -387,7 +392,7 @@ defmodule MedcampWeb.LabResultComponents do
                                 <% end %>
                               </div>
                               <%= if field_def["ref_range_text"] do %>
-                                <p class="text-xs text-gray-500 mt-1">
+                                <p class="text-xs text-slate-500 mt-1">
                                   Range: {field_def["ref_range_text"]}
                                 </p>
                               <% end %>
@@ -397,14 +402,14 @@ defmodule MedcampWeb.LabResultComponents do
                         
     <!-- Remarks -->
                         <%= if entry.remarks && entry.remarks != "" do %>
-                          <div class="mt-3 pt-3 border-t border-gray-200">
-                            <p class="text-xs font-semibold text-gray-700 mb-1">Remarks</p>
-                            <p class="text-sm text-gray-600">{entry.remarks}</p>
+                          <div class="mt-3 pt-3 border-t border-slate-200">
+                            <p class="text-xs font-semibold text-slate-700 mb-1">Remarks</p>
+                            <p class="text-sm text-slate-600">{entry.remarks}</p>
                           </div>
                         <% end %>
                         
     <!-- Performed/Verified Info -->
-                        <div class="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
+                        <div class="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
                           <%= if entry.performed_by do %>
                             <span>Performed by: {entry.performed_by.name}</span>
                           <% end %>
@@ -517,13 +522,13 @@ defmodule MedcampWeb.LabResultComponents do
 
       <%= if interpretation_present?(@payload) do %>
         <div class="space-y-4">
-          <p :if={@lab_result.interpretation_generated_at} class="text-xs text-gray-500">
+          <p :if={@lab_result.interpretation_generated_at} class="text-xs text-slate-500">
             Generated: {format_datetime(@lab_result.interpretation_generated_at)}
           </p>
           
     <!-- Patient & Clinical Context -->
-          <div class="bg-white rounded p-3 border border-gray-200">
-            <h6 class="text-xs font-semibold text-gray-700 uppercase mb-2">Clinical Context</h6>
+          <div class="bg-white rounded p-3 border border-slate-200">
+            <h6 class="text-xs font-semibold text-slate-700 uppercase mb-2">Clinical Context</h6>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2">
               <.context_value :if={@patient} label="Age" value={patient_age(@patient)} />
               <.context_value
@@ -541,28 +546,28 @@ defmodule MedcampWeb.LabResultComponents do
             </div>
             <div
               :if={present_value?(Map.get(@note, "symptoms"))}
-              class="mt-2 pt-2 border-t border-gray-100"
+              class="mt-2 pt-2 border-t border-slate-100"
             >
-              <p class="text-xs text-gray-500">Symptoms</p>
-              <p class="text-sm text-gray-700 whitespace-pre-line">{Map.get(@note, "symptoms")}</p>
+              <p class="text-xs text-slate-500">Symptoms</p>
+              <p class="text-sm text-slate-700 whitespace-pre-line">{Map.get(@note, "symptoms")}</p>
             </div>
           </div>
 
           <%= if Enum.any?(Map.get(@payload, "abnormal_findings", [])) do %>
             <div>
-              <h6 class="text-xs font-semibold text-gray-700 uppercase mb-2">Abnormal Findings</h6>
+              <h6 class="text-xs font-semibold text-slate-700 uppercase mb-2">Abnormal Findings</h6>
               <div class="space-y-2">
                 <%= for finding <- Map.get(@payload, "abnormal_findings", []) do %>
-                  <div class="bg-white rounded p-3 border border-gray-200">
+                  <div class="bg-white rounded p-3 border border-slate-200">
                     <div class="flex items-center justify-between">
-                      <span class="font-medium text-sm text-gray-900">{finding["test"]}</span>
+                      <span class="font-medium text-sm text-slate-900">{finding["test"]}</span>
                       <span class={[
                         "text-xs font-bold px-1.5 py-0.5 rounded",
                         case finding["flag"] do
                           "low" -> "bg-blue-100 text-blue-700"
                           "high" -> "bg-red-100 text-red-700"
                           "critical" -> "bg-red-100 text-red-700"
-                          _ -> "bg-gray-100 text-gray-700"
+                          _ -> "bg-slate-100 text-slate-700"
                         end
                       ]}>
                         {finding["value"]} {finding["unit"]}
@@ -571,12 +576,12 @@ defmodule MedcampWeb.LabResultComponents do
                         <% end %>
                       </span>
                     </div>
-                    <p :if={finding["reference_range"]} class="text-xs text-gray-500 mt-1">
+                    <p :if={finding["reference_range"]} class="text-xs text-slate-500 mt-1">
                       Range: {finding["reference_range"]}
                     </p>
                     <p
                       :if={finding["doctor_note"] && finding["doctor_note"] != ""}
-                      class="text-xs text-gray-600 mt-1"
+                      class="text-xs text-slate-600 mt-1"
                     >
                       {finding["doctor_note"]}
                     </p>
@@ -588,13 +593,13 @@ defmodule MedcampWeb.LabResultComponents do
 
           <%= if Enum.any?(Map.get(@payload, "clinical_interpretation", [])) do %>
             <div>
-              <h6 class="text-xs font-semibold text-gray-700 uppercase mb-2">
+              <h6 class="text-xs font-semibold text-slate-700 uppercase mb-2">
                 Clinical Interpretation
               </h6>
               <ul class="list-disc list-inside space-y-1">
                 <li
                   :for={line <- Map.get(@payload, "clinical_interpretation", [])}
-                  class="text-sm text-gray-700"
+                  class="text-sm text-slate-700"
                 >
                   {line}
                 </li>
@@ -604,13 +609,13 @@ defmodule MedcampWeb.LabResultComponents do
 
           <%= if Enum.any?(Map.get(@payload, "recommended_attention", [])) do %>
             <div>
-              <h6 class="text-xs font-semibold text-gray-700 uppercase mb-2">
+              <h6 class="text-xs font-semibold text-slate-700 uppercase mb-2">
                 Recommended Attention
               </h6>
               <ul class="list-disc list-inside space-y-1">
                 <li
                   :for={line <- Map.get(@payload, "recommended_attention", [])}
-                  class="text-sm text-gray-700"
+                  class="text-sm text-slate-700"
                 >
                   {line}
                 </li>
@@ -620,13 +625,13 @@ defmodule MedcampWeb.LabResultComponents do
 
           <p
             :if={Map.get(@payload, "disclaimer")}
-            class="text-xs italic text-gray-500 pt-2 border-t border-brand-100"
+            class="text-xs italic text-slate-500 pt-2 border-t border-brand-100"
           >
             {@payload["disclaimer"]}
           </p>
         </div>
       <% else %>
-        <p class="text-sm text-gray-500">
+        <p class="text-sm text-slate-500">
           <%= cond do %>
             <% @regenerate and @can_generate_ai -> %>
               No analysis generated yet. Click "Generate AI Lab Data" to generate one.
@@ -647,8 +652,8 @@ defmodule MedcampWeb.LabResultComponents do
   defp context_value(assigns) do
     ~H"""
     <div :if={present_value?(@value)}>
-      <p class="text-xs text-gray-500">{@label}</p>
-      <p class="text-sm font-medium text-gray-900">{@value}</p>
+      <p class="text-xs text-slate-500">{@label}</p>
+      <p class="text-sm font-medium text-slate-900">{@value}</p>
     </div>
     """
   end
@@ -719,7 +724,7 @@ defmodule MedcampWeb.LabResultComponents do
       <h2 class="text-lg font-semibold text-brand-primary">Patient Overview</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
-          <p class="text-sm text-gray-500 mb-1">Name</p>
+          <p class="text-sm text-slate-500 mb-1">Name</p>
           <p class="font-medium">
             {[
               @patient.first_name,
@@ -731,27 +736,27 @@ defmodule MedcampWeb.LabResultComponents do
           </p>
         </div>
         <div>
-          <p class="text-sm text-gray-500 mb-1">Phone Number</p>
+          <p class="text-sm text-slate-500 mb-1">Phone Number</p>
           <p class="font-medium">{@patient.phone_number}</p>
         </div>
 
         <div>
-          <p class="text-sm text-gray-500 mb-1">Date of Birth</p>
+          <p class="text-sm text-slate-500 mb-1">Date of Birth</p>
           <p class="font-medium">{@patient.date_of_birth}</p>
         </div>
 
         <div>
-          <p class="text-sm text-gray-500 mb-1">Gender</p>
+          <p class="text-sm text-slate-500 mb-1">Gender</p>
           <p class="font-medium">{@patient.gender}</p>
         </div>
 
         <div>
-          <p class="text-sm text-gray-500 mb-1">National ID</p>
+          <p class="text-sm text-slate-500 mb-1">National ID</p>
           <p class="font-medium">{@patient.national_id}</p>
         </div>
 
         <div>
-          <p class="text-sm text-gray-500 mb-1">Email</p>
+          <p class="text-sm text-slate-500 mb-1">Email</p>
           <p class="font-medium">{@patient.email}</p>
         </div>
       </div>
@@ -761,9 +766,9 @@ defmodule MedcampWeb.LabResultComponents do
 
   def incomplete_lab_result_card(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mt-4">
+    <div class="bg-white rounded-lg border border-slate-100 p-4 mt-4">
       <.patient_overview_card patient={@patient} />
-      <div class="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
+      <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -812,7 +817,7 @@ defmodule MedcampWeb.LabResultComponents do
           <h3 class="text-sm font-semibold text-brand-primary mb-2">Tests Requested</h3>
           <div class="flex gap-2 items-center flex-wrap">
             <%= for test <- @lab_result.tests do %>
-              <div class="border border-gray-200 flex gap-2 rounded-lg  p-4">
+              <div class="border border-slate-200 flex gap-2 rounded-lg  p-4">
                 <span class="px-2 py-1 text-xs items-center justify-center rounded-full bg-brand-50 text-brand-primary">
                   {test.name}
                 </span>
@@ -842,9 +847,9 @@ defmodule MedcampWeb.LabResultComponents do
           </div>
         </div>
 
-        <div class="bg-gray-50 rounded p-3 border border-gray-100">
-          <p class="text-xs text-gray-500 uppercase font-semibold">Urgency</p>
-          <p class="font-medium text-gray-900">
+        <div class="bg-slate-50 rounded p-3 border border-slate-100">
+          <p class="text-xs text-slate-500 uppercase font-semibold">Urgency</p>
+          <p class="font-medium text-slate-900">
             <%= case @lab_result.urgency do %>
               <% "Urgent" -> %>
                 <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800 font-medium">
@@ -870,16 +875,16 @@ defmodule MedcampWeb.LabResultComponents do
           </p>
         </div>
 
-        <div class="bg-gray-50 rounded p-3 border border-gray-100">
-          <p class="text-xs text-gray-500 uppercase font-semibold">Description</p>
-          <p class="text-gray-900 whitespace-pre-line">{@lab_result.description}</p>
+        <div class="bg-slate-50 rounded p-3 border border-slate-100">
+          <p class="text-xs text-slate-500 uppercase font-semibold">Description</p>
+          <p class="text-slate-900 whitespace-pre-line">{@lab_result.description}</p>
         </div>
 
-        <div class="bg-gray-50 rounded p-3 border border-gray-100">
-          <p class="text-xs text-gray-500 uppercase font-semibold">
+        <div class="bg-slate-50 rounded p-3 border border-slate-100">
+          <p class="text-xs text-slate-500 uppercase font-semibold">
             Date and Time Test Was Requested
           </p>
-          <p class="text-gray-900 whitespace-pre-line">{format_datetime(@lab_result.inserted_at)}</p>
+          <p class="text-slate-900 whitespace-pre-line">{format_datetime(@lab_result.inserted_at)}</p>
         </div>
       </div>
     </div>
@@ -900,8 +905,8 @@ defmodule MedcampWeb.LabResultComponents do
       |> assign(:can_generate_ai, has_ai_source_data?(assigns.lab_result, test_entries))
 
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mt-4">
-      <div class="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
+    <div class="bg-white rounded-lg border border-slate-100 p-4 mt-4">
+      <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -979,9 +984,9 @@ defmodule MedcampWeb.LabResultComponents do
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div class="bg-gray-50 rounded p-3 border border-gray-100">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Urgency</p>
-            <p class="font-medium text-gray-900">
+          <div class="bg-slate-50 rounded p-3 border border-slate-100">
+            <p class="text-xs text-slate-500 uppercase font-semibold">Urgency</p>
+            <p class="font-medium text-slate-900">
               <%= case @form[:urgency].value do %>
                 <% "Urgent" -> %>
                   <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800 font-medium">
@@ -1007,17 +1012,17 @@ defmodule MedcampWeb.LabResultComponents do
             </p>
           </div>
 
-          <div class="bg-gray-50 rounded p-3 border border-gray-100">
-            <p class="text-xs text-gray-500 uppercase font-semibold">
+          <div class="bg-slate-50 rounded p-3 border border-slate-100">
+            <p class="text-xs text-slate-500 uppercase font-semibold">
               Date and Time Test Was Requested
             </p>
-            <p class="text-gray-900 whitespace-pre-line">
+            <p class="text-slate-900 whitespace-pre-line">
               {format_datetime(@lab_result.inserted_at)}
             </p>
           </div>
 
-          <div class="bg-gray-50 rounded p-3 border border-gray-100">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Time test was requested</p>
+          <div class="bg-slate-50 rounded p-3 border border-slate-100">
+            <p class="text-xs text-slate-500 uppercase font-semibold">Time test was requested</p>
             <div class="flex items-center mt-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1033,12 +1038,12 @@ defmodule MedcampWeb.LabResultComponents do
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span class="text-gray-700">{@form[:time].value}</span>
+              <span class="text-slate-700">{@form[:time].value}</span>
             </div>
           </div>
 
-          <div class="bg-gray-50 rounded p-3 border border-gray-100">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Sample Collection Date</p>
+          <div class="bg-slate-50 rounded p-3 border border-slate-100">
+            <p class="text-xs text-slate-500 uppercase font-semibold">Sample Collection Date</p>
             <div class="flex items-center mt-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1054,12 +1059,12 @@ defmodule MedcampWeb.LabResultComponents do
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              <span class="text-gray-700">{@form[:sample_collection_date].value}</span>
+              <span class="text-slate-700">{@form[:sample_collection_date].value}</span>
             </div>
           </div>
 
-          <div class="bg-gray-50 rounded p-3 border border-gray-100">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Date of Test</p>
+          <div class="bg-slate-50 rounded p-3 border border-slate-100">
+            <p class="text-xs text-slate-500 uppercase font-semibold">Date of Test</p>
             <div class="flex items-center mt-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1075,7 +1080,7 @@ defmodule MedcampWeb.LabResultComponents do
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              <span class="text-gray-700">{@form[:date_of_test].value}</span>
+              <span class="text-slate-700">{@form[:date_of_test].value}</span>
             </div>
           </div>
         </div>
@@ -1109,11 +1114,16 @@ defmodule MedcampWeb.LabResultComponents do
 
         <%= if @lab_result.lab_report do %>
           <%= for report <- String.split(@lab_result.lab_report, ",") do %>
-            <div class="pdf-container h-[70vh] overflow-y-auto bg-gray-100">
-              <object data={report} width="100%" height="100%" class="shadow-lg">
+            <div class="pdf-container h-[70vh] overflow-y-auto bg-slate-100">
+              <object
+                data={report}
+                width="100%"
+                height="100%"
+                class="rounded-2xl border border-slate-200"
+              >
                 <div class="flex flex-col items-center justify-center h-full p-6 text-center">
                   <i class="fas fa-file-pdf text-red-500 text-5xl mb-4"></i>
-                  <p class="text-gray-700 mb-3">
+                  <p class="text-slate-700 mb-3">
                     Unable to display PDF. Your browser might not support embedded PDFs.
                   </p>
 
@@ -1131,19 +1141,21 @@ defmodule MedcampWeb.LabResultComponents do
         <% end %>
 
         <div class="space-y-4">
-          <div class="bg-gray-50 rounded p-3 border border-gray-100">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Description</p>
-            <p class="text-gray-900 whitespace-pre-line">{@form[:description].value}</p>
+          <div class="bg-slate-50 rounded p-3 border border-slate-100">
+            <p class="text-xs text-slate-500 uppercase font-semibold">Description</p>
+            <p class="text-slate-900 whitespace-pre-line">{@form[:description].value}</p>
           </div>
 
-          <div class="bg-gray-50 rounded p-3 border border-gray-100">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Test Findings</p>
-            <p class="text-gray-900 whitespace-pre-line">{@form[:test_findings].value}</p>
+          <div class="bg-slate-50 rounded p-3 border border-slate-100">
+            <p class="text-xs text-slate-500 uppercase font-semibold">Test Findings</p>
+            <p class="text-slate-900 whitespace-pre-line">{@form[:test_findings].value}</p>
           </div>
 
-          <div class="bg-gray-50 rounded p-3 border border-gray-100">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Sample Collection Description</p>
-            <p class="text-gray-900 whitespace-pre-line">
+          <div class="bg-slate-50 rounded p-3 border border-slate-100">
+            <p class="text-xs text-slate-500 uppercase font-semibold">
+              Sample Collection Description
+            </p>
+            <p class="text-slate-900 whitespace-pre-line">
               {@form[:sample_collection_description].value}
             </p>
           </div>

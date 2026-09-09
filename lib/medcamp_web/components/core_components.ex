@@ -101,6 +101,11 @@ defmodule MedcampWeb.CoreComponents do
   attr :id, :string, required: true
   attr :show, :boolean, default: false
   attr :on_cancel, JS, default: %JS{}
+
+  attr :max_width, :string,
+    default: "max-w-3xl",
+    doc: "Tailwind max-width class for the dialog card"
+
   slot :inner_block, required: true
 
   def modal(assigns) do
@@ -126,7 +131,7 @@ defmodule MedcampWeb.CoreComponents do
         tabindex="0"
       >
         <div class="flex min-h-full items-center justify-center print:block print:min-h-0">
-          <div class="w-full max-w-3xl p-4 sm:p-6 lg:py-8 print:max-w-none print:p-0">
+          <div class={["w-full p-4 sm:p-6 lg:py-8 print:max-w-none print:p-0", @max_width]}>
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
@@ -155,6 +160,49 @@ defmodule MedcampWeb.CoreComponents do
     """
   end
 
+  @doc ~S"""
+  A small confirmation dialog built on `<.modal>`. Render it with `:if` when
+  your `@confirm` state is set; supply the confirm control (wired to your own
+  event) via the `:confirm` slot.
+
+      <.confirm_dialog
+        :if={@confirm}
+        title={"Deactivate #{@confirm.name}?"}
+        body="Its staff are signed out until it is reactivated."
+        on_cancel={JS.push("cancel-confirm")}
+      >
+        <:confirm>
+          <button phx-click="toggle-active" phx-value-id={@confirm.id} class="...">
+            Deactivate
+          </button>
+        </:confirm>
+      </.confirm_dialog>
+  """
+  attr :id, :string, default: "confirm-dialog"
+  attr :title, :string, required: true
+  attr :body, :string, required: true
+  attr :on_cancel, JS, default: %JS{}
+  slot :confirm, required: true
+
+  def confirm_dialog(assigns) do
+    ~H"""
+    <.modal id={@id} show on_cancel={@on_cancel} max_width="max-w-md">
+      <h3 class="pr-6 text-lg font-bold text-slate-900">{@title}</h3>
+      <p class="mt-2 text-sm leading-relaxed text-slate-600">{@body}</p>
+      <div class="mt-6 flex justify-end gap-3">
+        <button
+          type="button"
+          phx-click={@on_cancel}
+          class="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition-colors duration-150 hover:bg-slate-50"
+        >
+          Cancel
+        </button>
+        {render_slot(@confirm)}
+      </div>
+    </.modal>
+    """
+  end
+
   @doc """
   Renders a page header: an icon in a rounded badge, a title, and an
   optional one-line subtitle, with an optional `:actions` slot on the right
@@ -176,12 +224,12 @@ defmodule MedcampWeb.CoreComponents do
 
   def page_header(assigns) do
     ~H"""
-    <div class="flex items-start justify-between gap-4 border-b border-gray-100 pb-4 mb-4">
+    <div class="flex flex-col gap-3 border-b border-slate-200 pb-4 mb-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
       <div class="flex items-start gap-3">
-        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-100">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-primary">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-brand-primary"
+            class="h-5 w-5"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -190,13 +238,72 @@ defmodule MedcampWeb.CoreComponents do
           </svg>
         </div>
         <div>
-          <h2 class="text-lg font-semibold text-gray-900">{@title}</h2>
-          <p :if={@subtitle} class="text-sm text-gray-500">{@subtitle}</p>
+          <h2 class="text-lg font-semibold text-slate-900">{@title}</h2>
+          <p :if={@subtitle} class="mt-0.5 text-sm text-slate-500">{@subtitle}</p>
         </div>
       </div>
-      <div :if={@actions != []} class="flex items-center gap-2">
+      <div :if={@actions != []} class="flex flex-wrap items-center gap-2 sm:shrink-0">
         {render_slot(@actions)}
       </div>
+    </div>
+    """
+  end
+
+  @doc """
+  The canonical directory / list-page shell: a white header card holding the
+  `page_header/1` (icon badge, title, count subtitle, optional `:actions`
+  button) and, directly below it, the search + filter toolbar. The table or
+  `blank_state/1` is passed as the default slot and renders *below* the card.
+
+  Every index page uses this so the card radius, border, padding and the
+  header-to-toolbar rhythm stay identical everywhere. See `docs/DESIGN.md`
+  ("List pages") and `.agents/repo/ui-system.md`.
+
+  ## Example
+
+      <.list_page
+        icon_path="M15 19.128a9.38 9.38 0 0 0 2.625.372..."
+        title="System Users"
+        subtitle={"\#{@count} users found"}
+      >
+        <:actions>
+          <.link patch={~p"/admin/users/new"}>...</.link>
+        </:actions>
+        <:toolbar>
+          <form phx-change="filter" class="flex-1">
+            <.search_input name="filters[search]" value={@filters.search} placeholder="Search by name or email" />
+          </form>
+          <.filter_drawer id="users-filters" title="Filter users" apply_event="filter" active_count={@active} >
+            ...
+          </.filter_drawer>
+        </:toolbar>
+
+        <.data_table id="users" rows={@users}>...</.data_table>
+      </.list_page>
+  """
+  attr :icon_path, :string, required: true
+  attr :title, :string, required: true
+  attr :subtitle, :string, default: nil
+
+  slot :actions, doc: "right-aligned header action(s), e.g. an Add button"
+  slot :toolbar, doc: "the search box + filter_drawer row; omitted for pages with no filtering"
+
+  slot :inner_block,
+    required: true,
+    doc: "the table / blank_state that sits below the header card"
+
+  def list_page(assigns) do
+    ~H"""
+    <div class="space-y-4">
+      <div class="rounded-xl border border-slate-200 bg-white px-6 py-5 shadow-card">
+        <.page_header icon_path={@icon_path} title={@title} subtitle={@subtitle}>
+          <:actions :if={@actions != []}>{render_slot(@actions)}</:actions>
+        </.page_header>
+        <div :if={@toolbar != []} class="flex flex-wrap items-center gap-3">
+          {render_slot(@toolbar)}
+        </div>
+      </div>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -608,15 +715,22 @@ defmodule MedcampWeb.CoreComponents do
 
   def search_input(assigns) do
     ~H"""
-    <input
-      type="text"
-      name={@name}
-      value={@value}
-      placeholder={@placeholder}
-      phx-debounce={@debounce}
-      class="h-[40px] w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:outline-none focus:ring-0"
-      {@rest}
-    />
+    <div class="relative">
+      <Heroicons.icon
+        name="magnifying-glass"
+        type="outline"
+        class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+      />
+      <input
+        type="text"
+        name={@name}
+        value={@value}
+        placeholder={@placeholder}
+        phx-debounce={@debounce}
+        class="h-10 w-full rounded-md border border-slate-300 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-accent focus:outline-none focus:ring-0"
+        {@rest}
+      />
+    </div>
     """
   end
 
@@ -645,26 +759,53 @@ defmodule MedcampWeb.CoreComponents do
 
   def blank_state(assigns) do
     ~H"""
-    <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+    <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 py-12 text-center">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="mx-auto h-12 w-12 text-gray-400"
+        class="mx-auto h-12 w-12 text-slate-400"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
       >
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={@icon_path} />
       </svg>
-      <h3 class="mt-2 text-sm font-medium text-gray-900">{@title}</h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <h3 class="mt-3 text-sm font-semibold text-slate-900">{@title}</h3>
+      <p class="mt-1 text-sm text-slate-500">
         {render_slot(@description_slot) || @description}
       </p>
-      <div :if={@actions != []} class="mt-2">
+      <div :if={@actions != []} class="mt-3">
         {render_slot(@actions)}
       </div>
     </div>
     """
   end
+
+  attr :organisation, :map, required: true
+
+  def organisation_status_pill(assigns) do
+    assigns = assign(assigns, :status, Medcamp.Organisations.status(assigns.organisation))
+
+    ~H"""
+    <span class={[
+      "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1",
+      organisation_status_pill_class(@status)
+    ]}>
+      <span class={["h-1.5 w-1.5 rounded-full", organisation_status_dot_class(@status)]}></span>
+      {@status |> to_string() |> String.capitalize()}
+    </span>
+    """
+  end
+
+  defp organisation_status_pill_class(:active), do: "bg-green-50 text-green-700 ring-green-600/20"
+
+  defp organisation_status_pill_class(:pending),
+    do: "bg-amber-50 text-amber-700 ring-amber-600/20"
+
+  defp organisation_status_pill_class(_), do: "bg-red-50 text-red-700 ring-red-600/20"
+
+  defp organisation_status_dot_class(:active), do: "bg-green-500"
+  defp organisation_status_dot_class(:pending), do: "bg-amber-500"
+  defp organisation_status_dot_class(_), do: "bg-red-500"
 
   @doc """
   Renders the age group + gender select pair shared by the patient/visit
@@ -775,12 +916,15 @@ defmodule MedcampWeb.CoreComponents do
 
   def flash(assigns) do
     assigns = assign_new(assigns, :id, fn -> "flash-#{assigns.kind}" end)
+    assigns = assign(assigns, :auto_dismiss?, assigns.kind == :info)
 
     ~H"""
     <div
       :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
       id={@id}
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
+      phx-hook={@auto_dismiss? && "AutoDismissFlash"}
+      data-auto-dismiss-ms={@auto_dismiss? && "4500"}
       role="alert"
       class={[
         "fixed top-2 right-2 mr-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1 print:hidden",
@@ -1306,6 +1450,154 @@ defmodule MedcampWeb.CoreComponents do
 
   defp table_row_and_id(row, row_id, _table_id), do: {row, row_id.(row)}
 
+  @doc """
+  The canonical flat directory table: a hairline-bordered `rounded-xl`
+  container, `slate-50` header row in `text-xs uppercase tracking-wider
+  text-slate-500`, `divide-slate-100` body rows, `hover:bg-slate-50` when the
+  row is clickable, and a right-aligned actions column when the `:action`
+  slot is used. Every column stays visible — no expand/Details row. For the
+  responsive detail-expansion model use `table/1` instead.
+
+  Pass `:footer` to render `pagination/1` inside the same bordered container,
+  and `:empty` to show a message row while keeping the header visible (use
+  `blank_state/1` above the table instead when you want the larger card).
+
+  ## Example
+
+      <.data_table id="users" rows={@users} row_id={&"user-\#{&1.id}"} row_click={&JS.push("open", value: %{id: &1.id})}>
+        <:col :let={u} label="User">{u.name}</:col>
+        <:col :let={u} label="Role">{u.role}</:col>
+        <:action :let={u}>
+          <.link navigate={~p"/admin/users/\#{u}/edit"}>Edit</.link>
+        </:action>
+        <:footer>
+          <.pagination page={@page} total_pages={@total_pages} total_count={@count} per_page={@per_page} />
+        </:footer>
+      </.data_table>
+  """
+  attr :id, :string, required: true
+  attr :rows, :any, required: true
+  attr :row_id, :any, default: nil, doc: "fn(row) -> dom id"
+  attr :row_click, :any, default: nil, doc: "fn(row) -> JS/event; also sets the hover + cursor"
+  attr :row_item, :any, default: &Function.identity/1
+
+  slot :col, required: true do
+    attr :label, :string
+    attr :align, :string, doc: ~s(set to "right" to right-align the header and cells)
+    attr :class, :string, doc: "extra classes on the <td>"
+    attr :always_show, :boolean, doc: "accepted for compatibility with table/1"
+
+    attr :hide_below, :string,
+      doc: ~s(hide this column below a breakpoint: "sm", "md" or "lg" - keep the essential ones)
+  end
+
+  slot :action, doc: "per-row actions; rendered right-aligned in a trailing Actions column"
+  slot :empty, doc: "message shown as a single row when rows is empty (header stays visible)"
+  slot :empty_state, doc: "accepted for compatibility with table/1"
+  slot :footer, doc: "rendered inside the bordered container below the table, e.g. pagination/1"
+
+  def data_table(assigns) do
+    assigns =
+      case assigns.rows do
+        %Phoenix.LiveView.LiveStream{} = rows ->
+          assign(assigns,
+            render_rows: rows,
+            row_id: assigns.row_id || fn {id, _item} -> id end
+          )
+
+        rows ->
+          render_rows =
+            rows
+            |> Enum.with_index()
+            |> Enum.map(fn {row, index} -> {:indexed_table_row, index, row} end)
+
+          assign(assigns, :render_rows, render_rows)
+      end
+
+    assigns =
+      assigns
+      |> assign(:span, length(assigns.col) + if(assigns.action != [], do: 1, else: 0))
+      |> assign(:empty_content, assigns.empty ++ assigns.empty_state)
+
+    ~H"""
+    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-card">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+          <thead class="bg-slate-50">
+            <tr>
+              <th
+                :for={col <- @col}
+                class={[
+                  "px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500",
+                  (col[:align] == "right" && "text-right") || "text-left",
+                  col_responsive_class(col[:hide_below])
+                ]}
+              >
+                {col[:label]}
+              </th>
+              <th
+                :if={@action != []}
+                class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            id={@id}
+            phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}
+            class="divide-y divide-slate-100 bg-white"
+          >
+            <tr :if={rows_empty?(@rows) and @empty_content != []}>
+              <td colspan={@span} class="px-5 py-10 text-center text-sm text-slate-500">
+                {render_slot(@empty_content)}
+              </td>
+            </tr>
+            <%= for render_row <- @render_rows do %>
+              <% {row, row_id} = table_row_and_id(render_row, @row_id, @id) %>
+              <tr
+                id={row_id}
+                class={["transition-colors", @row_click && "cursor-pointer hover:bg-slate-50"]}
+                phx-click={@row_click && @row_click.(@row_item.(row))}
+              >
+                <td
+                  :for={col <- @col}
+                  class={[
+                    "px-5 py-3 text-sm text-slate-700 align-middle",
+                    col[:align] == "right" && "text-right",
+                    col_responsive_class(col[:hide_below]),
+                    col[:class]
+                  ]}
+                >
+                  {render_slot(col, @row_item.(row))}
+                </td>
+                <td
+                  :if={@action != []}
+                  class="px-5 py-3 text-right"
+                  phx-click=""
+                  phx-stop-propagation=""
+                >
+                  <div class="flex items-center justify-end gap-2">
+                    {render_slot(@action, @row_item.(row))}
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <div :if={@footer != []}>
+        {render_slot(@footer)}
+      </div>
+    </div>
+    """
+  end
+
+  defp col_responsive_class("sm"), do: "hidden sm:table-cell"
+  defp col_responsive_class("md"), do: "hidden md:table-cell"
+  defp col_responsive_class("lg"), do: "hidden lg:table-cell"
+  defp col_responsive_class(_), do: nil
+
   def toggle_row_details(js \\ %JS{}, row_id) when is_binary(row_id) do
     js
     |> JS.toggle(to: "##{row_id}-details", display: "table-row")
@@ -1355,24 +1647,23 @@ defmodule MedcampWeb.CoreComponents do
           Showing {@from}–{@to} of {@total_count}
         </p>
 
-        <div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-end sm:gap-4">
+        <div class="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end sm:gap-4">
           <button
             type="button"
             phx-click={@page > 1 && @event}
             phx-value-page={@page - 1}
             disabled={@page <= 1}
             class={[
-              "inline-flex min-w-[7.5rem] items-center justify-center gap-1.5 rounded-md px-4 py-2.5 text-sm font-medium transition",
-              @page <= 1 &&
-                "cursor-not-allowed bg-gray-100 text-gray-400",
-              @page > 1 &&
-                "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              "inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-2.5 text-sm font-medium transition sm:min-w-[7.5rem] sm:px-4",
+              @page <= 1 && "cursor-not-allowed bg-gray-100 text-gray-400",
+              @page > 1 && "bg-gray-100 text-gray-700 hover:bg-gray-200"
             ]}
           >
-            <Heroicons.icon name="chevron-left" type="outline" class="h-4 w-4" /> Previous
+            <Heroicons.icon name="chevron-left" type="outline" class="h-4 w-4" />
+            <span class="hidden min-[420px]:inline">Previous</span>
           </button>
 
-          <span class="text-center text-sm text-slate-500">
+          <span class="whitespace-nowrap text-center text-sm text-slate-500">
             Page <span class="font-semibold text-slate-900">{@page}</span>
             of <span class="font-semibold text-slate-900">{@display_total_pages}</span>
           </span>
@@ -1383,14 +1674,13 @@ defmodule MedcampWeb.CoreComponents do
             phx-value-page={@page + 1}
             disabled={@page >= @total_pages}
             class={[
-              "inline-flex min-w-[7.5rem] items-center justify-center gap-1.5 rounded-md px-4 py-2.5 text-sm font-medium transition",
-              @page >= @total_pages &&
-                "cursor-not-allowed bg-gray-100 text-gray-400",
-              @page < @total_pages &&
-                "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              "inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-2.5 text-sm font-medium transition sm:min-w-[7.5rem] sm:px-4",
+              @page >= @total_pages && "cursor-not-allowed bg-gray-100 text-gray-400",
+              @page < @total_pages && "bg-gray-100 text-gray-700 hover:bg-gray-200"
             ]}
           >
-            Next <Heroicons.icon name="chevron-right" type="outline" class="h-4 w-4" />
+            <span class="hidden min-[420px]:inline">Next</span>
+            <Heroicons.icon name="chevron-right" type="outline" class="h-4 w-4" />
           </button>
         </div>
       </div>

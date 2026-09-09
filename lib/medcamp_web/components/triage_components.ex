@@ -7,10 +7,10 @@ defmodule MedcampWeb.TriageComponents do
 
   def triages_table(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+    <div class="bg-white rounded-lg border border-slate-100 p-4">
       <.header
         :if={Map.get(assigns, :show_header, true)}
-        class="text-brand-primary border-b border-gray-100 pb-4 mb-4"
+        class="text-brand-primary border-b border-slate-100 pb-4 mb-4"
       >
         <div class="flex items-center">
           <svg
@@ -71,7 +71,7 @@ defmodule MedcampWeb.TriageComponents do
           </:actions>
         </.blank_state>
       <% else %>
-        <.table
+        <.data_table
           id="triages"
           rows={@triages}
           row_click={
@@ -97,7 +97,7 @@ defmodule MedcampWeb.TriageComponents do
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              <span class="text-gray-700">{triage.date}</span>
+              <span class="text-slate-700">{triage.date}</span>
             </div>
           </:col>
 
@@ -135,13 +135,13 @@ defmodule MedcampWeb.TriageComponents do
 
           <:col :let={triage} label="Height">
             <div class="py-3">
-              <span class="text-gray-700">{triage.height} cm</span>
+              <span class="text-slate-700">{triage.height} cm</span>
             </div>
           </:col>
 
           <:col :let={triage} label="Weight">
             <div class="py-3">
-              <span class="text-gray-700">{triage.weight} kg</span>
+              <span class="text-slate-700">{triage.weight} kg</span>
             </div>
           </:col>
 
@@ -181,7 +181,7 @@ defmodule MedcampWeb.TriageComponents do
               View
             </.link>
           </:action>
-        </.table>
+        </.data_table>
       <% end %>
     </div>
     """

@@ -1,6 +1,8 @@
 <main>
   <div>
     <.flash_group flash={@flash} />
+
+    <.mobile_nav_bar />
     <%!-- <.stock_alerts_banner
       stock_alerts={@stock_alerts || %{near_expiry: [], below_reorder: []}}
       alert_count={@stock_alert_count || 0}
@@ -11,12 +13,11 @@
       <div>
         <.admin_sidebar current_user={@current_user} active_tab={@active_tab} />
       </div>
-      <div class="layout-content flex-1 min-w-0 lg:ml-64 md:p-6 p-2 bg-white shadow-md rounded-lg overflow-x-auto">
-        <.camp_switcher
-          camps={assigns[:camp_options] || []}
-          camp_filter={assigns[:camp_filter]}
-          active_camp={assigns[:active_camp]}
-        />
+      <div class="layout-content flex-1 min-w-0 lg:ml-64 md:p-6 p-2 bg-slate-50 overflow-x-auto">
+        <%!-- The camp view selector is not a layout-level bar any more. Each
+              camp-scoped page renders <.camp_switcher> in its own toolbar (or
+              header, on the medical camp dashboard). It stays session-backed,
+              so the choice still follows the admin across pages. --%>
         {@inner_content}
       </div>
     </div>

@@ -58,6 +58,14 @@ Public palette — recite-able, every entry has one job.
 `#16418f` → `brand-accent-dark`, `#52B2D8` → `brand-accent`, `#e9f6fb` →
 `brand-50`. Use the `brand-*` classes there, not the hex values.
 
+**KPI / stat icon tiles** (dashboards): tile background is always the tint
+(`bg-brand-50`); the glyph is **two-tone** — `text-brand-accent` (cyan) for
+activity / flow metrics (visits, lab tests, revenue, appointments, stock),
+`text-brand-primary` (navy) for everything else — so a KPI row alternates
+without leaving the two-colour palette. No per-metric background hue, no third
+glyph colour. Mapping lives in `dashboard_components.ex` (`color_classes/1`,
+`summary_icon_color/1`).
+
 ---
 
 ## Typography
@@ -134,13 +142,57 @@ white → slate-50 → white → slate-50 → …  → footer (navy)
 
 ## Elevation
 
-**Zero drop shadows.** No `shadow-*`, no `ring-*` decoration, no `backdrop-blur`.
-
-Elevation is communicated only by:
+**Public / marketing surfaces: zero drop shadows.** No `shadow-*`, no `ring-*`
+decoration, no `backdrop-blur`. Elevation is communicated only by:
 - a 1px hairline `border-slate-200` (or `border-white/10`–`/30` on dark), and/or
 - the alternating white / slate-50 section bands.
 
 A white card on a `slate-50` section lifts through its border + the value shift.
+
+**Authenticated operational screens: one soft shadow.** The content area behind
+the sidebar is the `slate-50` ground (set on `.layout-content` in every role
+layout — never a full-width white card). Cards, tables and KPI tiles float on
+it with the single `shadow-card` token (`tailwind.config.js` `boxShadow.card`);
+`shadow-card-hover` on `hover` for the cards that are themselves links
+(`stat_card`, `quick_action`). Still a 1px `border-slate-200` on every card —
+the shadow is additive, not a replacement. No other shadow value, no `ring-*`,
+no `backdrop-blur`. `shared` components already carry `shadow-card`
+(`list_page`, `data_table`, every `dashboard_components` card); page-level
+hand-rolled cards should use it too.
+
+---
+
+## List pages (authenticated)
+
+Every directory / index screen has the same anatomy, provided by two
+components in `core_components.ex` — pages never hand-roll the shell or the
+table.
+
+- **`<.list_page icon_path= title= subtitle=>`** — owns the `space-y-4` stack,
+  the white header card (`rounded-xl border border-slate-200 bg-white px-6
+  py-5`, **no shadow**), the `page_header/1` (icon tile `rounded-xl
+  bg-brand-100 text-brand-primary`, `text-slate-900` title, `text-slate-500`
+  subtitle, `border-slate-200` divider), and the toolbar row below it.
+  - `<:actions>` — the one primary button (`rounded-lg bg-brand-primary px-4
+    py-2 text-sm`), with a leading `plus` icon for "Add".
+  - `<:toolbar>` — `<form>` wrapping `<.search_input>` (leading magnifier,
+    `h-10 rounded-md border-slate-300`) as the growing control, then
+    `<.filter_drawer>`. Omit the slot entirely on pages with no filtering.
+  - `subtitle` is the **count line** ("6 users found"), never feature copy.
+- **`<.data_table id= rows=>`** — the default table: flat `rounded-xl
+  border-slate-200` container, `bg-slate-50` head in `text-xs uppercase
+  tracking-wider text-slate-500`, `divide-slate-100` rows, `hover:bg-slate-50`
+  only when `row_click` is set. `:col` per column, `:action` for the
+  right-aligned Actions column, `:empty` for an inline message row, `:footer`
+  for `<.pagination>`. All columns stay visible.
+- **`<.blank_state>`** is the default slot when the list is empty — dashed
+  `border-slate-200 bg-slate-50 rounded-xl py-12`, centred icon
+  `text-slate-400`, `text-slate-900` title, `text-slate-500` line, and a
+  "Clear filters" action when a filter caused the empty result.
+- Use `<.table>` (the expand/Details model) **only** when a row genuinely
+  needs a responsive detail panel for secondary fields.
+- Colours come from the `brand-*` role tokens here, not the public hex values
+  (see the role mapping above).
 
 ---
 
@@ -189,6 +241,30 @@ font, no external icon library on public pages.
 - `rounded-[2rem] border border-slate-200 object-cover`; `loading="lazy"` below
   the fold; a meaningful `alt`.
 - No decorative background SVGs, blobs, blur, gradients, clip-paths.
+
+---
+
+## Charts (authenticated dashboards)
+
+The palette discipline governs the UI *chrome*, not data encoding. A chart whose
+bars/slices each mean a different category needs distinguishable colours or it
+communicates nothing.
+
+- **Category charts** (one bar/slice per category — diagnoses, test types,
+  patient types, age bands): use the fixed categorical palette, one hue per
+  datum, in order. It leads with brand navy `#0C2765` then cyan `#52B2D8` so a
+  2–3 category chart still reads on-brand, then diverges:
+  `#F59E0B #22C55E #8B5CF6 #EC4899 #14B8A6 #F43F5E #0EA5E9 #94A3B8` (cycles).
+  Defined once per dashboard (`camp_palette/0` / `doughnut_palette/0`).
+- **Single-series charts** (a count over time — daily registrations): one colour,
+  brand navy `rgba(12, 39, 101, α)`. Not a rainbow.
+- **Two-series comparisons** (Day 1 vs Day 2, this vs last): brand navy + brand
+  cyan `rgba(82, 178, 216, α)`, in that order.
+- **Gender splits** keep the conventional blue / pink / slate mapping — it's
+  understood at a glance and shouldn't be recoloured to the categorical palette.
+- Axis ticks `#64748b`, gridlines `rgba(148, 163, 184, 0.18)`, tooltip body on
+  `#0f172a`. Bars `borderRadius` 6–10, no gradients, no drop shadows on the
+  canvas.
 
 ---
 

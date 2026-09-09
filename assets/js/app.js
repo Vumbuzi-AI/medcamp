@@ -542,6 +542,31 @@ function printDiv(e) {
 
 let Hooks = {};
 
+Hooks.AutoDismissFlash = {
+  mounted() {
+    this.scheduleDismiss();
+  },
+
+  updated() {
+    this.scheduleDismiss();
+  },
+
+  destroyed() {
+    clearTimeout(this.dismissTimer);
+  },
+
+  scheduleDismiss() {
+    clearTimeout(this.dismissTimer);
+
+    let delay = Number.parseInt(this.el.dataset.autoDismissMs || "4500", 10);
+    if (!Number.isFinite(delay) || delay <= 0) return;
+
+    this.dismissTimer = setTimeout(() => {
+      if (document.body.contains(this.el)) this.el.click();
+    }, delay);
+  },
+};
+
 Hooks.ReportWorkspace = {
   mounted() {
     this.scale = 1;
@@ -1436,7 +1461,6 @@ Hooks.CardQrCode = {
       var elText = document.getElementById("text");
 
       if (!elText.value) {
-        alert("Input a text");
         elText.focus();
         return;
       }
@@ -1456,7 +1480,6 @@ Hooks.CardQrCode = {
       var elText = document.getElementById("text");
 
       if (!elText.value) {
-        alert("Input a text");
         elText.focus();
         return;
       }
@@ -1590,7 +1613,6 @@ Hooks.QrCode = {
       var elText = document.getElementById("text");
 
       if (!elText.value) {
-        alert("Input a text");
         elText.focus();
         return;
       }
@@ -1610,7 +1632,6 @@ Hooks.QrCode = {
       var elText = document.getElementById("text");
 
       if (!elText.value) {
-        alert("Input a text");
         elText.focus();
         return;
       }
@@ -1863,7 +1884,6 @@ Hooks.RoomQrCode = {
       var elText = document.getElementById("text");
 
       if (!elText.value) {
-        alert("Input a text");
         elText.focus();
         return;
       }
@@ -1883,7 +1903,6 @@ Hooks.RoomQrCode = {
       var elText = document.getElementById("text");
 
       if (!elText.value) {
-        alert("Input a text");
         elText.focus();
         return;
       }
@@ -2054,6 +2073,96 @@ let liveSocket = new LiveSocket("/live", Socket, {
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" });
 window.addEventListener("phx:page-loading-start", (_info) => topbar.show(300));
 window.addEventListener("phx:page-loading-stop", (_info) => topbar.hide());
+
+(function initGlobalConfirmModal() {
+  let pendingElement = null;
+
+  function modalParts() {
+    let modal = document.getElementById("global-confirm-modal");
+    if (!modal) return {};
+
+    return {
+      modal,
+      backdrop: document.getElementById("global-confirm-modal-bg"),
+      container: document.getElementById("global-confirm-modal-container"),
+      title: document.getElementById("global-confirm-title"),
+      message: document.getElementById("global-confirm-message"),
+      accept: modal.querySelector("[data-global-confirm-accept]"),
+      cancel: modal.querySelector("[data-global-confirm-cancel]"),
+    };
+  }
+
+  function showModal(message, title) {
+    let parts = modalParts();
+    if (!parts.modal || !parts.container) return false;
+
+    if (parts.title) parts.title.textContent = title || "Confirm action";
+    if (parts.message) parts.message.textContent = message || "Are you sure?";
+
+    parts.modal.classList.remove("hidden");
+    parts.container.classList.remove("hidden");
+    parts.accept && parts.accept.focus();
+    return true;
+  }
+
+  function hideModal() {
+    let { modal, container } = modalParts();
+    modal && modal.classList.add("hidden");
+    container && container.classList.add("hidden");
+  }
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (!(event.target instanceof Element)) return;
+
+      let element = event.target.closest("[data-confirm-message]");
+      if (!element) return;
+
+      if (element.dataset.confirmBypass === "true") {
+        delete element.dataset.confirmBypass;
+        return;
+      }
+
+      if (!showModal(element.dataset.confirmMessage, element.dataset.confirmTitle)) return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      pendingElement = element;
+    },
+    true,
+  );
+
+  document.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element)) return;
+
+    if (
+      event.target.closest("[data-global-confirm-cancel]") ||
+      event.target.closest("#global-confirm-modal button[aria-label='close']") ||
+      event.target.id === "global-confirm-modal-bg"
+    ) {
+      pendingElement = null;
+      hideModal();
+    }
+
+    if (event.target.closest("[data-global-confirm-accept]")) {
+      let element = pendingElement;
+      pendingElement = null;
+      hideModal();
+
+      if (element) {
+        element.dataset.confirmBypass = "true";
+        element.click();
+      }
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    pendingElement = null;
+    hideModal();
+  });
+})();
 
 (function initInactivityLogout() {
   let authMeta = document.querySelector("meta[name='user-authenticated']");

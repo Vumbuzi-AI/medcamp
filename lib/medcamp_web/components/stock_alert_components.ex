@@ -16,7 +16,7 @@ defmodule MedcampWeb.StockAlertComponents do
     ~H"""
     <div :if={@alert_count > 0} class="mx-4 mt-4 md:mx-8 md:mt-6 lg:ml-72 lg:mr-8">
       <details
-        class="group rounded-lg border w-[98%] mx-auto border-amber-200/80 bg-gradient-to-r from-amber-50 to-orange-50/50 shadow-sm [&_summary::-webkit-details-marker]:hidden"
+        class="group rounded-xl border w-full border-amber-200 bg-amber-50 [&_summary::-webkit-details-marker]:hidden"
         id="stock-alerts-banner"
       >
         <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 hover:bg-amber-100/50 rounded-lg transition-colors">
@@ -43,14 +43,6 @@ defmodule MedcampWeb.StockAlertComponents do
               onclick="event.stopPropagation()"
             >
               View drugs
-            </.link>
-            <.link
-              :if={@context == :inventory_manager}
-              navigate={~p"/inventory_manager/inventories_received"}
-              class="rounded-md bg-amber-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-amber-700 transition-colors"
-              onclick="event.stopPropagation()"
-            >
-              View inventory
             </.link>
             <.link
               :if={@context == :admin}
