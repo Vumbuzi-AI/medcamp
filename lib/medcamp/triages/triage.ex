@@ -1,12 +1,10 @@
 defmodule Medcamp.Triages.Triage do
   use Ecto.Schema
   use Medcamp.Tenancy.Schema
-  use Medcamp.Camps.Schema
   import Ecto.Changeset
 
   schema "triages" do
     tenant_field()
-    camp_field()
 
     field :date, :date
     field :temperature, :float
@@ -66,7 +64,6 @@ defmodule Medcamp.Triages.Triage do
     |> put_time_if_missing()
     |> calculate_bmi()
     |> put_org_id()
-    |> put_camp_id()
   end
 
   defp put_date_if_missing(changeset) do

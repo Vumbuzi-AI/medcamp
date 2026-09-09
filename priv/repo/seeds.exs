@@ -7,12 +7,8 @@
 # them. Every account uses the same demo password - change or remove these
 # before running a real camp.
 
-import Ecto.Query, only: [from: 2]
-
 alias Medcamp.Accounts
 alias Medcamp.Accounts.User
-alias Medcamp.Camps
-alias Medcamp.Camps.Scope
 alias Medcamp.DrugBatches
 alias Medcamp.DrugAllocations.DrugAllocation
 alias Medcamp.Drugs
@@ -65,20 +61,6 @@ organisation =
   end
 
 Tenancy.put_org_id(organisation.id)
-
-## Camp ---------------------------------------------------------------------
-#
-# The seeded activity below has to land somewhere, so the organisation gets
-# one camp and it is made active before anything else is written.
-
-camp =
-  case Repo.one(from c in Medcamp.Camps.Camp, where: c.name == "Seed Camp", limit: 1) do
-    nil -> unwrap!.(Camps.create_camp(%{"name" => "Seed Camp", "location" => "Kenya"}), "camp")
-    existing -> existing
-  end
-
-{:ok, camp} = Camps.set_active_camp(camp)
-Scope.put_active_camp_id(camp.id)
 
 ## Staff -------------------------------------------------------------------
 

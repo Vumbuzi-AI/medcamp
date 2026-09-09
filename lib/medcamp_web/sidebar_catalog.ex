@@ -536,12 +536,6 @@ defmodule MedcampWeb.SidebarCatalog do
             url: "/admin/organisation",
             tab_name: :organisation
           },
-          %{
-            name: "Camps",
-            icon: "map-pin",
-            url: "/admin/camps",
-            tab_name: :camps
-          },
           %{name: "System Users", icon: "users", url: "/admin/users", tab_name: :users},
           %{
             name: "Login Sessions",

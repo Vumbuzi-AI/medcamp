@@ -5,8 +5,6 @@ defmodule MedcampWeb.UserAuth do
   import Phoenix.Controller
 
   alias Medcamp.Accounts
-  alias Medcamp.Camps
-  alias Medcamp.Camps.Scope
   alias Medcamp.Organisations
   alias Medcamp.Tenancy
   alias Medcamp.UserLoginSessions
@@ -164,36 +162,6 @@ defmodule MedcampWeb.UserAuth do
     conn
     |> assign(:current_user, user)
     |> assign_organisation(user)
-    |> fetch_camp_filter()
-  end
-
-  @camp_filter_session_key "camp_filter_id"
-
-  @doc """
-  The session key the admin camp switcher writes its choice to.
-  """
-  def camp_filter_session_key, do: @camp_filter_session_key
-
-  @doc """
-  Restores the viewer's camp filter from the session.
-
-  This is only the reading lens. The camp records are *written* into comes
-  from the organisation and is established in `assign_organisation/2`, so
-  editing the session cannot move or widen it.
-  """
-  def fetch_camp_filter(conn) do
-    camp_filter_id = get_session(conn, @camp_filter_session_key)
-
-    # Guarded on the organisation: a camp lookup is a tenant query, and a
-    # request with no user (or a superadmin, who has no organisation) has no
-    # tenant for it to run in.
-    camp =
-      if conn.assigns[:current_organisation] && camp_filter_id,
-        do: Camps.get_camp(camp_filter_id)
-
-    Scope.put_camp_filter(camp && camp.id)
-
-    assign(conn, :camp_filter, camp)
   end
 
   @doc """
@@ -223,12 +191,7 @@ defmodule MedcampWeb.UserAuth do
 
     if organisation, do: Tenancy.put_org_id(organisation.id)
 
-    active_camp = Camps.get_active_camp_for_organisation(organisation && organisation.id)
-    Scope.put_active_camp_id(active_camp && active_camp.id)
-
-    conn
-    |> assign(:current_organisation, organisation)
-    |> assign(:active_camp, active_camp)
+    assign(conn, :current_organisation, organisation)
   end
 
   defp ensure_user_token(conn) do
@@ -348,37 +311,7 @@ defmodule MedcampWeb.UserAuth do
     |> tap(fn socket ->
       if org = socket.assigns.current_organisation, do: Tenancy.put_org_id(org.id)
     end)
-    |> mount_camp_scope(session)
   end
-
-  # The camp half of the same re-establishment: the active camp records are
-  # written into, and the camp the viewer has filtered down to. Both are read
-  # fresh rather than carried in `assign_new/3` - an admin switching camps in
-  # one tab must not leave another tab writing into the previous one.
-  defp mount_camp_scope(socket, session) do
-    organisation = socket.assigns.current_organisation
-    active_camp = Camps.get_active_camp_for_organisation(organisation && organisation.id)
-    Scope.put_active_camp_id(active_camp && active_camp.id)
-
-    camp_filter_id = organisation && session[@camp_filter_session_key]
-    camp_filter = camp_filter_id && Camps.get_camp(camp_filter_id)
-
-    Scope.put_camp_filter(camp_filter && camp_filter.id)
-
-    socket
-    |> Phoenix.Component.assign(:active_camp, active_camp)
-    |> Phoenix.Component.assign(:camp_filter, camp_filter)
-    |> assign_camp_options()
-  end
-
-  # Only the admin layout renders the switcher, so only an admin pays for the
-  # list behind it.
-  defp assign_camp_options(%{assigns: %{current_user: %{role: "admin"}}} = socket) do
-    Phoenix.Component.assign_new(socket, :camp_options, fn -> Camps.list_camps() end)
-  end
-
-  defp assign_camp_options(socket),
-    do: Phoenix.Component.assign_new(socket, :camp_options, fn -> [] end)
 
   @doc """
   Used for routes that require the user to not be authenticated.

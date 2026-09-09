@@ -12,11 +12,6 @@
         <.admin_sidebar current_user={@current_user} active_tab={@active_tab} />
       </div>
       <div class="layout-content flex-1 min-w-0 lg:ml-64 md:p-6 p-2 bg-white shadow-md rounded-lg overflow-x-auto">
-        <.camp_switcher
-          camps={assigns[:camp_options] || []}
-          camp_filter={assigns[:camp_filter]}
-          active_camp={assigns[:active_camp]}
-        />
         {@inner_content}
       </div>
     </div>

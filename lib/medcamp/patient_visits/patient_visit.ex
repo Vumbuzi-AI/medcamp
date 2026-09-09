@@ -1,7 +1,6 @@
 defmodule Medcamp.PatientVisits.PatientVisit do
   use Ecto.Schema
   use Medcamp.Tenancy.Schema
-  use Medcamp.Camps.Schema
   import Ecto.Changeset
 
   @moduledoc """
@@ -35,7 +34,6 @@ defmodule Medcamp.PatientVisits.PatientVisit do
 
   schema "patient_visits" do
     tenant_field()
-    camp_field()
 
     field :reason, :string
     field :date, :date, default: Date.utc_today()
@@ -67,7 +65,6 @@ defmodule Medcamp.PatientVisits.PatientVisit do
     |> put_time_if_missing()
     |> put_date_if_missing()
     |> put_org_id()
-    |> put_camp_id()
   end
 
   defp put_date_if_missing(changeset) do

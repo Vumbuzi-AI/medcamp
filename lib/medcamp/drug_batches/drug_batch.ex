@@ -1,12 +1,10 @@
 defmodule Medcamp.DrugBatches.DrugBatch do
   use Ecto.Schema
   use Medcamp.Tenancy.Schema
-  use Medcamp.Camps.Schema
   import Ecto.Changeset
 
   schema "drug_batches" do
     tenant_field()
-    camp_field()
 
     field :remaining_quantity, :integer
     belongs_to :drug, Medcamp.Drugs.Drug
@@ -42,6 +40,5 @@ defmodule Medcamp.DrugBatches.DrugBatch do
       :inventory_received_id
     ])
     |> put_org_id()
-    |> put_camp_id()
   end
 end

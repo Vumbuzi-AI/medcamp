@@ -193,7 +193,6 @@ defmodule MedcampWeb do
       import MedcampWeb.DashboardComponents
       import MedcampWeb.MedicalCampReportComponents
       import MedcampWeb.OrganisationComponents
-      import MedcampWeb.CampComponents
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
