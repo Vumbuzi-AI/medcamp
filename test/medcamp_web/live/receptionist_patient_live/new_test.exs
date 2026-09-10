@@ -10,14 +10,32 @@ defmodule MedcampWeb.ReceptionistPatientLive.NewTest do
 
   setup %{conn: conn} do
     receptionist = user_fixture(%{role: "receptionist"})
+
+    # Registration and the /new route are refused with no active camp, so the
+    # default for this module is "a camp is active" - in the DB (for the
+    # LiveView process) and in this process (for direct context calls). The
+    # few tests about the no-camp state clear it with `deactivate_camps/1`.
+    Medcamp.Tenancy.with_org(receptionist.organisation_id, fn ->
+      {:ok, camp} = Medcamp.Camps.create_camp(%{name: "Reception Setup Camp"})
+      {:ok, camp} = Medcamp.Camps.set_active_camp(camp)
+      Medcamp.Camps.Scope.put_active_camp_id(camp.id)
+    end)
+
     %{conn: log_in_user(conn, receptionist), receptionist: receptionist}
   end
 
   defp camp_fixture(user) do
     Medcamp.Tenancy.with_org(user.organisation_id, fn ->
       {:ok, camp} = Medcamp.Camps.create_camp(%{name: "Attendance Test Camp"})
+      {:ok, camp} = Medcamp.Camps.set_active_camp(camp)
+      Medcamp.Camps.Scope.put_active_camp_id(camp.id)
       camp
     end)
+  end
+
+  defp deactivate_camps(user) do
+    Medcamp.Tenancy.with_org(user.organisation_id, fn -> Medcamp.Camps.clear_active_camp() end)
+    Medcamp.Camps.Scope.put_active_camp_id(nil)
   end
 
   test "defaults to this camp's roster and only widens to the org on search", %{
@@ -177,16 +195,22 @@ defmodule MedcampWeb.ReceptionistPatientLive.NewTest do
     end)
 
     # Instead of navigating away, the receptionist gets a wristband to print.
-    assert render(view) =~ "Amina Wanjiru is registered"
+    html = render(view)
+    assert html =~ "Amina Wanjiru is registered"
     assert has_element?(view, "#receptionist-registered-code-wrap")
-    assert has_element?(view, "button[data-print-trigger]")
-    assert render(view) =~ patient.gsrn
+    assert has_element?(view, "button[data-print-trigger]", "Print wristband")
+    assert html =~ patient.gsrn
+    # GS1 wristband: the (8018) SSCC line and the Data Matrix that encodes it.
+    assert html =~ "(8018) #{patient.gsrn}"
+    assert has_element?(view, ~s(svg[phx-hook="datamatrix"][data-value="8018#{patient.gsrn}"]))
   end
 
   test "the patient list offers a per-row reprint of the wristband code", %{
     conn: conn,
     receptionist: receptionist
   } do
+    # This one is about the org-wide list, so no camp scoping.
+    deactivate_camps(receptionist)
     scope = fn f -> Medcamp.Tenancy.with_org(receptionist.organisation_id, f) end
 
     {:ok, patient} =
@@ -264,5 +288,27 @@ defmodule MedcampWeb.ReceptionistPatientLive.NewTest do
 
     assert {:error, {:redirect, %{to: "/nurse/scan"}}} =
              live(nurse_conn, ~p"/receptionist/patients/new")
+  end
+
+  describe "with no active camp (E8-2)" do
+    setup %{receptionist: receptionist} do
+      deactivate_camps(receptionist)
+      :ok
+    end
+
+    test "the list disables Add Patient instead of linking to the form", %{
+      conn: conn
+    } do
+      {:ok, view, _html} = live(conn, ~p"/receptionist/patients")
+
+      refute has_element?(view, ~s(a[href="/receptionist/patients/new"]))
+      assert has_element?(view, "button[disabled]", "Add Patient")
+      assert render(view) =~ "No active camp"
+    end
+
+    test "navigating straight to the form bounces back to the list", %{conn: conn} do
+      assert {:error, {:live_redirect, %{to: "/receptionist/patients"}}} =
+               live(conn, ~p"/receptionist/patients/new")
+    end
   end
 end

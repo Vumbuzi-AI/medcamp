@@ -8,11 +8,21 @@ defmodule Medcamp.CampRegistrationTest do
   use Medcamp.DataCase, async: true
 
   import Medcamp.AccountsFixtures
+  import Medcamp.CampsFixtures
 
+  alias Medcamp.Camps.Scope
   alias Medcamp.PatientVisits
   alias Medcamp.PatientVisits.PatientVisit
   alias Medcamp.Patients
   alias Medcamp.Patients.Patient
+
+  # Registration lands a patient on the active camp's roster, so every test
+  # here needs one active (both in the DB and in this process).
+  setup do
+    camp = active_camp_fixture()
+    Scope.put_active_camp_id(camp.id)
+    %{camp: camp}
+  end
 
   defp valid_attrs do
     %{
@@ -69,6 +79,17 @@ defmodule Medcamp.CampRegistrationTest do
       attrs = Map.put(valid_attrs(), "first_name", nil)
 
       assert {:error, %Ecto.Changeset{}} = Patients.register_for_camp(attrs, nurse)
+
+      assert Repo.aggregate(Patient, :count) == patients_before
+      assert Repo.aggregate(PatientVisit, :count) == visits_before
+    end
+
+    test "is refused, with nothing written, when no camp is active", %{nurse: nurse} do
+      Scope.put_active_camp_id(nil)
+      patients_before = Repo.aggregate(Patient, :count)
+      visits_before = Repo.aggregate(PatientVisit, :count)
+
+      assert {:error, :no_active_camp} = Patients.register_for_camp(valid_attrs(), nurse)
 
       assert Repo.aggregate(Patient, :count) == patients_before
       assert Repo.aggregate(PatientVisit, :count) == visits_before

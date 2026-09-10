@@ -544,41 +544,48 @@ defmodule Medcamp.Patients do
   to every downstream role.
 
   Returns `{:ok, {patient, visit}}`, or `{:error, changeset}` from whichever
-  step failed, leaving nothing behind.
+  step failed, leaving nothing behind. Returns `{:error, :no_active_camp}` if
+  no camp is active - a patient registered with nowhere to land is invisible
+  to every camp-scoped list, so registration is refused rather than silently
+  orphaning them.
   """
   def register_for_camp(attrs, %Medcamp.Accounts.User{} = nurse) do
-    random_pin = :rand.uniform(9000) + 999
+    with {:ok, camp_id} <- require_active_camp() do
+      random_pin = :rand.uniform(9000) + 999
 
-    attrs =
-      attrs
-      |> stringify_keys()
-      |> Map.put("gsrn", get_available_gsrn())
-      |> Map.put("pin", random_pin)
-      |> Map.put("creator_id", nurse.id)
+      attrs =
+        attrs
+        |> stringify_keys()
+        |> Map.put("gsrn", get_available_gsrn())
+        |> Map.put("pin", random_pin)
+        |> Map.put("creator_id", nurse.id)
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.insert(:patient, Patient.changeset(%Patient{}, attrs))
-    |> Ecto.Multi.insert(:visit, fn %{patient: patient} ->
-      Medcamp.PatientVisits.PatientVisit.changeset(
-        %Medcamp.PatientVisits.PatientVisit{},
-        %{
-          "patient_id" => patient.id,
-          "creator_id" => nurse.id,
-          "status" => "triage_pending",
-          "visit_type" => attrs["visit_type"],
-          "reason" => attrs["reason"]
-        }
-      )
-    end)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{patient: patient, visit: visit}} ->
-        record_camp_attendance(patient.id)
-        Task.start(fn -> send_pin(patient) end)
-        {:ok, {patient, visit}}
+      Ecto.Multi.new()
+      |> Ecto.Multi.insert(:patient, Patient.changeset(%Patient{}, attrs))
+      |> Ecto.Multi.insert(:visit, fn %{patient: patient} ->
+        Medcamp.PatientVisits.PatientVisit.changeset(
+          %Medcamp.PatientVisits.PatientVisit{},
+          %{
+            "patient_id" => patient.id,
+            "creator_id" => nurse.id,
+            "status" => "triage_pending",
+            "visit_type" => attrs["visit_type"],
+            "reason" => attrs["reason"]
+          }
+        )
+      end)
+      |> Ecto.Multi.run(:attendance, fn _repo, %{patient: patient} ->
+        record_camp_attendance(patient.id, camp_id)
+      end)
+      |> Repo.transaction()
+      |> case do
+        {:ok, %{patient: patient, visit: visit}} ->
+          Task.start(fn -> send_pin(patient) end)
+          {:ok, {patient, visit}}
 
-      {:error, _step, changeset, _changes} ->
-        {:error, changeset}
+        {:error, _step, changeset, _changes} ->
+          {:error, changeset}
+      end
     end
   end
 
@@ -605,31 +612,50 @@ defmodule Medcamp.Patients do
 
   @doc """
   Opens a fresh camp visit for a patient who is already on file, reusing their
-  existing record and GSRN. Records camp attendance. Returns
-  `{:ok, {patient, visit}}`.
+  existing record and GSRN. The visit and the `camp_attendances` row are
+  written in one transaction, so a returning patient can't end up with a
+  visit the camp roster doesn't show. Returns `{:ok, {patient, visit}}`, or
+  `{:error, :no_active_camp}` when no camp is active.
   """
   def register_visit_for_existing(%Patient{} = patient, %Medcamp.Accounts.User{} = staff) do
-    %Medcamp.PatientVisits.PatientVisit{}
-    |> Medcamp.PatientVisits.PatientVisit.changeset(%{
-      "patient_id" => patient.id,
-      "creator_id" => staff.id,
-      "status" => "triage_pending"
-    })
-    |> Repo.insert()
-    |> case do
-      {:ok, visit} ->
-        record_camp_attendance(patient.id)
-        {:ok, {patient, visit}}
-
-      {:error, changeset} ->
-        {:error, changeset}
+    with {:ok, camp_id} <- require_active_camp() do
+      Ecto.Multi.new()
+      |> Ecto.Multi.insert(
+        :visit,
+        Medcamp.PatientVisits.PatientVisit.changeset(
+          %Medcamp.PatientVisits.PatientVisit{},
+          %{
+            "patient_id" => patient.id,
+            "creator_id" => staff.id,
+            "status" => "triage_pending"
+          }
+        )
+      )
+      |> Ecto.Multi.run(:attendance, fn _repo, _changes ->
+        record_camp_attendance(patient.id, camp_id)
+      end)
+      |> Repo.transaction()
+      |> case do
+        {:ok, %{visit: visit}} -> {:ok, {patient, visit}}
+        {:error, _step, changeset, _changes} -> {:error, changeset}
+      end
     end
   end
 
-  defp record_camp_attendance(patient_id) do
+  defp require_active_camp do
     case Medcamp.Camps.Scope.active_camp_id() do
-      nil -> :ok
-      camp_id -> Medcamp.CampAttendances.record(patient_id, camp_id)
+      nil -> {:error, :no_active_camp}
+      camp_id -> {:ok, camp_id}
+    end
+  end
+
+  # Runs inside the registration transaction. `record/2` is `on_conflict:
+  # :nothing`, so a repeat (patient, camp) pair is a harmless no-op and the
+  # step still succeeds.
+  defp record_camp_attendance(patient_id, camp_id) do
+    case Medcamp.CampAttendances.record(patient_id, camp_id) do
+      {:ok, attendance} -> {:ok, attendance}
+      {:error, changeset} -> {:error, changeset}
     end
   end
 

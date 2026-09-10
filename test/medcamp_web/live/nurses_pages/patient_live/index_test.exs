@@ -10,7 +10,16 @@ defmodule MedcampWeb.NursesPages.PatientIndexTest do
 
   setup %{conn: conn} do
     nurse = user_fixture(%{role: "nurse"})
-    %{conn: log_in_user(conn, nurse), nurse: nurse}
+
+    # Registration is refused with no active camp.
+    camp =
+      Medcamp.Tenancy.with_org(nurse.organisation_id, fn ->
+        {:ok, camp} = Medcamp.Camps.create_camp(%{name: "Nurse Test Camp"})
+        {:ok, camp} = Medcamp.Camps.set_active_camp(camp)
+        camp
+      end)
+
+    %{conn: log_in_user(conn, nurse), nurse: nurse, camp: camp}
   end
 
   test "nurse can add a patient and automatically open their triage visit", %{

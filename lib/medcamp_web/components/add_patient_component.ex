@@ -92,7 +92,13 @@ defmodule MedcampWeb.AddPatientComponent do
         >
           Open patient
         </.link>
-        <.button phx-click="register_visit" phx-target={@myself} phx-disable-with="Creating...">
+        <.button
+          phx-click="register_visit"
+          phx-target={@myself}
+          phx-disable-with="Creating..."
+          disabled={is_nil(@active_camp)}
+          class="disabled:opacity-50 disabled:pointer-events-none"
+        >
           {if @existing_visit, do: "Register another visit", else: "Register visit"}
         </.button>
       </div>
@@ -257,7 +263,11 @@ defmodule MedcampWeb.AddPatientComponent do
         <p :if={@upload_error} class="text-sm text-rose-600">{@upload_error}</p>
 
         <:actions>
-          <.button phx-disable-with="Saving...">
+          <.button
+            phx-disable-with="Saving..."
+            disabled={is_nil(@active_camp)}
+            class="disabled:opacity-50 disabled:pointer-events-none"
+          >
             Save Patient
           </.button>
         </:actions>
@@ -276,8 +286,9 @@ defmodule MedcampWeb.AddPatientComponent do
     >
       <.icon name="hero-exclamation-triangle" class="mt-0.5 h-4 w-4 shrink-0" />
       <span>
-        No camp is active. Patients registered now won't be attributed to any camp.
-        Activate one on <span class="font-semibold">Camps</span> first.
+        No camp is active, so registration is disabled - a patient with no camp
+        is invisible on every camp roster. Activate one on <span class="font-semibold">Camps</span>
+        first.
       </span>
     </div>
     """
@@ -494,6 +505,9 @@ defmodule MedcampWeb.AddPatientComponent do
       {:ok, {patient, _visit}} ->
         after_registration(socket, patient, "Visit created for #{full_name(patient)}")
 
+      {:error, :no_active_camp} ->
+        {:noreply, put_flash(socket, :error, "Activate a camp before registering patients.")}
+
       {:error, _changeset} ->
         {:noreply, put_flash(socket, :error, "Could not create the visit. Try again.")}
     end
@@ -658,6 +672,9 @@ defmodule MedcampWeb.AddPatientComponent do
     case Patients.register_for_camp(patient_params, socket.assigns.current_user) do
       {:ok, {patient, _visit}} ->
         after_registration(socket, patient, "Patient registered and sent to triage")
+
+      {:error, :no_active_camp} ->
+        {:noreply, put_flash(socket, :error, "Activate a camp before registering patients.")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
