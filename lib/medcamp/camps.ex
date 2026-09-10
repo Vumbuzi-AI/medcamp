@@ -205,8 +205,7 @@ defmodule Medcamp.Camps do
     Medcamp.LabResults.LabResult,
     Medcamp.DrugAllocations.DrugAllocation,
     Medcamp.DrugsGiven.DrugGiven,
-    Medcamp.DrugBatches.DrugBatch,
-    Medcamp.InventoriesReceived.InventoryReceived
+    Medcamp.DrugBatches.DrugBatch
   ]
 
   defp camp_used?(%Camp{id: id}) do
@@ -237,7 +236,7 @@ defmodule Medcamp.Camps do
 
   @doc """
   Total record count per camp as `%{camp_id => count}`, computed with one
-  `GROUP BY camp_id` per camp-scoped schema - 8 queries total, regardless of
+  `GROUP BY camp_id` per camp-scoped schema - one query each, regardless of
   how many camps there are. Use this once per page instead of an aggregate
   per row.
 
