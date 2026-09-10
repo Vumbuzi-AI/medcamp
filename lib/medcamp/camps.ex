@@ -20,6 +20,40 @@ defmodule Medcamp.Camps do
     )
   end
 
+  @doc """
+  One page of the current organisation's camps for the admin list, plus the
+  total number of camps matching `search`, as `{camps, total_count}`.
+
+  `search` matches the camp name or location (case-insensitive substring);
+  an empty string matches every camp. Ordering matches `list_camps/0`.
+  """
+  def list_camps(page, per_page, search \\ "") do
+    base = camps_search_query(search)
+    total_count = Repo.aggregate(base, :count, :id)
+    offset = max(page - 1, 0) * per_page
+
+    camps =
+      Repo.all(
+        from c in base,
+          order_by: [desc: c.is_active, desc_nulls_last: c.start_date, desc: c.inserted_at],
+          limit: ^per_page,
+          offset: ^offset
+      )
+
+    {camps, total_count}
+  end
+
+  defp camps_search_query(search) do
+    case search |> to_string() |> String.trim() do
+      "" ->
+        from(c in Camp)
+
+      term ->
+        like = "%" <> String.replace(term, ["\\", "%", "_"], &("\\" <> &1)) <> "%"
+        from(c in Camp, where: ilike(c.name, ^like) or ilike(c.location, ^like))
+    end
+  end
+
   @doc "Camps for a `<select>`: `[{label, id}, ...]`, active one first."
   def camp_options do
     Enum.map(list_camps(), fn camp ->
@@ -70,18 +104,28 @@ defmodule Medcamp.Camps do
     changeset = Camp.changeset(%Camp{}, attrs, opts)
 
     Repo.transaction(fn ->
-      case Repo.insert(changeset) do
-        {:ok, camp} ->
-          if Repo.aggregate(Camp, :count) == 1 do
-            camp |> Ecto.Changeset.change(is_active: true) |> Repo.update!()
-          else
-            camp
-          end
-
-        {:error, changeset} ->
-          Repo.rollback(changeset)
+      with {:ok, camp} <- Repo.insert(changeset),
+           {:ok, camp} <- maybe_auto_activate_first_camp(camp) do
+        camp
+      else
+        {:error, failed_changeset} -> Repo.rollback(failed_changeset)
       end
     end)
+  end
+
+  # Auto-activate an org's first-ever camp; `unique_constraint` + `Repo.update`
+  # so a concurrent activation returns `{:error, _}` instead of raising.
+  defp maybe_auto_activate_first_camp(camp) do
+    if Repo.aggregate(Camp, :count) == 1 and is_nil(get_active_camp()) do
+      camp
+      |> Ecto.Changeset.change(is_active: true)
+      |> Ecto.Changeset.unique_constraint(:is_active,
+        name: "camps_one_active_per_organisation"
+      )
+      |> Repo.update()
+    else
+      {:ok, camp}
+    end
   end
 
   def update_camp(%Camp{} = camp, attrs) do
@@ -96,6 +140,9 @@ defmodule Medcamp.Camps do
 
   Both writes are in one transaction because the database refuses two active
   camps in an organisation; doing them apart would fail halfway.
+
+  Returns `{:ok, camp}`, or `{:error, changeset}` if a concurrent activation
+  won the one-active-camp slot first (rather than raising).
   """
   def set_active_camp(%Camp{} = camp) do
     Repo.transaction(fn ->
@@ -104,9 +151,18 @@ defmodule Medcamp.Camps do
         set: [is_active: false, updated_at: DateTime.utc_now() |> DateTime.truncate(:second)]
       )
 
-      camp
-      |> Ecto.Changeset.change(is_active: true)
-      |> Repo.update!()
+      result =
+        camp
+        |> Ecto.Changeset.change(is_active: true)
+        |> Ecto.Changeset.unique_constraint(:is_active,
+          name: "camps_one_active_per_organisation"
+        )
+        |> Repo.update()
+
+      case result do
+        {:ok, updated} -> updated
+        {:error, changeset} -> Repo.rollback(changeset)
+      end
     end)
   end
 
@@ -175,11 +231,22 @@ defmodule Medcamp.Camps do
       )
       |> Repo.preload(:organisation, skip_org_id: true)
 
-    counts = record_counts_by_camp()
+    counts = record_counts_by_camp(skip_org_id: true)
     Enum.map(camps, fn camp -> {camp, Map.get(counts, camp.id, 0)} end)
   end
 
-  defp record_counts_by_camp do
+  @doc """
+  Total record count per camp as `%{camp_id => count}`, computed with one
+  `GROUP BY camp_id` per camp-scoped schema - 8 queries total, regardless of
+  how many camps there are. Use this once per page instead of an aggregate
+  per row.
+
+  Tenant-scoped by default (only the current organisation's records are
+  counted). Pass `skip_org_id: true` from the platform console.
+  """
+  def record_counts_by_camp(opts \\ []) do
+    skip_org_id = Keyword.get(opts, :skip_org_id, false)
+
     @camp_scoped_schemas
     |> Enum.flat_map(fn schema ->
       Repo.all(
@@ -188,7 +255,7 @@ defmodule Medcamp.Camps do
           group_by: r.camp_id,
           select: {r.camp_id, count(r.id)}
         ),
-        skip_org_id: true,
+        skip_org_id: skip_org_id,
         skip_camp_id: true
       )
     end)
@@ -209,8 +276,8 @@ defmodule Medcamp.Camps do
 
   Bypasses tenant scoping - superadmin only.
   """
-  def platform_camp_analytics do
-    rows = list_all_camps_with_counts()
+  def platform_camp_analytics(rows \\ nil) do
+    rows = rows || list_all_camps_with_counts()
     total_camps = length(rows)
     active_camps = Enum.count(rows, fn {camp, _} -> camp.is_active end)
     total_records = rows |> Enum.map(&elem(&1, 1)) |> Enum.sum()
@@ -254,12 +321,21 @@ defmodule Medcamp.Camps do
   A single camp from any organisation, with its organisation preloaded.
   Platform console only - bypasses tenant scoping. Returns `nil` if unknown.
   """
-  def get_camp_across_orgs(id) do
+  def get_camp_across_orgs(id) when is_integer(id) do
     case Repo.one(from(c in Camp, where: c.id == ^id), skip_org_id: true) do
       nil -> nil
       camp -> Repo.preload(camp, :organisation, skip_org_id: true)
     end
   end
+
+  def get_camp_across_orgs(id) when is_binary(id) do
+    case Integer.parse(id) do
+      {int_id, ""} -> get_camp_across_orgs(int_id)
+      _ -> nil
+    end
+  end
+
+  def get_camp_across_orgs(_), do: nil
 
   @camp_schema_labels %{
     Medcamp.PatientVisits.PatientVisit => "Patient visits",
@@ -337,16 +413,5 @@ defmodule Medcamp.Camps do
       ),
       skip_org_id: true
     )
-  end
-
-  @doc """
-  How many records a camp holds in total, for the camp list.
-  """
-  def record_count(%Camp{id: id}) do
-    @camp_scoped_schemas
-    |> Enum.map(fn schema ->
-      Repo.aggregate(from(r in schema, where: r.camp_id == ^id), :count, :id, skip_camp_id: true)
-    end)
-    |> Enum.sum()
   end
 end

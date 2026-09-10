@@ -7,9 +7,15 @@ defmodule MedcampWeb.SuperadminCampsLive.Index do
   use MedcampWeb, :superadmin_live_view
 
   alias Medcamp.Camps
+  alias Medcamp.Pagination
+
+  @per_page 10
 
   @impl true
   def mount(_params, _session, socket) do
+    # One pass: the rows feed both the table and the analytics band, so
+    # `platform_camp_analytics/1` is handed the already-computed rows rather
+    # than re-running every group-by itself.
     rows = Camps.list_all_camps_with_counts()
 
     {:ok,
@@ -17,24 +23,30 @@ defmodule MedcampWeb.SuperadminCampsLive.Index do
      |> assign(:active_tab, :camps)
      |> assign(:page_title, "Camps")
      |> assign(:search, "")
-     |> assign(:analytics, Camps.platform_camp_analytics())
+     |> assign(:page, 1)
+     |> assign(:per_page, @per_page)
+     |> assign(:analytics, Camps.platform_camp_analytics(rows))
      |> assign(:all_rows, rows)
-     |> assign(:rows, rows)}
+     |> filter()}
   end
 
   @impl true
   def handle_event("search", %{"search" => term}, socket) do
-    {:noreply, socket |> assign(:search, term) |> filter()}
+    {:noreply, socket |> assign(:search, term) |> assign(:page, 1) |> filter()}
   end
 
   def handle_event("clear_filters", _params, socket) do
-    {:noreply, socket |> assign(:search, "") |> filter()}
+    {:noreply, socket |> assign(:search, "") |> assign(:page, 1) |> filter()}
+  end
+
+  def handle_event("paginate", %{"page" => page}, socket) do
+    {:noreply, socket |> assign(:page, Pagination.normalize_page(page)) |> filter()}
   end
 
   defp filter(socket) do
     term = socket.assigns.search |> to_string() |> String.trim() |> String.downcase()
 
-    rows =
+    filtered =
       if term == "" do
         socket.assigns.all_rows
       else
@@ -44,7 +56,16 @@ defmodule MedcampWeb.SuperadminCampsLive.Index do
         end)
       end
 
-    assign(socket, :rows, rows)
+    per_page = socket.assigns.per_page
+    total_count = length(filtered)
+    total_pages = Pagination.total_pages(total_count, per_page)
+    page = Pagination.clamp_page(socket.assigns.page, total_pages)
+
+    socket
+    |> assign(:page, page)
+    |> assign(:total_count, total_count)
+    |> assign(:total_pages, total_pages)
+    |> assign(:rows, Enum.slice(filtered, (page - 1) * per_page, per_page))
   end
 
   defp org_name(%{organisation: %{name: name}}) when is_binary(name), do: name
@@ -196,6 +217,15 @@ defmodule MedcampWeb.SuperadminCampsLive.Index do
                 Camp dashboard
               </.link>
             </:action>
+
+            <:footer>
+              <.pagination
+                page={@page}
+                total_pages={@total_pages}
+                total_count={@total_count}
+                per_page={@per_page}
+              />
+            </:footer>
           </.data_table>
         <% end %>
       </.list_page>

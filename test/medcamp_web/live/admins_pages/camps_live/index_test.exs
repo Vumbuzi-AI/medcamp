@@ -78,4 +78,46 @@ defmodule MedcampWeb.AdminCampsLive.IndexTest do
 
     refute html =~ "cannot be in the past"
   end
+
+  describe "activating a camp from the list (D-9)" do
+    test "'Set active' flashes and deactivates whichever camp was active", %{conn: conn} do
+      # First camp auto-activates (Camps.create_camp/1); the second does not.
+      {:ok, first} = Camps.create_camp(%{name: "First Camp"})
+      {:ok, second} = Camps.create_camp(%{name: "Second Camp"})
+      assert first.is_active
+      refute second.is_active
+
+      {:ok, view, _html} = live(conn, ~p"/admin/camps")
+
+      html =
+        view
+        |> element("a[phx-click='activate'][phx-value-id='#{second.id}']")
+        |> render_click()
+
+      assert html =~ "Second Camp is now the active camp."
+      assert Camps.get_active_camp().id == second.id
+      refute Camps.get_camp!(first.id).is_active
+    end
+
+    @tag :known_bug
+    @tag :skip
+    test "DESIRED: a losing concurrent set_active_camp returns {:error, _} not a raise (C-4)" do
+      # CURRENT (C-4): Camps.set_active_camp/1 (and create_camp/1 auto-activate)
+      # do `Repo.update!` inside the transaction, so when two requests race for
+      # the partial unique index `camps_one_active_per_org`, the loser raises
+      # Ecto.ConstraintError / Postgrex.Error rather than returning an error
+      # tuple the caller can handle. Unblocked when set_active_camp/1 switches
+      # to `unique_constraint` + `Repo.update` + `Repo.rollback`.
+      {:ok, a} = Camps.create_camp(%{name: "Camp A"})
+      {:ok, b} = Camps.create_camp(%{name: "Camp B"})
+
+      # Simulate the two writes interleaving so both try to end up active.
+      task = Task.async(fn -> Camps.set_active_camp(a) end)
+      first = Camps.set_active_camp(b)
+      second = Task.await(task)
+
+      assert match?({:ok, _}, first)
+      assert match?({:error, _}, second) or match?({:ok, _}, second)
+    end
+  end
 end

@@ -84,4 +84,27 @@ defmodule MedcampWeb.SuperadminCampsLive.IndexTest do
     assert html =~ "No camps"
     assert html =~ "No organisation has created a camp yet."
   end
+
+  describe "authorization (Phase 7 gap 2)" do
+    test "a plain admin (non-superadmin) is redirected away from the camps console" do
+      admin = user_fixture(%{role: "admin"})
+      conn = log_in_user(Phoenix.ConnTest.build_conn(), admin)
+
+      assert {:error, {:redirect, %{to: "/admin/dashboard"}}} =
+               live(conn, ~p"/superadmin/camps")
+    end
+
+    test "a signed-in non-admin staff user is redirected away from the camps console" do
+      nurse = user_fixture(%{role: "nurse"})
+      conn = log_in_user(Phoenix.ConnTest.build_conn(), nurse)
+
+      assert {:error, {:redirect, %{to: "/nurse/scan"}}} =
+               live(conn, ~p"/superadmin/camps")
+    end
+
+    test "an unauthenticated visitor is redirected to log in" do
+      assert {:error, {:redirect, %{to: "/users/log_in"}}} =
+               live(Phoenix.ConnTest.build_conn(), ~p"/superadmin/camps")
+    end
+  end
 end

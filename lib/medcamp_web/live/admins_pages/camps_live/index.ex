@@ -13,6 +13,9 @@ defmodule MedcampWeb.AdminCampsLive.Index do
 
   alias Medcamp.Camps
   alias Medcamp.Camps.Camp
+  alias Medcamp.Pagination
+
+  @per_page 10
 
   @impl true
   def mount(_params, _session, socket) do
@@ -21,6 +24,8 @@ defmodule MedcampWeb.AdminCampsLive.Index do
      |> assign(:active_tab, :camps)
      |> assign(:page_title, "Camps")
      |> assign(:search, "")
+     |> assign(:page, 1)
+     |> assign(:per_page, @per_page)
      |> load_camps()}
   end
 
@@ -51,7 +56,11 @@ defmodule MedcampWeb.AdminCampsLive.Index do
 
   @impl true
   def handle_event("search", %{"search" => term}, socket) do
-    {:noreply, socket |> assign(:search, term) |> load_camps()}
+    {:noreply, socket |> assign(:search, term) |> assign(:page, 1) |> load_camps()}
+  end
+
+  def handle_event("paginate", %{"page" => page}, socket) do
+    {:noreply, socket |> assign(:page, Pagination.normalize_page(page)) |> load_camps()}
   end
 
   def handle_event("validate", %{"camp" => params}, socket) do
@@ -66,13 +75,19 @@ defmodule MedcampWeb.AdminCampsLive.Index do
   end
 
   def handle_event("activate", %{"id" => id}, socket) do
-    camp = Camps.get_camp!(id)
-    {:ok, camp} = Camps.set_active_camp(camp)
+    case id |> Camps.get_camp!() |> Camps.set_active_camp() do
+      {:ok, camp} ->
+        {:noreply,
+         socket
+         |> load_camps()
+         |> put_flash(:info, "#{camp.name} is now the active camp.")}
 
-    {:noreply,
-     socket
-     |> load_camps()
-     |> put_flash(:info, "#{camp.name} is now the active camp.")}
+      {:error, _changeset} ->
+        {:noreply,
+         socket
+         |> load_camps()
+         |> put_flash(:error, "Could not activate this camp. Please try again.")}
+    end
   end
 
   def handle_event("deactivate", _params, socket) do
@@ -143,23 +158,27 @@ defmodule MedcampWeb.AdminCampsLive.Index do
   defp today_iso, do: Date.utc_today() |> Date.to_iso8601()
 
   defp load_camps(socket) do
-    all_camps = Camps.list_camps()
-    term = socket.assigns[:search] |> to_string() |> String.trim() |> String.downcase()
+    per_page = socket.assigns.per_page
+    search = socket.assigns[:search] || ""
+
+    {camps, total_count} = Camps.list_camps(socket.assigns.page, per_page, search)
+    total_pages = Pagination.total_pages(total_count, per_page)
+    page = Pagination.clamp_page(socket.assigns.page, total_pages)
 
     camps =
-      if term == "" do
-        all_camps
-      else
-        Enum.filter(all_camps, fn c ->
-          String.contains?(String.downcase(c.name || ""), term) or
-            String.contains?(String.downcase(c.location || ""), term)
-        end)
-      end
+      if page == socket.assigns.page,
+        do: camps,
+        else: Camps.list_camps(page, per_page, search) |> elem(0)
+
+    record_counts = Camps.record_counts_by_camp()
 
     socket
     |> assign(:camps, camps)
-    |> assign(:camp_options, all_camps)
-    |> assign(:active_camp, Enum.find(all_camps, & &1.is_active))
+    |> assign(:record_counts, record_counts)
+    |> assign(:page, page)
+    |> assign(:total_count, total_count)
+    |> assign(:total_pages, total_pages)
+    |> assign(:active_camp, Camps.get_active_camp())
   end
 
   @impl true
@@ -224,7 +243,9 @@ defmodule MedcampWeb.AdminCampsLive.Index do
             Inactive
           </span>
         </:col>
-        <:col :let={camp} label="Records" align="right">{Camps.record_count(camp)}</:col>
+        <:col :let={camp} label="Records" align="right">
+          {Map.get(@record_counts, camp.id, 0)}
+        </:col>
 
         <:action :let={camp}>
           <.link
@@ -258,6 +279,15 @@ defmodule MedcampWeb.AdminCampsLive.Index do
             Delete
           </.link>
         </:action>
+
+        <:footer>
+          <.pagination
+            page={@page}
+            total_pages={@total_pages}
+            total_count={@total_count}
+            per_page={@per_page}
+          />
+        </:footer>
       </.data_table>
 
       <.modal

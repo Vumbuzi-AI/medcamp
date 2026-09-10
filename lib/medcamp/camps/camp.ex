@@ -41,7 +41,11 @@ defmodule Medcamp.Camps.Camp do
     |> validate_dates()
     |> maybe_reject_past_start(opts[:reject_past_start])
     |> put_org_id()
-    |> unique_constraint([:organisation_id, :name],
+    # The index is on `(organisation_id, name)`, but the error has to land on
+    # `:name` - the only one of the two the camp form renders - or the failure
+    # is invisible (the changeset is invalid, but nothing shows).
+    |> unique_constraint(:name,
+      name: :camps_organisation_id_name_index,
       message: "a camp with this name already exists"
     )
   end
