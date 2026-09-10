@@ -412,8 +412,6 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationFormComponent do
         brand not in selected_brands
       end)
 
-    IO.inspect(searched_drugs, label: "Searched drugs")
-
     {:noreply,
      socket
      |> assign(:searched_query, query)

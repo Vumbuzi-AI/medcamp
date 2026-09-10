@@ -133,6 +133,40 @@ defmodule Medcamp.OrganisationSignupTest do
       assert "must be a valid email address" in errors_on(changeset).email
       assert "is not a valid phone number" in errors_on(changeset).phone_number
     end
+
+    test "ignores privileged fields smuggled into the signup payload (mass-assignment guard)" do
+      hostile_org = %{
+        "name" => "Privilege Escalation Camp",
+        "email" => "evil@example.com",
+        "contact_name" => "Mallory",
+        "is_active" => true,
+        "approved_at" => DateTime.utc_now() |> DateTime.truncate(:second),
+        "rejected_at" => nil,
+        "is_superadmin" => true,
+        "role" => "superadmin"
+      }
+
+      hostile_admin = %{
+        "email" => "mallory@example.com",
+        "password" => "correct horse battery",
+        "password_confirmation" => "correct horse battery",
+        "role" => "superadmin",
+        "is_superadmin" => true,
+        "is_active" => true
+      }
+
+      assert {:ok, %{organisation: org, admin: admin}} =
+               Organisations.register_organisation(hostile_org, hostile_admin)
+
+      # The organisation is still just a pending signup, not a live tenant.
+      refute org.is_active
+      assert is_nil(org.approved_at)
+      assert Organisations.pending?(org)
+
+      # The first admin is a plain org admin, never a platform superadmin.
+      assert admin.role == "admin"
+      refute admin.is_superadmin
+    end
   end
 
   describe "admin invitations" do

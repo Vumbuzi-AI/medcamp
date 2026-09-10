@@ -367,7 +367,7 @@ defmodule Medcamp.Patients do
 
   def list_medical_camp_patients(date \\ Date.utc_today()) do
     medical_camp_patients_query()
-    |> where([p], fragment("DATE(?)", p.inserted_at) == ^date)
+    |> where([p], fragment("DATE(? AT TIME ZONE 'Africa/Nairobi')", p.inserted_at) == ^date)
     |> order_by([p], asc: p.inserted_at)
     |> Repo.all()
     |> Enum.map(&Patient.with_age/1)
@@ -375,17 +375,6 @@ defmodule Medcamp.Patients do
 
   def list_all_medical_camp_patients do
     medical_camp_patients_query()
-    |> order_by([p], asc: p.inserted_at)
-    |> Repo.all()
-    |> Enum.map(&Patient.with_age/1)
-  end
-
-  def list_medical_camp_patients_for_dates(dates) when is_list(dates) do
-    medical_camp_patients_query()
-    |> where(
-      [p],
-      fragment("DATE(? AT TIME ZONE 'Africa/Nairobi')", p.inserted_at) in ^dates
-    )
     |> order_by([p], asc: p.inserted_at)
     |> Repo.all()
     |> Enum.map(&Patient.with_age/1)
@@ -719,10 +708,14 @@ defmodule Medcamp.Patients do
   end
 
   def send_pin(patient) do
-    Medcamp.Postal.deliver_pin_to_patient(patient.email, patient.pin)
+    Medcamp.Postal.deliver_pin_to_patient(patient.email, patient.pin,
+      first_name: patient.first_name
+    )
+
+    product_name = Application.get_env(:medcamp, :product_name, "Tibasasa")
 
     Medcamp.Advanta.send_message(
-      "Hello #{patient.first_name}, thank you for visiting GHCE. Your PIN is #{patient.pin}. Please use this PIN for your next visit.",
+      "Hello #{patient.first_name}, thank you for visiting #{product_name}. Your PIN is #{patient.pin}. Please use this PIN for your next visit.",
       patient.phone_number
     )
   end

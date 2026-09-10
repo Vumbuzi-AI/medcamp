@@ -68,8 +68,6 @@ defmodule MedcampWeb.ScanComponent do
   def handle_event("check", %{"value" => %{"qr" => qr_code_value}}, socket) do
     qr_code_value = extract_gsrn(qr_code_value)
 
-    IO.inspect(qr_code_value, label: "QR Code Value")
-
     case Patients.get_patient_by_gsrn(qr_code_value) do
       nil ->
         {:noreply,
