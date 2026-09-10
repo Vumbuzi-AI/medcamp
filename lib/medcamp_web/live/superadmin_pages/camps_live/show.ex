@@ -39,8 +39,7 @@ defmodule MedcampWeb.SuperadminCampsLive.Show do
 
   @impl true
   def handle_event("tab", %{"tab" => tab}, socket) do
-    tab = String.to_existing_atom(tab)
-    tab = if tab in @tabs, do: tab, else: :overview
+    tab = Enum.find(@tabs, :overview, &(to_string(&1) == tab))
 
     {:noreply, socket |> assign(:tab, tab) |> load_tab(tab)}
   end
@@ -69,7 +68,7 @@ defmodule MedcampWeb.SuperadminCampsLive.Show do
     <div class="space-y-5">
       <.link
         navigate={~p"/superadmin/camps"}
-        class="inline-flex items-center gap-1 text-sm font-semibold text-[#0C2765] transition-colors duration-150 hover:text-[#52B2D8]"
+        class="inline-flex items-center gap-1 text-sm font-semibold text-[#0C2765] transition-colors duration-150 hover:text-[#1E7FA6]"
       >
         <Heroicons.icon name="arrow-left" type="outline" class="h-4 w-4" /> All camps
       </.link>
@@ -98,19 +97,35 @@ defmodule MedcampWeb.SuperadminCampsLive.Show do
               <span :if={Camps.Camp.date_range(@camp)}>· {Camps.Camp.date_range(@camp)}</span>
             </p>
           </div>
-          <.link
-            navigate={~p"/superadmin/organisations/#{@camp.organisation_id}/medical-camp"}
-            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#0C2765] px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-[#16418f]"
-          >
-            <Heroicons.icon name="chart-bar-square" type="outline" class="h-4 w-4" /> Camp dashboard
-          </.link>
+          <div class="flex shrink-0 items-center gap-2">
+            <.link
+              navigate={~p"/superadmin/organisations/#{@camp.organisation_id}"}
+              class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-[#0C2765] transition-colors duration-150 hover:bg-slate-50"
+            >
+              <Heroicons.icon name="building-office-2" type="outline" class="h-4 w-4" /> Organisation
+            </.link>
+            <.link
+              navigate={~p"/superadmin/organisations/#{@camp.organisation_id}/medical-camp"}
+              class="inline-flex items-center justify-center gap-2 rounded-full bg-[#0C2765] px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-[#16418f]"
+            >
+              <Heroicons.icon name="chart-bar-square" type="outline" class="h-4 w-4" /> Camp dashboard
+            </.link>
+          </div>
         </div>
       </div>
 
-      <div class="flex gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-card">
+      <div
+        role="tablist"
+        aria-label="Camp detail sections"
+        class="flex gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-card"
+      >
         <button
           :for={{tab, label} <- [overview: "Overview", patients: "Patients", staff: "Staff"]}
           type="button"
+          role="tab"
+          id={"camp-tab-#{tab}"}
+          aria-selected={to_string(@tab == tab)}
+          aria-controls={"camp-panel-#{tab}"}
           phx-click="tab"
           phx-value-tab={tab}
           class={[
@@ -123,7 +138,14 @@ defmodule MedcampWeb.SuperadminCampsLive.Show do
         </button>
       </div>
 
-      <div :if={@tab == :overview} class="space-y-5">
+      <div
+        :if={@tab == :overview}
+        id="camp-panel-overview"
+        role="tabpanel"
+        aria-labelledby="camp-tab-overview"
+        tabindex="0"
+        class="space-y-5"
+      >
         <div class="grid gap-5 sm:grid-cols-3">
           <div class="rounded-2xl border border-slate-200 bg-white shadow-card p-5">
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Patients</p>
@@ -157,42 +179,52 @@ defmodule MedcampWeb.SuperadminCampsLive.Show do
         </p>
       </div>
 
-      <.data_table
+      <div
         :if={@tab == :patients}
-        id="camp-patients"
-        rows={@camp_patients || []}
-        row_id={&"camp-patient-#{&1.patient.id}"}
+        id="camp-panel-patients"
+        role="tabpanel"
+        aria-labelledby="camp-tab-patients"
+        tabindex="0"
       >
-        <:col :let={row} label="Patient" class="font-medium text-slate-900">
-          {patient_name(row.patient)}
-        </:col>
-        <:col :let={row} label="GSRN" class="font-mono text-xs text-slate-500">
-          {row.patient.gsrn}
-        </:col>
-        <:col :let={row} label="First seen" hide_below="sm">
-          {row.first_seen_at && Calendar.strftime(row.first_seen_at, "%Y-%m-%d")}
-        </:col>
-        <:empty>No patients recorded for this camp yet.</:empty>
-      </.data_table>
+        <.data_table
+          id="camp-patients"
+          rows={@camp_patients || []}
+          row_id={&"camp-patient-#{&1.patient.id}"}
+        >
+          <:col :let={row} label="Patient" class="font-medium text-slate-900">
+            {patient_name(row.patient)}
+          </:col>
+          <:col :let={row} label="GSRN" class="font-mono text-xs text-slate-500">
+            {row.patient.gsrn}
+          </:col>
+          <:col :let={row} label="First seen" hide_below="sm">
+            {row.first_seen_at && Calendar.strftime(row.first_seen_at, "%Y-%m-%d")}
+          </:col>
+          <:empty>No patients recorded for this camp yet.</:empty>
+        </.data_table>
+      </div>
 
-      <.data_table
+      <div
         :if={@tab == :staff}
-        id="camp-staff"
-        rows={@staff || []}
-        row_id={&"camp-staff-#{&1.id}"}
+        id="camp-panel-staff"
+        role="tabpanel"
+        aria-labelledby="camp-tab-staff"
+        tabindex="0"
       >
-        <:col :let={user} label="Name">
-          <p class="text-sm font-medium text-slate-900">{user.name}</p>
-          <p class="text-xs text-slate-500">{user.email}</p>
-        </:col>
-        <:col :let={user} label="Role" class="capitalize">
-          {user.role}
-        </:col>
-        <:col :let={user} label="Status" class="capitalize" hide_below="sm">
-          {User.status(user)}
-        </:col>
-        <:empty>This organisation has no staff accounts.</:empty>
-      </.data_table>
+        <.data_table id="camp-staff" rows={@staff || []} row_id={&"camp-staff-#{&1.id}"}>
+          <:col :let={user} label="Name">
+            <p class="text-sm font-medium text-slate-900">{user.name}</p>
+            <p class="text-xs text-slate-500">{user.email}</p>
+          </:col>
+          <:col :let={user} label="Role" class="capitalize">
+            {user.role}
+          </:col>
+          <:col :let={user} label="Status" class="capitalize" hide_below="sm">
+            {User.status(user)}
+          </:col>
+          <:empty>This organisation has no staff accounts.</:empty>
+        </.data_table>
+      </div>
     </div>
     """
   end

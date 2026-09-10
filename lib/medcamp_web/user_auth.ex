@@ -323,7 +323,8 @@ defmodule MedcampWeb.UserAuth do
     socket = mount_current_user(socket, session)
 
     if match?(%{is_superadmin: true}, socket.assigns.current_user) do
-      {:cont, socket}
+      # Platform console renders on the stock palette; the org drilldown re-assigns this.
+      {:cont, Phoenix.Component.assign(socket, :current_organisation, nil)}
     else
       {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/users/log_in")}
     end

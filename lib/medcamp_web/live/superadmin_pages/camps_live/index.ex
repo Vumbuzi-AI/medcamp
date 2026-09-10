@@ -1,23 +1,24 @@
 defmodule MedcampWeb.SuperadminCampsLive.Index do
   @moduledoc """
-  Platform-wide view of every camp across every organisation. Read-only -
-  managing a camp still happens inside its organisation (`/admin/camps`).
+  Platform-wide view of every camp across every organisation. Mostly a
+  read-only console - editing / activating a camp still happens inside its
+  organisation (`/admin/camps`) - but a superadmin can create a camp here for
+  any organisation, choosing the organisation from a picker; the create then
+  runs inside that organisation's tenant just as the org admin's would.
   """
 
   use MedcampWeb, :superadmin_live_view
 
   alias Medcamp.Camps
+  alias Medcamp.Camps.Camp
+  alias Medcamp.Organisations
   alias Medcamp.Pagination
+  alias Medcamp.Tenancy
 
   @per_page 10
 
   @impl true
   def mount(_params, _session, socket) do
-    # One pass: the rows feed both the table and the analytics band, so
-    # `platform_camp_analytics/1` is handed the already-computed rows rather
-    # than re-running every group-by itself.
-    rows = Camps.list_all_camps_with_counts()
-
     {:ok,
      socket
      |> assign(:active_tab, :camps)
@@ -25,10 +26,19 @@ defmodule MedcampWeb.SuperadminCampsLive.Index do
      |> assign(:search, "")
      |> assign(:page, 1)
      |> assign(:per_page, @per_page)
-     |> assign(:analytics, Camps.platform_camp_analytics(rows))
-     |> assign(:all_rows, rows)
+     |> assign(:org_options, org_options())
+     |> assign(:form, to_form(camp_form(%{}), as: "camp"))
+     |> assign(:all_rows, Camps.list_all_camps_with_counts())
      |> filter()}
   end
+
+  @impl true
+  def handle_params(_params, _uri, socket) do
+    {:noreply, assign(socket, :page_title, page_title(socket.assigns.live_action))}
+  end
+
+  defp page_title(:new), do: "New camp"
+  defp page_title(_), do: "Camps"
 
   @impl true
   def handle_event("search", %{"search" => term}, socket) do
@@ -41,6 +51,102 @@ defmodule MedcampWeb.SuperadminCampsLive.Index do
 
   def handle_event("paginate", %{"page" => page}, socket) do
     {:noreply, socket |> assign(:page, Pagination.normalize_page(page)) |> filter()}
+  end
+
+  def handle_event("delete", %{"id" => id}, socket) do
+    {id, _} = Integer.parse(to_string(id))
+
+    case Enum.find(socket.assigns.all_rows, fn {c, _} -> c.id == id end) do
+      {camp, _count} ->
+        result = Tenancy.with_org(camp.organisation_id, fn -> Camps.delete_camp(camp) end)
+
+        socket =
+          case result do
+            {:ok, _} ->
+              socket
+              |> put_flash(:info, "#{camp.name} deleted.")
+              |> assign(:all_rows, Camps.list_all_camps_with_counts())
+              |> filter()
+
+            {:error, :camp_has_records} ->
+              put_flash(socket, :error, "#{camp.name} has records and can't be deleted.")
+
+            {:error, _} ->
+              put_flash(socket, :error, "Could not delete #{camp.name}.")
+          end
+
+        {:noreply, socket}
+
+      _ ->
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("validate", %{"camp" => params}, socket) do
+    changeset = %{camp_form(params) | action: :validate}
+    {:noreply, assign(socket, :form, to_form(changeset, as: "camp"))}
+  end
+
+  def handle_event("save", %{"camp" => params}, socket) do
+    with {org_id, _} <- Integer.parse(to_string(params["organisation_id"])),
+         camp_attrs = Map.drop(params, ["organisation_id"]),
+         {:ok, camp} <-
+           Tenancy.with_org(org_id, fn -> Camps.create_camp(camp_attrs, camp_opts()) end) do
+      {:noreply,
+       socket
+       |> put_flash(:info, "#{camp.name} created for #{camp_org_name(org_id)}.")
+       |> assign(:all_rows, Camps.list_all_camps_with_counts())
+       |> assign(:search, "")
+       |> assign(:page, 1)
+       |> assign(:form, to_form(camp_form(%{}), as: "camp"))
+       |> filter()
+       |> push_patch(to: ~p"/superadmin/camps")}
+    else
+      {:error, %Ecto.Changeset{} = changeset} ->
+        merged =
+          changeset
+          |> Ecto.Changeset.cast(params, [:organisation_id])
+          |> Ecto.Changeset.validate_required([:organisation_id])
+
+        {:noreply, assign(socket, :form, to_form(%{merged | action: :insert}, as: "camp"))}
+
+      _ ->
+        {:noreply,
+         assign(socket, :form, to_form(%{camp_form(params) | action: :validate}, as: "camp"))}
+    end
+  end
+
+  # The org is a real cast field here so the picker keeps its value; the full
+  # camp changeset only runs once one is chosen (else `put_org_id` would raise).
+  defp camp_form(params) do
+    base =
+      %Camp{}
+      |> Ecto.Changeset.cast(params, [:organisation_id])
+      |> Ecto.Changeset.validate_required([:organisation_id])
+
+    case Ecto.Changeset.get_field(base, :organisation_id) do
+      org_id when is_integer(org_id) ->
+        Tenancy.with_org(org_id, fn -> Camps.change_camp(%Camp{}, params, camp_opts()) end)
+        |> Ecto.Changeset.cast(params, [:organisation_id])
+        |> Ecto.Changeset.validate_required([:organisation_id])
+
+      _ ->
+        base
+    end
+  end
+
+  defp camp_opts, do: [reject_past_start: true]
+
+  defp org_options do
+    Organisations.list_organisations()
+    |> Enum.map(&{&1.name, &1.id})
+  end
+
+  defp camp_org_name(org_id) do
+    case Enum.find(org_options(), fn {_name, id} -> id == org_id end) do
+      {name, _} -> name
+      _ -> "the organisation"
+    end
   end
 
   defp filter(socket) do
@@ -75,75 +181,20 @@ defmodule MedcampWeb.SuperadminCampsLive.Index do
   def render(assigns) do
     ~H"""
     <div class="space-y-5">
-      <div :if={@search == ""} class="space-y-5">
-        <.summary_card_grid cards={kpi_cards(@analytics)} />
-
-        <div class="grid gap-5 lg:grid-cols-2">
-          <div class="rounded-2xl border border-slate-200 bg-white shadow-card p-5">
-            <h2 class="text-base font-semibold text-[#0C2765]">Busiest camps</h2>
-            <p class="mt-1 text-xs text-slate-500">By total clinical records logged.</p>
-            <ol class="mt-4 space-y-2">
-              <li :if={@analytics.top_camps == []} class="text-sm text-slate-500">
-                No camp activity yet.
-              </li>
-              <li
-                :for={{{camp, count}, idx} <- Enum.with_index(@analytics.top_camps, 1)}
-                class="flex items-center gap-3"
-              >
-                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#e9f6fb] text-xs font-bold text-[#0C2765]">
-                  {idx}
-                </span>
-                <span class="min-w-0 flex-1">
-                  <span class="block truncate text-sm font-medium text-slate-900">{camp.name}</span>
-                  <span class="block truncate text-xs text-slate-500">{org_name(camp)}</span>
-                </span>
-                <span class="shrink-0 text-sm font-semibold text-slate-900">{count}</span>
-              </li>
-            </ol>
-          </div>
-
-          <div class="rounded-2xl border border-slate-200 bg-white shadow-card p-5">
-            <h2 class="text-base font-semibold text-[#0C2765]">New vs returning patients</h2>
-            <p class="mt-1 text-xs text-slate-500">
-              Returning = seen at more than one camp in the same organisation.
-            </p>
-            <% total = max(@analytics.patients, 1) %>
-            <div class="mt-4 flex h-3 overflow-hidden rounded-full bg-slate-100">
-              <div
-                class="bg-[#0C2765]"
-                style={"width: #{Float.round(@analytics.new_patients / total * 100, 1)}%"}
-              >
-              </div>
-              <div
-                class="bg-[#52B2D8]"
-                style={"width: #{Float.round(@analytics.returning_patients / total * 100, 1)}%"}
-              >
-              </div>
-            </div>
-            <div class="mt-3 flex items-center justify-between text-sm">
-              <span class="flex items-center gap-1.5 text-slate-600">
-                <span class="h-2.5 w-2.5 rounded-full bg-[#0C2765]"></span>
-                New <span class="font-semibold text-slate-900">{@analytics.new_patients}</span>
-              </span>
-              <span class="flex items-center gap-1.5 text-slate-600">
-                <span class="h-2.5 w-2.5 rounded-full bg-[#52B2D8]"></span>
-                Returning
-                <span class="font-semibold text-slate-900">{@analytics.returning_patients}</span>
-              </span>
-            </div>
-            <p class="mt-4 text-xs text-slate-500">
-              Avg <span class="font-semibold text-slate-700">{@analytics.avg_records_per_camp}</span>
-              records per camp.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <.list_page
         icon_path="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
         title="Camps"
         subtitle={"#{length(@all_rows)} camp#{if length(@all_rows) != 1, do: "s", else: ""} across all organisations"}
       >
+        <:actions>
+          <.link
+            patch={~p"/superadmin/camps/new"}
+            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#0C2765] px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-[#16418f]"
+          >
+            <Heroicons.icon name="plus" type="outline" class="h-4 w-4" /> New camp
+          </.link>
+        </:actions>
+
         <:toolbar>
           <form phx-change="search" class="flex-1">
             <.search_input name="search" value={@search} placeholder="Search by camp or organisation" />
@@ -197,7 +248,7 @@ defmodule MedcampWeb.SuperadminCampsLive.Index do
             <:col :let={{_camp, count}} label="Records" align="right">
               <span class="font-semibold text-slate-900">{count}</span>
             </:col>
-            <:action :let={{camp, _count}}>
+            <:action :let={{camp, count}}>
               <.link
                 navigate={~p"/superadmin/camps/#{camp.id}"}
                 class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-[#0C2765] transition-colors duration-150 hover:text-[#52B2D8]"
@@ -205,16 +256,14 @@ defmodule MedcampWeb.SuperadminCampsLive.Index do
                 View
               </.link>
               <.link
-                navigate={~p"/superadmin/organisations/#{camp.organisation_id}"}
-                class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-[#0C2765] transition-colors duration-150 hover:text-[#52B2D8]"
+                :if={count == 0}
+                phx-click="delete"
+                phx-value-id={camp.id}
+                data-confirm-title={"Delete “#{camp.name}”?"}
+                data-confirm-message="This camp has no records. Deleting it can't be undone."
+                class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-rose-600 transition-colors duration-150 hover:text-rose-700"
               >
-                Organisation
-              </.link>
-              <.link
-                navigate={~p"/superadmin/organisations/#{camp.organisation_id}/medical-camp"}
-                class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-white bg-[#0C2765] transition-colors duration-150 hover:bg-[#16418f]"
-              >
-                Camp dashboard
+                Delete
               </.link>
             </:action>
 
@@ -229,26 +278,48 @@ defmodule MedcampWeb.SuperadminCampsLive.Index do
           </.data_table>
         <% end %>
       </.list_page>
+
+      <.modal
+        :if={@live_action == :new}
+        id="superadmin-camp-modal"
+        show
+        on_cancel={JS.patch(~p"/superadmin/camps")}
+      >
+        <.simple_form for={@form} as="camp" phx-change="validate" phx-submit="save">
+          <h2 class="text-lg font-semibold text-[#0C2765]">New camp</h2>
+          <p class="text-sm text-slate-500">
+            Choose the organisation this camp belongs to. It is created inside that
+            organisation just as its own admin would - the first camp an organisation
+            has becomes its active one.
+          </p>
+
+          <.input
+            field={@form[:organisation_id]}
+            type="select"
+            label="Organisation"
+            prompt="Select organisation"
+            options={@org_options}
+            required
+          />
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <.input field={@form[:name]} type="text" label="Name" required />
+            <.input field={@form[:location]} type="text" label="Location" />
+          </div>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <.input field={@form[:start_date]} type="date" label="Start date" />
+            <.input field={@form[:end_date]} type="date" label="End date" />
+          </div>
+          <.input field={@form[:description]} type="textarea" label="Description" />
+
+          <:actions>
+            <.link patch={~p"/superadmin/camps"} class="text-sm text-slate-600 hover:underline">
+              Cancel
+            </.link>
+            <.button phx-disable-with="Saving...">Create camp</.button>
+          </:actions>
+        </.simple_form>
+      </.modal>
     </div>
     """
-  end
-
-  defp kpi_cards(analytics) do
-    summary_cards_for(
-      [
-        :platform_total_camps,
-        :platform_active_camps,
-        :platform_camp_patients,
-        :platform_camp_records,
-        :platform_returning_patients
-      ],
-      %{
-        platform_total_camps: {analytics.total_camps, "Across all organisations"},
-        platform_active_camps: {analytics.active_camps, "Currently accepting records"},
-        platform_camp_patients: {analytics.patients, "Distinct patients with attendance"},
-        platform_camp_records: {analytics.total_records, "Clinical rows logged"},
-        platform_returning_patients: {analytics.returning_patients, "Seen at more than one camp"}
-      }
-    )
   end
 end

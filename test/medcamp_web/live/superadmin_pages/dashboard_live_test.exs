@@ -44,6 +44,38 @@ defmodule MedcampWeb.SuperadminDashboardLiveTest do
     assert html =~ organisation.name
   end
 
+  test "the platform dashboard shows the camp KPI cards (moved from /superadmin/camps)", %{
+    conn: conn
+  } do
+    conn = log_in_user(conn, superadmin_fixture())
+
+    {:ok, _view, html} = live(conn, ~p"/superadmin/dashboard")
+
+    assert html =~ "Total Camps"
+    assert html =~ "Active Camps"
+    assert html =~ "Patients Across Camps"
+    assert html =~ "Camp Records"
+    assert html =~ "Returning Patients"
+  end
+
+  test "the platform console renders on the stock palette, not the superadmin's own org colours",
+       %{conn: conn, organisation: organisation} do
+    organisation
+    |> Ecto.Changeset.change(%{primary_color: "#aa0000", accent_color: "#00aa00"})
+    |> Repo.update!()
+
+    superadmin =
+      superadmin_fixture()
+      |> Ecto.Changeset.change(%{organisation_id: organisation.id})
+      |> Repo.update!()
+
+    conn = log_in_user(conn, superadmin)
+    {:ok, _view, html} = live(conn, ~p"/superadmin/dashboard")
+
+    assert html =~ "--brand-primary: #0C2765"
+    refute html =~ "#aa0000"
+  end
+
   test "superadmin can open the organisations management page", %{conn: conn} do
     conn = log_in_user(conn, superadmin_fixture())
 
@@ -311,5 +343,35 @@ defmodule MedcampWeb.SuperadminDashboardLiveTest do
     assert html =~ "Back to organisations"
     assert html =~ organisation.name
     assert html =~ "Medical Camp Dashboard"
+  end
+
+  test "the drilldown has a camp picker and renders in the organisation's palette", %{
+    conn: conn,
+    organisation: organisation
+  } do
+    {:ok, organisation} = Organisations.approve(organisation)
+
+    organisation
+    |> Ecto.Changeset.change(%{primary_color: "#3b2f8f"})
+    |> Repo.update!()
+
+    {:ok, camp} =
+      Medcamp.Tenancy.with_org(organisation.id, fn ->
+        Medcamp.Camps.create_camp(%{"name" => "Outreach One"})
+      end)
+
+    conn = log_in_user(conn, superadmin_fixture())
+
+    {:ok, view, html} =
+      live(conn, ~p"/superadmin/organisations/#{organisation.id}/medical-camp")
+
+    assert html =~ "--brand-primary: #3b2f8f"
+
+    assert has_element?(view, "select#superadmin-camp option", "Outreach One")
+
+    child = find_live_child(view, "superadmin-medical-camp-#{organisation.id}")
+
+    assert render_change(child, "superadmin_pick_camp", %{"camp_id" => camp.id}) =~
+             "Medical Camp Dashboard"
   end
 end

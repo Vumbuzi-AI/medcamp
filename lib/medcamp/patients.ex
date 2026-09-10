@@ -422,6 +422,26 @@ defmodule Medcamp.Patients do
   end
 
   @doc """
+  First and last camp-attendance dates (Africa/Nairobi) for `camp_id`, as a
+  `Date.Range`, or `nil` when the camp has no attendance yet. Lets a dashboard
+  derive day tabs for camps whose own start/end dates were never set.
+  """
+  def camp_attendance_date_range(camp_id) do
+    from(a in Medcamp.Camps.CampAttendance,
+      where: a.camp_id == ^camp_id,
+      select: {
+        type(fragment("MIN(DATE(? AT TIME ZONE 'Africa/Nairobi'))", a.first_seen_at), :date),
+        type(fragment("MAX(DATE(? AT TIME ZONE 'Africa/Nairobi'))", a.first_seen_at), :date)
+      }
+    )
+    |> Repo.one()
+    |> case do
+      {%Date{} = first, %Date{} = last} -> Date.range(first, last)
+      _ -> nil
+    end
+  end
+
+  @doc """
   The active camp's roster for the reception list: patients with a
   `camp_attendances` row for `camp_id`, most recently seen first, with the
   shared search filter applied, paginated. A fresh camp starts empty; the

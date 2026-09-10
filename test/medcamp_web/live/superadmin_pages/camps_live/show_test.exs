@@ -76,6 +76,19 @@ defmodule MedcampWeb.SuperadminCampsLive.ShowTest do
     end
   end
 
+  describe "a crafted tab value (finding C-2)" do
+    test "an unknown phx-value-tab falls back to overview instead of raising", %{conn: conn} do
+      {_org, camp} = camp_in("Gamma Org", "Gamma Camp")
+
+      {:ok, view, _html} = live(conn, ~p"/superadmin/camps/#{camp.id}")
+
+      html = render_click(view, "tab", %{"tab" => "definitely-not-a-tab"})
+
+      assert html =~ "Records logged"
+      assert Process.alive?(view.pid)
+    end
+  end
+
   describe "a non-numeric camp id (finding C-1)" do
     test "redirects with a not-found flash instead of raising an Ecto cast error", %{conn: conn} do
       # get_camp_across_orgs/1 now parses the id and returns nil for a

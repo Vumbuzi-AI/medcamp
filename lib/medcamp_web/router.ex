@@ -433,6 +433,7 @@ defmodule MedcampWeb.Router do
       on_mount: [{MedcampWeb.UserAuth, :ensure_superadmin}] do
       live "/superadmin/dashboard", SuperadminDashboardLive.Index, :index
       live "/superadmin/camps", SuperadminCampsLive.Index, :index
+      live "/superadmin/camps/new", SuperadminCampsLive.Index, :new
       live "/superadmin/camps/:id", SuperadminCampsLive.Show, :show
       live "/superadmin/organisations", SuperadminOrganisationsLive.Index, :index
       live "/superadmin/organisations/new", SuperadminOrganisationsLive.Index, :new
