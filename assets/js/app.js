@@ -1364,23 +1364,27 @@ Hooks.QualityAssuranceInput = {
 
 Hooks.datamatrix = {
   mounted() {
-    const codes = document.querySelectorAll(".datamatrix");
-    for (var i = 0; i < codes.length; i++) {
-      let txt = codes[i].dataset.value || codes[i].id;
-
-      var element2 = codes[i];
-      data = {
-        msg: txt,
-        dim: 70,
-        rct: 0,
-        pad: 0,
-        pal: ["#000000", "#f2f4f8"],
-        vrb: 0,
-      };
-      element2.appendChild(DATAMatrix(data)).onclick = function () {
-        return download(element2.innerHTML);
-      };
-    }
+    this._render();
+  },
+  updated() {
+    this.el.innerHTML = "";
+    this._render();
+  },
+  _render() {
+    const el = this.el;
+    const txt = el.dataset.value || el.id;
+    const data = {
+      msg: txt,
+      dim: 70,
+      rct: 0,
+      pad: 0,
+      pal: ["#000000", "#f2f4f8"],
+      vrb: 0,
+    };
+    const node = el.appendChild(DATAMatrix(data));
+    node.onclick = function () {
+      return download(el.innerHTML);
+    };
   },
 };
 
@@ -1452,42 +1456,39 @@ Hooks.DownloadableDiv = {
 
 Hooks.CardQrCode = {
   mounted() {
-    var qrcode = new QRCode(document.getElementById("qrcode"), {
+    this.qrcode = new QRCode(this.el, {
       width: 120,
       height: 120,
     });
 
-    function makeCode() {
-      var elText = document.getElementById("text");
-
-      if (!elText.value) {
-        elText.focus();
-        return;
-      }
-
-      qrcode.makeCode(elText.value);
-    }
-
-    makeCode();
+    this.renderCode();
   },
   updated() {
-    var qrcode = new QRCode(document.getElementById("qrcode"), {
-      width: 120,
-      height: 120,
-    });
+    this.renderCode();
+  },
+  // The value lives in a hidden `#text` input elsewhere in the same card, so
+  // scope the lookup to the nearest ancestor that contains one rather than
+  // grabbing the first `#text`/`#qrcode` in the whole document.
+  textValue() {
+    let node = this.el.parentElement;
 
-    function makeCode() {
-      var elText = document.getElementById("text");
-
-      if (!elText.value) {
-        elText.focus();
-        return;
-      }
-
-      qrcode.makeCode(elText.value);
+    while (node && !node.querySelector("input#text, #text")) {
+      node = node.parentElement;
     }
 
-    makeCode();
+    const elText = node && node.querySelector("input#text, #text");
+
+    return elText ? elText.value : "";
+  },
+  renderCode() {
+    const value = this.textValue();
+
+    if (!value) {
+      return;
+    }
+
+    this.qrcode.clear();
+    this.qrcode.makeCode(value);
   },
 };
 

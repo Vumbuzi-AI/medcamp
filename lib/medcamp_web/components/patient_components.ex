@@ -8,7 +8,7 @@ defmodule MedcampWeb.PatientComponents do
 
   def patients_table(assigns) do
     ~H"""
-    <.header :if={Map.get(assigns, :show_header, true)} class="text-brand-primary">
+    <.header :if={Map.get(assigns, :show_header, false)} class="text-brand-primary">
       Patients
       <:actions>
         <.link :if={@show_new_link} patch={@new_patient_url}>
@@ -40,39 +40,26 @@ defmodule MedcampWeb.PatientComponents do
       row_click={fn patient -> JS.navigate("#{@route_prefix}/#{patient.id}") end}
       row_id={&"patients-#{&1.id}"}
     >
-      <:col :let={patient} label="">
-        <div class="flex flex-col gap-1">
-          <div>
-            <.button class=" text-brand-primary hover:bg-brand-200 border-0 font-normal text-sm">
-              Patient Code
-            </.button>
-          </div>
-          <p class="text-slate-500 text-sm font-medium mt-1">GSRN: {patient.gsrn}</p>
-        </div>
-      </:col>
       <:col :let={patient} label="Name">
-        {[
-          patient.first_name,
-          patient.middle_name,
-          patient.last_name
-        ]
-        |> Enum.filter(&(&1 != nil))
-        |> Enum.join(" ")}
-      </:col>
-      <:col :let={patient} label="Email">{patient.email}</:col>
-
-      <:col :let={patient} label="Phone Number">{patient.phone_number}</:col>
-      <:col :let={patient} label="National ID">{patient.national_id}</:col>
-      <:col :let={patient} label="Gender">{patient.gender}</:col>
-
-      <:action :let={patient}>
         <.link
-          navigate={"#{@route_prefix}/#{patient.id}/edit"}
-          class="text-brand-accent hover:text-brand-primary font-medium"
+          navigate={"#{@route_prefix}/#{patient.id}"}
+          class="font-medium text-slate-900 hover:text-brand-primary"
         >
-          Edit
+          {[patient.first_name, patient.middle_name, patient.last_name]
+          |> Enum.filter(&(&1 != nil))
+          |> Enum.join(" ")}
         </.link>
-      </:action>
+        <span class="mt-0.5 block font-mono text-xs text-slate-400 lg:hidden">
+          {patient.gsrn}
+        </span>
+      </:col>
+      <:col :let={patient} label="GSRN" hide_below="lg">
+        <span class="font-mono text-xs">{patient.gsrn}</span>
+      </:col>
+      <:col :let={patient} label="Email" hide_below="lg">{patient.email}</:col>
+      <:col :let={patient} label="Phone Number">{patient.phone_number}</:col>
+      <:col :let={patient} label="National ID" hide_below="md">{patient.national_id}</:col>
+      <:col :let={patient} label="Gender" hide_below="sm">{patient.gender}</:col>
     </.data_table>
     """
   end
@@ -150,54 +137,6 @@ defmodule MedcampWeb.PatientComponents do
     assigns = assign(assigns, :show_print_code, Map.get(assigns, :show_print_code, false))
 
     ~H"""
-    <div
-      :if={Map.get(assigns, :show_header, true)}
-      class="bg-white rounded-lg border border-slate-100 p-4"
-    >
-      <.header class="text-brand-primary border-b border-slate-100 pb-4 mb-4">
-        <div class="flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2 text-brand-accent"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
-          Patients
-        </div>
-        <:actions>
-          <.link :if={@show_new_link} patch={@new_patient_url}>
-            <.button class="bg-brand-accent hover:bg-brand-accent-dark">
-              <div class="flex items-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4 mr-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                Add New Patient
-              </div>
-            </.button>
-          </.link>
-        </:actions>
-      </.header>
-    </div>
-
     <.blank_state
       :if={@count == 0}
       icon_path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
@@ -221,45 +160,42 @@ defmodule MedcampWeb.PatientComponents do
       row_click={@row_click}
       row_id={&"patients-#{&1.id}"}
     >
-      <:col :let={patient} label="">
-        <div class="flex flex-col gap-1">
-          <button
-            :if={@show_print_code}
-            type="button"
-            phx-click="show_patient_code"
-            phx-value-patient_id={patient.id}
-            class="w-fit rounded-md bg-brand-accent px-3 py-2 text-sm font-medium text-white hover:bg-brand-accent-dark"
-          >
-            Print code
-          </button>
-          <span :if={!@show_print_code} class="text-sm font-medium text-slate-500">Patient code</span>
-          <p class="text-slate-500 text-sm font-medium mt-1">GSRN: {patient.gsrn}</p>
-        </div>
-      </:col>
       <:col :let={patient} label="Name">
-        {[
-          patient.first_name,
-          patient.middle_name,
-          patient.last_name
-        ]
-        |> Enum.filter(&(&1 != nil))
-        |> Enum.join(" ")}
+        <span class="font-medium text-slate-900">
+          {[patient.first_name, patient.middle_name, patient.last_name]
+          |> Enum.filter(&(&1 != nil))
+          |> Enum.join(" ")}
+        </span>
+        <span class="mt-0.5 block font-mono text-xs text-slate-400 lg:hidden">
+          {patient.gsrn}
+        </span>
       </:col>
-      <:col :let={patient} label="Email">{patient.email}</:col>
-
+      <:col :let={patient} label="GSRN" hide_below="lg">
+        <span class="font-mono text-xs">{patient.gsrn}</span>
+      </:col>
+      <:col :let={patient} label="Email" hide_below="lg">{patient.email}</:col>
       <:col :let={patient} label="Phone Number">{patient.phone_number}</:col>
-      <:col :let={patient} label="National ID">{patient.national_id}</:col>
-      <:col :let={patient} label="Gender">{patient.gender}</:col>
+      <:col :let={patient} label="National ID" hide_below="md">{patient.national_id}</:col>
+      <:col :let={patient} label="Gender" hide_below="sm">{patient.gender}</:col>
 
+      <:action :let={patient} :if={@show_print_code}>
+        <button
+          type="button"
+          phx-click="show_patient_code"
+          phx-value-patient_id={patient.id}
+          class="inline-flex items-center gap-1.5 rounded-md bg-brand-accent px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-brand-accent-dark"
+        >
+          <.icon name="hero-qr-code" class="h-4 w-4" /> Print code
+        </button>
+      </:action>
       <:action :let={patient}>
         <button
           type="button"
           phx-click="send_pin"
           phx-value-patient_id={patient.id}
           data-confirm-message="Are you sure you want to send the PIN?"
-          phx-disable-with="Sending..."
           aria-label={"Resend PIN to #{patient.first_name} #{patient.last_name}"}
-          class="inline-flex items-center justify-center gap-1.5 rounded-md bg-brand-accent px-3 py-2 text-center text-sm font-medium text-white transition hover:bg-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 disabled:cursor-wait disabled:opacity-60"
+          class="inline-flex items-center justify-center gap-1.5 rounded-md bg-brand-accent px-3 py-2 text-center text-sm font-medium text-white transition hover:bg-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2"
         >
           <.icon name="hero-paper-airplane-mini" class="h-4 w-4" /> Resend PIN
         </button>
@@ -304,7 +240,7 @@ defmodule MedcampWeb.PatientComponents do
 
       <div class="flex flex-col md:flex-row gap-6">
         <!-- Patient summary card -->
-        <div class="w-full md:w-1/3 bg-[#f8f8ff] rounded-lg p-5 border border-slate-100">
+        <div class="w-full md:w-1/3 bg-brand-50 rounded-lg p-5 border border-slate-100">
           <div>
             <div id="my-downloadable-container" phx-hook="DownloadableDiv" class="relative rounded ">
               <div id="my-content-to-download" class="">
@@ -348,7 +284,7 @@ defmodule MedcampWeb.PatientComponents do
                         <input
                           type="text"
                           id="text"
-                          value={"https://glocalhealthcentre.org/8018/#{@patient.gsrn}"}
+                          value={"#{MedcampWeb.Endpoint.url()}/8018/#{@patient.gsrn}"}
                           class="hidden"
                         />
                       </div>
@@ -409,7 +345,7 @@ defmodule MedcampWeb.PatientComponents do
 
           <div class="border-t border-slate-200 my-4"></div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 [&>div]:min-w-0">
             <div>
               <p class="text-sm text-slate-500 mb-1">Phone Number</p>
               <p class="font-medium">{@patient.phone_number}</p>
@@ -452,11 +388,11 @@ defmodule MedcampWeb.PatientComponents do
                 View document
               </a>
             </div>
+          </div>
 
-            <div>
-              <p class="text-sm text-slate-500 mb-1">Email</p>
-              <p class="font-medium">{@patient.email}</p>
-            </div>
+          <div class="mb-4">
+            <p class="text-sm text-slate-500 mb-1">Email</p>
+            <p class="font-medium break-words">{@patient.email}</p>
           </div>
           <div>
             <p class="text-sm text-slate-500 mb-1">Residence</p>
@@ -609,7 +545,7 @@ defmodule MedcampWeb.PatientComponents do
                           href={document_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          class="rounded bg-brand-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-[#2c2d75]"
+                          class="rounded bg-brand-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-primary-dark"
                         >
                           View
                         </a>
@@ -766,7 +702,7 @@ defmodule MedcampWeb.PatientComponents do
 
       <div class="flex flex-col md:flex-row gap-6">
         <!-- Patient summary card -->
-        <div class="w-full md:w-1/3 bg-[#f8f8ff] rounded-lg p-5 border border-slate-100">
+        <div class="w-full md:w-1/3 bg-brand-50 rounded-lg p-5 border border-slate-100">
           <div>
             <div class="  bg-white rounded-lg mx-auto my-5 p-4 border border-slate-200 relative overflow-hidden print:shadow-none print:m-0">
               <div class="hidden"></div>
@@ -808,7 +744,7 @@ defmodule MedcampWeb.PatientComponents do
                     <input
                       type="text"
                       id="text"
-                      value={"https://glocalhealthcentre.org/8018/#{@patient.gsrn}"}
+                      value={"#{MedcampWeb.Endpoint.url()}/8018/#{@patient.gsrn}"}
                       class="hidden"
                     />
                   </div>
@@ -832,7 +768,7 @@ defmodule MedcampWeb.PatientComponents do
 
           <div class="border-t border-slate-200 my-4"></div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 [&>div]:min-w-0">
             <div>
               <p class="text-sm text-slate-500 mb-1">Phone Number</p>
               <p class="font-medium">{@patient.phone_number}</p>
@@ -875,11 +811,11 @@ defmodule MedcampWeb.PatientComponents do
                 View document
               </a>
             </div>
+          </div>
 
-            <div>
-              <p class="text-sm text-slate-500 mb-1">Email</p>
-              <p class="font-medium">{@patient.email}</p>
-            </div>
+          <div class="mb-4">
+            <p class="text-sm text-slate-500 mb-1">Email</p>
+            <p class="font-medium break-words">{@patient.email}</p>
           </div>
           <div>
             <p class="text-sm text-slate-500 mb-1">Residence</p>
@@ -1111,7 +1047,7 @@ defmodule MedcampWeb.PatientComponents do
           type="button"
           data-print-trigger
           data-target-div={"#" <> @id}
-          class="rounded-full bg-[#0C2765] px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-[#16418f]"
+          class="rounded-full bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-brand-primary-dark"
         >
           Print wristband
         </button>
