@@ -2,23 +2,12 @@ defmodule MedcampWeb.MedicalCampPages.Scan do
   use MedcampWeb, :live_view
 
   alias MedcampWeb.PublicTenant
-  alias Medcamp.Accounts
 
   @impl true
-  def mount(%{"gsrn" => gsrn}, session, socket) do
-    patient = PublicTenant.resolve_patient!(gsrn)
-
-    current_user =
-      case session["user_token"] do
-        nil -> nil
-        token -> Accounts.get_user_by_session_token(token)
-      end
-
-    {:ok,
-     socket
-     |> assign(:patient, patient)
-     |> assign(:current_user, current_user)
-     |> assign(:page_title, "Scan Next Patient")}
+  def mount(%{"gsrn" => _gsrn}, _session, socket) do
+    # Guarded by `MedicalCampAuth.:require_camp_auth` - `@current_user` and
+    # `@patient` are already assigned and org-matched.
+    {:ok, assign(socket, :page_title, "Scan Next Patient")}
   end
 
   @impl true

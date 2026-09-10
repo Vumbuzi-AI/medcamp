@@ -43,6 +43,12 @@ defmodule MedcampWeb.Router do
     post "/admin/medical_camp/access/session", AdminMedicalCampPinSessionController, :create
     delete "/admin/medical_camp/access/logout", AdminMedicalCampPinSessionController, :delete
 
+    # Pre-auth station PIN screen - no guard, holds no patient data.
+    live_session :medical_camp_pin,
+      on_mount: [{MedcampWeb.UserAuth, :mount_current_user}] do
+      live "/8018/:gsrn/medical-camp/pin", MedicalCampPages.Pin, :index
+    end
+
     live "/medical-camp/scan", MedicalCampPages.GlobalScan, :index
 
     live_session :admin_medical_camp_access,
@@ -58,7 +64,7 @@ defmodule MedcampWeb.Router do
 
     live_session :medical_camp,
       layout: {MedcampWeb.Layouts, :medical_camp},
-      on_mount: [{MedcampWeb.MedicalCampAuth, :assign_active_camp}] do
+      on_mount: [{MedcampWeb.MedicalCampAuth, :require_camp_auth}] do
       live "/8018/:gsrn/medical-camp", MedicalCampPages.Home, :index
       live "/8018/:gsrn/medical-camp/triages/new", MedicalCampPages.Home, :new_triage
       live "/8018/:gsrn/medical-camp/scan", MedicalCampPages.Scan, :index

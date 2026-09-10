@@ -42,10 +42,16 @@ defmodule Medcamp.Accounts do
   end
 
   @doc """
-  Gets a medical-camp-enabled user by OTP pin.
+  Gets an **active** staff user by their 4-digit OTP pin, scoped to
+  `organisation_id`.
   """
-  def get_user_for_medical_camp_by_otp(otp) when is_binary(otp) do
-    Repo.get_by(User, [otp: otp], @unscoped)
+  def get_camp_user_by_otp(otp, organisation_id)
+      when is_binary(otp) and is_integer(organisation_id) do
+    Repo.get_by(
+      User,
+      [otp: otp, organisation_id: organisation_id, is_active: true],
+      @unscoped
+    )
   end
 
   @doc """
