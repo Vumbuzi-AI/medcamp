@@ -74,7 +74,20 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
      |> assign(:preview_page, 1)
      |> assign(:page, 1)
      |> assign(:per_page, @per_page)
-     |> load_all_data()}
+     |> assign(:patients, [])
+     |> assign(:stats, Patients.compute_camp_stats_for_patients([]))
+     |> assign(:triaged_ids, MapSet.new())
+     |> assign(:loading, not is_nil(camp))
+     |> paginate_patients()
+     |> maybe_defer_load()}
+  end
+
+  defp maybe_defer_load(socket) do
+    cond do
+      is_nil(socket.assigns.camp) -> assign(socket, :loading, false)
+      connected?(socket) -> tap(socket, fn _ -> send(self(), :load_camp_data) end)
+      true -> socket
+    end
   end
 
   @impl true
@@ -307,6 +320,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     |> assign(:reporting, empty_reporting())
     |> assign(:geographic_breakdown, [])
     |> assign(:patient_diagnoses, %{})
+    |> assign(:loading, false)
     |> paginate_patients()
   end
 
@@ -375,10 +389,15 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     |> assign(:reporting, reporting)
     |> assign(:geographic_breakdown, geographic_breakdown)
     |> assign(:patient_diagnoses, patient_diagnoses)
+    |> assign(:loading, false)
     |> paginate_patients()
   end
 
   @impl true
+  def handle_info(:load_camp_data, socket) do
+    {:noreply, load_all_data(socket)}
+  end
+
   def handle_info({:camp_ai_response, request_id, {:ok, response}}, socket) do
     if socket.assigns.camp_ai_request_id == request_id do
       {:noreply,
@@ -687,10 +706,23 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           >
           </div>
         </div>
+
+        <div :if={@camp && @loading} class="space-y-6" aria-busy="true">
+          <p class="sr-only" role="status">Loading camp data…</p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div
+              :for={_ <- 1..4}
+              class="h-24 animate-pulse rounded-xl border border-slate-200 bg-slate-100"
+            >
+            </div>
+          </div>
+          <div class="h-64 animate-pulse rounded-xl border border-slate-200 bg-slate-100"></div>
+          <div class="h-64 animate-pulse rounded-xl border border-slate-200 bg-slate-100"></div>
+        </div>
         
     <!-- Overview Tab Content -->
         <div
-          :if={@camp && @active_dashboard_tab == :overview}
+          :if={@camp && not @loading && @active_dashboard_tab == :overview}
           id="dash-panel-overview"
           role="tabpanel"
           aria-labelledby="dash-tab-overview"
@@ -911,7 +943,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
 
         <!-- Patient Data Tab Content -->
         <div
-          :if={@camp && @active_dashboard_tab == :patient_data}
+          :if={@camp && not @loading && @active_dashboard_tab == :patient_data}
           id="dash-panel-patient_data"
           role="tabpanel"
           aria-labelledby="dash-tab-patient_data"
@@ -1707,7 +1739,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
         <!-- /Patient Data Tab -->
 
         <div
-          :if={@camp && @active_dashboard_tab == :ai_analysis}
+          :if={@camp && not @loading && @active_dashboard_tab == :ai_analysis}
           id="dash-panel-ai_analysis"
           role="tabpanel"
           aria-labelledby="dash-tab-ai_analysis"
@@ -1857,7 +1889,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
         
     <!-- Financials Tab Content -->
         <div
-          :if={@camp && @active_dashboard_tab == :financials}
+          :if={@camp && not @loading && @active_dashboard_tab == :financials}
           id="dash-panel-financials"
           role="tabpanel"
           aria-labelledby="dash-tab-financials"
@@ -2118,7 +2150,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
 
         <!-- Downloads Tab Content -->
         <div
-          :if={@camp && @active_dashboard_tab == :downloads}
+          :if={@camp && not @loading && @active_dashboard_tab == :downloads}
           id="dash-panel-downloads"
           role="tabpanel"
           aria-labelledby="dash-tab-downloads"

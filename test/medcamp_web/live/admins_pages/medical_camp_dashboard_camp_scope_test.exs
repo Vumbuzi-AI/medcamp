@@ -62,10 +62,11 @@ defmodule MedcampWeb.AdminMedicalCampLive.CampScopeTest do
       CampAttendances.record(attended_b.id, camp.id)
     end)
 
-    {:ok, view, html} = live(conn, ~p"/admin/medical_camp")
+    {:ok, view, _html} = live(conn, ~p"/admin/medical_camp")
 
     # Header patient count is the camp roster, not every org patient.
-    assert html =~ "2 patients"
+    # (rendered after the deferred camp-data load settles)
+    assert render(view) =~ "2 patients"
 
     roster =
       view
