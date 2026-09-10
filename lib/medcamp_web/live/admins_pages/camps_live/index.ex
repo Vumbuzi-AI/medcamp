@@ -191,7 +191,7 @@ defmodule MedcampWeb.AdminCampsLive.Index do
     >
       <:actions>
         <.link patch={~p"/admin/camps/new"}>
-          <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2d2d7a]">
+          <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark">
             <Heroicons.icon name="plus" type="outline" class="h-4 w-4" /> New camp
           </button>
         </.link>
@@ -301,15 +301,19 @@ defmodule MedcampWeb.AdminCampsLive.Index do
             {if @live_action == :new, do: "New camp", else: "Edit camp"}
           </h2>
 
-          <.input field={@form[:name]} type="text" label="Name" required />
-          <.input field={@form[:location]} type="text" label="Location" />
-          <.input
-            field={@form[:start_date]}
-            type="date"
-            label="Start date"
-            min={if @live_action == :new, do: today_iso()}
-          />
-          <.input field={@form[:end_date]} type="date" label="End date" />
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <.input field={@form[:name]} type="text" label="Name" required />
+            <.input field={@form[:location]} type="text" label="Location" />
+          </div>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <.input
+              field={@form[:start_date]}
+              type="date"
+              label="Start date"
+              min={if @live_action == :new, do: today_iso()}
+            />
+            <.input field={@form[:end_date]} type="date" label="End date" />
+          </div>
           <.input field={@form[:description]} type="textarea" label="Description" />
 
           <:actions>

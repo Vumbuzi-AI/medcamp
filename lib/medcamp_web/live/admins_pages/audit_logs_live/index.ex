@@ -282,7 +282,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
+    <div class="bg-white rounded-lg shadow-card border border-slate-200 p-4">
       <.page_header
         icon_path="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
         title="Audit Logs"
@@ -291,15 +291,15 @@ defmodule MedcampWeb.AuditLogsLive.Index do
       
     <!-- Statistics Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+        <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-card">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-blue-600">Total Changes</p>
-              <p class="text-2xl font-bold text-blue-900">{@stats.total}</p>
+              <p class="text-sm font-medium text-brand-primary">Total Changes</p>
+              <p class="text-2xl font-bold text-slate-900">{@stats.total}</p>
             </div>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-8 w-8 text-blue-400"
+              class="h-8 w-8 text-brand-primary"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -314,11 +314,11 @@ defmodule MedcampWeb.AuditLogsLive.Index do
           </div>
         </div>
 
-        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+        <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-card">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-green-600">Created</p>
-              <p class="text-2xl font-bold text-green-900">
+              <p class="text-sm font-medium text-brand-primary">Created</p>
+              <p class="text-2xl font-bold text-slate-900">
                 {Map.get(@stats.by_action, "insert", 0)}
               </p>
             </div>
@@ -326,11 +326,11 @@ defmodule MedcampWeb.AuditLogsLive.Index do
           </div>
         </div>
 
-        <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200">
+        <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-card">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-yellow-600">Updated</p>
-              <p class="text-2xl font-bold text-yellow-900">
+              <p class="text-sm font-medium text-brand-primary">Updated</p>
+              <p class="text-2xl font-bold text-slate-900">
                 {Map.get(@stats.by_action, "update", 0)}
               </p>
             </div>
@@ -338,11 +338,11 @@ defmodule MedcampWeb.AuditLogsLive.Index do
           </div>
         </div>
 
-        <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
+        <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-card">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-red-600">Deleted</p>
-              <p class="text-2xl font-bold text-red-900">
+              <p class="text-sm font-medium text-brand-primary">Deleted</p>
+              <p class="text-2xl font-bold text-slate-900">
                 {Map.get(@stats.by_action, "delete", 0)}
               </p>
             </div>
@@ -514,7 +514,7 @@ defmodule MedcampWeb.AuditLogsLive.Index do
               <%= if log.changed_fields && length(log.changed_fields) > 0 do %>
                 <div class="flex flex-wrap gap-1">
                   <%= for field <- Enum.take(log.changed_fields, 3) do %>
-                    <span class="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded">
+                    <span class="px-2 py-0.5 text-xs font-medium bg-brand-50 text-brand-primary rounded">
                       {String.replace(field, "_", " ") |> String.capitalize()}
                     </span>
                   <% end %>

@@ -358,15 +358,15 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
+    <div class="bg-white rounded-lg shadow-card border border-slate-200 p-4">
       <.page_header
         icon_path="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
         title="Drugs"
-        subtitle="Search, filter and manage the drug inventory."
+        subtitle={"#{@total_count} drug#{if @total_count != 1, do: "s", else: ""}"}
       >
         <:actions>
           <.link patch={~p"/pharmacist/drugs/new"}>
-            <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2d2d7a]">
+            <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark">
               <Heroicons.icon name="plus" type="outline" class="h-4 w-4" /> Add Drug
             </button>
           </.link>
@@ -539,7 +539,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
             </div>
           </:col>
 
-          <:col :let={drug} label="Price">
+          <:col :let={drug} label="Price" hide_below="lg">
             <div class="flex items-center py-3">
               <% price = latest_batch_price(drug) %>
               <span :if={price} class="font-medium text-slate-900">
@@ -578,7 +578,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
             </div>
           </:col>
 
-          <:col :let={drug} label="OTC">
+          <:col :let={drug} label="OTC" hide_below="md">
             <div class="flex items-center py-3">
               <%= if drug.is_otc do %>
                 <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 font-medium">
@@ -592,7 +592,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
             </div>
           </:col>
 
-          <:col :let={drug} label="DDA">
+          <:col :let={drug} label="DDA" hide_below="md">
             <div class="flex items-center py-3">
               <%= if drug.is_dangerous_drug do %>
                 <span class="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800 font-medium">
@@ -606,7 +606,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
             </div>
           </:col>
 
-          <:col :let={drug} label="Expired Batches">
+          <:col :let={drug} label="Expired Batches" hide_below="lg">
             <div class="flex items-center py-3">
               <% expired_count = count_expired_batches(drug) %>
               <%= if expired_count > 0 do %>
@@ -621,7 +621,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugsIndex do
             </div>
           </:col>
 
-          <:col :let={drug} label="Batches">
+          <:col :let={drug} label="Batches" hide_below="md">
             <div class="flex items-center py-3">
               <span class="px-2 py-1 text-xs rounded-full bg-brand-50 text-brand-primary font-medium">
                 {length(drug.drug_batches)} batches

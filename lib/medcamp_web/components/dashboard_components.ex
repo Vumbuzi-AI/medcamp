@@ -598,7 +598,7 @@ defmodule MedcampWeb.DashboardComponents do
         </div>
       <% else %>
         <div class="overflow-x-auto max-h-72 overflow-y-auto">
-          <table class="min-w-full divide-y divide-[#E8EEF8] text-sm">
+          <table class="min-w-full divide-y divide-slate-100 text-sm">
             <thead class="bg-slate-50 sticky top-0">
               <tr>
                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -612,7 +612,7 @@ defmodule MedcampWeb.DashboardComponents do
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-[#F1F5FB] bg-white">
+            <tbody class="divide-y divide-slate-100 bg-white">
               <%= for loc <- Enum.take(@rows, 15) do %>
                 <tr class="hover:bg-slate-50">
                   <td class="px-4 py-3 text-slate-900">{loc.address}</td>

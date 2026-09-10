@@ -104,10 +104,10 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-slate-100">
-      <.header class="p-6 border-b border-slate-100">
+    <div class="bg-white rounded-lg shadow-card border border-slate-200">
+      <.header class="p-6 border-b border-slate-200">
         <div class="flex items-center">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-accent to-[#8384c9] flex items-center justify-center mr-4">
+          <div class="w-12 h-12 rounded-xl bg-brand-accent flex items-center justify-center mr-4">
             <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 stroke-linecap="round"
@@ -119,7 +119,9 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
           </div>
           <div>
             <h1 class="text-2xl font-bold text-brand-primary">Lab Test Templates</h1>
-            <p class="text-sm text-slate-600 mt-1">Manage laboratory test templates and parameters</p>
+            <p class="text-sm text-slate-600 mt-1">
+              {@total_count} {if @total_count == 1, do: "template", else: "templates"}
+            </p>
           </div>
         </div>
         <:actions>
@@ -201,271 +203,52 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.Index do
             </div>
           </div>
         <% else %>
-          <!-- Desktop View -->
-          <div class="hidden lg:block overflow-hidden rounded-xl border border-slate-200">
-            <table class="min-w-full divide-y divide-slate-200">
-              <thead class="bg-slate-50">
-                <tr>
-                  <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    Template Name
-                  </th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    Short Name
-                  </th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    Parameters
-                  </th>
-                  <th class="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody id="templates" phx-update="stream" class="bg-white divide-y divide-slate-100">
-                <tr
-                  :for={{id, template} <- @streams.templates}
-                  id={id}
-                  class="hover:bg-slate-50 transition-colors"
-                >
-                  <td class="px-6 py-4">
-                    <div class="flex items-center">
-                      <div class="w-10 h-10 rounded-lg bg-brand-accent/10 flex items-center justify-center mr-3">
-                        <svg
-                          class="w-5 h-5 text-brand-accent"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <div class="text-sm font-medium text-slate-900">{template.name}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                      {template.short_name}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span class="text-sm text-slate-700">
-                      {template.category && template.category.name}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="flex items-center">
-                      <svg
-                        class="w-4 h-4 text-slate-400 mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <span class="text-sm text-slate-600">
-                        {length(template.field_definitions)} fields
-                      </span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <div class="flex items-center justify-end gap-2">
-                      <.link
-                        patch={~p"/lab/lab_test_templates/#{template}/preview"}
-                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors"
-                      >
-                        <svg
-                          class="w-4 h-4 mr-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                          />
-                        </svg>
-                        Preview
-                      </.link>
-                      <.link
-                        patch={~p"/lab/lab_test_templates/#{template}/edit"}
-                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-brand-accent bg-brand-accent/10 rounded-lg hover:bg-brand-accent/20 transition-colors"
-                      >
-                        <svg
-                          class="w-4 h-4 mr-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
-                        Edit
-                      </.link>
-                      <.link
-                        phx-click={JS.push("delete", value: %{id: template.id}) |> hide("##{id}")}
-                        data-confirm-message="Are you sure you want to delete this template?"
-                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
-                      >
-                        <svg
-                          class="w-4 h-4 mr-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                        Delete
-                      </.link>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          
-    <!-- Mobile View -->
-          <div class="lg:hidden space-y-4">
-            <div
-              :for={{id, template} <- @streams.templates}
-              id={id}
-              class="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-            >
-              <div class="flex items-start justify-between mb-3">
-                <div class="flex items-center flex-1">
-                  <div class="w-12 h-12 rounded-xl bg-brand-accent/10 flex items-center justify-center mr-3">
-                    <svg
-                      class="w-6 h-6 text-brand-accent"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <h3 class="text-sm font-semibold text-slate-900 truncate">{template.name}</h3>
-                    <p class="text-xs text-slate-500 mt-1">
-                      {template.category && template.category.name}
-                    </p>
-                  </div>
-                </div>
-                <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 ml-2">
-                  {template.short_name}
-                </span>
-              </div>
-
-              <div class="flex items-center text-sm text-slate-600 mb-4">
-                <svg
-                  class="w-4 h-4 text-slate-400 mr-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                  />
-                </svg>
-                <span>{length(template.field_definitions)} parameters</span>
-              </div>
-
-              <div class="flex gap-2">
-                <.link
-                  patch={~p"/lab/lab_test_templates/#{template}/preview"}
-                  class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors"
-                >
-                  <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
-                  Preview
-                </.link>
-                <.link
-                  patch={~p"/lab/lab_test_templates/#{template}/edit"}
-                  class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-brand-accent bg-brand-accent/10 rounded-lg hover:bg-brand-accent/20 transition-colors"
-                >
-                  <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    />
-                  </svg>
-                  Edit
-                </.link>
-                <.link
-                  phx-click={JS.push("delete", value: %{id: template.id}) |> hide("##{id}")}
-                  data-confirm-message="Are you sure?"
-                  class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
-                >
-                  <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                  Delete
-                </.link>
-              </div>
-            </div>
-          </div>
-          <.pagination
-            page={@page}
-            total_pages={@total_pages}
-            total_count={@total_count}
-            per_page={@per_page}
-          />
+          <.data_table id="templates" rows={@streams.templates} row_id={fn {id, _template} -> id end}>
+            <:col :let={{_id, template}} label="Template Name">
+              <span class="font-medium text-slate-900">{template.name}</span>
+            </:col>
+            <:col :let={{_id, template}} label="Short Name">
+              <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                {template.short_name}
+              </span>
+            </:col>
+            <:col :let={{_id, template}} label="Category" hide_below="md">
+              {template.category && template.category.name}
+            </:col>
+            <:col :let={{_id, template}} label="Parameters" hide_below="sm">
+              <% count = length(template.field_definitions) %>
+              {count} {if count == 1, do: "field", else: "fields"}
+            </:col>
+            <:action :let={{id, template}}>
+              <.link
+                patch={~p"/lab/lab_test_templates/#{template}/preview"}
+                class="text-sm font-medium text-brand-primary hover:underline"
+              >
+                Preview
+              </.link>
+              <.link
+                patch={~p"/lab/lab_test_templates/#{template}/edit"}
+                class="text-sm font-medium text-brand-primary hover:underline"
+              >
+                Edit
+              </.link>
+              <.link
+                phx-click={JS.push("delete", value: %{id: template.id}) |> hide("##{id}")}
+                data-confirm-message="Are you sure you want to delete this template?"
+                class="text-sm font-medium text-red-600 hover:underline"
+              >
+                Delete
+              </.link>
+            </:action>
+            <:footer>
+              <.pagination
+                page={@page}
+                total_pages={@total_pages}
+                total_count={@total_count}
+                per_page={@per_page}
+              />
+            </:footer>
+          </.data_table>
         <% end %>
       </div>
     </div>
