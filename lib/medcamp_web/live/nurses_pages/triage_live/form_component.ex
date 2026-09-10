@@ -57,11 +57,7 @@ defmodule MedcampWeb.NursesPage.TriageFormComponent do
         <.input
           field={@form[:emergency_scale]}
           type="select"
-          options={[
-            {"High (Red)", "High"},
-            {"Medium (Amber)", "Medium"},
-            {"Low (Green)", "Low"}
-          ]}
+          options={emergency_scale_options()}
           prompt="Select emergency scale"
           label="Emergency scale"
           class="rag-options"
@@ -135,5 +131,11 @@ defmodule MedcampWeb.NursesPage.TriageFormComponent do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
     end
+  end
+
+  # RAG labels over the canonical values from `Medcamp.Triages.Triage`.
+  defp emergency_scale_options do
+    labels = %{"High" => "High (Red)", "Medium" => "Medium (Amber)", "Low" => "Low (Green)"}
+    Enum.map(Medcamp.Triages.Triage.emergency_scales(), &{Map.get(labels, &1, &1), &1})
   end
 end
