@@ -1,7 +1,6 @@
 defmodule MedcampWeb.AdminUsersLive.Index do
   use MedcampWeb, :admin_live_view
   alias Medcamp.Accounts
-  alias Medcamp.Notify
 
   @per_page 10
 
@@ -70,10 +69,10 @@ defmodule MedcampWeb.AdminUsersLive.Index do
   def handle_event("reset-password", %{"id" => id}, socket) do
     user = Accounts.get_user!(id)
     token = Accounts.get_reset_password_link_for_user(user)
-    reset_link = "http://glocalhealthcentre.org/users/reset_password/" <> token
+    reset_link = url(~p"/users/reset_password/#{token}")
 
     spawn(fn ->
-      Notify.send_reset_password_link(user.email, user.name, reset_link)
+      Medcamp.Postal.deliver_reset_password_instructions(user, reset_link)
     end)
 
     {:noreply,
