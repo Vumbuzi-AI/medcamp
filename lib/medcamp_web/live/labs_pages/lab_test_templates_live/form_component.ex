@@ -97,6 +97,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormComponent do
                 </p>
                 <button
                   type="button"
+                  aria-label={"Remove parameter #{index + 1}"}
                   phx-click="remove_parameter"
                   phx-value-index={index}
                   phx-target={@myself}
@@ -108,7 +109,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormComponent do
 
               <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 [&>*]:min-w-0">
                 <label class="block text-sm">
-                  <span class="font-medium text-slate-700">Label</span>
+                  <span class="font-medium text-slate-700">Name</span>
                   <input
                     type="text"
                     name={"lab_test_template[fields][#{index}][label]"}
@@ -119,17 +120,11 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormComponent do
                   />
                 </label>
 
-                <label class="block text-sm">
-                  <span class="font-medium text-slate-700">Field key</span>
-                  <input
-                    type="text"
-                    name={"lab_test_template[fields][#{index}][name]"}
-                    value={row["name"]}
-                    phx-debounce="blur"
-                    placeholder="hemoglobin (auto from label if blank)"
-                    class="mt-1 block w-full rounded-lg border-slate-300 font-mono text-sm focus:border-brand-accent focus:ring-brand-accent"
-                  />
-                </label>
+                <input
+                  type="hidden"
+                  name={"lab_test_template[fields][#{index}][name]"}
+                  value={row["name"]}
+                />
 
                 <label class="block text-sm">
                   <span class="font-medium text-slate-700">Type</span>
@@ -156,7 +151,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormComponent do
                 </label>
 
                 <label :if={row["type"] == "number"} class="block text-sm">
-                  <span class="font-medium text-slate-700">Reference min</span>
+                  <span class="font-medium text-slate-700">Normal low</span>
                   <input
                     type="number"
                     step="any"
@@ -168,7 +163,7 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormComponent do
                 </label>
 
                 <label :if={row["type"] == "number"} class="block text-sm">
-                  <span class="font-medium text-slate-700">Reference max</span>
+                  <span class="font-medium text-slate-700">Normal high</span>
                   <input
                     type="number"
                     step="any"
@@ -191,17 +186,23 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormComponent do
                   />
                 </label>
 
-                <label class="block text-sm">
-                  <span class="font-medium text-slate-700">Reference text</span>
+                <label :if={row["type"] != "number"} class="block text-sm">
+                  <span class="font-medium text-slate-700">Normal result</span>
                   <input
                     type="text"
                     name={"lab_test_template[fields][#{index}][ref_range_text]"}
                     value={row["ref_range_text"]}
                     phx-debounce="blur"
-                    placeholder="12-16 g/dL"
+                    placeholder="Negative"
                     class="mt-1 block w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
                   />
                 </label>
+                <input
+                  :if={row["type"] == "number"}
+                  type="hidden"
+                  name={"lab_test_template[fields][#{index}][ref_range_text]"}
+                  value={row["ref_range_text"]}
+                />
 
                 <label class="block text-sm">
                   <span class="font-medium text-slate-700">Section (optional)</span>
@@ -244,10 +245,14 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormComponent do
           </div>
 
           <div :if={@show_json} class="mt-4">
-            <label class="block text-sm font-semibold text-slate-900">
+            <label
+              for="field_definitions_json_input"
+              class="block text-sm font-semibold text-slate-900"
+            >
               Field definitions (JSON array)
             </label>
             <textarea
+              id="field_definitions_json_input"
               name="lab_test_template[field_definitions_json]"
               rows="16"
               phx-debounce="500"
@@ -301,20 +306,36 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormComponent do
     categories = LabTestTemplates.list_categories()
     category_options = Enum.map(categories, fn cat -> {cat.name, cat.id} end)
 
-    rows = definitions_to_rows(template.field_definitions)
-
     changeset = LabTestTemplates.change_template(template)
 
-    {:ok,
-     socket
-     |> assign(assigns)
-     |> assign(:category_options, category_options)
-     |> assign(:field_types, @field_types)
-     |> assign(:json_error, nil)
-     |> assign(:show_json, false)
-     |> assign(:field_rows, rows)
-     |> assign(:field_definitions_json, rows_to_json(rows))
-     |> assign_form(changeset)}
+    # Only re-derive the builder state from the template when the template
+    # itself changed. Otherwise a plain parent re-render would discard an
+    # unsaved blank parameter row or the JSON/builder toggle. (C-5)
+    template_changed? =
+      not Map.has_key?(socket.assigns, :template) or
+        socket.assigns.template.id != template.id
+
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign(:category_options, category_options)
+      |> assign(:field_types, @field_types)
+      |> assign_new(:json_error, fn -> nil end)
+      |> assign_new(:show_json, fn -> false end)
+      |> assign_form(changeset)
+
+    socket =
+      if template_changed? do
+        rows = definitions_to_rows(template.field_definitions)
+
+        socket
+        |> assign(:field_rows, rows)
+        |> assign(:field_definitions_json, rows_to_json(rows))
+      else
+        socket
+      end
+
+    {:ok, socket}
   end
 
   @impl true
@@ -323,9 +344,15 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormComponent do
   end
 
   def handle_event("remove_parameter", %{"index" => index}, socket) do
-    rows = List.delete_at(socket.assigns.field_rows, String.to_integer(index))
-    changeset = validate_changeset(socket, rows_to_definitions(rows))
-    {:noreply, socket |> assign(:field_rows, rows) |> assign_form(changeset)}
+    case Integer.parse(to_string(index)) do
+      {i, ""} when i >= 0 and i < length(socket.assigns.field_rows) ->
+        rows = List.delete_at(socket.assigns.field_rows, i)
+        changeset = validate_changeset(socket, rows_to_definitions(rows))
+        {:noreply, socket |> assign(:field_rows, rows) |> assign_form(changeset)}
+
+      _ ->
+        {:noreply, socket}
+    end
   end
 
   def handle_event("toggle_json", _params, socket) do
@@ -410,8 +437,15 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormComponent do
 
   defp params_to_rows(fields) when is_map(fields) do
     fields
-    |> Enum.sort_by(fn {k, _} -> String.to_integer(k) end)
+    |> Enum.sort_by(fn {k, _} -> safe_index(k) end)
     |> Enum.map(fn {_k, v} -> Map.merge(@blank_row, v) end)
+  end
+
+  defp safe_index(key) do
+    case Integer.parse(to_string(key)) do
+      {i, _} -> i
+      :error -> 0
+    end
   end
 
   defp rows_to_definitions(rows) do

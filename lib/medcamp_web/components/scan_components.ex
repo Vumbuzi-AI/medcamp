@@ -26,6 +26,8 @@ defmodule MedcampWeb.ScanComponents do
         </div>
 
         <.input
+          id="qr_scan_input"
+          name="qr_code_value"
           value={@qr_code_value}
           type="textarea"
           label="Scan QR Code for Patient"
