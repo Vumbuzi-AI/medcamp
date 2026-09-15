@@ -300,7 +300,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
           <button
             type="button"
             phx-click="toggle_edit"
-            class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:bg-[#2a2b73] transition-colors"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brand-primary-dark transition-colors"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -500,7 +500,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
           :if={!@show_scanner}
           type="button"
           phx-click="open_scanner"
-          class="w-full inline-flex items-center justify-center gap-3 rounded-lg bg-brand-primary px-6 py-4 text-lg font-semibold text-white hover:bg-[#2a2b73] transition-colors"
+          class="w-full inline-flex items-center justify-center gap-3 rounded-lg bg-brand-primary px-6 py-4 text-lg font-semibold text-white hover:bg-brand-primary-dark transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

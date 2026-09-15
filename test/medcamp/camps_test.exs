@@ -21,9 +21,24 @@ defmodule Medcamp.CampsTest do
       assert {:ok, %Camp{is_active: false}} = Camps.create_camp(%{"name" => "Turkana"})
     end
 
+    test "create_camp/1 does not re-activate once the active camp has been cleared" do
+      active_camp_fixture()
+      assert :ok = Camps.clear_active_camp()
+
+      assert {:ok, %Camp{is_active: false}} = Camps.create_camp(%{"name" => "After the break"})
+      assert Camps.get_active_camp() == nil
+    end
+
     test "create_camp/1 requires a name" do
       assert {:error, changeset} = Camps.create_camp(%{"name" => ""})
       assert %{name: ["can't be blank"]} = errors_on(changeset)
+    end
+
+    test "create_camp/1 surfaces a duplicate name as an error on :name (not silently)" do
+      assert {:ok, _} = Camps.create_camp(%{"name" => "Same Name Camp"})
+
+      assert {:error, changeset} = Camps.create_camp(%{"name" => "Same Name Camp"})
+      assert %{name: ["a camp with this name already exists"]} = errors_on(changeset)
     end
 
     test "create_camp/1 rejects an end date before the start date" do

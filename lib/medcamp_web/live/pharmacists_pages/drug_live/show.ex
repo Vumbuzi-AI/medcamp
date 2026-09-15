@@ -476,14 +476,14 @@ defmodule MedcampWeb.PharmacistsLive.DrugsShow do
           <div class="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap xl:w-auto xl:max-w-2xl xl:justify-end">
             <.button
               phx-click="open_edit_drug_modal"
-              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 bg-brand-primary px-5 text-sm shadow-sm hover:bg-[#2f317f]"
+              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 bg-brand-primary px-5 text-sm shadow-sm hover:bg-brand-primary-dark"
             >
               <.icon name="hero-pencil-square" class="h-4 w-4" /> Edit Drug
             </.button>
 
             <.link
               patch={~p"/pharmacist/drugs/#{@drug.id}/new_batch"}
-              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-lg bg-brand-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2f317f]"
+              class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-lg bg-brand-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-primary-dark"
             >
               <.icon name="hero-plus" class="h-4 w-4" /> Add Batch
             </.link>

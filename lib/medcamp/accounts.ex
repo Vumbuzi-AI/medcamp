@@ -8,7 +8,8 @@ defmodule Medcamp.Accounts do
   alias Medcamp.Patients
   alias Medcamp.Validation
 
-  alias Medcamp.Accounts.{User, UserToken, UserNotifier}
+  alias Medcamp.Accounts.{User, UserToken}
+  alias Medcamp.Postal
 
   # Lookups that run before we know which organisation we are in - logging in,
   # a reset-password token, a scanned GSRN - plus the two identifiers that are
@@ -41,10 +42,16 @@ defmodule Medcamp.Accounts do
   end
 
   @doc """
-  Gets a medical-camp-enabled user by OTP pin.
+  Gets an **active** staff user by their 4-digit OTP pin, scoped to
+  `organisation_id`.
   """
-  def get_user_for_medical_camp_by_otp(otp) when is_binary(otp) do
-    Repo.get_by(User, [otp: otp], @unscoped)
+  def get_camp_user_by_otp(otp, organisation_id)
+      when is_binary(otp) and is_integer(organisation_id) do
+    Repo.get_by(
+      User,
+      [otp: otp, organisation_id: organisation_id, is_active: true],
+      @unscoped
+    )
   end
 
   @doc """
@@ -634,7 +641,7 @@ defmodule Medcamp.Accounts do
     {encoded_token, user_token} = UserToken.build_email_token(user, "change:#{current_email}")
 
     Repo.insert!(user_token)
-    UserNotifier.deliver_update_email_instructions(user, update_email_url_fun.(encoded_token))
+    Postal.deliver_update_email_instructions(user, update_email_url_fun.(encoded_token))
   end
 
   @doc """
@@ -726,7 +733,7 @@ defmodule Medcamp.Accounts do
     else
       {encoded_token, user_token} = UserToken.build_email_token(user, "confirm")
       Repo.insert!(user_token)
-      UserNotifier.deliver_confirmation_instructions(user, confirmation_url_fun.(encoded_token))
+      Postal.deliver_confirmation_instructions(user, confirmation_url_fun.(encoded_token))
     end
   end
 
@@ -767,7 +774,7 @@ defmodule Medcamp.Accounts do
       when is_function(reset_password_url_fun, 1) do
     {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
     Repo.insert!(user_token)
-    UserNotifier.deliver_reset_password_instructions(user, reset_password_url_fun.(encoded_token))
+    Postal.deliver_reset_password_instructions(user, reset_password_url_fun.(encoded_token))
   end
 
   @doc """

@@ -11,15 +11,24 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
 
   @per_page 10
 
+  @dashboard_tabs ~w(overview patient_data ai_analysis financials downloads)a
+  @report_tabs ~w(triage notes labs ai)a
+
   @impl true
   def mount(_params, session, socket) do
     report_path = Map.get(session, "report_path", "/admin/medical_camp/report")
     organisation_name = Map.get(session, "superadmin_organisation_name")
     back_path = Map.get(session, "superadmin_back_path")
 
-    if org_id = Map.get(session, "superadmin_org_id"), do: Tenancy.put_org_id(org_id)
+    superadmin_org_id = Map.get(session, "superadmin_org_id")
+    if superadmin_org_id, do: Tenancy.put_org_id(superadmin_org_id)
 
-    camp = safe_active_camp()
+    # Everything derived from `@camp` tracks the selected camp: the org admin's
+    # session-backed `@camp_filter`, or the superadmin picker's `superadmin_camp_id`.
+    camp =
+      if superadmin_org_id,
+        do: resolve_superadmin_camp(Map.get(session, "superadmin_camp_id")),
+        else: socket.assigns[:camp_filter] || safe_active_camp()
 
     {:ok,
      socket
@@ -28,8 +37,12 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
      |> assign(:report_path, report_path)
      |> assign(:superadmin_organisation_name, organisation_name)
      |> assign(:superadmin_back_path, back_path)
+     |> assign(:superadmin?, not is_nil(superadmin_org_id))
+     |> assign_new(:camp_options, fn ->
+       if(superadmin_org_id, do: Camps.list_camps(), else: [])
+     end)
      |> assign(:camp, camp)
-     |> assign(:camp_days, (camp && Camps.Camp.days(camp)) || [])
+     |> assign(:camp_days, camp_days_for(camp))
      |> assign(:selected_date, nil)
      |> assign(:active_day_tab, :all)
      |> assign(:selected_patient, nil)
@@ -61,7 +74,20 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
      |> assign(:preview_page, 1)
      |> assign(:page, 1)
      |> assign(:per_page, @per_page)
-     |> load_all_data()}
+     |> assign(:patients, [])
+     |> assign(:stats, Patients.compute_camp_stats_for_patients([]))
+     |> assign(:triaged_ids, MapSet.new())
+     |> assign(:loading, not is_nil(camp))
+     |> paginate_patients()
+     |> maybe_defer_load()}
+  end
+
+  defp maybe_defer_load(socket) do
+    cond do
+      is_nil(socket.assigns.camp) -> assign(socket, :loading, false)
+      connected?(socket) -> tap(socket, fn _ -> send(self(), :load_camp_data) end)
+      true -> socket
+    end
   end
 
   @impl true
@@ -76,6 +102,20 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
      socket
      |> assign(:page, page_num)
      |> paginate_patients()}
+  end
+
+  def handle_event("superadmin_pick_camp", %{"camp_id" => camp_id}, socket) do
+    camp = resolve_superadmin_camp(camp_id)
+
+    {:noreply,
+     socket
+     |> assign(:camp, camp)
+     |> assign(:camp_days, camp_days_for(camp))
+     |> assign(:active_day_tab, :all)
+     |> assign(:selected_date, nil)
+     |> assign(:selected_patient, nil)
+     |> assign(:page, 1)
+     |> load_all_data()}
   end
 
   def handle_event("set_day_tab", %{"tab" => "all"}, socket) do
@@ -152,11 +192,15 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
   end
 
   def handle_event("set_report_tab", %{"tab" => tab}, socket) do
-    {:noreply, assign(socket, :active_report_tab, String.to_existing_atom(tab))}
+    tab = Enum.find(@report_tabs, socket.assigns.active_report_tab, &(to_string(&1) == tab))
+    {:noreply, assign(socket, :active_report_tab, tab)}
   end
 
   def handle_event("set_dashboard_tab", %{"tab" => tab}, socket) do
-    {:noreply, assign(socket, :active_dashboard_tab, String.to_existing_atom(tab))}
+    tab =
+      Enum.find(@dashboard_tabs, socket.assigns.active_dashboard_tab, &(to_string(&1) == tab))
+
+    {:noreply, assign(socket, :active_dashboard_tab, tab)}
   end
 
   def handle_event("update_camp_ai_question", %{"ai" => %{"question" => question}}, socket) do
@@ -243,32 +287,75 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     |> assign(:display_patients, display)
   end
 
-  defp load_all_data(socket) do
-    patients =
-      case socket.assigns.camp do
-        nil -> Patients.list_patients()
-        camp -> Patients.list_patients_for_camp(camp.id)
-      end
+  # With no active camp there is nothing camp-scoped to show, so the whole
+  # register is *not* loaded here (it once was, on every mount, connected and
+  # not). The render shows an "activate a camp" empty state instead.
+  defp load_all_data(%{assigns: %{camp: nil}} = socket), do: assign_no_active_camp(socket)
 
+  defp load_all_data(socket) do
+    patients = Patients.list_patients_for_camp(socket.assigns.camp.id)
     stats = Patients.compute_camp_stats_for_patients(patients)
     load_from_patients(socket, patients, stats)
   end
 
-  defp load_data(socket, date) do
-    patients =
-      case socket.assigns.camp do
-        nil -> Patients.list_medical_camp_patients(date)
-        camp -> Patients.list_patients_for_camp_on(camp.id, date)
-      end
+  defp load_data(%{assigns: %{camp: nil}} = socket, _date), do: assign_no_active_camp(socket)
 
+  defp load_data(socket, date) do
+    patients = Patients.list_patients_for_camp_on(socket.assigns.camp.id, date)
     stats = Patients.compute_camp_stats_for_patients(patients)
     load_from_patients(socket, patients, stats)
+  end
+
+  defp assign_no_active_camp(socket) do
+    socket
+    |> assign(:patients, [])
+    |> assign(:camp_triages, [])
+    |> assign(:camp_doctor_notes, [])
+    |> assign(:camp_lab_results, [])
+    |> assign(:stats, Patients.compute_camp_stats_for_patients([]))
+    |> assign(:triaged_ids, MapSet.new())
+    |> assign(:patients_with_notes, 0)
+    |> assign(:total_lab_tests, 0)
+    |> assign(:financials, nil)
+    |> assign(:reporting, empty_reporting())
+    |> assign(:geographic_breakdown, [])
+    |> assign(:patient_diagnoses, %{})
+    |> assign(:loading, false)
+    |> paginate_patients()
   end
 
   defp safe_active_camp do
     Camps.get_active_camp()
   rescue
     _ -> nil
+  end
+
+  # Day tabs come from the camp's own start/end dates. When those were never
+  # set (or cover a single day), fall back to the span of actual attendance so
+  # a multi-day camp is still drillable by day.
+  defp camp_days_for(nil), do: []
+
+  defp camp_days_for(camp) do
+    case Camps.Camp.days(camp) do
+      [_, _ | _] = declared ->
+        declared
+
+      declared ->
+        case Patients.camp_attendance_date_range(camp.id) do
+          %Date.Range{} = range -> Enum.to_list(range)
+          _ -> declared
+        end
+    end
+  end
+
+  defp resolve_superadmin_camp(camp_id) do
+    with id when is_binary(id) <- camp_id,
+         {int, _} <- Integer.parse(id),
+         %Camps.Camp{} = camp <- Camps.get_camp(int) do
+      camp
+    else
+      _ -> safe_active_camp()
+    end
   end
 
   defp load_from_patients(socket, patients, stats) do
@@ -302,10 +389,15 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     |> assign(:reporting, reporting)
     |> assign(:geographic_breakdown, geographic_breakdown)
     |> assign(:patient_diagnoses, patient_diagnoses)
+    |> assign(:loading, false)
     |> paginate_patients()
   end
 
   @impl true
+  def handle_info(:load_camp_data, socket) do
+    {:noreply, load_all_data(socket)}
+  end
+
   def handle_info({:camp_ai_response, request_id, {:ok, response}}, socket) do
     if socket.assigns.camp_ai_request_id == request_id do
       {:noreply,
@@ -359,32 +451,49 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
       <div class="space-y-6">
         
     <!-- Header -->
-        <div class="rounded-2xl bg-brand-primary p-6 text-white">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <.link
-                :if={@superadmin_back_path}
-                navigate={@superadmin_back_path}
-                class="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-white/70 transition-colors duration-150 hover:text-white"
-              >
-                <Heroicons.icon name="arrow-left" type="outline" class="h-4 w-4" />
-                Back to organisations
-              </.link>
-              <h1 class="text-2xl font-bold tracking-[-0.01em]">Medical Camp Dashboard</h1>
-              <p class="mt-1 text-sm text-white/70">
-                <span :if={@superadmin_organisation_name} class="font-semibold text-white">
-                  {@superadmin_organisation_name} ·
-                </span>
-                {@stats.total} patients
-              </p>
+        <div class="rounded-xl bg-brand-primary px-6 py-5 shadow-card">
+          <.link
+            :if={@superadmin_back_path}
+            navigate={@superadmin_back_path}
+            class="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-white/70 transition-colors duration-150 hover:text-white"
+          >
+            <Heroicons.icon name="arrow-left" type="outline" class="h-4 w-4" /> Back to organisations
+          </.link>
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            <div class="flex items-start gap-3">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
+                <Heroicons.icon name="chart-bar-square" type="outline" class="h-5 w-5" />
+              </div>
+              <div>
+                <h1 class="text-lg font-semibold text-white">Medical Camp Dashboard</h1>
+                <p class="mt-0.5 text-sm text-white/80">
+                  <span :if={@superadmin_organisation_name} class="font-semibold text-white">
+                    {@superadmin_organisation_name} ·
+                  </span>
+                  {@stats.total} patients
+                </p>
+              </div>
             </div>
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <div class="flex flex-col gap-3 sm:shrink-0 sm:flex-row sm:items-center sm:gap-4">
               <.camp_switcher
-                :if={is_nil(@superadmin_organisation_name)}
+                :if={not @superadmin?}
                 tone="on_dark"
                 camps={assigns[:camp_options] || []}
                 camp_filter={assigns[:camp_filter]}
               />
+              <form :if={@superadmin?} phx-change="superadmin_pick_camp" class="w-full sm:w-72">
+                <label for="superadmin-camp" class="sr-only">Camp</label>
+                <select
+                  id="superadmin-camp"
+                  name="camp_id"
+                  class="h-10 w-full appearance-none rounded-full border border-transparent bg-white px-4 text-sm font-medium text-slate-900 focus:outline-none focus:ring-0"
+                >
+                  <option value="" selected={is_nil(@camp)}>Active camp</option>
+                  <option :for={c <- @camp_options} value={c.id} selected={@camp && @camp.id == c.id}>
+                    {c.name}{if Camps.Camp.date_range(c), do: " · #{Camps.Camp.date_range(c)}"}
+                  </option>
+                </select>
+              </form>
               <.link
                 navigate={@report_path}
                 class="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-primary transition-colors duration-150 hover:bg-white/90"
@@ -396,14 +505,35 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
         </div>
 
         <div
-          :if={length(@camp_days) > 1}
+          :if={is_nil(@camp)}
+          class="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center"
+        >
+          <h2 class="text-lg font-semibold text-slate-900">No active camp</h2>
+          <p class="mx-auto mt-2 max-w-md text-sm text-slate-500">
+            Activate a camp to see its dashboard. Until then work is not attributed to any
+            camp, and the full patient register is not loaded here.
+          </p>
+          <.link
+            navigate={~p"/admin/camps"}
+            class="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2b73]"
+          >
+            <Heroicons.icon name="arrow-right" type="outline" class="h-4 w-4" /> Go to camps
+          </.link>
+        </div>
+
+        <div
+          :if={not is_nil(@camp) and length(@camp_days) > 1}
+          role="tablist"
+          aria-label="Camp day"
           class="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white p-2"
         >
-          <span class="px-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <span class="px-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
             Camp day
           </span>
           <button
             type="button"
+            role="tab"
+            aria-selected={to_string(@active_day_tab == :all)}
             phx-click="set_day_tab"
             phx-value-tab="all"
             class={[
@@ -417,6 +547,8 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           <button
             :for={day <- @camp_days}
             type="button"
+            role="tab"
+            aria-selected={to_string(@active_day_tab == day)}
             phx-click="set_day_tab"
             phx-value-tab={Date.to_iso8601(day)}
             class={[
@@ -430,14 +562,22 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
         </div>
         
     <!-- Top-level Tabs -->
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-          <div class="overflow-x-auto">
-            <div class="flex min-w-max sm:min-w-0">
+        <div
+          :if={not is_nil(@camp)}
+          class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white"
+        >
+          <div class="snap-x snap-mandatory overflow-x-auto">
+            <div role="tablist" aria-label="Dashboard sections" class="flex min-w-max sm:min-w-0">
               <button
+                type="button"
+                role="tab"
+                id="dash-tab-overview"
+                aria-selected={to_string(@active_dashboard_tab == :overview)}
+                aria-controls="dash-panel-overview"
                 phx-click="set_dashboard_tab"
                 phx-value-tab="overview"
                 class={[
-                  "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
+                  "min-w-[7.5rem] flex-1 flex items-center justify-center gap-2 px-4 py-4 text-sm font-semibold transition-colors border-b-2 snap-start sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :overview,
                     do: "border-brand-primary text-brand-primary bg-brand-50",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
@@ -455,10 +595,15 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 Overview
               </button>
               <button
+                type="button"
+                role="tab"
+                id="dash-tab-patient_data"
+                aria-selected={to_string(@active_dashboard_tab == :patient_data)}
+                aria-controls="dash-panel-patient_data"
                 phx-click="set_dashboard_tab"
                 phx-value-tab="patient_data"
                 class={[
-                  "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
+                  "min-w-[7.5rem] flex-1 flex items-center justify-center gap-2 px-4 py-4 text-sm font-semibold transition-colors border-b-2 snap-start sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :patient_data,
                     do: "border-brand-primary text-brand-primary bg-brand-50",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
@@ -476,10 +621,15 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 Patient Data
               </button>
               <button
+                type="button"
+                role="tab"
+                id="dash-tab-ai_analysis"
+                aria-selected={to_string(@active_dashboard_tab == :ai_analysis)}
+                aria-controls="dash-panel-ai_analysis"
                 phx-click="set_dashboard_tab"
                 phx-value-tab="ai_analysis"
                 class={[
-                  "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
+                  "min-w-[7.5rem] flex-1 flex items-center justify-center gap-2 px-4 py-4 text-sm font-semibold transition-colors border-b-2 snap-start sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :ai_analysis,
                     do: "border-brand-primary text-brand-primary bg-brand-50",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
@@ -497,10 +647,15 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 AI Analysis
               </button>
               <button
+                type="button"
+                role="tab"
+                id="dash-tab-financials"
+                aria-selected={to_string(@active_dashboard_tab == :financials)}
+                aria-controls="dash-panel-financials"
                 phx-click="set_dashboard_tab"
                 phx-value-tab="financials"
                 class={[
-                  "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
+                  "min-w-[7.5rem] flex-1 flex items-center justify-center gap-2 px-4 py-4 text-sm font-semibold transition-colors border-b-2 snap-start sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :financials,
                     do: "border-brand-primary text-brand-primary bg-brand-50",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
@@ -518,10 +673,15 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 Financials
               </button>
               <button
+                type="button"
+                role="tab"
+                id="dash-tab-downloads"
+                aria-selected={to_string(@active_dashboard_tab == :downloads)}
+                aria-controls="dash-panel-downloads"
                 phx-click="set_dashboard_tab"
                 phx-value-tab="downloads"
                 class={[
-                  "min-w-[10rem] flex-1 flex items-center justify-center gap-2 px-5 py-4 text-sm font-semibold transition-colors border-b-2 sm:min-w-0 sm:px-6",
+                  "min-w-[7.5rem] flex-1 flex items-center justify-center gap-2 px-4 py-4 text-sm font-semibold transition-colors border-b-2 snap-start sm:min-w-0 sm:px-6",
                   if(@active_dashboard_tab == :downloads,
                     do: "border-brand-primary text-brand-primary bg-brand-50",
                     else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
@@ -540,10 +700,35 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </button>
             </div>
           </div>
+          <div
+            class="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent sm:hidden"
+            aria-hidden="true"
+          >
+          </div>
+        </div>
+
+        <div :if={@camp && @loading} class="space-y-6" aria-busy="true">
+          <p class="sr-only" role="status">Loading camp data…</p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div
+              :for={_ <- 1..4}
+              class="h-24 animate-pulse rounded-xl border border-slate-200 bg-slate-100"
+            >
+            </div>
+          </div>
+          <div class="h-64 animate-pulse rounded-xl border border-slate-200 bg-slate-100"></div>
+          <div class="h-64 animate-pulse rounded-xl border border-slate-200 bg-slate-100"></div>
         </div>
         
     <!-- Overview Tab Content -->
-        <%= if @active_dashboard_tab == :overview do %>
+        <div
+          :if={@camp && not @loading && @active_dashboard_tab == :overview}
+          id="dash-panel-overview"
+          role="tabpanel"
+          aria-labelledby="dash-tab-overview"
+          tabindex="0"
+          class="space-y-6"
+        >
           
     <!-- Stats Grid -->
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -670,7 +855,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 Patient Type Breakdown
               </h3>
               <%= if Enum.empty?(@stats.patient_types) do %>
-                <p class="text-sm text-slate-400 text-center py-6">No data available</p>
+                <p class="text-sm text-slate-500 text-center py-6">No data available</p>
               <% else %>
                 <div class="space-y-3">
                   <%= for {type, count} <- @stats.patient_types do %>
@@ -710,7 +895,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </div>
             </div>
             <%= if Enum.empty?(@geographic_breakdown) do %>
-              <div class="flex flex-col items-center justify-center py-12 text-slate-400">
+              <div class="flex flex-col items-center justify-center py-12 text-slate-500">
                 <p class="text-sm font-medium">No location data available</p>
               </div>
             <% else %>
@@ -753,11 +938,18 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </div>
             <% end %>
           </div>
-        <% end %>
+        </div>
         <!-- /Overview Tab -->
 
         <!-- Patient Data Tab Content -->
-        <%= if @active_dashboard_tab == :patient_data do %>
+        <div
+          :if={@camp && not @loading && @active_dashboard_tab == :patient_data}
+          id="dash-panel-patient_data"
+          role="tabpanel"
+          aria-labelledby="dash-tab-patient_data"
+          tabindex="0"
+          class="space-y-6"
+        >
           <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
               <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
@@ -773,7 +965,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </div>
 
               <%= if Enum.empty?(@reporting.doctor_note_doctors) do %>
-                <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+                <div class="flex flex-col items-center justify-center py-16 text-slate-500">
                   <svg class="h-12 w-12 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       stroke-linecap="round"
@@ -830,7 +1022,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </div>
 
               <%= if Enum.empty?(@reporting.diagnoses) do %>
-                <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+                <div class="flex flex-col items-center justify-center py-16 text-slate-500">
                   <svg class="h-12 w-12 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       stroke-linecap="round"
@@ -885,7 +1077,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
             </div>
 
             <%= if Enum.empty?(@reporting.tests) do %>
-              <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+              <div class="flex flex-col items-center justify-center py-16 text-slate-500">
                 <svg class="h-12 w-12 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -920,7 +1112,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                       <tr>
                         <td class="px-4 py-3">
                           <div class="font-medium text-slate-800">{test.name}</div>
-                          <div class="text-xs text-slate-400">{test.revenue_label}</div>
+                          <div class="text-xs text-slate-500">{test.revenue_label}</div>
                         </td>
                         <td class="px-4 py-3 text-right font-semibold text-slate-800">
                           {test.total}
@@ -963,7 +1155,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
             </div>
 
             <%= if Enum.empty?(@patients) do %>
-              <div class="flex flex-col items-center justify-center py-20 text-slate-400">
+              <div class="flex flex-col items-center justify-center py-20 text-slate-500">
                 <svg class="h-12 w-12 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -1018,12 +1210,12 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                         phx-click="select_patient"
                         phx-value-id={patient.id}
                       >
-                        <td class="px-4 py-3 text-slate-400 font-mono text-xs">{index}</td>
+                        <td class="px-4 py-3 text-slate-500 font-mono text-xs">{index}</td>
                         <td class="px-4 py-3">
                           <div class="font-medium text-slate-800">
                             {full_name(patient)}
                           </div>
-                          <div class="text-xs text-slate-400">{patient.gsrn}</div>
+                          <div class="text-xs text-slate-500">{patient.gsrn}</div>
                         </td>
                         <td class="px-4 py-3">
                           <span class="text-slate-700">{patient.age || "—"} yrs</span>
@@ -1060,7 +1252,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                               Yes
                             </span>
                           <% else %>
-                            <span class="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">
+                            <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
                               No
                             </span>
                           <% end %>
@@ -1160,7 +1352,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                       <span class="font-medium">Insured · {@selected_patient.insurance_scheme}</span>
                     </span>
                   <% end %>
-                  <span class="ml-auto flex items-center gap-1 text-slate-400">
+                  <span class="ml-auto flex items-center gap-1 text-slate-500">
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
                         stroke-linecap="round"
@@ -1175,7 +1367,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 
     <!-- Tabs -->
                 <div class="overflow-x-auto border-b border-slate-200 bg-white shrink-0">
-                  <div class="flex min-w-max">
+                  <div role="tablist" aria-label="Patient record sections" class="flex min-w-max">
                     <.report_tab
                       tab={:triage}
                       active={@active_report_tab}
@@ -1207,7 +1399,13 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                 <div class="flex-1 overflow-y-auto p-6">
                   
     <!-- Triage Tab -->
-                  <%= if @active_report_tab == :triage do %>
+                  <div
+                    :if={@active_report_tab == :triage}
+                    id="report-panel-triage"
+                    role="tabpanel"
+                    aria-labelledby="report-tab-triage"
+                    tabindex="0"
+                  >
                     <%= if @patient_triage do %>
                       <div class="space-y-5">
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -1298,17 +1496,23 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                           <% end %>
                         </div>
 
-                        <p class="text-xs text-slate-400 text-center">
+                        <p class="text-xs text-slate-500 text-center">
                           Recorded: {format_datetime(@patient_triage.inserted_at)}
                         </p>
                       </div>
                     <% else %>
                       <.empty_state label="No triage recorded for this patient" />
                     <% end %>
-                  <% end %>
+                  </div>
                   
     <!-- Doctor Notes Tab -->
-                  <%= if @active_report_tab == :notes do %>
+                  <div
+                    :if={@active_report_tab == :notes}
+                    id="report-panel-notes"
+                    role="tabpanel"
+                    aria-labelledby="report-tab-notes"
+                    tabindex="0"
+                  >
                     <%= if Enum.empty?(@patient_doctor_notes) do %>
                       <.empty_state label="No doctor notes recorded" />
                     <% else %>
@@ -1354,10 +1558,16 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                         <% end %>
                       </div>
                     <% end %>
-                  <% end %>
+                  </div>
                   
     <!-- Lab Tests Tab -->
-                  <%= if @active_report_tab == :labs do %>
+                  <div
+                    :if={@active_report_tab == :labs}
+                    id="report-panel-labs"
+                    role="tabpanel"
+                    aria-labelledby="report-tab-labs"
+                    tabindex="0"
+                  >
                     <%= if Enum.empty?(@patient_lab_results) do %>
                       <.empty_state label="No lab tests requested" />
                     <% else %>
@@ -1395,7 +1605,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                                 <p class="text-sm text-slate-700">{result.test_findings}</p>
                               </div>
                             <% end %>
-                            <div class="flex items-center gap-3 text-xs text-slate-400 mt-2">
+                            <div class="flex items-center gap-3 text-xs text-slate-500 mt-2">
                               <%= if result.date_of_test do %>
                                 <span>
                                   Test date: {Calendar.strftime(result.date_of_test, "%d %b %Y")}
@@ -1409,10 +1619,16 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                         <% end %>
                       </div>
                     <% end %>
-                  <% end %>
+                  </div>
                   
     <!-- AI Analysis Tab -->
-                  <%= if @active_report_tab == :ai do %>
+                  <div
+                    :if={@active_report_tab == :ai}
+                    id="report-panel-ai"
+                    role="tabpanel"
+                    aria-labelledby="report-tab-ai"
+                    tabindex="0"
+                  >
                     <div class="space-y-4">
                       <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
                         <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -1490,7 +1706,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                         </div>
                       <% end %>
                     </div>
-                  <% end %>
+                  </div>
                 </div>
                 
     <!-- Modal Footer -->
@@ -1519,10 +1735,17 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </div>
             </div>
           <% end %>
-        <% end %>
+        </div>
         <!-- /Patient Data Tab -->
 
-        <%= if @active_dashboard_tab == :ai_analysis do %>
+        <div
+          :if={@camp && not @loading && @active_dashboard_tab == :ai_analysis}
+          id="dash-panel-ai_analysis"
+          role="tabpanel"
+          aria-labelledby="dash-tab-ai_analysis"
+          tabindex="0"
+          class="space-y-6"
+        >
           <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
             <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
               <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -1595,8 +1818,10 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                       Camp AI Findings
                     </h4>
                   </div>
-                  <div class="camp-ai-body">
-                    {raw(@camp_ai_response)}
+                  <%!-- TODO(S-3): structured AI output. Model-generated text is
+                        rendered escaped (never raw HTML) to avoid XSS via the LLM. --%>
+                  <div class="camp-ai-body text-sm leading-7 text-slate-700 whitespace-pre-line">
+                    {@camp_ai_response}
                   </div>
                 </div>
               <% end %>
@@ -1660,10 +1885,17 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </div>
             </div>
           </div>
-        <% end %>
+        </div>
         
     <!-- Financials Tab Content -->
-        <%= if @active_dashboard_tab == :financials do %>
+        <div
+          :if={@camp && not @loading && @active_dashboard_tab == :financials}
+          id="dash-panel-financials"
+          role="tabpanel"
+          aria-labelledby="dash-tab-financials"
+          tabindex="0"
+          class="space-y-6"
+        >
           <% f = @financials %>
           
     <!-- Summary stat cards -->
@@ -1675,21 +1907,21 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               <p class="text-2xl font-bold text-emerald-700 tabular-nums">
                 KSh {Number.Delimit.number_to_delimited(f.total_revenue, precision: 0)}
               </p>
-              <p class="text-xs text-slate-400">from lab tests</p>
+              <p class="text-xs text-slate-500">from lab tests</p>
             </div>
             <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col gap-1">
               <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Collected</p>
               <p class="text-2xl font-bold text-blue-700 tabular-nums">
                 KSh {Number.Delimit.number_to_delimited(f.total_paid, precision: 0)}
               </p>
-              <p class="text-xs text-slate-400">marked as paid</p>
+              <p class="text-xs text-slate-500">marked as paid</p>
             </div>
             <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col gap-1">
               <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pending</p>
               <p class="text-2xl font-bold text-amber-600 tabular-nums">
                 KSh {Number.Delimit.number_to_delimited(f.total_pending, precision: 0)}
               </p>
-              <p class="text-xs text-slate-400">awaiting payment</p>
+              <p class="text-xs text-slate-500">awaiting payment</p>
             </div>
             <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col gap-2">
               <div>
@@ -1739,7 +1971,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
             </div>
 
             <%= if Enum.empty?(f.patient_rows) do %>
-              <div class="flex flex-col items-center justify-center py-20 text-slate-400">
+              <div class="flex flex-col items-center justify-center py-20 text-slate-500">
                 <svg class="h-12 w-12 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -1771,11 +2003,11 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                       </div>
                     </div>
                     <div class="text-right">
-                      <p class="text-xs text-slate-400 uppercase tracking-wide">Patient Total</p>
+                      <p class="text-xs text-slate-500 uppercase tracking-wide">Patient Total</p>
                       <p class="text-xl font-bold text-emerald-700 tabular-nums">
                         KSh {Number.Delimit.number_to_delimited(row.total_amount, precision: 0)}
                       </p>
-                      <p class="text-xs text-slate-400 mt-0.5">
+                      <p class="text-xs text-slate-500 mt-0.5">
                         {length(row.lab_results)} order{if length(row.lab_results) != 1,
                           do: "s",
                           else: ""}
@@ -1822,7 +2054,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
                                   <% end %>
                                 </div>
                               <% else %>
-                                <span class="text-slate-400 text-xs italic">No tests listed</span>
+                                <span class="text-slate-500 text-xs italic">No tests listed</span>
                               <% end %>
                               <%= if lr.name do %>
                                 <p class="text-xs text-slate-500 mt-1">{lr.name}</p>
@@ -1913,11 +2145,18 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </div>
             <% end %>
           </div>
-        <% end %>
+        </div>
         <!-- /Financials Tab -->
 
         <!-- Downloads Tab Content -->
-        <%= if @active_dashboard_tab == :downloads do %>
+        <div
+          :if={@camp && not @loading && @active_dashboard_tab == :downloads}
+          id="dash-panel-downloads"
+          role="tabpanel"
+          aria-labelledby="dash-tab-downloads"
+          tabindex="0"
+          class="space-y-6"
+        >
           <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
             <div class="px-5 py-5 border-b border-slate-200 bg-slate-50/80">
               <h3 class="text-base font-semibold text-slate-800">Export & Download</h3>
@@ -2222,14 +2461,14 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               </div>
             </div>
           </div>
-        <% end %>
+        </div>
         <!-- /Downloads Tab -->
 
       </div>
     </div>
 
     <!-- Export Preview Modal -->
-    <%= if @preview_modal do %>
+    <%= if @camp && @preview_modal do %>
       <% page_size = 10
       total_rows = length(@preview_modal.rows)
       total_pages = max(ceil(total_rows / page_size), 1)
@@ -2246,7 +2485,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
           <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
             <div>
               <h3 class="text-base font-semibold text-slate-800">{@preview_modal.title}</h3>
-              <p class="text-xs text-slate-400 mt-0.5">
+              <p class="text-xs text-slate-500 mt-0.5">
                 Showing {from}–{to} of {total_rows} rows
               </p>
             </div>
@@ -2444,6 +2683,11 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
   defp report_tab(assigns) do
     ~H"""
     <button
+      type="button"
+      role="tab"
+      id={"report-tab-#{@tab}"}
+      aria-selected={to_string(@tab == @active)}
+      aria-controls={"report-panel-#{@tab}"}
       phx-click="set_report_tab"
       phx-value-tab={@tab}
       class={[
@@ -2486,7 +2730,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     ~H"""
     <span class={[
       "text-xs font-medium px-2 py-1 rounded-full",
-      if(@active, do: "bg-blue-100 text-blue-700", else: "bg-slate-100 text-slate-400 line-through")
+      if(@active, do: "bg-blue-100 text-blue-700", else: "bg-slate-100 text-slate-500 line-through")
     ]}>
       {@label}
     </span>
@@ -2511,7 +2755,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
 
   defp empty_state(assigns) do
     ~H"""
-    <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+    <div class="flex flex-col items-center justify-center py-16 text-slate-500">
       <svg class="h-10 w-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path
           stroke-linecap="round"
@@ -2535,6 +2779,12 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
       assigns
       |> assign(:config_json, Jason.encode!(assigns.config))
       |> assign(:dom_id, chart_dom_id(assigns.title))
+      |> assign(
+        :chart_label,
+        [assigns.title, assigns[:subtitle]]
+        |> Enum.reject(&(&1 in [nil, ""]))
+        |> Enum.join(" — ")
+      )
 
     ~H"""
     <div class="bg-white rounded-2xl border border-slate-200 p-6 h-full">
@@ -2545,7 +2795,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
 
       <div class="w-full" style={"height: #{@height}"}>
         <div id={@dom_id} phx-hook="ChartJS" data-chart={@config_json} class="h-full w-full">
-          <canvas class="h-full w-full"></canvas>
+          <canvas class="h-full w-full" role="img" aria-label={@chart_label}></canvas>
         </div>
       </div>
     </div>
@@ -2756,7 +3006,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
       age_groups: [],
       tests: [],
       diagnoses: [],
-      registration_timeline: %{labels: [], day1: [], day2: []}
+      registration_timeline: %{labels: [], series: []}
     }
   end
 
@@ -2952,11 +3202,19 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
       Enum.map(hour_range, fn h -> Map.get(freq, h, 0) end)
     end
 
+    # One series per camp day so 09:00 Fri and 09:00 Sat stay distinct bars
+    # rather than collapsing into a single "all registrations" line. (D-6)
+    series =
+      by_day
+      |> Enum.sort_by(&elem(&1, 0), Date)
+      |> Enum.map(fn {date, hours} ->
+        %{label: Calendar.strftime(date, "%a, %d %b"), data: count_by_hour.(hours)}
+      end)
+
     %{
       labels:
         Enum.map(hour_range, fn h -> :io_lib.format("~2..0B:00", [h]) |> IO.iodata_to_binary() end),
-      day1: count_by_hour.(all_hours),
-      day2: []
+      series: series
     }
   end
 
@@ -3180,35 +3438,42 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     }
   end
 
-  defp registration_timeline_chart(%{labels: labels, day1: day1, day2: day2}) do
+  @registration_timeline_palette [
+    {"rgba(12, 39, 101, 0.9)", "rgba(12, 39, 101, 0.12)"},
+    {"rgba(82, 178, 216, 0.9)", "rgba(82, 178, 216, 0.12)"},
+    {"rgba(16, 185, 129, 0.9)", "rgba(16, 185, 129, 0.12)"},
+    {"rgba(217, 119, 6, 0.9)", "rgba(217, 119, 6, 0.12)"},
+    {"rgba(139, 92, 246, 0.9)", "rgba(139, 92, 246, 0.12)"}
+  ]
+
+  defp registration_timeline_chart(%{labels: labels, series: series}) do
+    palette = @registration_timeline_palette
+    single? = length(series) == 1
+
+    datasets =
+      series
+      |> Enum.with_index()
+      |> Enum.map(fn {%{label: label, data: data}, index} ->
+        {border, background} = Enum.at(palette, rem(index, length(palette)))
+
+        %{
+          label: if(single?, do: "Registrations", else: label),
+          data: data,
+          borderColor: border,
+          backgroundColor: background,
+          borderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.4,
+          fill: true
+        }
+      end)
+
     %{
       type: "line",
       data: %{
         labels: labels,
-        datasets: [
-          %{
-            label: "All registrations",
-            data: day1,
-            borderColor: "rgba(12, 39, 101, 0.9)",
-            backgroundColor: "rgba(12, 39, 101, 0.12)",
-            borderWidth: 2,
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            tension: 0.4,
-            fill: true
-          },
-          %{
-            label: "",
-            data: day2,
-            borderColor: "rgba(82, 178, 216, 0.9)",
-            backgroundColor: "rgba(82, 178, 216, 0.12)",
-            borderWidth: 2,
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            tension: 0.4,
-            fill: true
-          }
-        ]
+        datasets: datasets
       },
       options:
         base_chart_options(%{

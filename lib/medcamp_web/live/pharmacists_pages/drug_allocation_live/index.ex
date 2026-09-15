@@ -282,7 +282,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsIndex do
 
           <:col :let={drug_allocation} label="Patient">
             <div class="flex items-center gap-3">
-              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#e8e8ff] text-brand-primary font-semibold text-sm">
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-primary font-semibold text-sm">
                 {String.first(drug_allocation.patient.first_name || "?")}
               </div>
               <span class="font-medium text-slate-800">

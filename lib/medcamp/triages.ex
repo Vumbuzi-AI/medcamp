@@ -248,41 +248,4 @@ defmodule Medcamp.Triages do
   def change_triage(%Triage{} = triage, attrs \\ %{}) do
     Triage.changeset(triage, attrs)
   end
-
-  @doc """
-  Sets patient_type to "Community" for all medical camp patients that have no type set.
-
-  Usage:
-      Medcamp.Triages.fix_medical_camp_patient_types()
-  """
-  def fix_medical_camp_patient_types do
-    {count, _} =
-      from(p in Medcamp.Patients.Patient,
-        where: fragment("coalesce(?, false) = true", p.is_for_medical_camp),
-        where: is_nil(p.patient_type) or p.patient_type == "" or p.patient_type == "Community"
-      )
-      |> Repo.update_all(set: [patient_type: "Community Member"])
-
-    {:ok, count}
-  end
-
-  def fix_triages_for_march_28 do
-    camp_date = ~D[2026-03-28]
-    # Set inserted_at to 08:00 EAT (05:00 UTC) on the 28th as a neutral anchor time
-    anchor_inserted_at = ~U[2026-03-28 05:00:00Z]
-
-    patient_ids =
-      from(p in Medcamp.Patients.Patient,
-        where: fragment("coalesce(?, false) = true", p.is_for_medical_camp),
-        where: fragment("DATE(? AT TIME ZONE 'Africa/Nairobi')", p.inserted_at) == ^camp_date,
-        select: p.id
-      )
-      |> Repo.all()
-
-    {count, _} =
-      from(t in Triage, where: t.patient_id in ^patient_ids)
-      |> Repo.update_all(set: [date: camp_date, inserted_at: anchor_inserted_at])
-
-    {:ok, count}
-  end
 end

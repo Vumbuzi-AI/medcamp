@@ -23,8 +23,8 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
     />
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
-    <%!-- The current organisation's palette. Overrides the --brand-* defaults
-          in app.css, which is what every brand-* Tailwind class reads. --%>
+    <%!-- The current organisation's --brand-* palette; falls back to the stock
+          Tibasasa theme when there is no organisation in context. --%>
     <style>
       :root { <%= Phoenix.HTML.raw(Medcamp.Organisations.brand_css(assigns[:current_organisation])) %> }
     </style>

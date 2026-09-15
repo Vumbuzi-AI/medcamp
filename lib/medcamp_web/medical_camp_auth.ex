@@ -6,12 +6,20 @@ defmodule MedcampWeb.MedicalCampAuth do
   These pages sit outside the normal tenant-scoped `live_session`, so the
   guard is explicit here:
 
-    * a valid `user_token` in the session (regular staff login), and
+    * a valid `user_token` in the session (regular staff login or the station
+      PIN sign-in), and
     * the user's organisation is the **same** as the scanned patient's, and
     * the user's role is one the route allows (a doctor page needs a doctor).
 
+  On failure:
+
+    * **no session at all** -> the station PIN screen
+      (`/8018/:gsrn/medical-camp/pin`), so a nurse can PIN in and keep scanning.
+    * **signed in, but wrong organisation or role** -> `/users/log_in`.
+
   Use `{:require_camp_role, ["doctor"]}` to name the roles. `:require_camp_auth`
-  is kept as "any clinical camp role".
+  is kept as "any clinical camp role". On success `:current_user`, `:patient`
+  and `:active_camp` are assigned.
   """
   import Phoenix.LiveView
   import Phoenix.Component, only: [assign: 3]
@@ -43,13 +51,19 @@ defmodule MedcampWeb.MedicalCampAuth do
       {:cont,
        socket
        |> assign(:current_user, user)
+       |> assign(:patient, patient)
        |> assign(:active_camp, safe_active_camp())}
     else
+      # No usable session -> the station PIN screen (keeps scan-and-go fast).
+      nil ->
+        {:halt, redirect(socket, to: "/8018/#{gsrn}/medical-camp/pin")}
+
+      # Signed in but not for this camp, or the code resolves to no patient.
+      # Silent redirect (no flash): `/users/log_in` bounces an authenticated
+      # user straight to their own workspace, and a mis-scanned wristband at a
+      # multi-org event is routine, not an error worth shouting about.
       _ ->
-        {:halt,
-         socket
-         |> put_flash(:error, "Sign in with an account authorised for this camp to continue.")
-         |> redirect(to: "/users/log_in")}
+        {:halt, redirect(socket, to: "/users/log_in")}
     end
   end
 

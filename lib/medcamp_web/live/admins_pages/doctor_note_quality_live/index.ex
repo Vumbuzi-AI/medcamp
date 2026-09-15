@@ -142,7 +142,7 @@ defmodule MedcampWeb.AdminDoctorNoteQualityLive.Index do
               <div class="flex items-end gap-2">
                 <button
                   type="submit"
-                  class="h-[42px] flex-1 rounded-lg bg-brand-accent px-4 text-sm font-semibold text-white hover:bg-[#55569a]"
+                  class="h-[42px] flex-1 rounded-lg bg-brand-accent px-4 text-sm font-semibold text-white hover:bg-brand-accent-dark"
                 >
                   Apply
                 </button>

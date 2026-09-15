@@ -16,6 +16,7 @@ module.exports = {
         brand: {
           DEFAULT: "#FD4F00",
           primary: "var(--brand-primary)",
+          "primary-dark": "var(--brand-primary-dark)",
           accent: "var(--brand-accent)",
           "accent-dark": "var(--brand-accent-dark)",
           50: "var(--brand-50)",

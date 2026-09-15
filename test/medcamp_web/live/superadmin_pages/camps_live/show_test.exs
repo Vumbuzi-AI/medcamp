@@ -56,4 +56,46 @@ defmodule MedcampWeb.SuperadminCampsLive.ShowTest do
     assert {:error, {:live_redirect, %{to: "/superadmin/camps"}}} =
              live(conn, ~p"/superadmin/camps/999999")
   end
+
+  describe "authorization (Phase 7 gap 2)" do
+    test "a plain admin cannot open another org's camp detail" do
+      {_org, camp} = camp_in("Alpha Org", "Alpha Camp")
+
+      admin = user_fixture(%{role: "admin"})
+      conn = log_in_user(Phoenix.ConnTest.build_conn(), admin)
+
+      assert {:error, {:redirect, %{to: "/admin/dashboard"}}} =
+               live(conn, ~p"/superadmin/camps/#{camp.id}")
+    end
+
+    test "an unauthenticated visitor is redirected to log in" do
+      {_org, camp} = camp_in("Beta Org", "Beta Camp")
+
+      assert {:error, {:redirect, %{to: "/users/log_in"}}} =
+               live(Phoenix.ConnTest.build_conn(), ~p"/superadmin/camps/#{camp.id}")
+    end
+  end
+
+  describe "a crafted tab value (finding C-2)" do
+    test "an unknown phx-value-tab falls back to overview instead of raising", %{conn: conn} do
+      {_org, camp} = camp_in("Gamma Org", "Gamma Camp")
+
+      {:ok, view, _html} = live(conn, ~p"/superadmin/camps/#{camp.id}")
+
+      html = render_click(view, "tab", %{"tab" => "definitely-not-a-tab"})
+
+      assert html =~ "Records logged"
+      assert Process.alive?(view.pid)
+    end
+  end
+
+  describe "a non-numeric camp id (finding C-1)" do
+    test "redirects with a not-found flash instead of raising an Ecto cast error", %{conn: conn} do
+      # get_camp_across_orgs/1 now parses the id and returns nil for a
+      # non-numeric one, so show.ex:19 catches nil and flashes rather than
+      # letting `where: c.id == ^id` raise Ecto.Query.CastError.
+      assert {:error, {:live_redirect, %{to: "/superadmin/camps"}}} =
+               live(conn, "/superadmin/camps/not-a-number")
+    end
+  end
 end

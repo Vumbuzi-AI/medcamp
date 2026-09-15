@@ -31,15 +31,24 @@ defmodule Medcamp.Postal.LocalClient do
     end
   end
 
-  defp put_body(email, %{"html_body" => html}) when is_binary(html) and html != "",
-    do: html_body(email, html)
+  # Set both parts when present so the dev mailbox mirrors the real multipart send.
+  defp put_body(email, payload) do
+    html = payload["html_body"]
+    text = payload["plain_body"]
 
-  defp put_body(email, %{"plain_body" => text}) when is_binary(text) and text != "",
-    do: text_body(email, text)
+    email =
+      if is_binary(html) and html != "", do: html_body(email, html), else: email
 
-  defp put_body(email, _payload), do: text_body(email, "(empty body)")
+    cond do
+      is_binary(text) and text != "" -> text_body(email, text)
+      is_binary(html) and html != "" -> email
+      true -> text_body(email, "(empty body)")
+    end
+  end
 
-  defp parse_from(nil), do: {"GHCE (dev)", "no-reply@localhost"}
+  defp parse_from(nil) do
+    {"#{Application.get_env(:medcamp, :product_name, "Tibasasa")} (dev)", "no-reply@localhost"}
+  end
 
   defp parse_from(from) when is_binary(from) do
     case Regex.run(~r/^(.*?)\s*<(.+)>$/, String.trim(from)) do

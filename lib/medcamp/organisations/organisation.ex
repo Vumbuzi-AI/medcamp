@@ -24,6 +24,11 @@ defmodule Medcamp.Organisations.Organisation do
     field :phone_number, :string
     field :location, :string
     field :logo, :string
+    # The stock Tibasasa navy/cyan pair. This exact pair is the single source of
+    # truth for "no colour chosen" (see `Organisations.using_default_colours?/1`
+    # and the `:root` fallback in assets/css/app.css). Any other value - e.g. the
+    # seeded "GHC Excellence" org's #373896 - is a legitimate customised brand
+    # colour and is expected to classify as customised.
     field :primary_color, :string, default: "#0C2765"
     field :accent_color, :string, default: "#52B2D8"
     field :is_active, :boolean, default: true
@@ -153,11 +158,12 @@ defmodule Medcamp.Organisations.Organisation do
   @doc """
   The `--brand-*` CSS variables the theme is built from.
 
-  An organisation picks two colours; the four tints behind them (selected nav
-  item, hover background, ring) are derived here so nobody has to choose seven
-  hex codes that go together. The tints keep the primary colour's hue and are
-  placed at fixed lightnesses, which is what makes the derivation work for a
-  teal or maroon brand as well as the stock Tibasasa navy.
+  An organisation picks two colours; the darker hover shades and the tints
+  behind them (selected nav item, hover background, ring) are derived here so
+  nobody has to choose eight hex codes that go together. The tints keep the
+  primary colour's hue and are placed at fixed lightnesses, which is what
+  makes the derivation work for a teal or maroon brand as well as the stock
+  Tibasasa navy.
   """
   def css_variables(%__MODULE__{} = organisation) do
     primary = organisation.primary_color || "#0C2765"
@@ -165,6 +171,7 @@ defmodule Medcamp.Organisations.Organisation do
 
     %{
       "--brand-primary" => primary,
+      "--brand-primary-dark" => darken(primary, 0.12),
       "--brand-accent" => accent,
       "--brand-accent-dark" => darken(accent, 0.12),
       "--brand-50" => tint(primary, 0.97),

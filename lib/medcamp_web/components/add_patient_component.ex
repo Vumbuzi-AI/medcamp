@@ -20,6 +20,7 @@ defmodule MedcampWeb.AddPatientComponent do
       <form phx-submit="lookup" phx-target={@myself} class="mt-6 space-y-4">
         <.input
           type="text"
+          id="national_id_lookup"
           name="national_id"
           value={@lookup_id}
           label="National ID"
@@ -60,7 +61,7 @@ defmodule MedcampWeb.AddPatientComponent do
           <span :if={@matched_patient.phone_number}>{@matched_patient.phone_number}</span>
         </p>
         <p class="mt-2 flex items-center gap-2 text-xs">
-          <span class="font-semibold uppercase tracking-wide text-slate-400">GSRN</span>
+          <span class="font-semibold uppercase tracking-wide text-slate-500">GSRN</span>
           <span class="font-mono text-slate-700">{@matched_patient.gsrn}</span>
         </p>
       </div>
@@ -92,7 +93,13 @@ defmodule MedcampWeb.AddPatientComponent do
         >
           Open patient
         </.link>
-        <.button phx-click="register_visit" phx-target={@myself} phx-disable-with="Creating...">
+        <.button
+          phx-click="register_visit"
+          phx-target={@myself}
+          phx-disable-with="Creating..."
+          disabled={is_nil(@active_camp)}
+          class="disabled:opacity-50 disabled:pointer-events-none"
+        >
           {if @existing_visit, do: "Register another visit", else: "Register visit"}
         </.button>
       </div>
@@ -257,7 +264,11 @@ defmodule MedcampWeb.AddPatientComponent do
         <p :if={@upload_error} class="text-sm text-rose-600">{@upload_error}</p>
 
         <:actions>
-          <.button phx-disable-with="Saving...">
+          <.button
+            phx-disable-with="Saving..."
+            disabled={is_nil(@active_camp)}
+            class="disabled:opacity-50 disabled:pointer-events-none"
+          >
             Save Patient
           </.button>
         </:actions>
@@ -276,8 +287,9 @@ defmodule MedcampWeb.AddPatientComponent do
     >
       <.icon name="hero-exclamation-triangle" class="mt-0.5 h-4 w-4 shrink-0" />
       <span>
-        No camp is active. Patients registered now won't be attributed to any camp.
-        Activate one on <span class="font-semibold">Camps</span> first.
+        No camp is active, so registration is disabled - a patient with no camp
+        is invisible on every camp roster. Activate one on <span class="font-semibold">Camps</span>
+        first.
       </span>
     </div>
     """
@@ -297,7 +309,7 @@ defmodule MedcampWeb.AddPatientComponent do
     ~H"""
     <h3 class="text-sm font-semibold text-slate-900">
       {render_slot(@inner_block)}
-      <span :if={@note} class="ml-1 font-normal text-slate-400">({@note})</span>
+      <span :if={@note} class="ml-1 font-normal text-slate-500">({@note})</span>
     </h3>
     """
   end
@@ -311,7 +323,9 @@ defmodule MedcampWeb.AddPatientComponent do
   defp document_upload_field(assigns) do
     ~H"""
     <div class="min-w-0">
-      <label class="block text-sm font-medium leading-6 text-zinc-800">{@label}</label>
+      <label for={@upload.ref} class="block text-sm font-medium leading-6 text-zinc-800">
+        {@label}
+      </label>
       <div :if={@existing_document} class="mt-1">
         <a
           href={@existing_document}
@@ -326,7 +340,7 @@ defmodule MedcampWeb.AddPatientComponent do
         upload={@upload}
         class="mt-1 block w-full max-w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200"
       />
-      <p class="mt-1 text-xs text-slate-400">JPG, PNG or PDF, up to 8MB.</p>
+      <p class="mt-1 text-xs text-slate-500">JPG, PNG or PDF, up to 8MB.</p>
       <div :for={entry <- @upload.entries} class="mt-1 flex items-center gap-2 text-sm text-slate-600">
         <span class="truncate">{entry.client_name}</span>
         <progress value={entry.progress} max="100" class="max-w-full">{entry.progress}%</progress>
@@ -494,6 +508,9 @@ defmodule MedcampWeb.AddPatientComponent do
       {:ok, {patient, _visit}} ->
         after_registration(socket, patient, "Visit created for #{full_name(patient)}")
 
+      {:error, :no_active_camp} ->
+        {:noreply, put_flash(socket, :error, "Activate a camp before registering patients.")}
+
       {:error, _changeset} ->
         {:noreply, put_flash(socket, :error, "Could not create the visit. Try again.")}
     end
@@ -658,6 +675,9 @@ defmodule MedcampWeb.AddPatientComponent do
     case Patients.register_for_camp(patient_params, socket.assigns.current_user) do
       {:ok, {patient, _visit}} ->
         after_registration(socket, patient, "Patient registered and sent to triage")
+
+      {:error, :no_active_camp} ->
+        {:noreply, put_flash(socket, :error, "Activate a camp before registering patients.")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}

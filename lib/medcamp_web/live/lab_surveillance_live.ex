@@ -118,7 +118,7 @@ defmodule MedcampWeb.LabSurveillanceLive do
         </.dashboard_top_card>
       </div>
 
-      <section class="lab-surveillance-report overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <section class="lab-surveillance-report overflow-hidden rounded-xl border border-slate-200 bg-white shadow-card">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
           <div>
             <h2 class="text-lg font-bold text-slate-900">Laboratory Surveillance Summary</h2>
@@ -129,7 +129,7 @@ defmodule MedcampWeb.LabSurveillanceLive do
           <button
             type="button"
             onclick="window.print()"
-            class="no-print inline-flex h-9 items-center rounded-md border border-[#cdd0ff] bg-brand-50 px-3 text-sm font-semibold text-brand-primary hover:bg-brand-100"
+            class="no-print inline-flex h-9 items-center rounded-md border border-brand-200 bg-brand-50 px-3 text-sm font-semibold text-brand-primary hover:bg-brand-100"
           >
             Print summary
           </button>
@@ -201,7 +201,7 @@ defmodule MedcampWeb.LabSurveillanceLive do
             </tbody>
             <tfoot :if={@report.rows != []}>
               <tr class="bg-brand-50 font-bold text-brand-primary">
-                <td class="border-r border-t border-[#d9dcff] px-4 py-3">All tests</td>
+                <td class="border-r border-t border-brand-200 px-4 py-3">All tests</td>
                 <.number_cell value={@report.totals.under_five_tested} footer />
                 <.number_cell value={@report.totals.under_five_positive} footer />
                 <.number_cell value={@report.totals.five_plus_tested} footer />
@@ -249,7 +249,7 @@ defmodule MedcampWeb.LabSurveillanceLive do
     <td class={[
       "px-3 py-3 text-center tabular-nums",
       !@last && "border-r",
-      @footer && "border-t border-[#d9dcff]",
+      @footer && "border-t border-brand-200",
       !@footer && "border-b border-slate-200",
       @positive && !@footer && @value > 0 && "font-semibold text-rose-700"
     ]}>

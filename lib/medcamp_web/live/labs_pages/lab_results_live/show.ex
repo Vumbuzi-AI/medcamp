@@ -442,7 +442,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.Show do
         </div>
         
     <!-- AI Interpretation -->
-        <div class="bg-[#f8f8ff] rounded-lg p-4 border border-brand-100 mb-6">
+        <div class="bg-brand-50 rounded-lg p-4 border border-brand-100 mb-6">
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-semibold text-brand-primary uppercase tracking-wide flex items-center">
               <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

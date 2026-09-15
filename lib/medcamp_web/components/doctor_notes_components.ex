@@ -444,7 +444,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
               <button
                 type="button"
                 data-role="voice-start"
-                class="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2f307f]"
+                class="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark"
               >
                 Start dictating
               </button>
@@ -521,7 +521,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
               <button
                 type="button"
                 data-role="voice-save"
-                class="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2f307f]"
+                class="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark"
               >
                 Save to note
               </button>
@@ -583,7 +583,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
 
           <div
             :if={@patient.gender == "Female"}
-            class="bg-[#f8f8ff] p-4 rounded-lg border border-brand-100"
+            class="bg-brand-50 p-4 rounded-lg border border-brand-100"
           >
             <.input
               field={@form[:last_period_date]}
@@ -812,7 +812,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
 
           <div
             :if={@patient.gender == "Female"}
-            class="bg-[#f8f8ff] p-4 rounded-lg border border-brand-100"
+            class="bg-brand-50 p-4 rounded-lg border border-brand-100"
           >
             <.input
               field={@form[:last_period_date]}
@@ -948,7 +948,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
         </button>
         <button
           type="submit"
-          class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-5 py-2 text-sm font-semibold text-white hover:bg-[#2a2b73] transition-colors"
+          class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-5 py-2 text-sm font-semibold text-white hover:bg-brand-primary-dark transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -1121,7 +1121,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
 
         <div
           :if={@patient.gender == "Female"}
-          class="bg-[#f8f8ff] p-4 rounded-lg border border-brand-100"
+          class="bg-brand-50 p-4 rounded-lg border border-brand-100"
         >
           <.input
             field={@form[:last_period_date]}
@@ -1233,7 +1233,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
   def doctor_notes_card(assigns) do
     ~H"""
     <.simple_form for={%{}} id="doctor_note-form">
-      <div class="border-[#D0D5DD] border-[1px] rounded-md p-4">
+      <div class="border border-slate-300 rounded-md p-4">
         <p class="text-xl mb-4 font-semibold text-darkblue">
           Consultation Details
         </p>
@@ -1250,7 +1250,7 @@ defmodule MedcampWeb.DoctorNotesComponents do
         </div>
       </div>
 
-      <div class="border-[#D0D5DD] border-[1px] rounded-md p-4">
+      <div class="border border-slate-300 rounded-md p-4">
         <p class="text-xl mb-4 font-semibold text-darkblue">
           Diagnosis & Treatment
         </p>

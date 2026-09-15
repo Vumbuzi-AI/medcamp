@@ -37,7 +37,15 @@ defmodule MedcampWeb.ReceptionistPatientLive.New do
   end
 
   defp apply_action(socket, :new) do
-    assign(socket, page_title: "Add Patient", patient: %Patient{})
+    if socket.assigns.camp do
+      assign(socket, page_title: "Add Patient", patient: %Patient{})
+    else
+      # No camp -> a registered patient would land on no roster. Bounce back
+      # to the list, which already explains what to do.
+      socket
+      |> put_flash(:error, "Activate a camp before registering patients.")
+      |> push_patch(to: ~p"/receptionist/patients")
+    end
   end
 
   defp apply_action(socket, :index) do
@@ -125,16 +133,12 @@ defmodule MedcampWeb.ReceptionistPatientLive.New do
         <.list_page
           icon_path="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
           title="Patients"
-          subtitle={
-            if @search != "",
-              do: "Searching every patient in the organisation.",
-              else: "New patients go straight to the triage queue."
-          }
+          subtitle={"#{@patient_count} patient#{if @patient_count != 1, do: "s", else: ""}"}
         >
           <:actions>
             <span
               :if={@camp}
-              class="inline-flex items-center gap-1.5 rounded-full bg-[#e9f6fb] px-3 py-1.5 text-sm font-semibold text-[#0C2765]"
+              class="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-3 py-1.5 text-sm font-semibold text-brand-primary"
             >
               <.icon name="hero-map-pin" class="h-4 w-4" />
               <span class="max-w-[12rem] truncate">{@camp.name}</span>
@@ -145,11 +149,19 @@ defmodule MedcampWeb.ReceptionistPatientLive.New do
             >
               <.icon name="hero-exclamation-triangle" class="h-4 w-4" /> No active camp
             </span>
-            <.link patch={~p"/receptionist/patients/new"}>
-              <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2d2d7a]">
+            <.link :if={@camp} patch={~p"/receptionist/patients/new"}>
+              <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark">
                 <.icon name="hero-user-plus" class="h-4 w-4" /> Add Patient
               </button>
             </.link>
+            <button
+              :if={is_nil(@camp)}
+              disabled
+              title="Activate a camp first"
+              class="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white opacity-50"
+            >
+              <.icon name="hero-user-plus" class="h-4 w-4" /> Add Patient
+            </button>
             <.link
               href={~p"/users/log_out"}
               method="delete"
@@ -168,6 +180,9 @@ defmodule MedcampWeb.ReceptionistPatientLive.New do
               />
               <p :if={@scope == :camp} class="mt-1.5 text-xs text-slate-400">
                 Showing this camp only. Search to find a returning patient from anywhere in the organisation.
+              </p>
+              <p class="mt-1.5 text-xs text-slate-500">
+                New patients are added straight to the triage queue.
               </p>
             </form>
           </:toolbar>
@@ -222,7 +237,7 @@ defmodule MedcampWeb.ReceptionistPatientLive.New do
                 type="button"
                 phx-click="show_patient_code"
                 phx-value-patient_id={patient.id}
-                class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100"
+                class="inline-flex items-center gap-1.5 rounded-lg bg-brand-accent px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-brand-accent-dark"
               >
                 <.icon name="hero-qr-code" class="h-4 w-4" /> Print code
               </button>
@@ -267,7 +282,7 @@ defmodule MedcampWeb.ReceptionistPatientLive.New do
             <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100">
               <.icon name="hero-check" class="h-6 w-6 text-emerald-600" />
             </div>
-            <h3 class="mt-3 text-base font-semibold text-[#0C2765]">
+            <h3 class="mt-3 text-base font-semibold text-brand-primary">
               {patient_name(@registered_patient)} is registered
             </h3>
             <p class="mt-1 text-sm text-slate-500">
@@ -296,7 +311,7 @@ defmodule MedcampWeb.ReceptionistPatientLive.New do
           show
           on_cancel={JS.push("close_patient_code")}
         >
-          <h3 class="text-base font-semibold text-[#0C2765]">Patient wristband</h3>
+          <h3 class="text-base font-semibold text-brand-primary">Patient wristband</h3>
           <p class="mt-1 text-sm text-slate-500">
             Reprint the code for {patient_name(@code_patient)}.
           </p>

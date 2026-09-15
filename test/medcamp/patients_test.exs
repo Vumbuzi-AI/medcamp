@@ -481,4 +481,87 @@ defmodule Medcamp.PatientsTest do
       assert "is not a valid phone number" in errors_on(changeset).phone_number
     end
   end
+
+  defp camp_attrs(name) do
+    %{
+      "first_name" => name,
+      "last_name" => "Camper",
+      "phone_number" => "0712345678",
+      "date_of_birth" => "1990-01-01",
+      "gender" => "Female",
+      "home_address" => "Nairobi"
+    }
+  end
+
+  describe "register_for_camp/2 and camp attendance (D-5 / E8-2)" do
+    alias Medcamp.CampAttendances
+    alias Medcamp.Camps
+    alias Medcamp.Camps.Scope
+
+    test "writes a camp_attendances row when a camp is active" do
+      nurse = user_fixture(%{role: "nurse"})
+      {:ok, camp} = Camps.create_camp(%{"name" => "Active Camp"})
+      Scope.put_active_camp_id(camp.id)
+
+      assert {:ok, {patient, _visit}} = Patients.register_for_camp(camp_attrs("Ada"), nurse)
+
+      assert CampAttendances.attended?(patient.id, camp.id)
+      assert patient.id in Enum.map(Patients.list_patients_for_camp(camp.id), & &1.id)
+    end
+
+    test "with no active camp registration is refused and nothing is written" do
+      nurse = user_fixture(%{role: "nurse"})
+      # A camp exists but is not the one the process is scoped to.
+      {:ok, _camp} = Camps.create_camp(%{"name" => "Not Active For This Request"})
+      Scope.put_active_camp_id(nil)
+
+      patients_before = Repo.aggregate(Medcamp.Patients.Patient, :count)
+
+      assert {:error, :no_active_camp} = Patients.register_for_camp(camp_attrs("Bea"), nurse)
+
+      # No orphaned patient, so nothing to go missing from a camp roster later.
+      assert Repo.aggregate(Medcamp.Patients.Patient, :count) == patients_before
+    end
+
+    test "the attendance write is part of the registration transaction (E8-2)" do
+      nurse = user_fixture(%{role: "nurse"})
+      {:ok, camp} = Camps.create_camp(%{"name" => "March Camp"})
+      Scope.put_active_camp_id(camp.id)
+
+      {:ok, {patient, _visit}} = Patients.register_for_camp(camp_attrs("Cleo"), nurse)
+
+      # Committed patient + visit always come with the attendance row, so the
+      # camp-scoped views (which inner-join camp_attendances) show them.
+      assert CampAttendances.attended?(patient.id, camp.id)
+      assert patient.id in Enum.map(Patients.list_patients(), & &1.id)
+      assert patient.id in Enum.map(Patients.list_patients_for_camp(camp.id), & &1.id)
+    end
+
+    test "register_visit_for_existing/2 is refused when no camp is active" do
+      nurse = user_fixture(%{role: "nurse"})
+      {:ok, camp} = Camps.create_camp(%{"name" => "Existing Camp"})
+      Scope.put_active_camp_id(camp.id)
+      {:ok, {patient, _}} = Patients.register_for_camp(camp_attrs("Eve"), nurse)
+
+      Scope.put_active_camp_id(nil)
+      visits_before = Repo.aggregate(Medcamp.PatientVisits.PatientVisit, :count)
+
+      assert {:error, :no_active_camp} = Patients.register_visit_for_existing(patient, nurse)
+      assert Repo.aggregate(Medcamp.PatientVisits.PatientVisit, :count) == visits_before
+    end
+
+    test "repeat register_visit_for_existing/2 for one patient+camp keeps exactly one row" do
+      nurse = user_fixture(%{role: "nurse"})
+      {:ok, camp} = Camps.create_camp(%{"name" => "Repeat Camp"})
+      Scope.put_active_camp_id(camp.id)
+
+      {:ok, {patient, _}} = Patients.register_for_camp(camp_attrs("Dee"), nurse)
+
+      assert {:ok, {^patient, _}} = Patients.register_visit_for_existing(patient, nurse)
+      assert {:ok, {^patient, _}} = Patients.register_visit_for_existing(patient, nurse)
+
+      assert CampAttendances.camp_count(patient.id) == 1
+      assert CampAttendances.patient_count_for_camp(camp.id) == 1
+    end
+  end
 end

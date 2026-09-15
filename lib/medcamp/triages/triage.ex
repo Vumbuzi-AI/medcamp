@@ -30,6 +30,11 @@ defmodule Medcamp.Triages.Triage do
     timestamps(type: :utc_datetime)
   end
 
+  @emergency_scales ~w(High Medium Low)
+
+  @doc "The valid triage acuity values, in descending order of urgency."
+  def emergency_scales, do: @emergency_scales
+
   @doc false
   def changeset(triage, attrs) do
     triage
@@ -62,6 +67,7 @@ defmodule Medcamp.Triages.Triage do
       :weight,
       :date
     ])
+    |> validate_inclusion(:emergency_scale, @emergency_scales)
     |> put_date_if_missing()
     |> put_time_if_missing()
     |> calculate_bmi()

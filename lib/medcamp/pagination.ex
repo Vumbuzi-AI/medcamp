@@ -14,6 +14,21 @@ defmodule Medcamp.Pagination do
 
   def normalize_page(_), do: 1
 
+  @doc """
+  Clamps a page number into `1..total_pages`.
+
+  `normalize_page/1` only floors a stray value at 1; this also caps it at the
+  last page, so `?page=99999` lands on the last page of results instead of an
+  empty body.
+  """
+  def clamp_page(page, total_pages) do
+    total_pages = max(total_pages || 1, 1)
+
+    page
+    |> normalize_page()
+    |> min(total_pages)
+  end
+
   def normalize_per_page(per_page) when is_integer(per_page) and per_page > 0, do: per_page
 
   def normalize_per_page(per_page) when is_binary(per_page) do

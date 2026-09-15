@@ -40,26 +40,26 @@ defmodule MedcampWeb.AuditLogLive.Show do
       </.header>
       
     <!-- Overview Card -->
-      <div class="bg-gradient-to-r from-brand-accent to-brand-primary rounded-lg p-6 mb-6 text-white">
+      <div class="bg-white border border-slate-200 rounded-lg shadow-card p-6 mb-6">
         <div class="flex items-start justify-between">
           <div>
             <div class="flex items-center mb-2">
               <%= case action_badge(@audit_log.action) do %>
                 <% {label, emoji} -> %>
                   <span class="text-3xl mr-2">{emoji}</span>
-                  <h2 class="text-2xl font-bold">{label}</h2>
+                  <h2 class="text-2xl font-bold text-brand-primary">{label}</h2>
               <% end %>
             </div>
-            <p class="text-white/80 text-sm">
+            <p class="text-slate-500 text-sm">
               {format_table_name(@audit_log.table_name)} • Record ID: {@audit_log.record_id}
             </p>
           </div>
           <div class="text-right">
-            <p class="text-xs text-white/60 mb-1">Timestamp</p>
-            <p class="text-sm font-medium">
+            <p class="text-xs text-slate-400 mb-1">Timestamp</p>
+            <p class="text-sm font-medium text-slate-700">
               {Calendar.strftime(@audit_log.inserted_at, "%B %d, %Y")}
             </p>
-            <p class="text-sm font-medium">
+            <p class="text-sm font-medium text-slate-700">
               {Calendar.strftime(@audit_log.inserted_at, "%I:%M:%S %p")}
             </p>
           </div>
@@ -134,7 +134,7 @@ defmodule MedcampWeb.AuditLogLive.Show do
           </h3>
           <div class="flex flex-wrap gap-2">
             <%= for field <- @audit_log.changed_fields do %>
-              <span class="px-3 py-1.5 text-sm font-medium bg-purple-100 text-purple-800 rounded-lg">
+              <span class="px-3 py-1.5 text-sm font-medium bg-brand-50 text-brand-primary rounded-lg">
                 {String.replace(field, "_", " ") |> String.capitalize()}
               </span>
             <% end %>

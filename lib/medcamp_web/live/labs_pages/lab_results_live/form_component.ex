@@ -116,8 +116,6 @@ defmodule MedcampWeb.LabPagesLabResultLive.FormComponent do
          }}
       end)
 
-    IO.inspect(uploaded_files, label: "Uploaded files")
-
     lab_report = uploaded_files |> Enum.map(& &1.path) |> Enum.join(",")
 
     lab_result_params =

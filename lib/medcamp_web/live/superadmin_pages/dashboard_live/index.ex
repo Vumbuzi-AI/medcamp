@@ -11,6 +11,7 @@ defmodule MedcampWeb.SuperadminDashboardLive.Index do
 
   import Ecto.Query, warn: false
 
+  alias Medcamp.Camps
   alias Medcamp.DrugAllocations.DrugAllocation
   alias Medcamp.LabResults.LabResult
   alias Medcamp.Organisations
@@ -28,6 +29,7 @@ defmodule MedcampWeb.SuperadminDashboardLive.Index do
      |> assign(:page, 1)
      |> assign(:per_page, 10)
      |> assign(:stats, Organisations.organisation_stats())
+     |> assign(:camp_analytics, Camps.platform_camp_analytics())
      |> load_activity()}
   end
 
@@ -217,12 +219,28 @@ defmodule MedcampWeb.SuperadminDashboardLive.Index do
   end
 
   defp summary_cards(assigns) do
+    a = assigns.camp_analytics
+
     summary_cards_for(
-      [:platform_organisations, :platform_active_organisations, :platform_pending_approvals],
+      [
+        :platform_organisations,
+        :platform_active_organisations,
+        :platform_pending_approvals,
+        :platform_total_camps,
+        :platform_active_camps,
+        :platform_camp_patients,
+        :platform_camp_records,
+        :platform_returning_patients
+      ],
       %{
         platform_organisations: {assigns.stats.total, "Tenant workspaces"},
         platform_active_organisations: {assigns.stats.active, "Approved and live"},
-        platform_pending_approvals: {assigns.stats.pending, "Awaiting review"}
+        platform_pending_approvals: {assigns.stats.pending, "Awaiting review"},
+        platform_total_camps: {a.total_camps, "Across all organisations"},
+        platform_active_camps: {a.active_camps, "Currently accepting records"},
+        platform_camp_patients: {a.patients, "Distinct patients with attendance"},
+        platform_camp_records: {a.total_records, "Clinical rows logged"},
+        platform_returning_patients: {a.returning_patients, "Seen at more than one camp"}
       }
     )
   end

@@ -121,4 +121,51 @@ defmodule MedcampWeb.PharmacistsLive.DrugFormTest do
 
     assert render(view) =~ "Enter it manually"
   end
+
+  describe "parse_gtin/1 via a scan (finding C-8)" do
+    test "a GS1 AI string without parentheses fills the GTIN", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/pharmacist/drugs/new")
+
+      render_hook(view, "qr_scanned", %{"value" => "0106291041500213"})
+
+      assert has_element?(
+               view,
+               "#drug-form input[name='drug[gtin]'][value='06291041500213']"
+             )
+    end
+
+    test "a bare 8-digit GTIN-8 is accepted", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/pharmacist/drugs/new")
+
+      render_hook(view, "qr_scanned", %{"value" => "62910412"})
+
+      assert has_element?(view, "#drug-form input[name='drug[gtin]'][value='62910412']")
+    end
+
+    test "CURRENT BEHAVIOUR: a symbology-identifier prefix defeats the parser", %{conn: conn} do
+      # Scanners in GS1 mode emit a symbology id (`]d2`, `]C1`) and/or FNC1
+      # before the first AI. parse_gtin/1 matches neither `(01)` nor `^01`, so
+      # parse_bare_digits concatenates the `2`/`1` from the symbology id with
+      # the GTIN -> wrong length -> :error.
+      {:ok, view, _html} = live(conn, ~p"/pharmacist/drugs/new")
+
+      render_hook(view, "qr_scanned", %{"value" => "]d20106291041500213"})
+
+      assert render(view) =~ "Enter it manually"
+      refute has_element?(view, "#drug-form input[name='drug[gtin]'][value='06291041500213']")
+    end
+
+    @tag :known_bug
+    @tag :skip
+    test "DESIRED: a symbology-identifier prefix is stripped before parsing (C-8)", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/pharmacist/drugs/new")
+
+      render_hook(view, "qr_scanned", %{"value" => "]d20106291041500213"})
+
+      assert has_element?(
+               view,
+               "#drug-form input[name='drug[gtin]'][value='06291041500213']"
+             )
+    end
+  end
 end

@@ -1,59 +1,43 @@
 defmodule MedcampWeb.MedicalCampPages.Home do
   use MedcampWeb, :live_view
 
-  alias MedcampWeb.PublicTenant
   alias Phoenix.LiveView.JS
   alias Medcamp.Triages
   alias Medcamp.DoctorNotes
-  alias Medcamp.Accounts
   alias Medcamp.Triages.Triage
   alias Medcamp.DrugAllocations
   alias Medcamp.DrugAllocations.DrugAllocation
   alias Medcamp.LabResults
 
   @impl true
-  def mount(%{"gsrn" => gsrn}, session, socket) do
-    patient = PublicTenant.resolve_patient!(gsrn)
-    most_recent_triage = Triages.most_recent_triage(patient.id)
-    triages = Triages.list_triages_by_patient(patient.id)
+  def mount(%{"gsrn" => gsrn}, _session, socket) do
+    # Guarded by `MedicalCampAuth.:require_camp_auth` - `@current_user` and
+    # `@patient` are already assigned, org-matched, and role-checked.
+    patient = socket.assigns.patient
 
-    current_user =
-      case session["user_token"] do
-        nil -> nil
-        token -> Accounts.get_user_by_session_token(token)
-      end
+    cond do
+      socket.assigns.live_action == :index and socket.assigns.current_user.role == "nurse" ->
+        {:ok, push_navigate(socket, to: "/8018/#{gsrn}/medical-camp/triages/new")}
 
-    authenticated = not is_nil(current_user)
+      socket.assigns.live_action == :index and socket.assigns.current_user.role == "doctor" ->
+        {:ok, push_navigate(socket, to: "/8018/#{gsrn}/medical-camp/doctor_notes")}
 
-    # Redirect nurse to new triage, doctor to doctor_notes (only from the index route)
-    if authenticated and socket.assigns.live_action == :index do
-      case current_user.role do
-        "nurse" ->
-          {:ok,
-           socket
-           |> push_navigate(to: "/8018/#{gsrn}/medical-camp/triages/new")}
-
-        "doctor" ->
-          {:ok,
-           socket
-           |> push_navigate(to: "/8018/#{gsrn}/medical-camp/doctor_notes")}
-
-        _ ->
-          {:ok,
-           mount_home(socket, patient, most_recent_triage, triages, current_user, authenticated)}
-      end
-    else
-      {:ok, mount_home(socket, patient, most_recent_triage, triages, current_user, authenticated)}
+      true ->
+        {:ok,
+         mount_home(
+           socket,
+           patient,
+           Triages.most_recent_triage(patient.id),
+           Triages.list_triages_by_patient(patient.id)
+         )}
     end
   end
 
-  defp mount_home(socket, patient, most_recent_triage, triages, current_user, authenticated) do
+  defp mount_home(socket, patient, most_recent_triage, triages) do
     socket
     |> assign(:patient, patient)
     |> assign(:most_recent_triage, most_recent_triage)
     |> assign(:page_title, "Patient Details")
-    |> assign(:show_otp_modal, !authenticated)
-    |> assign(:current_user, current_user)
     |> assign(:triage, %Triage{})
     |> assign(:active_tab, :overview)
     |> assign(:back_url, nil)
@@ -141,38 +125,7 @@ defmodule MedcampWeb.MedicalCampPages.Home do
   def render(assigns) do
     ~H"""
     <div>
-      <%!-- OTP verification modal --%>
-      <div
-        :if={@show_otp_modal}
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      >
-        <div class="bg-white rounded-xl shadow-xl p-8 w-full max-w-sm mx-4">
-          <h2 class="text-xl font-bold text-slate-800 mb-1">Medical Camp Access</h2>
-          <p class="text-sm text-slate-500 mb-6">Enter your 4-digit OTP to continue.</p>
-
-          <form action={"/8018/#{@patient.gsrn}/medical-camp/session"} method="post">
-            <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
-            <input
-              type="text"
-              name="otp"
-              maxlength="4"
-              inputmode="numeric"
-              placeholder="_ _ _ _"
-              autofocus
-              class="w-full text-center text-2xl tracking-[0.5em] border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition-colors"
-            >
-              Verify OTP
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <%!-- Main content (blurred when OTP modal is showing) --%>
-      <div class={if @show_otp_modal, do: "pointer-events-none select-none blur-sm", else: ""}>
+      <div>
         <%!-- Patient header --%>
         <div class="bg-white rounded-lg border border-slate-100 shadow-sm p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>

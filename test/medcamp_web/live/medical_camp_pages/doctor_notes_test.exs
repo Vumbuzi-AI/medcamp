@@ -19,11 +19,13 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNotesTest do
     }
   end
 
-  test "redirects visitors with no staff login to sign in", %{patient: patient} do
+  test "sends visitors with no staff session to the station PIN screen", %{patient: patient} do
     conn = Phoenix.ConnTest.build_conn()
 
-    assert {:error, {:redirect, %{to: "/users/log_in"}}} =
+    assert {:error, {:redirect, %{to: to}}} =
              live(conn, "/8018/#{patient.gsrn}/medical-camp/doctor_notes")
+
+    assert to == "/8018/#{patient.gsrn}/medical-camp/pin"
   end
 
   test "redirects a doctor from a different organisation", %{patient: patient} do

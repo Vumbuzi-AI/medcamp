@@ -169,7 +169,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Show do
           <button
             type="button"
             phx-click="open_allergy_modal"
-            class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-3 py-2 text-sm font-medium text-white hover:bg-[#2f327d]"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-3 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark"
           >
             <.icon name="hero-plus" class="h-4 w-4" /> Add Allergy
           </button>
@@ -221,7 +221,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Show do
                     type="button"
                     phx-click="edit_allergy"
                     phx-value-id={allergy.id}
-                    class="text-sm font-medium text-brand-primary hover:text-[#2f327d]"
+                    class="text-sm font-medium text-brand-primary hover:text-brand-primary-dark"
                   >
                     Edit
                   </button>

@@ -6,6 +6,10 @@ defmodule MedcampWeb.TriageComponents do
   import MedcampWeb.CoreComponents
 
   def triages_table(assigns) do
+    # Callers that only render a patient's own triages (e.g. the camp-link home
+    # page) don't compute a separate `count` - derive it from the rows.
+    assigns = assign_new(assigns, :count, fn -> length(assigns[:triages] || []) end)
+
     ~H"""
     <div class="bg-white rounded-lg border border-slate-100 p-4">
       <.header

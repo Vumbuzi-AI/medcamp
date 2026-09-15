@@ -146,7 +146,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
               Delete Prescription <.icon name="hero-trash" class="h-5 w-5" />
             </button>
           </div>
-          <div class="p-3 mt-2 bg-[#f8f8ff] rounded-lg border border-brand-100 whitespace-pre-line text-slate-800">
+          <div class="p-3 mt-2 bg-brand-50 rounded-lg border border-brand-100 whitespace-pre-line text-slate-800">
             {@drug_allocation.prescription}
           </div>
         </div>
@@ -541,7 +541,7 @@ defmodule MedcampWeb.DrugAllocationComponents do
           :if={!@drug_allocation.has_been_assigned}
           navigate={"/pharmacist/drug_allocations/#{@drug_allocation.id}/confirm"}
         >
-          <.button class="bg-brand-primary px-4 py-2.5 hover:bg-[#2d2f7d]">
+          <.button class="px-4 py-2.5">
             <div class="flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"

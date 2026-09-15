@@ -1,19 +1,19 @@
 defmodule Medcamp.InventoriesReceived.InventoryReceived do
   use Ecto.Schema
   use Medcamp.Tenancy.Schema
-  use Medcamp.Camps.Schema
   import Ecto.Changeset
   alias Medcamp.Repo
   import Ecto.Query
 
   @moduledoc """
-  The pharmacy item master: one row per distinct product the camp stocks,
-  keyed by GTIN and carrying its brand/generic name, strength, category and
-  unit of measure.
+  The pharmacy item master: one row per distinct product the organisation
+  carries, keyed by GTIN and carrying its brand/generic name, strength,
+  category and unit of measure.
 
-  Despite the legacy `inventories_received` name this is a catalogue, not a
-  goods-receipt document - the camp has no procurement chain. It is the
-  identity a prescription and a dispense are recorded against
+  Despite the legacy `inventories_received` name this is an organisation-level
+  catalogue, not a goods-receipt document - the camp has no procurement
+  chain, and per-camp stock lives in `drug_batches`. It is the identity a
+  prescription and a dispense are recorded against
   (`inventory_received_id` flows through drug allocations and drugs given),
   which is why it survived the trim while the surrounding stores workflow
   did not.
@@ -27,7 +27,6 @@ defmodule Medcamp.InventoriesReceived.InventoryReceived do
 
   schema "inventories_received" do
     tenant_field()
-    camp_field()
 
     field :type, :string
     field :description, :string
@@ -69,7 +68,6 @@ defmodule Medcamp.InventoriesReceived.InventoryReceived do
     |> validate_name_present()
     |> maybe_strict(opts[:strict])
     |> put_org_id()
-    |> put_camp_id()
   end
 
   defp maybe_strict(changeset, true) do

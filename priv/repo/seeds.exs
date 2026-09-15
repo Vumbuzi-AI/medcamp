@@ -71,10 +71,28 @@ Tenancy.put_org_id(organisation.id)
 # The seeded activity below has to land somewhere, so the organisation gets
 # one camp and it is made active before anything else is written.
 
+# A 3-day window ending today, so day-by-day dashboards and the camp
+# switcher have a realistic multi-day range to work with.
+camp_end_date = Date.utc_today()
+camp_start_date = Date.add(camp_end_date, -2)
+
 camp =
-  case Repo.one(from c in Medcamp.Camps.Camp, where: c.name == "Seed Camp", limit: 1) do
-    nil -> unwrap!.(Camps.create_camp(%{"name" => "Seed Camp", "location" => "Kenya"}), "camp")
-    existing -> existing
+  case Repo.one(
+         from c in Medcamp.Camps.Camp, where: c.name == "GHC Community Medical Camp", limit: 1
+       ) do
+    nil ->
+      unwrap!.(
+        Camps.create_camp(%{
+          "name" => "GHC Community Medical Camp",
+          "location" => "Kenya",
+          "start_date" => camp_start_date,
+          "end_date" => camp_end_date
+        }),
+        "camp"
+      )
+
+    existing ->
+      existing
   end
 
 {:ok, camp} = Camps.set_active_camp(camp)
@@ -137,7 +155,8 @@ ensure_user = fn attrs ->
     role: attrs.role,
     organisation_id: organisation.id,
     is_active: true,
-    confirmed_at: user.confirmed_at || now
+    confirmed_at: user.confirmed_at || now,
+    activated_at: user.activated_at || now
   }
 
   desired_changes =
@@ -232,7 +251,8 @@ drug_stock = [
     brand_name: "Panadol",
     batch: "PCM-2601",
     expiry: "2027-06-30",
-    quantity: 500
+    quantity: 500,
+    uom: "Tablet"
   },
   %{
     gtin: "06161021090002",
@@ -240,7 +260,8 @@ drug_stock = [
     brand_name: "Amoxil",
     batch: "AMX-2602",
     expiry: "2027-03-31",
-    quantity: 300
+    quantity: 300,
+    uom: "Capsule"
   },
   %{
     gtin: "06161021090003",
@@ -248,7 +269,8 @@ drug_stock = [
     brand_name: "Coartem",
     batch: "ALU-2603",
     expiry: "2026-12-31",
-    quantity: 200
+    quantity: 200,
+    uom: "Tablet"
   },
   %{
     gtin: "06161021090004",
@@ -256,7 +278,8 @@ drug_stock = [
     brand_name: "Zentel",
     batch: "ALB-2604",
     expiry: "2028-01-31",
-    quantity: 400
+    quantity: 400,
+    uom: "Tablet"
   },
   %{
     gtin: "06161021090005",
@@ -264,7 +287,8 @@ drug_stock = [
     brand_name: "ORS",
     batch: "ORS-2605",
     expiry: "2027-09-30",
-    quantity: 250
+    quantity: 250,
+    uom: "Sachet"
   }
 ]
 
@@ -279,7 +303,7 @@ for attrs <- drug_stock do
             "generic_name" => attrs.generic_name,
             "type" => "Drug",
             "category" => "Pharmaceuticals",
-            "uom" => "Tablets",
+            "uom" => attrs.uom,
             "user_id" => pharmacist.id
           }),
           "item master #{attrs.gtin}"
@@ -400,7 +424,7 @@ patients =
       insurance_cover_limit: if(has_insurance, do: 50_000, else: nil),
       insurance_company: if(has_insurance, do: "Social Health Authority", else: nil),
       is_for_medical_camp: true,
-      medical_camp_name: "GHC Community Medical Camp",
+      medical_camp_name: camp.name,
       patient_type: if(rem(index, 4) == 0, do: "Returning", else: "New"),
       home_address: Enum.at(locations, rem(index - 1, length(locations))),
       emergency_contact_name: "#{last_name} Family Contact",
@@ -464,7 +488,7 @@ patients =
         height: 150.0 + rem(index * 3, 35),
         weight: 48.0 + rem(index * 5, 42),
         allergies: if(rem(index, 7) == 0, do: "Penicillin", else: "No known allergies"),
-        emergency_scale: if(rem(index, 8) == 0, do: "Urgent", else: "Standard"),
+        emergency_scale: Enum.at(Triage.emergency_scales(), rem(index, 3)),
         pain: rem(index, 5) == 0,
         triage_notes: "Demo triage observations recorded during intake."
       }
@@ -572,7 +596,7 @@ patients =
               generic_name: item.generic_name,
               inventory_received_id: item.id,
               quantity: quantity,
-              unit_of_measurement: item.uom || "Tablets",
+              unit_of_measurement: item.uom || "Tablet",
               frequency: "Twice daily",
               duration_in_days: 3,
               price: 0,

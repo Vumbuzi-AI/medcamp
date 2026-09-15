@@ -33,8 +33,10 @@ defmodule Medcamp.AccountsFixtures do
   end
 
   def extract_user_token(fun) do
-    {:ok, captured_email} = fun.(&"[TOKEN]#{&1}[TOKEN]")
-    [_, token | _] = String.split(captured_email.text_body, "[TOKEN]")
+    fun.(&"[TOKEN]#{&1}[TOKEN]")
+    [{_url, body, _headers} | _] = Medcamp.Postal.TestClient.calls()
+    text = Jason.decode!(body)["plain_body"] || Jason.decode!(body)["html_body"] || ""
+    [_, token | _] = String.split(text, "[TOKEN]")
     token
   end
 end

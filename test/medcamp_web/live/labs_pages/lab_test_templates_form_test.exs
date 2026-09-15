@@ -41,7 +41,6 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormTest do
             "unit" => "g/dL",
             "ref_range_min" => "12",
             "ref_range_max" => "16",
-            "ref_range_text" => "12-16 g/dL",
             "required" => "true"
           }
         }
@@ -116,5 +115,94 @@ defmodule MedcampWeb.LabPagesLabTestTemplateLive.FormTest do
 
     assert template
     assert [%{"name" => "glucose"}] = template.field_definitions
+  end
+
+  test "malformed JSON in the fallback surfaces an error instead of saving", %{
+    conn: conn,
+    category: category
+  } do
+    {:ok, view, _html} = live(conn, ~p"/lab/lab_test_templates/new")
+
+    view |> element("button", "Paste JSON instead") |> render_click()
+
+    html =
+      view
+      |> form("#template-form", %{
+        "lab_test_template" => %{
+          "name" => "Broken",
+          "short_name" => "BRK",
+          "category_id" => category.id,
+          "field_definitions_json" => "{not json"
+        }
+      })
+      |> render_submit()
+
+    assert html =~ "bg-red-50"
+    refute html =~ "Template created"
+  end
+
+  test "a JSON object (not an array) is rejected with a clear message", %{
+    conn: conn,
+    category: category
+  } do
+    {:ok, view, _html} = live(conn, ~p"/lab/lab_test_templates/new")
+
+    view |> element("button", "Paste JSON instead") |> render_click()
+
+    html =
+      view
+      |> form("#template-form", %{
+        "lab_test_template" => %{
+          "name" => "Object",
+          "short_name" => "OBJ",
+          "category_id" => category.id,
+          "field_definitions_json" => "{}"
+        }
+      })
+      |> render_submit()
+
+    assert html =~ "Field definitions must be a JSON array"
+  end
+
+  test "an added blank parameter row survives a parent re-render (finding C-5)", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/lab/lab_test_templates/new")
+
+    view |> element("button", "Add parameter") |> render_click()
+    view |> element("button", "Add parameter") |> render_click()
+
+    assert has_element?(view, ~s(input[name="lab_test_template[fields][1][label]"]))
+
+    # A parent event (the list search box) re-renders the LiveView and
+    # re-invokes FormComponent.update/3 with the same template. The blank
+    # second row must not be discarded.
+    view
+    |> form(~s(form[phx-change="search"]), %{"query" => "anything"})
+    |> render_change()
+
+    assert has_element?(view, ~s(input[name="lab_test_template[fields][1][label]"]))
+  end
+
+  test "toggle_json round-trips a builder row through JSON and back", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/lab/lab_test_templates/new")
+
+    view |> element("button", "Add parameter") |> render_click()
+
+    view
+    |> form("#template-form", %{
+      "lab_test_template" => %{
+        "fields" => %{
+          "0" => %{"label" => "Haemoglobin", "type" => "number", "unit" => "g/dL"}
+        }
+      }
+    })
+    |> render_change()
+
+    json_view = view |> element("button", "Paste JSON instead") |> render_click()
+    assert json_view =~ "Haemoglobin"
+
+    builder_view = view |> element("button", "Back to builder") |> render_click()
+
+    assert builder_view =~ ~s(value="Haemoglobin")
+    assert has_element?(view, ~s(input[name="lab_test_template[fields][0][unit]"][value="g/dL"]))
   end
 end

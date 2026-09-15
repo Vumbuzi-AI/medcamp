@@ -1,7 +1,6 @@
 defmodule MedcampWeb.AdminUsersLive.Index do
   use MedcampWeb, :admin_live_view
   alias Medcamp.Accounts
-  alias Medcamp.Notify
 
   @per_page 10
 
@@ -70,10 +69,10 @@ defmodule MedcampWeb.AdminUsersLive.Index do
   def handle_event("reset-password", %{"id" => id}, socket) do
     user = Accounts.get_user!(id)
     token = Accounts.get_reset_password_link_for_user(user)
-    reset_link = "http://glocalhealthcentre.org/users/reset_password/" <> token
+    reset_link = url(~p"/users/reset_password/#{token}")
 
     spawn(fn ->
-      Notify.send_reset_password_link(user.email, user.name, reset_link)
+      Medcamp.Postal.deliver_reset_password_instructions(user, reset_link)
     end)
 
     {:noreply,
@@ -205,7 +204,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
     >
       <:actions>
         <.link patch="/admin/users/new">
-          <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#2d2d7a]">
+          <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark">
             <Heroicons.icon name="plus" type="outline" class="h-4 w-4" /> Add User
           </button>
         </.link>
@@ -334,7 +333,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
             </.link>
             <.link
               navigate={~p"/admin/users/access/#{user.email}"}
-              class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-white bg-brand-primary hover:bg-[#2d2d7a]"
+              class="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-white bg-brand-primary hover:bg-brand-primary-dark"
             >
               Access
             </.link>
@@ -477,7 +476,7 @@ defmodule MedcampWeb.AdminUsersLive.Index do
             </button>
             <.link
               navigate={~p"/admin/users/access/#{u.email}"}
-              class="inline-flex items-center gap-1.5 rounded-lg bg-brand-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-[#2d2d7a]"
+              class="inline-flex items-center gap-1.5 rounded-lg bg-brand-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-primary-dark"
             >
               <Heroicons.icon name="arrow-right-on-rectangle" type="outline" class="h-4 w-4" />
               Access Account

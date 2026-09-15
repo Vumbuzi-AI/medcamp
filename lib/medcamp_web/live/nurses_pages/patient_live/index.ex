@@ -333,23 +333,21 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="w-[100%]">
-      <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4 mb-4">
-        <.page_header
-          icon_path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-          title="Patients"
-          subtitle="Search, filter and manage registered patients."
-        >
-          <:actions>
-            <.link patch={~p"/nurse/patients/new"}>
-              <.button class="inline-flex items-center gap-2 bg-brand-primary hover:bg-[#2f317f]">
-                <.icon name="hero-user-plus" class="h-4 w-4" /> Add Patient
-              </.button>
-            </.link>
-          </:actions>
-        </.page_header>
+    <div>
+      <.list_page
+        icon_path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        title="Patients"
+        subtitle={"#{@total_count} patient#{if @total_count != 1, do: "s", else: ""}"}
+      >
+        <:actions>
+          <.link patch={~p"/nurse/patients/new"}>
+            <.button class="inline-flex items-center gap-2">
+              <.icon name="hero-user-plus" class="h-4 w-4" /> Add Patient
+            </.button>
+          </.link>
+        </:actions>
 
-        <div class="flex flex-wrap items-center gap-3">
+        <:toolbar>
           <form phx-change="filter" class="flex-1">
             <.search_input
               name="filters[search]"
@@ -399,41 +397,41 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
               clear={JS.push("clear_chip", value: %{"field" => chip.field})}
             />
           </.filter_drawer>
+
+          <label class="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+            <input
+              type="checkbox"
+              phx-click="toggle_figures"
+              checked={@show_figures}
+              class="h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
+            /> Show figures in table
+          </label>
+        </:toolbar>
+
+        <div :if={@show_figures}>
+          <.summary_card_grid cards={figures_cards(@figures)} />
         </div>
 
-        <label class="mt-3 inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-          <input
-            type="checkbox"
-            phx-click="toggle_figures"
-            checked={@show_figures}
-            class="h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
-          /> Show figures in table
-        </label>
-      </div>
+        <.patients_table_for_receptionists
+          show_header={false}
+          route_prefix="/nurse"
+          row_click={nil}
+          show_print_code={true}
+          new_patient_url="/nurse/patients/new"
+          patients={@patients}
+          count={@patients_count}
+          show_view_link={false}
+          show_new_link={false}
+          filters_active={@filters.search != "" or count_active_filters(@filters) > 0}
+        />
 
-      <div :if={@show_figures} class="mb-4">
-        <.summary_card_grid cards={figures_cards(@figures)} />
-      </div>
-
-      <.patients_table_for_receptionists
-        show_header={false}
-        route_prefix="/nurse"
-        row_click={nil}
-        show_print_code={true}
-        new_patient_url="/nurse/patients/new"
-        patients={@patients}
-        count={@patients_count}
-        show_view_link={false}
-        show_new_link={false}
-        filters_active={@filters.search != "" or count_active_filters(@filters) > 0}
-      />
-
-      <.pagination
-        page={@page}
-        total_pages={@total_pages}
-        total_count={@total_count}
-        per_page={@per_page}
-      />
+        <.pagination
+          page={@page}
+          total_pages={@total_pages}
+          total_count={@total_count}
+          per_page={@per_page}
+        />
+      </.list_page>
 
       <.modal
         :if={@show_patient_code}
@@ -458,7 +456,7 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
             >
               <div class="flex items-start gap-2">
                 <svg
-                  id={"https://glocalhealthcentre.org/8018/#{@code_patient.gsrn}"}
+                  id={"#{MedcampWeb.Endpoint.url()}/8018/#{@code_patient.gsrn}"}
                   phx-hook="datamatrix"
                   class="datamatrix h-[70px] w-[70px]"
                 >
@@ -487,7 +485,7 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
               type="button"
               data-print-trigger
               data-target-div={"#nurse-code-card-#{@code_patient.gsrn}"}
-              class="rounded bg-[#1f3b64] px-4 py-2 text-sm font-bold text-white hover:bg-[#173050]"
+              class="rounded bg-brand-primary px-4 py-2 text-sm font-bold text-white hover:bg-brand-primary-dark"
             >
               Print
             </button>

@@ -137,7 +137,7 @@ defmodule MedcampWeb.CoreComponents do
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
               phx-key="escape"
               phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
-              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl bg-white p-6 shadow-lg ring-1 transition sm:p-8 print:rounded-none print:p-0 print:shadow-none print:ring-0"
+              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl bg-white p-6 shadow-lg ring-1 transition sm:p-8 print:max-h-none print:overflow-visible print:rounded-none print:p-0 print:shadow-none print:ring-0"
             >
               <div class="absolute top-6 right-5 print:hidden">
                 <button
@@ -396,11 +396,11 @@ defmodule MedcampWeb.CoreComponents do
         phx-click={show_filter_drawer(@id)}
         class={[
           "flex h-[40px] items-center gap-2 rounded-md border px-4 text-sm font-medium whitespace-nowrap transition",
-          @active_count > 0 && "border-brand-100 bg-brand-100 text-brand-primary hover:bg-[#dcdcff]",
+          @active_count > 0 && "border-brand-100 bg-brand-100 text-brand-primary hover:bg-brand-200",
           @active_count == 0 && @variant == "outline" &&
             "border-gray-300 text-gray-700 hover:bg-gray-50",
           @active_count == 0 && @variant == "solid" &&
-            "border-brand-primary bg-brand-primary text-white hover:bg-[#2d2e78]"
+            "border-brand-primary bg-brand-primary text-white hover:bg-brand-primary-dark"
         ]}
       >
         <Heroicons.icon name="adjustments-horizontal" type="outline" class="h-4 w-4" />
@@ -433,7 +433,7 @@ defmodule MedcampWeb.CoreComponents do
               <button
                 type="button"
                 phx-click={JS.push(@clear_event) |> hide_filter_drawer(@id)}
-                class="rounded-md px-2.5 py-1.5 text-sm font-medium text-brand-accent hover:bg-[#f4f4ff] hover:text-brand-primary"
+                class="rounded-md px-2.5 py-1.5 text-sm font-medium text-brand-accent hover:bg-brand-50 hover:text-brand-primary"
               >
                 Reset all
               </button>
@@ -1046,7 +1046,7 @@ defmodule MedcampWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 rounded-lg bg-[#1D3557] hover:bg-[#1D3557]/80 py-2 px-3",
+        "phx-submit-loading:opacity-75 rounded-lg bg-brand-primary hover:bg-brand-primary-dark py-2 px-3",
         "text-sm font-semibold leading-6 text-white active:text-white/80",
         @class
       ]}

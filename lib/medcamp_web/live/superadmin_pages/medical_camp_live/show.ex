@@ -17,7 +17,8 @@ defmodule MedcampWeb.SuperadminMedicalCampLive.Show do
      socket
      |> assign(:active_tab, :organisations)
      |> assign(:page_title, "#{organisation.name} Camp Dashboard")
-     |> assign(:organisation, organisation)}
+     |> assign(:organisation, organisation)
+     |> assign(:current_organisation, organisation)}
   end
 
   @impl true

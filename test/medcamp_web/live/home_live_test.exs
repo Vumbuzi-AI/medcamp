@@ -14,17 +14,17 @@ defmodule MedcampWeb.HomeLiveTest do
     assert html =~ "Care that moves with the camp"
 
     # Every section anchor present.
-    for id <- ~w(features stations analysis) do
+    for id <- ~w(features departments workflow analysis) do
       assert html =~ ~s(id="#{id}")
     end
 
     # Story beats.
-    assert html =~ "One record, from registration to dispensing."
+    assert html =~ "Every department, working from the same patient story."
     assert html =~ "Better coordination means more time for patients."
 
-    # Both hero calls to action — org signup + staff portal (login when anon).
-    assert html =~ ~s(href="/organisations/register")
+    # Anonymous visitor: staff portal CTA routes to login.
     assert html =~ ~s(href="/users/log_in")
+    refute html =~ ~s(href="/organisations/register")
 
     # Current medical-camp product copy + imagery.
     assert html =~ "Laboratory"

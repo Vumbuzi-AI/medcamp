@@ -10,7 +10,10 @@ import Config
 config :medcamp,
   ecto_repos: [Medcamp.Repo],
   generators: [timestamp_type: :utc_datetime],
-  login_otp_enabled: false
+  login_otp_enabled: false,
+  # Canonical user-facing product name. Single source for email sender labels,
+  # SMS sender id fallback and dev mailbox from-name. Override per env if needed.
+  product_name: "Tibasasa"
 
 config :sentry,
   dsn:

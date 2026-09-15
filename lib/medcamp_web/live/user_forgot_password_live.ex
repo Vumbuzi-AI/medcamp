@@ -34,8 +34,7 @@ defmodule MedcampWeb.UserForgotPasswordLive do
     if user = Accounts.get_user_by_email(email) do
       token = Accounts.get_reset_password_link_for_user(user)
 
-      reset_link =
-        "https://glocalhealthcentre.org/users/reset_password/" <> token
+      reset_link = url(~p"/users/reset_password/#{token}")
 
       spawn(fn ->
         Postal.deliver_reset_password_instructions(

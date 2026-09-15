@@ -197,7 +197,7 @@ defmodule MedcampWeb.LabResultComponents do
           <h5 class="text-sm font-semibold text-brand-primary mb-2">Tests Requested</h5>
           <div class="flex flex-wrap gap-2">
             <%= for test <- @lab_result.tests do %>
-              <span class="px-2 py-1 text-xs bg-[#f8f8ff] text-brand-primary rounded-full border border-brand-100">
+              <span class="px-2 py-1 text-xs bg-brand-50 text-brand-primary rounded-full border border-brand-100">
                 {test.name}
               </span>
             <% end %>
@@ -214,7 +214,7 @@ defmodule MedcampWeb.LabResultComponents do
     <!-- Attached PDF Report (if uploaded) -->
         <%= if @lab_result.report_complete && @lab_result.lab_report &&
                String.trim(@lab_result.lab_report) != "" do %>
-          <div class="mt-4 bg-[#f8f8ff] rounded-lg p-4 border border-brand-100">
+          <div class="mt-4 bg-brand-50 rounded-lg p-4 border border-brand-100">
             <div class="flex items-center justify-between gap-3">
               <div class="flex items-center">
                 <svg
@@ -467,7 +467,7 @@ defmodule MedcampWeb.LabResultComponents do
       |> assign(:note, Map.get(payload, "doctor_note_context", %{}))
 
     ~H"""
-    <div class="bg-[#f8f8ff] rounded-lg p-4 border border-brand-100 mb-4">
+    <div class="bg-brand-50 rounded-lg p-4 border border-brand-100 mb-4">
       <div class="flex items-center justify-between mb-3">
         <h5 class="text-sm font-semibold text-brand-primary uppercase tracking-wide flex items-center">
           <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1092,7 +1092,7 @@ defmodule MedcampWeb.LabResultComponents do
           can_generate_ai={@can_generate_ai}
         />
 
-        <div class="bg-[#f8f8ff] rounded-lg p-4 border border-brand-100 flex items-center">
+        <div class="bg-brand-50 rounded-lg p-4 border border-brand-100 flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5 mr-2 text-brand-accent"
