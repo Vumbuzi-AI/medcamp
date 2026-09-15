@@ -9,17 +9,16 @@ defmodule MedcampWeb.LabSurveillanceLiveTest do
 
     {:ok, view, html} = conn |> log_in_user(user) |> live("/lab/surveillance")
 
+    assert html =~ "Search lab test"
+    assert html =~ "Filters"
     assert html =~ "Laboratory Surveillance Summary"
     assert has_element?(view, "#lab-surveillance-table")
 
     view
-    |> form("#lab-surveillance-filters", %{
-      "filters" => %{
-        "date_from" => "2026-08-01",
-        "date_to" => "2026-08-31",
-        "test_name" => "",
-        "age_group" => "under_five"
-      }
+    |> form("#lab-surveillance-filters-form", %{
+      "date_from" => "2026-08-01",
+      "date_to" => "2026-08-31",
+      "age_group" => "under_five"
     })
     |> render_submit()
 

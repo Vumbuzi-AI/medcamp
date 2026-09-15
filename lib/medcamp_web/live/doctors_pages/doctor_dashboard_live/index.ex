@@ -146,8 +146,8 @@ defmodule MedcampWeb.DoctorDashboardLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-50 -m-4 sm:-m-6 p-4 sm:p-6">
-      <div class="w-[95%] mx-auto space-y-6">
+    <div class="min-h-screen bg-slate-50 -m-4 sm:-m-6 p-4 sm:p-6">
+      <div class="space-y-6">
         <.dashboard_top_card
           title="Doctor Dashboard"
           subtitle={"Your patients and visits for #{format_date(@date_from)} to #{format_date(@date_to)}"}
@@ -247,7 +247,7 @@ defmodule MedcampWeb.DoctorDashboardLive.Index do
         "px-3 py-1.5 rounded-full text-xs font-semibold transition-colors",
         if(@is_active,
           do: "bg-brand-primary text-white",
-          else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          else: "bg-slate-100 text-slate-600 hover:bg-slate-200"
         )
       ]}
     >

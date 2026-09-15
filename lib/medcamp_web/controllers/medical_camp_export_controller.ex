@@ -1,14 +1,12 @@
 defmodule MedcampWeb.MedicalCampExportController do
   use MedcampWeb, :controller
 
+  alias Medcamp.Camps
   alias Medcamp.Patients
   alias Medcamp.DoctorNotes
   alias Medcamp.Triages
 
-  @day1 ~D[2026-03-28]
-  @day2 ~D[2026-03-29]
-
-  # GET /admin/medical_camp/export/summary?day=all|day1|day2
+  # GET /admin/medical_camp/export/summary?day=all|<ISO date>
   def summary(conn, params) do
     patients = load_patients(params["day"])
     stats = Patients.compute_camp_stats_for_patients(patients)
@@ -174,9 +172,26 @@ defmodule MedcampWeb.MedicalCampExportController do
 
   # ---- Private helpers ----
 
-  defp load_patients("day1"), do: Patients.list_medical_camp_patients(@day1)
-  defp load_patients("day2"), do: Patients.list_medical_camp_patients(@day2)
-  defp load_patients(_), do: Patients.list_medical_camp_patients_for_dates([@day1, @day2])
+  # `day` is either "all" (or absent) for the whole camp, or an ISO date for a
+  # single camp day. With no active camp we fall back to the legacy
+  # medical-camp patient set so exports still work mid-migration.
+  defp load_patients(day) do
+    case {Camps.get_active_camp(), parse_day(day)} do
+      {nil, %Date{} = date} -> Patients.list_medical_camp_patients(date)
+      {nil, _} -> Patients.list_all_medical_camp_patients()
+      {camp, %Date{} = date} -> Patients.list_patients_for_camp_on(camp.id, date)
+      {camp, _} -> Patients.list_patients_for_camp(camp.id)
+    end
+  end
+
+  defp parse_day(day) when is_binary(day) do
+    case Date.from_iso8601(day) do
+      {:ok, date} -> date
+      _ -> nil
+    end
+  end
+
+  defp parse_day(_day), do: nil
 
   defp send_csv(conn, rows, filename) do
     csv_content = rows |> Enum.map(&encode_row/1) |> Enum.join("\r\n")
@@ -258,7 +273,10 @@ defmodule MedcampWeb.MedicalCampExportController do
     dt |> Calendar.strftime("%Y-%m-%d %H:%M")
   end
 
-  defp day_label("day1"), do: "day1"
-  defp day_label("day2"), do: "day2"
-  defp day_label(_), do: "all_days"
+  defp day_label(day) do
+    case parse_day(day) do
+      %Date{} = date -> Date.to_iso8601(date)
+      _ -> "all_days"
+    end
+  end
 end

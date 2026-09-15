@@ -3,6 +3,6 @@ defmodule MedcampWeb.PageControllerTest do
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")
-    assert html_response(conn, 200) =~ "Glocal Healthcare"
+    assert html_response(conn, 200) =~ "Tibasasa Medical Camp Management System"
   end
 end

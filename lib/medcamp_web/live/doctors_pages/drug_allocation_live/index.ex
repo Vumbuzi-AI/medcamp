@@ -109,7 +109,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DrugAllocationIndex do
         description="No drugs have been given to this patient yet."
       />
 
-      <.table
+      <.data_table
         :if={@drug_allocations != []}
         id="drug_allocations"
         rows={@drug_allocations}
@@ -130,7 +130,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.DrugAllocationIndex do
 
         <:col :let={drug_allocation} label="Quantity">{drug_allocation.quantity}</:col>
         <:col :let={drug_allocation} label="Prescription">{drug_allocation.prescription}</:col>
-      </.table>
+      </.data_table>
 
       <.pagination
         page={@page}

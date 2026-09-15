@@ -77,7 +77,7 @@ defmodule MedcampWeb.AdminPatientsLive.Index do
 
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
       <.page_header
         icon_path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
         title="Patients"
@@ -92,6 +92,8 @@ defmodule MedcampWeb.AdminPatientsLive.Index do
             placeholder="Search by name, phone, ID, or GSRN"
           />
         </form>
+
+        <.camp_switcher camps={assigns[:camp_options] || []} camp_filter={assigns[:camp_filter]} />
 
         <.filter_drawer
           id="patients-filters"

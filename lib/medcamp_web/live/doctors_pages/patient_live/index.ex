@@ -293,15 +293,13 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="w-[100%]">
-      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
-        <.page_header
-          icon_path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-          title="Patients"
-          subtitle="Search, filter and manage registered patients."
-        />
-
-        <div class="flex flex-wrap items-center gap-3">
+    <div>
+      <.list_page
+        icon_path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        title="Patients"
+        subtitle="Search, filter and manage registered patients."
+      >
+        <:toolbar>
           <form phx-change="filter" class="flex-1">
             <.search_input
               name="filters[search]"
@@ -351,39 +349,39 @@ defmodule MedcampWeb.DoctorsPagePatientLive.Index do
               clear={JS.push("clear_chip", value: %{"field" => chip.field})}
             />
           </.filter_drawer>
+
+          <label class="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+            <input
+              type="checkbox"
+              phx-click="toggle_figures"
+              checked={@show_figures}
+              class="h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
+            /> Show figures in table
+          </label>
+        </:toolbar>
+
+        <div :if={@show_figures}>
+          <.summary_card_grid cards={figures_cards(@figures)} />
         </div>
 
-        <label class="mt-3 inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-          <input
-            type="checkbox"
-            phx-click="toggle_figures"
-            checked={@show_figures}
-            class="h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
-          /> Show figures in table
-        </label>
-      </div>
+        <.patients_table
+          show_header={false}
+          route_prefix="/doctor/patients"
+          new_patient_url="/doctor/patients/new"
+          patients={@patients}
+          count={@patients_count}
+          show_view_link={true}
+          show_new_link={false}
+          filters_active={@filters.search != "" or count_active_filters(@filters) > 0}
+        />
 
-      <div :if={@show_figures} class="mb-4">
-        <.summary_card_grid cards={figures_cards(@figures)} />
-      </div>
-
-      <.patients_table
-        show_header={false}
-        route_prefix="/doctor/patients"
-        new_patient_url="/doctor/patients/new"
-        patients={@patients}
-        count={@patients_count}
-        show_view_link={true}
-        show_new_link={false}
-        filters_active={@filters.search != "" or count_active_filters(@filters) > 0}
-      />
-
-      <.pagination
-        page={@page}
-        total_pages={@total_pages}
-        total_count={@total_count}
-        per_page={@per_page}
-      />
+        <.pagination
+          page={@page}
+          total_pages={@total_pages}
+          total_count={@total_count}
+          per_page={@per_page}
+        />
+      </.list_page>
 
       <.modal
         :if={@live_action in [:new, :edit]}

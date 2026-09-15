@@ -147,8 +147,8 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-50 -m-4 sm:-m-6 p-4 sm:p-6">
-      <div class="w-[95%] mx-auto space-y-6">
+    <div class="min-h-screen bg-slate-50 -m-4 sm:-m-6 p-4 sm:p-6">
+      <div class="space-y-6">
         <.dashboard_top_card
           title="Admin Dashboard"
           subtitle={"System-wide view for #{format_date(@date_from)} to #{format_date(@date_to)}"}
@@ -157,6 +157,8 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
           search_placeholder="Search patients, visits or reports..."
           filter_id="admin-dashboard-filters"
           active_filter_count={if @period == :custom, do: 1, else: 0}
+          camps={assigns[:camp_options] || []}
+          camp_filter={assigns[:camp_filter]}
         >
           <:filter_group label="Date range">
             <.date_range_fields
@@ -248,7 +250,7 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
         "px-3 py-1.5 rounded-full text-xs font-semibold transition-colors",
         if(@is_active,
           do: "bg-brand-primary text-white",
-          else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          else: "bg-slate-100 text-slate-600 hover:bg-slate-200"
         )
       ]}
     >
@@ -420,42 +422,7 @@ defmodule MedcampWeb.AdminDashboardLive.Index do
     end)
   end
 
-  defp build_last_12_months(today) do
-    Enum.map(11..0//-1, fn offset ->
-      shift_month(today, -offset) |> then(&{&1.year, &1.month})
-    end)
-  end
-
-  defp shift_month(%Date{year: y, month: m}, delta) do
-    total = y * 12 + (m - 1) + delta
-    new_year = div(total, 12)
-    new_month = rem(total, 12) + 1
-    %Date{year: new_year, month: new_month, day: 1}
-  end
-
-  defp month_label(year, month) do
-    name =
-      ~w(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
-      |> Enum.at(month - 1)
-
-    "#{name} #{year}"
-  end
-
   defp list_days(date_from, date_to) do
     Date.range(date_from, date_to) |> Enum.to_list()
   end
-
-  defp humanize_reason(nil), do: "Other"
-  defp humanize_reason(""), do: "Other"
-
-  defp humanize_reason(value) when is_binary(value) do
-    value
-    |> String.replace("create_", "")
-    |> String.replace("_", " ")
-    |> String.split(" ")
-    |> Enum.map(&String.capitalize/1)
-    |> Enum.join(" ")
-  end
-
-  defp delimited(value), do: Number.Delimit.number_to_delimited(value || 0, precision: 0)
 end

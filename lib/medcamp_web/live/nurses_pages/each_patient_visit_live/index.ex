@@ -84,8 +84,8 @@ defmodule MedcampWeb.NursesPages.EachPatientVisitIndex do
 
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      <.header class="text-brand-primary border-b border-gray-100 pb-4 mb-4">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
+      <.header class="text-brand-primary border-b border-slate-100 pb-4 mb-4">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -112,10 +112,10 @@ defmodule MedcampWeb.NursesPages.EachPatientVisitIndex do
       </.header>
 
       <%= if @total_count == 0 do %>
-        <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+        <div class="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="mx-auto h-12 w-12 text-gray-400"
+            class="mx-auto h-12 w-12 text-slate-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -127,19 +127,19 @@ defmodule MedcampWeb.NursesPages.EachPatientVisitIndex do
               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
             />
           </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No patient visits</h3>
-          <p class="mt-1 text-sm text-gray-500">
+          <h3 class="mt-2 text-sm font-medium text-slate-900">No patient visits</h3>
+          <p class="mt-1 text-sm text-slate-500">
             No patient visits have been recorded yet.
           </p>
         </div>
       <% else %>
-        <.table id="patient_visits" rows={@patient_visits} row_id={&"patient_visits-#{&1.id}"}>
+        <.data_table id="patient_visits" rows={@patient_visits} row_id={&"patient_visits-#{&1.id}"}>
           <:col :let={patient_visit} label="Patient">
             <div class="flex items-center py-3">
               <div class="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-medium mr-2 text-sm">
                 {String.first(patient_visit.patient.first_name || "")}
               </div>
-              <span class="font-medium text-gray-900">
+              <span class="font-medium text-slate-900">
                 {[
                   patient_visit.patient.first_name,
                   patient_visit.patient.middle_name
@@ -166,7 +166,7 @@ defmodule MedcampWeb.NursesPages.EachPatientVisitIndex do
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              <span class="text-gray-700">{patient_visit.date}</span>
+              <span class="text-slate-700">{patient_visit.date}</span>
             </div>
           </:col>
 
@@ -186,13 +186,13 @@ defmodule MedcampWeb.NursesPages.EachPatientVisitIndex do
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span class="text-gray-700">{patient_visit.time}</span>
+              <span class="text-slate-700">{patient_visit.time}</span>
             </div>
           </:col>
 
           <:col :let={patient_visit} label="Reason">
             <div class="max-w-xs py-3">
-              <span class="text-gray-700 line-clamp-2">{patient_visit.reason}</span>
+              <span class="text-slate-700 line-clamp-2">{patient_visit.reason}</span>
             </div>
           </:col>
 
@@ -211,13 +211,13 @@ defmodule MedcampWeb.NursesPages.EachPatientVisitIndex do
                   Dr. {patient_visit.doctor.name}
                 </span>
               <% else %>
-                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-500">
+                <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-500">
                   Not Assigned
                 </span>
               <% end %>
             </div>
           </:col>
-        </.table>
+        </.data_table>
         <.pagination
           page={@page}
           total_pages={@total_pages}

@@ -86,7 +86,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PendingIndex do
 
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
       <.page_header
         icon_path="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
         title="Pending Visits"
@@ -114,7 +114,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PendingIndex do
         </:actions>
       </.blank_state>
 
-      <.table
+      <.data_table
         :if={@pending_visits_count > 0}
         id="patient_visits"
         rows={@patient_visits}
@@ -125,7 +125,7 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PendingIndex do
             <div class="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-medium mr-2 text-sm">
               {String.first(patient_visit.patient.first_name || "")}
             </div>
-            <span class="font-medium text-gray-900">
+            <span class="font-medium text-slate-900">
               {[
                 patient_visit.patient.first_name,
                 patient_visit.patient.middle_name
@@ -152,26 +152,26 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PendingIndex do
                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <span class="text-gray-700">{patient_visit.date}</span>
+            <span class="text-slate-700">{patient_visit.date}</span>
           </div>
         </:col>
 
         <:col :let={patient_visit} label="Reason">
           <div class="max-w-xs py-3">
-            <span class="text-gray-700 line-clamp-2">{patient_visit.reason}</span>
+            <span class="text-slate-700 line-clamp-2">{patient_visit.reason}</span>
           </div>
         </:col>
 
         <:col :let={patient_visit} label="Receptionist/ Nurse">
           <div class="flex items-center py-3">
-            <span class="text-gray-700">{patient_visit.creator.name}</span>
+            <span class="text-slate-700">{patient_visit.creator.name}</span>
           </div>
         </:col>
 
         <:col :let={patient_visit} label="Actions">
           <div class="py-2">
             <.button
-              data-confirm="Are you sure you want to see this patient?"
+              data-confirm-message="Are you sure you want to see this patient?"
               phx-click="see_patient"
               phx-value-id={patient_visit.id}
               class="bg-brand-accent hover:bg-brand-accent-dark text-white font-medium py-2 px-4 rounded-md text-sm"
@@ -180,19 +180,8 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PendingIndex do
             </.button>
           </div>
         </:col>
-      </.table>
+      </.data_table>
     </div>
     """
-  end
-
-  # The table is expandable, so it renders eagerly rather than under
-  # `phx-update="stream"` and must be fed a plain list. Replace the row in place
-  # when it is already listed, otherwise prepend it.
-  defp upsert(rows, row) do
-    if Enum.any?(rows, &(&1.id == row.id)) do
-      Enum.map(rows, &if(&1.id == row.id, do: row, else: &1))
-    else
-      [row | rows]
-    end
   end
 end

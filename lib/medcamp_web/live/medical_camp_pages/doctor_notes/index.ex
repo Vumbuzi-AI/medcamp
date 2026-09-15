@@ -78,49 +78,49 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNotes do
     <div class="w-full">
       <div
         :if={@most_recent_triage}
-        class="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mb-6"
+        class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-6"
       >
         <h3 class="text-lg font-semibold text-brand-primary mb-1">Most Recent Triage</h3>
-        <p class="text-sm text-gray-600 mb-3">
+        <p class="text-sm text-slate-600 mb-3">
           <span class="font-medium">
             {[@patient.first_name, @patient.middle_name, @patient.last_name]
             |> Enum.filter(&(&1 != nil))
             |> Enum.join(" ")}
           </span>
-          <span class="mx-1 text-gray-400">·</span>
+          <span class="mx-1 text-slate-400">·</span>
           DOB: <span class="font-medium">{@patient.date_of_birth}</span>
         </p>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 text-sm">
-          <div class="bg-gray-50 rounded p-2">
-            <span class="text-gray-500 block">Date</span>
+          <div class="bg-slate-50 rounded p-2">
+            <span class="text-slate-500 block">Date</span>
             <span class="font-medium">{@most_recent_triage.date}</span>
           </div>
-          <div class="bg-gray-50 rounded p-2">
-            <span class="text-gray-500 block">Temperature</span>
+          <div class="bg-slate-50 rounded p-2">
+            <span class="text-slate-500 block">Temperature</span>
             <span class="font-medium">{@most_recent_triage.temperature || "-"} °C</span>
           </div>
-          <div class="bg-gray-50 rounded p-2">
-            <span class="text-gray-500 block">Blood Pressure</span>
+          <div class="bg-slate-50 rounded p-2">
+            <span class="text-slate-500 block">Blood Pressure</span>
             <span class="font-medium">{@most_recent_triage.blood_pressure || "-"}</span>
           </div>
-          <div class="bg-gray-50 rounded p-2">
-            <span class="text-gray-500 block">Pulse Rate</span>
+          <div class="bg-slate-50 rounded p-2">
+            <span class="text-slate-500 block">Pulse Rate</span>
             <span class="font-medium">{@most_recent_triage.pulse_rate || "-"} bpm</span>
           </div>
-          <div class="bg-gray-50 rounded p-2">
-            <span class="text-gray-500 block">O2 Saturation</span>
+          <div class="bg-slate-50 rounded p-2">
+            <span class="text-slate-500 block">O2 Saturation</span>
             <span class="font-medium">{@most_recent_triage.oxygen_saturation || "-"} %</span>
           </div>
-          <div class="bg-gray-50 rounded p-2">
-            <span class="text-gray-500 block">Weight</span>
+          <div class="bg-slate-50 rounded p-2">
+            <span class="text-slate-500 block">Weight</span>
             <span class="font-medium">{@most_recent_triage.weight || "-"} kg</span>
           </div>
-          <div class="bg-gray-50 rounded p-2">
-            <span class="text-gray-500 block">Height</span>
+          <div class="bg-slate-50 rounded p-2">
+            <span class="text-slate-500 block">Height</span>
             <span class="font-medium">{@most_recent_triage.height || "-"} cm</span>
           </div>
-          <div class="bg-gray-50 rounded p-2">
-            <span class="text-gray-500 block">Emergency</span>
+          <div class="bg-slate-50 rounded p-2">
+            <span class="text-slate-500 block">Emergency</span>
             <span class={[
               "font-medium",
               @most_recent_triage.emergency_scale == "High" && "text-red-600",
@@ -135,8 +135,8 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNotes do
           <span class="text-red-600 font-medium">Allergies:</span>
           <span class="text-red-800">{@most_recent_triage.allergies}</span>
         </div>
-        <div :if={@most_recent_triage.triage_notes} class="mt-2 bg-gray-50 rounded p-2 text-sm">
-          <span class="text-gray-500 font-medium">Notes:</span>
+        <div :if={@most_recent_triage.triage_notes} class="mt-2 bg-slate-50 rounded p-2 text-sm">
+          <span class="text-slate-500 font-medium">Notes:</span>
           <span>{@most_recent_triage.triage_notes}</span>
         </div>
       </div>
@@ -152,23 +152,23 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNotes do
       <%!-- Previous notes --%>
       <div
         :if={@doctor_notes != []}
-        class="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mt-6"
+        class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mt-6"
       >
         <h3 class="text-lg font-semibold text-brand-primary mb-3">Previous Notes</h3>
-        <div class="divide-y divide-gray-100">
+        <div class="divide-y divide-slate-100">
           <%= for note <- @doctor_notes do %>
             <a
               href={"/8018/#{@patient.gsrn}/medical-camp/doctor_notes/#{note.id}"}
-              class="flex items-center justify-between py-3 hover:bg-gray-50 rounded px-2 transition-colors group"
+              class="flex items-center justify-between py-3 hover:bg-slate-50 rounded px-2 transition-colors group"
             >
               <div>
-                <p class="text-sm font-medium text-gray-800">
+                <p class="text-sm font-medium text-slate-800">
                   {note.date && Calendar.strftime(note.date, "%d %b %Y")}
-                  <span :if={note.time} class="text-gray-500 font-normal ml-1">
+                  <span :if={note.time} class="text-slate-500 font-normal ml-1">
                     · {note.time |> Time.to_string() |> String.slice(0..4)}
                   </span>
                 </p>
-                <p :if={note.symptoms} class="text-xs text-gray-500 mt-0.5 truncate max-w-xs">
+                <p :if={note.symptoms} class="text-xs text-slate-500 mt-0.5 truncate max-w-xs">
                   {note.symptoms}
                 </p>
                 <p :if={note.doctor} class="text-xs text-brand-accent mt-0.5">
@@ -177,7 +177,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNotes do
               </div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4 text-gray-400 group-hover:text-brand-primary flex-shrink-0"
+                class="h-4 w-4 text-slate-400 group-hover:text-brand-primary flex-shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

@@ -1,172 +1,170 @@
 defmodule MedcampWeb.ProfileComponents do
   use Phoenix.Component
+
   import MedcampWeb.CoreComponents
 
   def profile_section(assigns) do
+    assigns =
+      assigns
+      |> assign(:initials, user_initials(assigns.current_user))
+      |> assign(:role_label, role_label(assigns.current_user.role))
+
     ~H"""
-    <div class="container mx-auto px-4 py-5">
-      <div class="bg-white rounded-xl shadow-md p-6 mb-5">
-        <h2 class="text-xl spartan-bold text-gray-900 mb-5">Profile Information</h2>
+    <div class="-m-4 min-h-screen bg-slate-50 p-4 sm:-m-6 sm:p-6">
+      <.form
+        for={@form}
+        id="profile-form"
+        phx-submit="save-profile"
+        phx-change="validate-profile"
+        class="mx-auto max-w-6xl space-y-6"
+      >
+        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+          <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h1 class="text-2xl font-bold tracking-[-0.01em] text-slate-900 sm:text-3xl">
+                Profile Information
+              </h1>
+              <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">
+                Keep your staff profile current for camp coordination, clinical records,
+                and activity reports.
+              </p>
+            </div>
 
-        <.form
-          for={@form}
-          id="profile-form"
-          phx-submit="save-profile"
-          phx-change="validate-profile"
-          class="space-y-5"
-        >
-          <div class="flex flex-col items-center mb-6" phx-drop-target={@uploads.image.ref}>
-            <label for="profile_image_input" class="cursor-pointer block">
-              <div class="relative group">
-                <%= if @current_user.image do %>
-                  <img
-                    src={@current_user.image}
-                    alt="Profile Photo"
-                    class="h-40 w-40 rounded-full object-cover border-4 border-blue-100"
-                  />
-                  <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div class="text-white flex flex-col justify-center text-center text-center">
-                        <i class="fa fa-user text-xl"></i>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Role</p>
+              <p class="mt-1 text-sm font-semibold text-brand-primary">{@role_label}</p>
+            </div>
+          </div>
+        </section>
 
-                        <label class="mt-4 inline-flex items-center px-4  rounded-md shadow-sm text-sm font-medium text-white  cursor-pointer">
-                          <p class="text-xs">Change Photo</p>
-                          <.live_file_input upload={@uploads.image} class="hidden" />
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                <% else %>
-                  <div class="h-40 w-40 rounded-full bg-[#0047AB]  flex items-center justify-center text-blue-500 text-4xl">
-                    <i class="fa fa-user text-white"></i>
-                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div class="text-white flex flex-col justify-center text-center text-center">
-                        <i class="fa fa-user text-xl"></i>
-
-                        <label class="mt-4 inline-flex items-center px-4  rounded-md shadow-sm text-sm font-medium text-white  cursor-pointer">
-                          <p class="text-xs">Upload Photo</p>
-                          <.live_file_input upload={@uploads.image} class="hidden" />
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                <% end %>
+        <div class="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
+          <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div class="flex items-start gap-3">
+              <div class="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-slate-200 bg-slate-50 text-brand-primary">
+                <Heroicons.icon name="identification" type="outline" class="h-6 w-6" />
               </div>
-            </label>
-            <p class="text-gray-500 spartan-regular text-xl">Tap to change profile photo</p>
+              <div>
+                <h2 class="text-lg font-semibold text-slate-900">Profile photo</h2>
+                <p class="mt-1 text-sm leading-relaxed text-slate-500">
+                  This photo appears in staff-facing screens and audit context.
+                </p>
+              </div>
+            </div>
 
-            <%= for entry <- @uploads.image.entries do %>
-              <div class="mt-2 w-full max-w-xs">
-                <div class="relative pt-1">
-                  <div class="text-xs text-center mb-1">
+            <div
+              class="mt-6 flex flex-col items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-6 text-center"
+              phx-drop-target={@uploads.image.ref}
+            >
+              <label for="profile_image_input" class="group cursor-pointer">
+                <span class="relative block">
+                  <%= if @current_user.image do %>
+                    <img
+                      src={@current_user.image}
+                      alt="Profile photo"
+                      class="h-28 w-28 rounded-full border border-brand-200 bg-white object-cover shadow-sm"
+                    />
+                  <% else %>
+                    <span class="flex h-28 w-28 items-center justify-center rounded-full bg-brand-primary text-2xl font-bold text-white shadow-sm">
+                      {@initials}
+                    </span>
+                  <% end %>
+
+                  <span class="absolute inset-0 flex items-center justify-center rounded-full bg-slate-950/45 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
+                    Change
+                  </span>
+                </span>
+
+                <span class="mt-4 block text-sm font-semibold text-brand-primary">
+                  Upload profile photo
+                </span>
+                <span class="mt-1 block text-xs text-slate-500">PNG or JPEG, under 5 MB</span>
+                <.live_file_input upload={@uploads.image} class="hidden" />
+              </label>
+
+              <div
+                :for={entry <- @uploads.image.entries}
+                class="mt-5 w-full rounded-xl border border-slate-200 bg-white p-3"
+              >
+                <div class="flex items-center justify-between gap-3 text-left">
+                  <p class="min-w-0 truncate text-sm font-medium text-slate-700">
                     {entry.client_name}
-                  </div>
-                  <div class="overflow-hidden h-2 text-xs flex rounded bg-blue-200">
-                    <div
-                      style={"width: #{entry.progress}%"}
-                      class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500 transition-all duration-500"
-                    >
-                    </div>
+                  </p>
+                  <span class="shrink-0 text-xs font-semibold text-brand-primary">
+                    {entry.progress}%
+                  </span>
+                </div>
+                <div class="mt-2 h-2 overflow-hidden rounded-full bg-brand-100">
+                  <div
+                    style={"width: #{entry.progress}%"}
+                    class="h-full rounded-full bg-brand-primary transition-all duration-500"
+                  >
                   </div>
                 </div>
               </div>
-            <% end %>
-          </div>
-          <div class="w-[100%] gap-5">
-            <div>
-              <label
-                for="first_name"
-                class="block text-sm font-medium text-gray-700 mb-1 spartan-medium"
-              >
-                Email
-              </label>
-
-              <.input
-                field={@form[:email]}
-                disabled
-                type="text"
-                class="text-lg py-4 px-4 rounded-xl text-[#3D3D3D] placeholder-[#3D3D3D] border-2 h-32 w-full"
-              />
             </div>
-          </div>
+          </section>
 
-          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div>
-              <label
-                for="first_name"
-                class="block text-sm font-medium text-gray-700 mb-1 spartan-medium"
-              >
-                Name
-              </label>
-
-              <.input
-                field={@form[:name]}
-                type="text"
-                class="text-lg py-4 px-4 rounded-xl text-[#3D3D3D] placeholder-[#3D3D3D] border-2 h-32 w-full"
-              />
+          <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div class="flex items-start gap-3 border-b border-slate-100 pb-5">
+              <div class="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-slate-200 bg-slate-50 text-brand-primary">
+                <Heroicons.icon name="user-circle" type="outline" class="h-6 w-6" />
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-slate-900">Staff details</h2>
+                <p class="mt-1 text-sm leading-relaxed text-slate-500">
+                  These details help identify who recorded clinical notes, triage,
+                  lab results, dispensing, and admin actions.
+                </p>
+              </div>
             </div>
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1 spartan-medium">
-                License Number
-              </label>
+            <div class="mt-6 space-y-5">
+              <.input field={@form[:email]} disabled type="email" label="Email" />
+
+              <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <.input field={@form[:name]} type="text" label="Name" />
+                <.input field={@form[:license_number]} type="text" label="License number" />
+                <.input field={@form[:phone_number]} type="text" label="Phone number" />
+                <.input field={@form[:id_number]} type="text" label="ID number" />
+              </div>
 
               <.input
-                field={@form[:license_number]}
-                type="text"
-                class="text-lg py-4 px-4 rounded-xl text-[#3D3D3D] placeholder-[#3D3D3D] border-2 h-32 w-full"
+                field={@form[:experience]}
+                type="textarea"
+                label="Experience"
+                placeholder="Relevant camp, clinical, laboratory, pharmacy, or operations experience"
               />
             </div>
-          </div>
+          </section>
+        </div>
 
-          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1 spartan-medium">
-                Phone Number
-              </label>
-
-              <.input
-                field={@form[:phone_number]}
-                type="text"
-                class="text-lg py-4 px-4 rounded-xl text-[#3D3D3D] placeholder-[#3D3D3D] border-2 h-32 w-full"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1 spartan-medium">
-                ID Number
-              </label>
-
-              <.input
-                field={@form[:id_number]}
-                type="text"
-                class="text-lg py-4 px-4 rounded-xl text-[#3D3D3D] placeholder-[#3D3D3D] border-2 h-32 w-full"
-              />
-            </div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1 spartan-medium">
-              Experience
-            </label>
-
-            <.input
-              field={@form[:experience]}
-              type="textarea"
-              class="text-lg py-4 px-4 rounded-xl text-[#3D3D3D] placeholder-[#3D3D3D] border-2 h-32 w-full"
-            />
-          </div>
-
-          <div class="pt-2">
-            <button
-              type="submit"
-              class="w-full bg-[#0047AB] text-white py-3 px-4 rounded-lg text-lg spartan-medium shadow-md hover:bg-blue-700 transition-colors"
-            >
-              Save Profile
-            </button>
-          </div>
-        </.form>
-      </div>
+        <div class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-sm text-slate-500">
+            Changes update your staff profile across this medical camp workspace.
+          </p>
+          <.button phx-disable-with="Saving...">Save profile</.button>
+        </div>
+      </.form>
     </div>
     """
   end
+
+  defp user_initials(%{name: name}) when is_binary(name) and name != "" do
+    name
+    |> String.split(~r/\s+/, trim: true)
+    |> Enum.take(2)
+    |> Enum.map_join(&String.upcase(String.first(&1)))
+  end
+
+  defp user_initials(%{email: email}) when is_binary(email) and email != "" do
+    email
+    |> String.first()
+    |> String.upcase()
+  end
+
+  defp user_initials(_), do: "U"
+
+  defp role_label("labtechnician"), do: "Lab technician"
+  defp role_label(role) when is_binary(role), do: String.capitalize(role)
+  defp role_label(_), do: "Staff"
 end

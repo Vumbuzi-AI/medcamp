@@ -10,18 +10,15 @@ defmodule MedcampWeb.SidebarCatalogTest do
     test "normalises the role segment to the slug style already in use" do
       assert SidebarCatalog.permission_slug("doctor", :patients) == "doctor.patients"
       assert SidebarCatalog.permission_slug("labtechnician", :lab_results) == "lab.lab_results"
-
-      assert SidebarCatalog.permission_slug("support staff", :daily_activities) ==
-               "support_staff.daily_activities"
     end
   end
 
   describe "permission_for_path/2" do
-    test "matches the longest tab URL, so sub-pages inherit their panel" do
+    test "matches top-level role routes to their panel" do
       assert SidebarCatalog.permission_for_path("doctor", "/doctor/patients") ==
                "doctor.patients"
 
-      assert SidebarCatalog.permission_for_path("doctor", "/doctor/patients/42/notes") ==
+      assert SidebarCatalog.permission_for_path("doctor", "/doctor/patients/new") ==
                "doctor.patients"
     end
 
@@ -31,12 +28,12 @@ defmodule MedcampWeb.SidebarCatalogTest do
                "doctor.visits"
     end
 
-    test "resolves per-patient sections that nest the id before the section" do
-      assert SidebarCatalog.permission_for_path("doctor", "/doctor/42/doctor_procedures") ==
-               "doctor.doctor_procedures"
+    test "resolves role-specific routes outside the patient list" do
+      assert SidebarCatalog.permission_for_path("doctor", "/doctor/lab_results") ==
+               "doctor.lab_results"
 
-      assert SidebarCatalog.permission_for_path("doctor", "/doctor/42/doctor_procedures/7/edit") ==
-               "doctor.doctor_procedures"
+      assert SidebarCatalog.permission_for_path("doctor", "/doctor/lab_results/7") ==
+               "doctor.lab_results"
     end
 
     test "returns nil for paths no panel claims" do
@@ -46,12 +43,11 @@ defmodule MedcampWeb.SidebarCatalogTest do
   end
 
   describe "panel_role_for_path/1" do
-    test "derives the panel from the URL prefix, not the user's role" do
-      assert SidebarCatalog.panel_role_for_path("/inventory_manager/in_store") ==
-               "inventory_manager"
-
+    test "derives the panel from active Medcamp role URL prefixes" do
+      assert SidebarCatalog.panel_role_for_path("/doctor/scan") == "doctor"
+      assert SidebarCatalog.panel_role_for_path("/nurse/scan") == "nurse"
       assert SidebarCatalog.panel_role_for_path("/lab/scan") == "labtechnician"
-      assert SidebarCatalog.panel_role_for_path("/support_staff/staff_meals") == "support staff"
+      assert SidebarCatalog.panel_role_for_path("/pharmacist/scan") == "pharmacist"
     end
 
     test "returns nil for paths outside every role prefix" do
@@ -61,16 +57,48 @@ defmodule MedcampWeb.SidebarCatalogTest do
   end
 
   describe "visible_tab_groups/2" do
+    test "clinical roles pin scan and their primary work queue above grouped navigation" do
+      expected = %{
+        "nurse" => [
+          {"Scan Patient", "/nurse/scan"},
+          {"Triages", "/nurse/triages"}
+        ],
+        "doctor" => [
+          {"Scan Patient", "/doctor/scan"},
+          {"Pending Consults", "/doctor/pending_patient_visits"}
+        ],
+        "labtechnician" => [
+          {"Scan Patient", "/lab/scan"},
+          {"Lab Results", "/lab/lab_results"}
+        ],
+        "pharmacist" => [
+          {"Scan Patient", "/pharmacist/scan"},
+          {"Drug Allocations", "/pharmacist/drug_allocations"}
+        ]
+      }
+
+      for {role, quick_links} <- expected do
+        user = user_fixture(%{role: role})
+
+        assert SidebarCatalog.visible_tab_groups(user)
+               |> Enum.take(2)
+               |> Enum.map(fn group ->
+                 [tab] = group.tabs
+                 {tab.name, tab.url}
+               end) == quick_links
+      end
+    end
+
     test "hides tabs the user has been denied and drops groups left empty" do
       doctor = user_fixture(%{role: "doctor"})
 
       before = SidebarCatalog.visible_tab_groups(doctor)
-      assert "doctor.doctor_procedures" in Enum.map(SidebarCatalog.all_tabs("doctor"), & &1.slug)
-      assert tab_named?(before, "My Procedures")
+      assert "doctor.lab_results" in Enum.map(SidebarCatalog.all_tabs("doctor"), & &1.slug)
+      assert tab_named?(before, "Lab Results")
 
-      {:ok, _} = Authorization.deny_user_override(doctor, "doctor.doctor_procedures", nil)
+      {:ok, _} = Authorization.deny_user_override(doctor, "doctor.lab_results", nil)
 
-      refute tab_named?(SidebarCatalog.visible_tab_groups(doctor), "My Procedures")
+      refute tab_named?(SidebarCatalog.visible_tab_groups(doctor), "Lab Results")
     end
 
     test "checks the panel being rendered, not the viewer's own role" do
@@ -131,11 +159,11 @@ defmodule MedcampWeb.SidebarCatalogTest do
     end
 
     test "sections that nest the id before the section still resolve" do
-      assert SidebarCatalog.permission_for_path("doctor", "/doctor/42/doctor_procedures") ==
-               "doctor.patient.doctor_procedures"
+      assert SidebarCatalog.permission_for_path("nurse", "/nurse/42/triages") ==
+               "nurse.patient.triages"
 
-      assert SidebarCatalog.permission_for_path("nurse", "/nurse/42/cadex_notes") ==
-               "nurse.patient.cadex_notes"
+      assert SidebarCatalog.permission_for_path("labtechnician", "/lab/42/lab_results") ==
+               "lab.patient.lab_results"
     end
 
     test "list-management routes are not mistaken for a patient record" do
@@ -155,14 +183,14 @@ defmodule MedcampWeb.SidebarCatalogTest do
 
       assert flat_tab_named?(
                SidebarCatalog.visible_patient_tabs(doctor, "doctor", patient),
-               "MCH (Mother & Child)"
+               "Lab Results"
              )
 
-      {:ok, _} = Authorization.deny_user_override(doctor, "doctor.patient.mch", nil)
+      {:ok, _} = Authorization.deny_user_override(doctor, "doctor.patient.lab_results", nil)
 
       refute flat_tab_named?(
                SidebarCatalog.visible_patient_tabs(doctor, "doctor", patient),
-               "MCH (Mother & Child)"
+               "Lab Results"
              )
     end
 

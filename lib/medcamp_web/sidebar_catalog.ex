@@ -403,29 +403,31 @@ defmodule MedcampWeb.SidebarCatalog do
 
   defp doctor_tab_groups do
     [
+      quick_access_group(
+        "quick-scan",
+        "Scan Patient",
+        "qr-code",
+        "/doctor/scan",
+        :scan
+      ),
+      quick_access_group(
+        "quick-work",
+        "Pending Consults",
+        "calculator",
+        "/doctor/pending_patient_visits",
+        :pending
+      ),
       %{
         key: "patient-management",
         name: "Patient Management",
         icon: "users",
         tabs: [
-          %{
-            name: "Scan Patient",
-            icon: "magnifying-glass-circle",
-            url: "/doctor/scan",
-            tab_name: :scan
-          },
           %{name: "Patient List", icon: "users", url: "/doctor/patients", tab_name: :patients},
           %{
             name: "My Visits",
             icon: "home-modern",
             url: "/doctor/patient_visits",
             tab_name: :visits
-          },
-          %{
-            name: "Pending Cases",
-            icon: "calculator",
-            url: "/doctor/pending_patient_visits",
-            tab_name: :pending
           }
         ]
       },
@@ -562,19 +564,26 @@ defmodule MedcampWeb.SidebarCatalog do
 
   defp nurse_tab_groups do
     [
+      quick_access_group(
+        "quick-scan",
+        "Scan Patient",
+        "qr-code",
+        "/nurse/scan",
+        :scan
+      ),
+      quick_access_group(
+        "quick-work",
+        "Triages",
+        "computer-desktop",
+        "/nurse/triages",
+        :triages
+      ),
       %{
         key: "patient-management",
         name: "Patient Management",
         icon: "users",
         tabs: [
-          %{
-            name: "Scan Patient",
-            icon: "magnifying-glass-circle",
-            url: "/nurse/scan",
-            tab_name: :scan
-          },
           %{name: "Patients", icon: "users", url: "/nurse/patients", tab_name: :patients},
-          %{name: "Triages", icon: "computer-desktop", url: "/nurse/triages", tab_name: :triages},
           %{name: "Visits", icon: "home-modern", url: "/nurse/visits", tab_name: :visits}
         ]
       }
@@ -583,24 +592,26 @@ defmodule MedcampWeb.SidebarCatalog do
 
   defp pharmacist_tab_groups do
     [
+      quick_access_group(
+        "quick-scan",
+        "Scan Patient",
+        "qr-code",
+        "/pharmacist/scan",
+        :scan
+      ),
+      quick_access_group(
+        "quick-work",
+        "Drug Allocations",
+        "clock",
+        "/pharmacist/drug_allocations",
+        :drug_allocations
+      ),
       %{
         key: "drug-management",
         name: "Drug Management",
         icon: "beaker",
         tabs: [
-          %{
-            name: "Scan Patient",
-            icon: "magnifying-glass-circle",
-            url: "/pharmacist/scan",
-            tab_name: :scan
-          },
-          %{name: "Drugs", icon: "folder-plus", url: "/pharmacist/drugs", tab_name: :drugs},
-          %{
-            name: "Drug Allocations",
-            icon: "clock",
-            url: "/pharmacist/drug_allocations",
-            tab_name: :drug_allocations
-          }
+          %{name: "Drugs", icon: "folder-plus", url: "/pharmacist/drugs", tab_name: :drugs}
         ]
       },
       %{
@@ -621,13 +632,19 @@ defmodule MedcampWeb.SidebarCatalog do
 
   defp lab_tab_groups do
     [
+      quick_access_group("quick-scan", "Scan Patient", "qr-code", "/lab/scan", :scan),
+      quick_access_group(
+        "quick-work",
+        "Lab Results",
+        "beaker",
+        "/lab/lab_results",
+        :lab_results
+      ),
       %{
         key: "lab-work",
         name: "Lab Work",
         icon: "beaker",
         tabs: [
-          %{name: "Scan Patient", icon: "qr-code", url: "/lab/scan", tab_name: :scan},
-          %{name: "Lab Results", icon: "beaker", url: "/lab/lab_results", tab_name: :lab_results},
           %{
             name: "Lab Surveillance",
             icon: "chart-bar-square",
@@ -644,6 +661,22 @@ defmodule MedcampWeb.SidebarCatalog do
         ]
       }
     ]
+  end
+
+  defp quick_access_group(key, name, icon, url, tab_name) do
+    %{
+      key: key,
+      name: name,
+      icon: icon,
+      tabs: [
+        %{
+          name: name,
+          icon: icon,
+          url: url,
+          tab_name: tab_name
+        }
+      ]
+    }
   end
 
   defp nurse_patient_tabs(patient) do

@@ -65,6 +65,11 @@ config :medcamp, MedcampWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :medcamp, dev_routes: true
 
+# Mail: with no POSTAL_API_KEY, config/runtime.exs points Medcamp.Postal at
+# Medcamp.Postal.LocalClient, which writes every message (org approval, admin
+# invite, password reset, login OTP) into the Swoosh mailbox at
+# http://localhost:7710/dev/mailbox. Set POSTAL_API_KEY in .env for real sends.
+
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
 

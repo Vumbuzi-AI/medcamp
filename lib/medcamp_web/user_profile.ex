@@ -32,7 +32,7 @@ defmodule MedcampWeb.UserLive.Profile do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-[#f8f8ff] flex flex-col">
+    <div class="min-h-screen bg-brand-50 flex flex-col">
       <div class="flex-1 flex items-center justify-center p-4">
         <%= if @user do %>
           <div class="w-full max-w-4xl bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden">
@@ -261,7 +261,7 @@ defmodule MedcampWeb.UserLive.Profile do
             </div>
             
     <!-- Footer -->
-            <div class="bg-[#f8f8ff] px-6 py-4 border-t border-gray-100">
+            <div class="bg-brand-50 px-6 py-4 border-t border-gray-100">
               <div class="text-center text-sm text-gray-500">
                 <p>&copy; {Date.utc_today().year} Glocal Health Centre. All Rights Reserved.</p>
                 <p class="mt-1">

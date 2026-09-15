@@ -87,42 +87,32 @@ defmodule MedcampWeb.DrugAllocationReportLive do
   def render(assigns) do
     ~H"""
     <div class="space-y-6">
-      <.page_header
-        icon_path="M19.428 15.428a8 8 0 11-11.314-11.314 8 8 0 0111.314 11.314zM8.586 8.586l6.828 6.828"
+      <.dashboard_top_card
         title="Drug Allocations"
         subtitle="Issued drug quantities by received-inventory category, such as Antibiotics."
-      />
-
-      <form
-        id="drug-allocation-report-filters"
-        phx-change="filter"
-        phx-submit="filter"
-        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+        search_name="search"
+        search_value={@search}
+        search_placeholder="Brand, generic name, or GTIN"
+        search_event="filter"
+        filter_id="drug-allocation-report-filters"
+        filter_apply_event="filter"
+        filter_clear_event="reset_filters"
+        active_filter_count={active_filter_count(assigns)}
+        camps={assigns[:camp_options] || []}
+        camp_filter={assigns[:camp_filter]}
       >
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
-          <div class="xl:col-span-2">
-            <label for="drug-allocation-search" class="mb-1 block text-xs font-medium text-gray-600">
-              Drug
-            </label>
-            <input
-              id="drug-allocation-search"
-              type="search"
-              name="search"
-              value={@search}
-              placeholder="Brand, generic name, or GTIN"
-              phx-debounce="300"
-              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
-            />
-          </div>
-
+        <:filter_group label="Classification">
           <div>
-            <label for="drug-allocation-category" class="mb-1 block text-xs font-medium text-gray-600">
+            <label
+              for="drug-allocation-category"
+              class="mb-1 block text-xs font-medium text-slate-600"
+            >
               Inventory Category
             </label>
             <select
               id="drug-allocation-category"
               name="category"
-              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
+              class="h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
             >
               <option value="">All categories</option>
               <option :for={option <- @category_options} value={option} selected={@category == option}>
@@ -132,13 +122,13 @@ defmodule MedcampWeb.DrugAllocationReportLive do
           </div>
 
           <div>
-            <label for="drug-allocation-type" class="mb-1 block text-xs font-medium text-gray-600">
+            <label for="drug-allocation-type" class="mb-1 block text-xs font-medium text-slate-600">
               Product Type
             </label>
             <select
               id="drug-allocation-type"
               name="inventory_type"
-              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
+              class="h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
             >
               <option value="">All types</option>
               <option
@@ -150,43 +140,18 @@ defmodule MedcampWeb.DrugAllocationReportLive do
               </option>
             </select>
           </div>
-
-          <div>
-            <label for="drug-allocation-from" class="mb-1 block text-xs font-medium text-gray-600">
-              Issued From
-            </label>
-            <input
-              id="drug-allocation-from"
-              type="date"
-              name="date_from"
-              value={@date_from}
-              class="h-10 w-full rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
-            />
-          </div>
-
-          <div>
-            <label for="drug-allocation-to" class="mb-1 block text-xs font-medium text-gray-600">
-              Issued To
-            </label>
-            <div class="flex gap-2">
-              <input
-                id="drug-allocation-to"
-                type="date"
-                name="date_to"
-                value={@date_to}
-                class="h-10 min-w-0 flex-1 rounded-md border border-gray-300 px-3 text-sm focus:border-brand-accent focus:ring-brand-accent"
-              />
-              <button
-                type="button"
-                phx-click="reset_filters"
-                class="h-10 rounded-md border border-gray-300 px-3 text-sm text-gray-600 hover:bg-gray-50"
-              >
-                Reset
-              </button>
-            </div>
-          </div>
-        </div>
-      </form>
+        </:filter_group>
+        <:filter_group label="Issued date">
+          <.date_range_fields
+            from_name="date_from"
+            to_name="date_to"
+            from_value={@date_from}
+            to_value={@date_to}
+            from_label="Issued From"
+            to_label="Issued To"
+          />
+        </:filter_group>
+      </.dashboard_top_card>
 
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <.report_stat_card label="Total units issued" value={@total_issued} />
@@ -194,84 +159,69 @@ defmodule MedcampWeb.DrugAllocationReportLive do
         <.report_stat_card label="Issue records" value={@total_issue_count} />
       </div>
 
-      <section class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-        <div class="border-b border-gray-200 px-4 py-3">
-          <h2 class="font-semibold text-gray-900">Issued by Inventory Category</h2>
-          <p class="mt-1 text-sm text-gray-500">
+      <section class="space-y-3">
+        <div>
+          <h2 class="font-semibold text-slate-900">Issued by Inventory Category</h2>
+          <p class="mt-1 text-sm text-slate-500">
             Category totals use the classification saved when each inventory item was received.
           </p>
         </div>
 
-        <div :if={@category_summary != []} class="overflow-x-auto">
-          <table id="drug-allocation-category-summary" class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <.heading>Category</.heading>
-                <.heading align="right">Units Issued</.heading>
-                <.heading align="right">Drug Items</.heading>
-                <.heading align="right">Issue Records</.heading>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              <tr :for={summary <- @category_summary}>
-                <td class="px-4 py-3 text-sm font-medium text-gray-900">{summary.category}</td>
-                <td class="px-4 py-3 text-right text-sm font-bold text-brand-primary">
-                  {summary.issued_quantity}
-                </td>
-                <td class="px-4 py-3 text-right text-sm text-gray-700">{summary.item_count}</td>
-                <td class="px-4 py-3 text-right text-sm text-gray-700">{summary.issue_count}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div :if={@category_summary == []} class="px-4 py-10 text-center text-sm text-gray-500">
-          No issued drugs match the selected filters.
-        </div>
+        <.data_table id="drug-allocation-category-summary" rows={@category_summary}>
+          <:col :let={summary} label="Category" class="font-medium text-slate-900">
+            {summary.category}
+          </:col>
+          <:col :let={summary} label="Units Issued" align="right" class="font-bold text-brand-primary">
+            {summary.issued_quantity}
+          </:col>
+          <:col :let={summary} label="Drug Items" align="right">
+            {summary.item_count}
+          </:col>
+          <:col :let={summary} label="Issue Records" align="right">
+            {summary.issue_count}
+          </:col>
+          <:empty>
+            No issued drugs match the selected filters.
+          </:empty>
+        </.data_table>
       </section>
 
-      <section class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-        <div class="border-b border-gray-200 px-4 py-3">
-          <h2 class="font-semibold text-gray-900">Issued Drug Details</h2>
+      <section class="space-y-3">
+        <div>
+          <h2 class="font-semibold text-slate-900">Issued Drug Details</h2>
         </div>
 
-        <div :if={@rows != []} class="overflow-x-auto">
-          <table id="issued-drug-details" class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <.heading>Drug</.heading>
-                <.heading>Category</.heading>
-                <.heading>Product Type</.heading>
-                <.heading>GTIN</.heading>
-                <.heading align="right">Units Issued</.heading>
-                <.heading align="right">Allocations</.heading>
-                <.heading>Last Issued</.heading>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              <tr :for={row <- @rows} id={"issued-drug-#{row.inventory_received_id}"}>
-                <td class="px-4 py-3 text-sm">
-                  <p class="font-medium text-gray-900">{present(row.brand_name)}</p>
-                  <p class="text-xs text-gray-500">{present(row.generic_name)}</p>
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{classification(row)}</td>
-                <td class="px-4 py-3 text-sm text-gray-700">{present(row.inventory_type)}</td>
-                <td class="px-4 py-3 font-mono text-xs text-gray-600">{present(row.gtin)}</td>
-                <td class="px-4 py-3 text-right text-sm font-bold text-brand-primary">
-                  {row.issued_quantity} {row.unit_of_measurement || "units"}
-                </td>
-                <td class="px-4 py-3 text-right text-sm text-gray-700">{row.allocation_count}</td>
-                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
-                  {format_datetime(row.last_issued_at)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div :if={@rows == []} class="px-4 py-10 text-center text-sm text-gray-500">
-          No drugs have been issued for this period and classification.
-        </div>
+        <.data_table
+          id="issued-drug-details"
+          rows={@rows}
+          row_id={&"issued-drug-#{&1.inventory_received_id}"}
+        >
+          <:col :let={row} label="Drug">
+            <p class="font-medium text-slate-900">{present(row.brand_name)}</p>
+            <p class="text-xs text-slate-500">{present(row.generic_name)}</p>
+          </:col>
+          <:col :let={row} label="Category" hide_below="md">
+            {classification(row)}
+          </:col>
+          <:col :let={row} label="Product Type" hide_below="md">
+            {present(row.inventory_type)}
+          </:col>
+          <:col :let={row} label="GTIN" class="font-mono text-xs text-slate-600" hide_below="lg">
+            {present(row.gtin)}
+          </:col>
+          <:col :let={row} label="Units Issued" align="right" class="font-bold text-brand-primary">
+            {row.issued_quantity} {row.unit_of_measurement || "units"}
+          </:col>
+          <:col :let={row} label="Allocations" align="right" hide_below="sm">
+            {row.allocation_count}
+          </:col>
+          <:col :let={row} label="Last Issued" hide_below="lg">
+            {format_datetime(row.last_issued_at)}
+          </:col>
+          <:empty>
+            No drugs have been issued for this period and classification.
+          </:empty>
+        </.data_table>
       </section>
     </div>
     """
@@ -282,26 +232,25 @@ defmodule MedcampWeb.DrugAllocationReportLive do
 
   defp report_stat_card(assigns) do
     ~H"""
-    <div class="rounded-lg border border-brand-100 bg-brand-50 p-4">
-      <p class="text-xs font-medium uppercase tracking-wide text-gray-500">{@label}</p>
-      <p class="mt-1 text-2xl font-bold text-brand-primary">{@value}</p>
+    <div class="rounded-2xl border border-slate-200 bg-white p-5">
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{@label}</p>
+      <p class="mt-2 text-2xl font-bold leading-none text-brand-primary">{@value}</p>
     </div>
     """
   end
 
-  attr :align, :string, default: "left"
-  slot :inner_block, required: true
+  defp active_filter_count(assigns) do
+    today = Date.utc_today()
+    default_from = Date.to_string(Date.beginning_of_month(today))
+    default_to = Date.to_string(today)
 
-  defp heading(assigns) do
-    ~H"""
-    <th class={[
-      "px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500",
-      @align == "right" && "text-right",
-      @align != "right" && "text-left"
-    ]}>
-      {render_slot(@inner_block)}
-    </th>
-    """
+    [
+      assigns.category != "",
+      assigns.inventory_type != "",
+      assigns.date_from != default_from,
+      assigns.date_to != default_to
+    ]
+    |> Enum.count(& &1)
   end
 
   defp present(value) when value in [nil, ""], do: "—"

@@ -29,9 +29,20 @@
               <span class="hidden sm:inline">Back</span>
             </a>
           <% end %>
-          <span class="text-base sm:text-lg font-bold text-blue-700 tracking-tight">
-            HDF Medical Camp
-          </span>
+          <div class="min-w-0">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+              Recording into
+            </p>
+            <%= if assigns[:active_camp] do %>
+              <span class="block truncate text-sm font-bold tracking-tight text-brand-primary sm:text-base">
+                {@active_camp.name}
+              </span>
+            <% else %>
+              <span class="block truncate text-sm font-bold tracking-tight text-amber-600 sm:text-base">
+                No active camp
+              </span>
+            <% end %>
+          </div>
         </div>
 
         <%!-- Center: nav tabs (hidden on mobile) --%>
@@ -91,8 +102,11 @@
           <%!-- Mobile hamburger button --%>
           <button
             type="button"
-            class="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none"
-            onclick="document.getElementById('camp-mobile-menu').classList.toggle('hidden')"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="camp-mobile-menu"
+            class="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent"
+            onclick="var m=document.getElementById('camp-mobile-menu');m.classList.toggle('hidden');this.setAttribute('aria-expanded', m.classList.contains('hidden') ? 'false' : 'true')"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

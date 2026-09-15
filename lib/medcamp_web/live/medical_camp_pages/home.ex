@@ -1,59 +1,43 @@
 defmodule MedcampWeb.MedicalCampPages.Home do
   use MedcampWeb, :live_view
 
-  alias MedcampWeb.PublicTenant
   alias Phoenix.LiveView.JS
   alias Medcamp.Triages
   alias Medcamp.DoctorNotes
-  alias Medcamp.Accounts
   alias Medcamp.Triages.Triage
   alias Medcamp.DrugAllocations
   alias Medcamp.DrugAllocations.DrugAllocation
   alias Medcamp.LabResults
 
   @impl true
-  def mount(%{"gsrn" => gsrn}, session, socket) do
-    patient = PublicTenant.resolve_patient!(gsrn)
-    most_recent_triage = Triages.most_recent_triage(patient.id)
-    triages = Triages.list_triages_by_patient(patient.id)
+  def mount(%{"gsrn" => gsrn}, _session, socket) do
+    # Guarded by `MedicalCampAuth.:require_camp_auth` - `@current_user` and
+    # `@patient` are already assigned, org-matched, and role-checked.
+    patient = socket.assigns.patient
 
-    current_user =
-      case session["user_token"] do
-        nil -> nil
-        token -> Accounts.get_user_by_session_token(token)
-      end
+    cond do
+      socket.assigns.live_action == :index and socket.assigns.current_user.role == "nurse" ->
+        {:ok, push_navigate(socket, to: "/8018/#{gsrn}/medical-camp/triages/new")}
 
-    authenticated = not is_nil(current_user)
+      socket.assigns.live_action == :index and socket.assigns.current_user.role == "doctor" ->
+        {:ok, push_navigate(socket, to: "/8018/#{gsrn}/medical-camp/doctor_notes")}
 
-    # Redirect nurse to new triage, doctor to doctor_notes (only from the index route)
-    if authenticated and socket.assigns.live_action == :index do
-      case current_user.role do
-        "nurse" ->
-          {:ok,
-           socket
-           |> push_navigate(to: "/8018/#{gsrn}/medical-camp/triages/new")}
-
-        "doctor" ->
-          {:ok,
-           socket
-           |> push_navigate(to: "/8018/#{gsrn}/medical-camp/doctor_notes")}
-
-        _ ->
-          {:ok,
-           mount_home(socket, patient, most_recent_triage, triages, current_user, authenticated)}
-      end
-    else
-      {:ok, mount_home(socket, patient, most_recent_triage, triages, current_user, authenticated)}
+      true ->
+        {:ok,
+         mount_home(
+           socket,
+           patient,
+           Triages.most_recent_triage(patient.id),
+           Triages.list_triages_by_patient(patient.id)
+         )}
     end
   end
 
-  defp mount_home(socket, patient, most_recent_triage, triages, current_user, authenticated) do
+  defp mount_home(socket, patient, most_recent_triage, triages) do
     socket
     |> assign(:patient, patient)
     |> assign(:most_recent_triage, most_recent_triage)
     |> assign(:page_title, "Patient Details")
-    |> assign(:show_otp_modal, !authenticated)
-    |> assign(:current_user, current_user)
     |> assign(:triage, %Triage{})
     |> assign(:active_tab, :overview)
     |> assign(:back_url, nil)
@@ -141,47 +125,16 @@ defmodule MedcampWeb.MedicalCampPages.Home do
   def render(assigns) do
     ~H"""
     <div>
-      <%!-- OTP verification modal --%>
-      <div
-        :if={@show_otp_modal}
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      >
-        <div class="bg-white rounded-xl shadow-xl p-8 w-full max-w-sm mx-4">
-          <h2 class="text-xl font-bold text-gray-800 mb-1">Medical Camp Access</h2>
-          <p class="text-sm text-gray-500 mb-6">Enter your 4-digit OTP to continue.</p>
-
-          <form action={"/8018/#{@patient.gsrn}/medical-camp/session"} method="post">
-            <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
-            <input
-              type="text"
-              name="otp"
-              maxlength="4"
-              inputmode="numeric"
-              placeholder="_ _ _ _"
-              autofocus
-              class="w-full text-center text-2xl tracking-[0.5em] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition-colors"
-            >
-              Verify OTP
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <%!-- Main content (blurred when OTP modal is showing) --%>
-      <div class={if @show_otp_modal, do: "pointer-events-none select-none blur-sm", else: ""}>
+      <div>
         <%!-- Patient header --%>
-        <div class="bg-white rounded-lg border border-gray-100 shadow-sm p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div class="bg-white rounded-lg border border-slate-100 shadow-sm p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
-            <h2 class="text-lg font-bold text-gray-800">
+            <h2 class="text-lg font-bold text-slate-800">
               {[@patient.first_name, @patient.middle_name, @patient.last_name]
               |> Enum.filter(&(&1 != nil))
               |> Enum.join(" ")}
             </h2>
-            <p class="text-sm text-gray-500">
+            <p class="text-sm text-slate-500">
               GSRN: {@patient.gsrn} · {@patient.gender} · {@patient.date_of_birth}
             </p>
           </div>
@@ -208,44 +161,44 @@ defmodule MedcampWeb.MedicalCampPages.Home do
           <div class="p-2">
             <h2 class="text-lg font-bold text-brand-primary mb-4">Triage Details</h2>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Date</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Date</span>
                 <span class="font-medium">{@selected_triage.date}</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Time</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Time</span>
                 <span class="font-medium">{@selected_triage.time || "-"}</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Temperature</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Temperature</span>
                 <span class="font-medium">{@selected_triage.temperature || "-"} °C</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Blood Pressure</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Blood Pressure</span>
                 <span class="font-medium">{@selected_triage.blood_pressure || "-"}</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Pulse Rate</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Pulse Rate</span>
                 <span class="font-medium">{@selected_triage.pulse_rate || "-"} bpm</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">O2 Saturation</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">O2 Saturation</span>
                 <span class="font-medium">{@selected_triage.oxygen_saturation || "-"} %</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Weight</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Weight</span>
                 <span class="font-medium">{@selected_triage.weight || "-"} kg</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Height</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Height</span>
                 <span class="font-medium">{@selected_triage.height || "-"} cm</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">BMI</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">BMI</span>
                 <span class="font-medium">{@selected_triage.bmi || "-"}</span>
               </div>
-              <div class="bg-gray-50 rounded p-2">
-                <span class="text-gray-500 block">Emergency</span>
+              <div class="bg-slate-50 rounded p-2">
+                <span class="text-slate-500 block">Emergency</span>
                 <span class={[
                   "font-medium",
                   @selected_triage.emergency_scale == "High" && "text-red-600",
@@ -260,8 +213,8 @@ defmodule MedcampWeb.MedicalCampPages.Home do
               <span class="text-red-600 font-medium">Allergies: </span>
               <span class="text-red-800">{@selected_triage.allergies}</span>
             </div>
-            <div :if={@selected_triage.triage_notes} class="mt-2 bg-gray-50 rounded p-2 text-sm">
-              <span class="text-gray-500 font-medium">Notes: </span>
+            <div :if={@selected_triage.triage_notes} class="mt-2 bg-slate-50 rounded p-2 text-sm">
+              <span class="text-slate-500 font-medium">Notes: </span>
               <span>{@selected_triage.triage_notes}</span>
             </div>
           </div>

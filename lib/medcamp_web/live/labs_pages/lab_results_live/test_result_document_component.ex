@@ -14,7 +14,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestResultDocumentComponent do
         <.link
           :if={@back_to}
           navigate={@back_to}
-          class="px-4 py-2 text-sm font-medium text-brand-accent bg-white border border-brand-accent rounded-lg hover:bg-gray-50 flex items-center transition-colors"
+          class="px-4 py-2 text-sm font-medium text-brand-accent bg-white border border-brand-accent rounded-lg hover:bg-slate-50 flex items-center transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -70,38 +70,38 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestResultDocumentComponent do
           <table class="w-full border-collapse text-base">
             <tbody>
               <tr>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold w-[20%]">
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold w-[20%]">
                   Patient No:
                 </td>
-                <td class="border-2 border-gray-800 px-3 py-2 w-[30%]">{@patient.id}</td>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold w-[20%]">Lab Test No:</td>
-                <td class="border-2 border-gray-800 px-3 py-2 w-[30%]">{@lab_result.id}</td>
+                <td class="border-2 border-slate-800 px-3 py-2 w-[30%]">{@patient.id}</td>
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold w-[20%]">Lab Test No:</td>
+                <td class="border-2 border-slate-800 px-3 py-2 w-[30%]">{@lab_result.id}</td>
               </tr>
               <tr>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold">Patient Name:</td>
-                <td class="border-2 border-gray-800 px-3 py-2">{format_patient_name(@patient)}</td>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold">Requested On:</td>
-                <td class="border-2 border-gray-800 px-3 py-2">
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold">Patient Name:</td>
+                <td class="border-2 border-slate-800 px-3 py-2">{format_patient_name(@patient)}</td>
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold">Requested On:</td>
+                <td class="border-2 border-slate-800 px-3 py-2">
                   {format_date(@lab_result.inserted_at)}
                 </td>
               </tr>
               <tr>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold">Gender:</td>
-                <td class="border-2 border-gray-800 px-3 py-2">
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold">Gender:</td>
+                <td class="border-2 border-slate-800 px-3 py-2">
                   {String.capitalize(@patient.gender || "")}
                 </td>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold">Lab service Provider</td>
-                <td class="border-2 border-gray-800 px-3 py-2">
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold">Lab service Provider</td>
+                <td class="border-2 border-slate-800 px-3 py-2">
                   {(@entry.performed_by && @entry.performed_by.name) || "-"}
                 </td>
               </tr>
               <tr>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold">Age:</td>
-                <td class="border-2 border-gray-800 px-3 py-2">
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold">Age:</td>
+                <td class="border-2 border-slate-800 px-3 py-2">
                   {calculate_age(@patient.date_of_birth)} years
                 </td>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold">Referring Doctor:</td>
-                <td class="border-2 border-gray-800 px-3 py-2">{@doctor.name}</td>
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold">Referring Doctor:</td>
+                <td class="border-2 border-slate-800 px-3 py-2">{@doctor.name}</td>
               </tr>
             </tbody>
           </table>
@@ -117,15 +117,15 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestResultDocumentComponent do
             <!-- Investigation Header -->
             <thead>
               <tr>
-                <td colspan="2" class="border-2 border-gray-800 px-3 py-2">
+                <td colspan="2" class="border-2 border-slate-800 px-3 py-2">
                   <span class="text-[#7c3aed] font-bold">Investigation:</span>
                   <span class="text-[#7c3aed] ml-1 font-semibold">{@template.name}</span>
                 </td>
-                <td colspan="2" class="border-2 border-gray-800 px-3 py-2 text-right">
+                <td colspan="2" class="border-2 border-slate-800 px-3 py-2 text-right">
                   <%= if @entry.sample_collected_on do %>
                     <div class="leading-tight">
                       <span class="text-[#7c3aed] font-bold">Sample collected on:</span>
-                      <span class="text-gray-800 font-medium ml-1">
+                      <span class="text-slate-800 font-medium ml-1">
                         {format_date(@entry.sample_collected_on)}
                       </span>
                     </div>
@@ -133,7 +133,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestResultDocumentComponent do
                   <%= if @entry.test_performed_on do %>
                     <div class="leading-tight">
                       <span class="text-[#7c3aed] font-bold">Test Performed on:</span>
-                      <span class="text-gray-800 font-medium ml-1">
+                      <span class="text-slate-800 font-medium ml-1">
                         {format_date(@entry.test_performed_on)}
                       </span>
                     </div>
@@ -141,16 +141,16 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestResultDocumentComponent do
                 </td>
               </tr>
               <tr>
-                <th class="border-2 border-gray-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold">
+                <th class="border-2 border-slate-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold">
                   Test_Name
                 </th>
-                <th class="border-2 border-gray-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold">
+                <th class="border-2 border-slate-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold">
                   Result
                 </th>
-                <th class="border-2 border-gray-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold">
+                <th class="border-2 border-slate-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold">
                   Ref. Ranges
                 </th>
-                <th class="border-2 border-gray-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold w-20">
+                <th class="border-2 border-slate-800 px-3 py-2.5 text-left text-[#06b6d4] font-bold w-20">
                   Flag
                 </th>
               </tr>
@@ -161,7 +161,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestResultDocumentComponent do
                   <tr>
                     <td
                       colspan="4"
-                      class="border-2 border-gray-800 px-3 py-2 bg-gray-50 font-bold text-gray-800"
+                      class="border-2 border-slate-800 px-3 py-2 bg-slate-50 font-bold text-slate-800"
                     >
                       {section}
                     </td>
@@ -180,25 +180,25 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestResultDocumentComponent do
                   ref_max = field["ref_range_max"] || field[:ref_range_max]
                   has_ref_range? = ref_min || ref_max || ref_range %>
                   <tr>
-                    <td class="border-2 border-gray-800 px-3 py-2 align-top">
+                    <td class="border-2 border-slate-800 px-3 py-2 align-top">
                       {field["label"] || field[:label]}
                     </td>
-                    <td class="border-2 border-gray-800 px-3 py-2 font-medium align-top">
+                    <td class="border-2 border-slate-800 px-3 py-2 font-medium align-top">
                       <%= if value do %>
                         {value}
                         <%= if unit do %>
-                          <span class="text-gray-600 font-normal ml-1">{unit}</span>
+                          <span class="text-slate-600 font-normal ml-1">{unit}</span>
                         <% end %>
                       <% end %>
                       <%= if note && note != "" do %>
-                        <div class="mt-1 text-xs italic text-gray-700 font-normal">
+                        <div class="mt-1 text-xs italic text-slate-700 font-normal">
                           <span class="font-semibold not-italic">Note:</span> {note}
                         </div>
                       <% end %>
                     </td>
-                    <td class="border-2 border-gray-800 px-3 py-2 align-top">{ref_range || ""}</td>
+                    <td class="border-2 border-slate-800 px-3 py-2 align-top">{ref_range || ""}</td>
                     <td class={[
-                      "border-2 border-gray-800 px-3 py-2 font-bold text-center align-top",
+                      "border-2 border-slate-800 px-3 py-2 font-bold text-center align-top",
                       case flag do
                         "low" -> "text-blue-600"
                         "high" -> "text-red-600"
@@ -224,8 +224,8 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestResultDocumentComponent do
               
     <!-- Remarks row -->
               <tr>
-                <td class="border-2 border-gray-800 px-3 py-2 font-bold text-[#06b6d4]">Remarks</td>
-                <td colspan="3" class="border-2 border-gray-800 px-3 py-2">
+                <td class="border-2 border-slate-800 px-3 py-2 font-bold text-[#06b6d4]">Remarks</td>
+                <td colspan="3" class="border-2 border-slate-800 px-3 py-2">
                   {@entry.remarks || ""}
                 </td>
               </tr>
@@ -238,7 +238,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestResultDocumentComponent do
           <div class="flex justify-between items-end mt-12 print:mt-8">
             <div class="text-left">
               <p class="text-base font-bold text-[#06b6d4] mb-2 print:mb-12">Lab Technologist</p>
-              <p class="text-sm text-gray-700">
+              <p class="text-sm text-slate-700">
                 {(@entry.performed_by && @entry.performed_by.name) || ""}
               </p>
             </div>

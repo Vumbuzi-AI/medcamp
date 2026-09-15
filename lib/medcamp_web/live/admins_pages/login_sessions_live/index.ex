@@ -105,7 +105,7 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
       <.page_header
         icon_path="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
         title="Login Sessions"
@@ -129,10 +129,10 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
         >
           <:group label="Status">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Session Status</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Session Status</label>
               <select
                 name="active"
-                class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
               >
                 <option value="">All</option>
                 <option value="active" selected={@filters[:active] == "active"}>
@@ -155,12 +155,12 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
       
     <!-- Summary -->
       <div class="flex gap-3 mb-4">
-        <div class="flex items-center gap-1.5 text-sm text-gray-500">
+        <div class="flex items-center gap-1.5 text-sm text-slate-500">
           <span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500"></span>
           Active: {Enum.count(@sessions, fn s -> is_nil(s.logged_out_at) end)}
         </div>
-        <div class="flex items-center gap-1.5 text-sm text-gray-500">
-          <span class="inline-block w-2.5 h-2.5 rounded-full bg-gray-400"></span>
+        <div class="flex items-center gap-1.5 text-sm text-slate-500">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-400"></span>
           Total shown: {length(@sessions)}
         </div>
       </div>
@@ -183,22 +183,22 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
           </:actions>
         </.blank_state>
       <% else %>
-        <.table id="login-sessions" rows={@sessions}>
+        <.data_table id="login-sessions" rows={@sessions}>
           <:col :let={session} label="User">
             <div class="py-2 flex items-center gap-2">
               <div class="h-7 w-7 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-medium text-xs flex-shrink-0">
                 {String.first(session.user.name || "?")}
               </div>
               <div>
-                <p class="font-medium text-gray-900 text-sm">{session.user.name}</p>
-                <p class="text-xs text-gray-500">{session.user.email}</p>
+                <p class="font-medium text-slate-900 text-sm">{session.user.name}</p>
+                <p class="text-xs text-slate-500">{session.user.email}</p>
               </div>
             </div>
           </:col>
 
           <:col :let={session} label="Role">
             <div class="py-2">
-              <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700 capitalize">
+              <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-700 capitalize">
                 {session.user.role}
               </span>
             </div>
@@ -206,7 +206,7 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
 
           <:col :let={session} label="Logged In">
             <div class="py-2">
-              <span class="text-sm text-gray-700">
+              <span class="text-sm text-slate-700">
                 {format_datetime_kenya(session.logged_in_at)}
               </span>
             </div>
@@ -215,7 +215,7 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
           <:col :let={session} label="Logged Out">
             <div class="py-2">
               <%= if session.logged_out_at do %>
-                <span class="text-sm text-gray-700">
+                <span class="text-sm text-slate-700">
                   {format_datetime_kenya(session.logged_out_at)}
                 </span>
               <% else %>
@@ -228,12 +228,12 @@ defmodule MedcampWeb.LoginSessionsLive.Index do
 
           <:col :let={session} label="Duration">
             <div class="py-2">
-              <span class="text-sm text-gray-600">
+              <span class="text-sm text-slate-600">
                 {format_duration(session.logged_in_at, session.logged_out_at)}
               </span>
             </div>
           </:col>
-        </.table>
+        </.data_table>
         <.pagination
           page={@page}
           total_pages={@total_pages}

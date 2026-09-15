@@ -255,6 +255,8 @@ defmodule MedcampWeb.CoreComponentsTest do
       assert html =~ "Saved successfully"
       assert html =~ "bg-emerald-50"
       assert html =~ "hero-information-circle-mini"
+      assert html =~ ~s(phx-hook="AutoDismissFlash")
+      assert html =~ ~s(data-auto-dismiss-ms="4500")
     end
 
     test "still renders the error kind" do
@@ -269,6 +271,8 @@ defmodule MedcampWeb.CoreComponentsTest do
       assert html =~ "Something broke"
       assert html =~ "bg-rose-50"
       assert html =~ "hero-exclamation-circle-mini"
+      refute html =~ ~s(phx-hook="AutoDismissFlash")
+      refute html =~ ~s(data-auto-dismiss-ms="4500")
     end
 
     test "renders nothing when there is no message for that kind" do

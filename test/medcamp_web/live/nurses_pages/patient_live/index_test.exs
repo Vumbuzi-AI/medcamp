@@ -10,7 +10,16 @@ defmodule MedcampWeb.NursesPages.PatientIndexTest do
 
   setup %{conn: conn} do
     nurse = user_fixture(%{role: "nurse"})
-    %{conn: log_in_user(conn, nurse), nurse: nurse}
+
+    # Registration is refused with no active camp.
+    camp =
+      Medcamp.Tenancy.with_org(nurse.organisation_id, fn ->
+        {:ok, camp} = Medcamp.Camps.create_camp(%{name: "Nurse Test Camp"})
+        {:ok, camp} = Medcamp.Camps.set_active_camp(camp)
+        camp
+      end)
+
+    %{conn: log_in_user(conn, nurse), nurse: nurse, camp: camp}
   end
 
   test "nurse can add a patient and automatically open their triage visit", %{
@@ -21,6 +30,9 @@ defmodule MedcampWeb.NursesPages.PatientIndexTest do
     assert has_element?(index_view, ~s(a[href="/nurse/patients/new"]), "Add Patient")
 
     {:ok, form_view, _html} = live(conn, ~p"/nurse/patients/new")
+
+    form_view |> element("button[phx-click='register_new']") |> render_click()
+
     refute has_element?(form_view, ~s(input[name="patient[birth_certificate_number]"]))
     refute has_element?(form_view, ~s(input[name="patient[has_insurance]"]))
     refute has_element?(form_view, ~s(input[name="patient[consent_agreement]"]))

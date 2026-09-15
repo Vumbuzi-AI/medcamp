@@ -5,26 +5,24 @@ defmodule Medcamp.MedicalCampReports do
 
   import Ecto.Query, warn: false
 
+  alias Medcamp.Camps
   alias Medcamp.Patients
   alias Medcamp.Repo
-  alias Medcamp.Patients.Patient
 
   alias Medcamp.LabResults.LabResult
 
-  # Fixed camp days — only patients registered on these dates are included
-  @camp_dates [~D[2026-03-28], ~D[2026-03-29]]
-
   def report do
+    camp = Camps.get_active_camp()
+
     patients =
-      Patients.medical_camp_patients_query()
-      |> where(
-        [p],
-        fragment("DATE(? AT TIME ZONE 'Africa/Nairobi')", p.inserted_at) in ^@camp_dates
-      )
-      |> order_by([p], asc: p.first_name, asc: p.last_name)
-      |> Repo.all()
-      |> Enum.map(&Patient.with_age/1)
-      |> Enum.filter(&medical_camp_patient?/1)
+      case camp do
+        nil ->
+          Patients.list_all_medical_camp_patients()
+          |> Enum.filter(&medical_camp_patient?/1)
+
+        camp ->
+          Patients.list_patients_for_camp(camp.id)
+      end
 
     patient_map = Map.new(patients, &{&1.id, &1})
     patient_ids = Map.keys(patient_map)
@@ -40,7 +38,7 @@ defmodule Medcamp.MedicalCampReports do
     %{
       generated_at: DateTime.utc_now(),
       cohort_name: "Medical Camp",
-      medical_camp_name: nil,
+      medical_camp_name: camp && camp.name,
       patient_type: nil,
       insurer_name: insurer_name(records),
       payer_names:

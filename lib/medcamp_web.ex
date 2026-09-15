@@ -133,6 +133,15 @@ defmodule MedcampWeb do
     end
   end
 
+  def superadmin_live_view do
+    quote do
+      use Phoenix.LiveView,
+        layout: {MedcampWeb.Layouts, :superadmin}
+
+      unquote(html_helpers())
+    end
+  end
+
   def pharmacist_live_view do
     quote do
       use Phoenix.LiveView,
@@ -194,6 +203,7 @@ defmodule MedcampWeb do
       import MedcampWeb.MedicalCampReportComponents
       import MedcampWeb.OrganisationComponents
       import MedcampWeb.CampComponents
+      import MedcampWeb.AuthComponents
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

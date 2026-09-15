@@ -10,25 +10,166 @@ defmodule MedcampWeb.ReceptionistPatientLive.NewTest do
 
   setup %{conn: conn} do
     receptionist = user_fixture(%{role: "receptionist"})
+
+    # Registration and the /new route are refused with no active camp, so the
+    # default for this module is "a camp is active" - in the DB (for the
+    # LiveView process) and in this process (for direct context calls). The
+    # few tests about the no-camp state clear it with `deactivate_camps/1`.
+    Medcamp.Tenancy.with_org(receptionist.organisation_id, fn ->
+      {:ok, camp} = Medcamp.Camps.create_camp(%{name: "Reception Setup Camp"})
+      {:ok, camp} = Medcamp.Camps.set_active_camp(camp)
+      Medcamp.Camps.Scope.put_active_camp_id(camp.id)
+    end)
+
     %{conn: log_in_user(conn, receptionist), receptionist: receptionist}
+  end
+
+  defp camp_fixture(user) do
+    Medcamp.Tenancy.with_org(user.organisation_id, fn ->
+      {:ok, camp} = Medcamp.Camps.create_camp(%{name: "Attendance Test Camp"})
+      {:ok, camp} = Medcamp.Camps.set_active_camp(camp)
+      Medcamp.Camps.Scope.put_active_camp_id(camp.id)
+      camp
+    end)
+  end
+
+  defp deactivate_camps(user) do
+    Medcamp.Tenancy.with_org(user.organisation_id, fn -> Medcamp.Camps.clear_active_camp() end)
+    Medcamp.Camps.Scope.put_active_camp_id(nil)
+  end
+
+  test "defaults to this camp's roster and only widens to the org on search", %{
+    conn: conn,
+    receptionist: receptionist
+  } do
+    scope = fn f -> Medcamp.Tenancy.with_org(receptionist.organisation_id, f) end
+    camp = camp_fixture(receptionist)
+
+    {:ok, in_camp} =
+      scope.(fn ->
+        Medcamp.Patients.create_patient(%{
+          "first_name" => "Incamp",
+          "last_name" => "Patient",
+          "phone_number" => "0700000001",
+          "date_of_birth" => "1990-01-01",
+          "gender" => "Female",
+          "home_address" => "Nairobi",
+          "creator_id" => receptionist.id
+        })
+      end)
+
+    {:ok, _past} =
+      scope.(fn ->
+        Medcamp.Patients.create_patient(%{
+          "first_name" => "Pastcamp",
+          "last_name" => "Patient",
+          "phone_number" => "0700000002",
+          "date_of_birth" => "1990-01-01",
+          "gender" => "Male",
+          "home_address" => "Nairobi",
+          "creator_id" => receptionist.id
+        })
+      end)
+
+    scope.(fn -> Medcamp.CampAttendances.record(in_camp.id, camp.id) end)
+
+    {:ok, view, html} = live(conn, ~p"/receptionist/patients")
+
+    # Default view: only the patient attending the active camp.
+    assert html =~ "Incamp Patient"
+    refute html =~ "Pastcamp Patient"
+    assert html =~ "Showing this camp only"
+
+    # Searching reaches the whole organisation.
+    html =
+      view
+      |> form("form[phx-change='search']", %{"search" => "Pastcamp"})
+      |> render_change()
+
+    assert html =~ "Pastcamp Patient"
   end
 
   test "shows the patient list with registration as the only action", %{conn: conn} do
     {:ok, view, html} = live(conn, ~p"/receptionist/patients")
 
-    assert html =~ "All patients"
+    assert html =~ "Patients"
+    assert html =~ "triage queue"
     assert has_element?(view, ~s(a[href="/receptionist/patients/new"]), "Add Patient")
+    assert has_element?(view, "input[name='search']")
     refute has_element?(view, "#patient-form")
     refute html =~ "Visits"
-    refute html =~ "Triage"
+    refute html =~ "Triage queue"
     refute html =~ "Edit"
   end
 
-  test "adding a patient also creates a triage visit", %{
+  test "search narrows the patient list", %{conn: conn} do
+    receptionist = user_fixture(%{role: "receptionist"})
+    scope = fn f -> Medcamp.Tenancy.with_org(receptionist.organisation_id, f) end
+
+    scope.(fn ->
+      Medcamp.Patients.create_patient(%{
+        "first_name" => "Findme",
+        "last_name" => "Mwangi",
+        "phone_number" => "0700111222",
+        "date_of_birth" => "1990-01-01",
+        "gender" => "Male",
+        "home_address" => "Nairobi",
+        "creator_id" => receptionist.id
+      })
+
+      Medcamp.Patients.create_patient(%{
+        "first_name" => "Someone",
+        "last_name" => "Else",
+        "phone_number" => "0700333444",
+        "date_of_birth" => "1990-01-01",
+        "gender" => "Female",
+        "home_address" => "Nairobi",
+        "creator_id" => receptionist.id
+      })
+    end)
+
+    conn = log_in_user(conn, receptionist)
+    {:ok, view, _html} = live(conn, ~p"/receptionist/patients")
+
+    html =
+      view
+      |> form("form[phx-change='search']", %{"search" => "Findme"})
+      |> render_change()
+
+    assert html =~ "Findme Mwangi"
+    refute html =~ "Someone Else"
+  end
+
+  test "registration starts on a National ID lookup step", %{conn: conn} do
+    {:ok, view, html} = live(conn, ~p"/receptionist/patients/new")
+
+    assert html =~ "National ID"
+    assert has_element?(view, "form[phx-submit='lookup']")
+    refute has_element?(view, "#patient-form")
+  end
+
+  test "an unknown ID drops straight into the new-patient form, ID pre-filled", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/receptionist/patients/new")
+
+    html =
+      view
+      |> form("form[phx-submit='lookup']", %{"national_id" => "NOSUCH-123"})
+      |> render_submit()
+
+    assert has_element?(view, "#patient-form")
+    assert html =~ ~s(value="NOSUCH-123")
+  end
+
+  test "adding a patient also creates a triage visit and a camp-attendance row", %{
     conn: conn,
     receptionist: receptionist
   } do
+    camp = camp_fixture(receptionist)
     {:ok, view, _html} = live(conn, ~p"/receptionist/patients/new")
+
+    view
+    |> element("button[phx-click='register_new']")
+    |> render_click()
 
     view
     |> form("#patient-form",
@@ -47,9 +188,93 @@ defmodule MedcampWeb.ReceptionistPatientLive.NewTest do
     assert patient.creator_id == receptionist.id
 
     visit = Repo.get_by!(PatientVisit, patient_id: patient.id)
-    assert visit.creator_id == receptionist.id
     assert visit.status == "triage_pending"
-    assert_redirect(view, ~p"/receptionist/patients")
+
+    Medcamp.Tenancy.with_org(receptionist.organisation_id, fn ->
+      assert Medcamp.CampAttendances.attended?(patient.id, camp.id)
+    end)
+
+    # Instead of navigating away, the receptionist gets a wristband to print.
+    html = render(view)
+    assert html =~ "Amina Wanjiru is registered"
+    assert has_element?(view, "#receptionist-registered-code-wrap")
+    assert has_element?(view, "button[data-print-trigger]", "Print wristband")
+    assert html =~ patient.gsrn
+    # GS1 wristband: the (8018) SSCC line and the Data Matrix that encodes it.
+    assert html =~ "(8018) #{patient.gsrn}"
+    assert has_element?(view, ~s(svg[phx-hook="datamatrix"][data-value="8018#{patient.gsrn}"]))
+  end
+
+  test "the patient list offers a per-row reprint of the wristband code", %{
+    conn: conn,
+    receptionist: receptionist
+  } do
+    # This one is about the org-wide list, so no camp scoping.
+    deactivate_camps(receptionist)
+    scope = fn f -> Medcamp.Tenancy.with_org(receptionist.organisation_id, f) end
+
+    {:ok, patient} =
+      scope.(fn ->
+        Medcamp.Patients.create_patient(%{
+          "first_name" => "Reprint",
+          "last_name" => "Me",
+          "phone_number" => "0700111000",
+          "date_of_birth" => "1990-01-01",
+          "gender" => "Male",
+          "home_address" => "Nairobi",
+          "creator_id" => receptionist.id
+        })
+      end)
+
+    {:ok, view, _html} = live(conn, ~p"/receptionist/patients")
+
+    view
+    |> element("button[phx-click='show_patient_code'][phx-value-patient_id='#{patient.id}']")
+    |> render_click()
+
+    assert has_element?(view, "#receptionist-reprint-code-wrap")
+    assert render(view) =~ patient.gsrn
+  end
+
+  test "a known ID reuses the record and just opens a new visit", %{
+    conn: conn,
+    receptionist: receptionist
+  } do
+    _camp = camp_fixture(receptionist)
+
+    {existing, _} =
+      Medcamp.Tenancy.with_org(receptionist.organisation_id, fn ->
+        Medcamp.Patients.register_for_camp(
+          %{
+            "first_name" => "Grace",
+            "last_name" => "Otieno",
+            "phone_number" => "0700999888",
+            "date_of_birth" => "1985-02-02",
+            "gender" => "Female",
+            "home_address" => "Nakuru",
+            "national_id" => "KE-987654"
+          },
+          receptionist
+        )
+        |> elem(1)
+      end)
+
+    {:ok, view, _html} = live(conn, ~p"/receptionist/patients/new")
+
+    view
+    |> form("form[phx-submit='lookup']", %{"national_id" => "ke-987654"})
+    |> render_submit()
+
+    assert render(view) =~ "Grace Otieno"
+
+    view |> element("button[phx-click='register_visit']") |> render_click()
+
+    visits =
+      Medcamp.Tenancy.with_org(receptionist.organisation_id, fn ->
+        Medcamp.PatientVisits.list_patient_visits_by_patient_id(existing.id)
+      end)
+
+    assert length(visits) == 2
   end
 
   test "receptionists cannot enter the nurse workflow", %{conn: conn} do
@@ -63,5 +288,27 @@ defmodule MedcampWeb.ReceptionistPatientLive.NewTest do
 
     assert {:error, {:redirect, %{to: "/nurse/scan"}}} =
              live(nurse_conn, ~p"/receptionist/patients/new")
+  end
+
+  describe "with no active camp (E8-2)" do
+    setup %{receptionist: receptionist} do
+      deactivate_camps(receptionist)
+      :ok
+    end
+
+    test "the list disables Add Patient instead of linking to the form", %{
+      conn: conn
+    } do
+      {:ok, view, _html} = live(conn, ~p"/receptionist/patients")
+
+      refute has_element?(view, ~s(a[href="/receptionist/patients/new"]))
+      assert has_element?(view, "button[disabled]", "Add Patient")
+      assert render(view) =~ "No active camp"
+    end
+
+    test "navigating straight to the form bounces back to the list", %{conn: conn} do
+      assert {:error, {:live_redirect, %{to: "/receptionist/patients"}}} =
+               live(conn, ~p"/receptionist/patients/new")
+    end
   end
 end

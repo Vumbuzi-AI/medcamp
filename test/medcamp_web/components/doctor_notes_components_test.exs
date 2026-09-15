@@ -1,5 +1,5 @@
 defmodule MedcampWeb.DoctorNotesComponentsTest do
-  use ExUnit.Case, async: true
+  use Medcamp.DataCase, async: true
 
   import Phoenix.LiveViewTest
 

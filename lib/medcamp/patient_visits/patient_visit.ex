@@ -38,7 +38,7 @@ defmodule Medcamp.PatientVisits.PatientVisit do
     camp_field()
 
     field :reason, :string
-    field :date, :date, default: Date.utc_today()
+    field :date, :date
     field :time, :time
     field :visit_type, :string
     field :status, :string, default: "triage_pending"
@@ -62,10 +62,10 @@ defmodule Medcamp.PatientVisits.PatientVisit do
       :creator_id,
       :doctor_id
     ])
-    |> validate_required([:date, :patient_id, :creator_id])
-    |> validate_inclusion(:status, @statuses)
     |> put_time_if_missing()
     |> put_date_if_missing()
+    |> validate_required([:date, :patient_id, :creator_id])
+    |> validate_inclusion(:status, @statuses)
     |> put_org_id()
     |> put_camp_id()
   end

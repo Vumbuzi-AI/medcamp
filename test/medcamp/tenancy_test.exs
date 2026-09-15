@@ -17,7 +17,10 @@ defmodule Medcamp.TenancyTest do
         "first_name" => name,
         "last_name" => "Test",
         "gender" => "female",
-        "date_of_birth" => "1990-01-01"
+        "date_of_birth" => "1990-01-01",
+        "phone_number" => "0712345678",
+        "home_address" => "#{name} Street",
+        "creator_id" => Medcamp.AccountsFixtures.user_fixture().id
       })
 
     patient

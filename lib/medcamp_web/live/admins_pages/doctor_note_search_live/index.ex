@@ -5,16 +5,7 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    today = Date.utc_today()
-
-    filters = %{
-      query: "",
-      date_from: Date.to_iso8601(Date.beginning_of_month(today)),
-      date_to: Date.to_iso8601(today),
-      age_from: "",
-      age_to: "",
-      sex: ""
-    }
+    filters = default_filters()
 
     {:ok,
      socket
@@ -26,6 +17,8 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
 
   @impl true
   def handle_event("search", %{"filters" => params}, socket) do
+    params = Map.merge(socket.assigns.filters, params)
+
     case parse_filters(params) do
       {:ok, display_filters, search_filters} ->
         {:noreply,
@@ -36,6 +29,10 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
       {:error, message} ->
         {:noreply, put_flash(socket, :error, message)}
     end
+  end
+
+  def handle_event("update_query", %{"filters" => %{"query" => query}}, socket) do
+    {:noreply, update(socket, :filters, &Map.put(&1, :query, query))}
   end
 
   @impl true
@@ -102,6 +99,72 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
     if from <= to, do: :ok, else: {:error, message}
   end
 
+  defp default_filters do
+    today = Date.utc_today()
+
+    %{
+      query: "",
+      date_from: Date.to_iso8601(Date.beginning_of_month(today)),
+      date_to: Date.to_iso8601(today),
+      age_from: "",
+      age_to: "",
+      sex: ""
+    }
+  end
+
+  defp active_filter_count(filters) do
+    defaults = default_filters()
+
+    [:date_from, :date_to, :age_from, :age_to, :sex]
+    |> Enum.count(&(Map.get(filters, &1) != Map.get(defaults, &1)))
+  end
+
+  defp age_filter_fields(assigns) do
+    ~H"""
+    <div>
+      <label class="mb-1 block text-xs font-medium text-gray-600">Min age</label>
+      <input
+        type="number"
+        name="filters[age_from]"
+        value={@from_value}
+        min="0"
+        max="130"
+        placeholder="Any"
+        class="h-9 w-full rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
+      />
+    </div>
+    <div>
+      <label class="mb-1 block text-xs font-medium text-gray-600">Max age</label>
+      <input
+        type="number"
+        name="filters[age_to]"
+        value={@to_value}
+        min="0"
+        max="130"
+        placeholder="Any"
+        class="h-9 w-full rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
+      />
+    </div>
+    """
+  end
+
+  defp sex_filter_field(assigns) do
+    ~H"""
+    <div>
+      <label class="mb-1 block text-xs font-medium text-gray-600">Sex</label>
+      <select
+        name="filters[sex]"
+        class="h-9 w-full rounded-md border border-gray-300 px-2 text-sm focus:border-brand-accent focus:ring-brand-accent"
+      >
+        <option value="">All</option>
+        <option value="male" selected={@value == "male"}>Male</option>
+        <option value="female" selected={@value == "female"}>Female</option>
+        <option value="other" selected={@value == "other"}>Other</option>
+      </select>
+    </div>
+    """
+  end
+
   defp patient_name(patient) do
     [patient.first_name, patient.middle_name, patient.last_name]
     |> Enum.reject(&(&1 in [nil, ""]))
@@ -115,7 +178,7 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-slate-50 -m-4 p-4 sm:-m-6 sm:p-6">
-      <div class="mx-auto w-[95%] space-y-6">
+      <div class="space-y-6">
         <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <p class="text-sm font-semibold text-brand-accent">Clinical documentation</p>
           <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">
@@ -129,9 +192,10 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
           <form
             id="doctor-note-search-form"
             phx-submit="search"
-            class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-7 xl:items-end"
+            phx-change="update_query"
+            class="mt-6 flex flex-col gap-3 lg:flex-row lg:items-end"
           >
-            <label class="block md:col-span-2 xl:col-span-2">
+            <label class="block flex-1">
               <span class="mb-1 block text-xs font-semibold text-slate-600">Word or phrase</span>
               <input
                 id="doctor-note-search-query"
@@ -143,78 +207,44 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
                 class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
               />
             </label>
-            <label class="block">
-              <span class="mb-1 block text-xs font-semibold text-slate-600">From</span>
-              <input
-                type="date"
-                name="filters[date_from]"
-                value={@filters.date_from}
-                required
-                class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
-              />
-            </label>
-            <label class="block">
-              <span class="mb-1 block text-xs font-semibold text-slate-600">To</span>
-              <input
-                type="date"
-                name="filters[date_to]"
-                value={@filters.date_to}
-                required
-                class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
-              />
-            </label>
-            <div class="grid grid-cols-2 gap-2">
-              <label class="block">
-                <span class="mb-1 block text-xs font-semibold text-slate-600">Min age</span>
-                <input
-                  type="number"
-                  name="filters[age_from]"
-                  value={@filters.age_from}
-                  min="0"
-                  max="130"
-                  placeholder="Any"
-                  class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
-                />
-              </label>
-              <label class="block">
-                <span class="mb-1 block text-xs font-semibold text-slate-600">Max age</span>
-                <input
-                  type="number"
-                  name="filters[age_to]"
-                  value={@filters.age_to}
-                  min="0"
-                  max="130"
-                  placeholder="Any"
-                  class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
-                />
-              </label>
-            </div>
-            <label class="block">
-              <span class="mb-1 block text-xs font-semibold text-slate-600">Sex</span>
-              <select
-                name="filters[sex]"
-                class="h-[42px] w-full rounded-lg border-slate-300 text-sm focus:border-brand-accent focus:ring-brand-accent"
-              >
-                <option value="">All</option>
-                <option value="male" selected={@filters.sex == "male"}>Male</option>
-                <option value="female" selected={@filters.sex == "female"}>Female</option>
-                <option value="other" selected={@filters.sex == "other"}>Other</option>
-              </select>
-            </label>
-            <div class="flex gap-2">
+
+            <input type="hidden" name="filters[date_from]" value={@filters.date_from} />
+            <input type="hidden" name="filters[date_to]" value={@filters.date_to} />
+            <input type="hidden" name="filters[age_from]" value={@filters.age_from} />
+            <input type="hidden" name="filters[age_to]" value={@filters.age_to} />
+            <input type="hidden" name="filters[sex]" value={@filters.sex} />
+
+            <div class="flex shrink-0 gap-2">
               <button
                 type="submit"
-                class="h-[42px] flex-1 rounded-lg bg-brand-accent px-4 text-sm font-semibold text-white hover:bg-[#55569a]"
+                class="h-[42px] rounded-lg bg-brand-primary px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-accent"
               >
                 Search
               </button>
-              <button
-                type="button"
-                phx-click="clear_filters"
-                class="h-[42px] rounded-lg border border-slate-300 px-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+
+              <.filter_drawer
+                id="doctor-note-search-filters"
+                title="Search filters"
+                apply_event="search"
+                clear_event="clear_filters"
+                active_count={active_filter_count(@filters)}
               >
-                Reset
-              </button>
+                <:group label="Date range">
+                  <input type="hidden" name="filters[query]" value={@filters.query} />
+                  <.date_range_fields
+                    from_name="filters[date_from]"
+                    to_name="filters[date_to]"
+                    from_value={@filters.date_from}
+                    to_value={@filters.date_to}
+                    from_label="From"
+                    to_label="To"
+                  />
+                </:group>
+                <:group label="Patient filters">
+                  <.age_filter_fields from_value={@filters.age_from} to_value={@filters.age_to} />
+                  <.sex_filter_field value={@filters.sex} />
+                </:group>
+              </.filter_drawer>
             </div>
           </form>
         </section>
@@ -250,15 +280,12 @@ defmodule MedcampWeb.AdminDoctorNoteSearchLive.Index do
             />
           </div>
 
-          <div
-            :if={@report.matches == []}
-            class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center"
-          >
-            <.icon name="hero-magnifying-glass" class="mx-auto h-10 w-10 text-slate-400" />
-            <h2 class="mt-3 text-base font-semibold text-slate-900">No matching doctor notes</h2>
-            <p class="mt-1 text-sm text-slate-500">
-              Try a different word, wider date range, or broader patient filters.
-            </p>
+          <div :if={@report.matches == []}>
+            <.blank_state
+              icon_path="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z"
+              title="No matching doctor notes"
+              description="Try a different word, wider date range, or broader patient filters."
+            />
           </div>
 
           <div

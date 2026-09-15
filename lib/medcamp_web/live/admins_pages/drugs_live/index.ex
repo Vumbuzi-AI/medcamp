@@ -3,7 +3,6 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
 
   alias Medcamp.Drugs
   alias Medcamp.ExpiryFilter
-  alias Medcamp.Postal
   alias Medcamp.StockAlerts
 
   @per_page 10
@@ -117,7 +116,6 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
     {:noreply, socket |> assign(:page, max(1, String.to_integer(page))) |> load_drugs()}
   end
 
-  @impl true
   @low_stock_threshold 20
 
   defp total_remaining(drug) do
@@ -177,7 +175,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
 
     ~H"""
     <%= if @batches == [] do %>
-      <span class="text-gray-400">—</span>
+      <span class="text-slate-400">—</span>
     <% else %>
       <div class="flex flex-col gap-0.5 text-sm">
         <%= for db <- @batches do %>
@@ -185,8 +183,8 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
           <% near_exp = expiry_str && StockAlerts.near_expiry?(expiry_str) %>
           <% rem_qty = db.remaining_quantity || 0 %>
           <div class="flex items-baseline gap-2 flex-wrap">
-            <span class="font-medium text-gray-700">{batch_label(db)}</span>
-            <span class={if rem_qty == 0, do: "text-red-600 font-medium", else: "text-gray-600"}>
+            <span class="font-medium text-slate-700">{batch_label(db)}</span>
+            <span class={if rem_qty == 0, do: "text-red-600 font-medium", else: "text-slate-600"}>
               → {rem_qty} remaining
             </span>
             <%= if near_exp do %>
@@ -218,7 +216,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
     ~H"""
     <div class="w-full">
       <div class="space-y-4">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+        <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
           <.page_header
             icon_path="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
             title="Drugs"
@@ -243,10 +241,10 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
             >
               <:group label="Item Details">
                 <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">Category</label>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">Category</label>
                   <select
                     name="filters[category]"
-                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                    class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                   >
                     <option value="" selected={@drug_filters[:category] in [nil, ""]}>All</option>
                     <option
@@ -259,10 +257,10 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
                   </select>
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">Supplier</label>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">Supplier</label>
                   <select
                     name="filters[supplier]"
-                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                    class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                   >
                     <option value="" selected={@drug_filters[:supplier] in [nil, ""]}>All</option>
                     <option
@@ -278,10 +276,10 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
 
               <:group label="Type and OTC">
                 <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">Type</label>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">Type</label>
                   <select
                     name="filters[type]"
-                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                    class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                   >
                     <option value="" selected={@drug_filters[:type] in [nil, ""]}>All</option>
                     <option :for={type <- @types} value={type} selected={@drug_filters[:type] == type}>
@@ -290,10 +288,10 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
                   </select>
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">OTC</label>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">OTC</label>
                   <select
                     name="filters[otc_filter]"
-                    class="w-full h-9 border border-gray-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
+                    class="w-full h-9 border border-slate-300 rounded-md px-2 text-sm focus:ring-brand-accent focus:border-brand-accent"
                   >
                     <option value="all" selected={@drug_filters[:otc_filter] == "all"}>All</option>
                     <option value="otc" selected={@drug_filters[:otc_filter] == "otc"}>
@@ -322,7 +320,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
             </.filter_drawer>
           </div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-x-auto">
+        <div class="bg-white rounded-lg shadow-sm border border-slate-100 overflow-x-auto">
           <.blank_state
             :if={@total_count == 0}
             icon_path="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
@@ -344,7 +342,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
               </button>
             </:actions>
           </.blank_state>
-          <.table :if={@total_count > 0} id="drugs" rows={@drugs} row_id={&"drugs-#{&1.id}"}>
+          <.data_table :if={@total_count > 0} id="drugs" rows={@drugs} row_id={&"drugs-#{&1.id}"}>
             <:col :let={drug} label="Brand name">{drug.brand_name || "—"}</:col>
             <:col :let={drug} label="Generic name">{drug.generic_name || "—"}</:col>
             <:col :let={drug} label="GTIN">
@@ -365,7 +363,7 @@ defmodule MedcampWeb.AdminDrugsLive.Index do
             <:col :let={drug} label="Batches">
               <.batches_cell drug={drug} />
             </:col>
-          </.table>
+          </.data_table>
           <.pagination
             page={@page}
             total_pages={@total_pages}

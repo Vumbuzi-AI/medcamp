@@ -92,24 +92,32 @@ defmodule MedcampWeb.UserSessionController do
     %{"email" => email, "password" => password} = user_params
 
     if user = Accounts.get_user_by_email_and_password(email, password) do
-      if not login_otp_enabled?() or otp_exempt?(user) do
-        conn
-        |> put_session(:login_success_message, info)
-        |> UserAuth.log_in_user(user, %{"remember_me" => to_string(user_params["remember_me"])})
-      else
-        case LoginOtp.issue(user, user_params["remember_me"] == "true") do
-          {:ok, challenge} ->
-            conn
-            |> put_session(:login_otp_challenge, challenge)
-            |> put_session(:login_success_message, info)
-            |> redirect(to: ~p"/users/log_in/otp")
+      cond do
+        block_message = UserAuth.login_block_message(user) ->
+          conn
+          |> put_flash(:error, block_message)
+          |> put_flash(:email, String.slice(email, 0, 160))
+          |> redirect(to: ~p"/users/log_in")
 
-          {:error, _reason} ->
-            conn
-            |> put_flash(:error, "We could not send a verification code. Please try again.")
-            |> put_flash(:email, String.slice(email, 0, 160))
-            |> redirect(to: ~p"/users/log_in")
-        end
+        not login_otp_enabled?() or otp_exempt?(user) ->
+          conn
+          |> put_session(:login_success_message, info)
+          |> UserAuth.log_in_user(user, %{"remember_me" => to_string(user_params["remember_me"])})
+
+        true ->
+          case LoginOtp.issue(user, user_params["remember_me"] == "true") do
+            {:ok, challenge} ->
+              conn
+              |> put_session(:login_otp_challenge, challenge)
+              |> put_session(:login_success_message, info)
+              |> redirect(to: ~p"/users/log_in/otp")
+
+            {:error, _reason} ->
+              conn
+              |> put_flash(:error, "We could not send a verification code. Please try again.")
+              |> put_flash(:email, String.slice(email, 0, 160))
+              |> redirect(to: ~p"/users/log_in")
+          end
       end
     else
       # In order to prevent user enumeration attacks, don't disclose whether the email is registered.

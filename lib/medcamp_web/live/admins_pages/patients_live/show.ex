@@ -9,7 +9,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :active_tab, :patients)}
+    {:ok, assign(socket, active_tab: :patients)}
   end
 
   @impl true
@@ -39,8 +39,8 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 -m-4 sm:-m-6 p-4 sm:p-6">
-      <div class="w-[90%] mx-auto  space-y-6">
+    <div class="min-h-screen bg-slate-50 -m-4 sm:-m-6 p-4 sm:p-6">
+      <div class="space-y-6">
         <.patient_overview_to_show_all
           most_recent_triage={@most_recent_triage}
           patient={@patient}
@@ -77,7 +77,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
         <.patient_detailed_overview patient={@patient} most_recent_triage={@most_recent_triage} />
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-white rounded-2xl shadow-card border border-slate-200 overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/80">
               <h3 class="text-base font-semibold text-slate-800 flex items-center">
                 <div class="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center mr-3">
@@ -123,7 +123,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
             </div>
           </div>
 
-          <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border border-slate-200 p-6">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-card p-6">
             <h3 class="text-base font-semibold text-slate-800 mb-4 flex items-center">
               <div class="w-8 h-8 rounded-lg bg-slate-700 flex items-center justify-center mr-3">
                 <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -155,7 +155,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
   defp patient_detailed_overview(assigns) do
     ~H"""
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-      <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-card">
         <h3 class="text-base font-semibold text-slate-800 mb-4 flex items-center">
           <div class="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center mr-3">
             <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -187,9 +187,9 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
       </div>
 
       <%= if @most_recent_triage do %>
-        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 sm:p-5 border border-blue-200 shadow-sm">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-card">
           <h3 class="text-base font-semibold text-slate-800 mb-4 flex items-center">
-            <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center mr-3">
+            <div class="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center mr-3">
               <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   stroke-linecap="round"
@@ -222,7 +222,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
           </p>
         </div>
       <% else %>
-        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200 flex items-center justify-center shadow-sm">
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 flex items-center justify-center shadow-card">
           <p class="text-slate-500">No triage information available</p>
         </div>
       <% end %>
@@ -238,7 +238,7 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
   defp metric_card(assigns) do
     ~H"""
     <div class={[
-      "rounded-2xl border p-4 shadow-sm",
+      "rounded-2xl border p-4 shadow-card",
       metric_card_tone(@tone)
     ]}>
       <div class="flex items-start justify-between gap-4">
@@ -376,31 +376,11 @@ defmodule MedcampWeb.AdminPatientsLive.Show do
     """
   end
 
-  defp metric_card_tone("indigo"),
-    do: "bg-gradient-to-br from-indigo-50 to-white border-indigo-200"
-
-  defp metric_card_tone("blue"), do: "bg-gradient-to-br from-blue-50 to-white border-blue-200"
-
-  defp metric_card_tone("emerald"),
-    do: "bg-gradient-to-br from-emerald-50 to-white border-emerald-200"
-
-  defp metric_card_tone("amber"), do: "bg-gradient-to-br from-amber-50 to-white border-amber-200"
-  defp metric_card_tone("rose"), do: "bg-gradient-to-br from-rose-50 to-white border-rose-200"
   defp metric_card_tone(_), do: "bg-white border-slate-200"
 
-  defp metric_icon_tone("indigo"), do: "bg-brand-accent"
-  defp metric_icon_tone("blue"), do: "bg-blue-500"
-  defp metric_icon_tone("emerald"), do: "bg-emerald-500"
-  defp metric_icon_tone("amber"), do: "bg-amber-500"
-  defp metric_icon_tone("rose"), do: "bg-rose-500"
-  defp metric_icon_tone(_), do: "bg-slate-600"
+  defp metric_icon_tone(_), do: "bg-brand-primary"
 
-  defp activity_badge_tone("indigo"), do: "bg-indigo-100 text-indigo-700"
-  defp activity_badge_tone("blue"), do: "bg-blue-100 text-blue-700"
-  defp activity_badge_tone("emerald"), do: "bg-emerald-100 text-emerald-700"
-  defp activity_badge_tone("amber"), do: "bg-amber-100 text-amber-700"
-  defp activity_badge_tone("rose"), do: "bg-rose-100 text-rose-700"
-  defp activity_badge_tone(_), do: "bg-slate-100 text-slate-700"
+  defp activity_badge_tone(_), do: "bg-brand-50 text-brand-primary"
 
   defp format_date(nil), do: "—"
   defp format_date(%Date{} = date), do: Calendar.strftime(date, "%B %d, %Y")

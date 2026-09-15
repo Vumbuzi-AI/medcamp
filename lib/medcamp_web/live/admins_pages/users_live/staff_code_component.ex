@@ -24,7 +24,7 @@ defmodule MedcampWeb.AdminUsersLive.StaffCodeComponent do
           <input
             type="text"
             id="text"
-            value={"https://glocalhealthcentre.org/8017/#{@user.gsrn}"}
+            value={"#{MedcampWeb.Endpoint.url()}/8017/#{@user.gsrn}"}
             class="hidden"
           />
         </div>

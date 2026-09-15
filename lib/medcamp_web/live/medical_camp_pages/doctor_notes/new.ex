@@ -75,23 +75,23 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteNew do
     <div class="w-full">
       <div
         :if={@doctor_notes != []}
-        class="bg-white mt-4 rounded-lg border border-gray-200 shadow-sm p-4 mt-6"
+        class="bg-white mt-4 rounded-lg border border-slate-200 shadow-sm p-4 mt-6"
       >
         <h3 class="text-lg font-semibold text-brand-primary mb-3">Previous Notes</h3>
-        <div class="divide-y divide-gray-100">
+        <div class="divide-y divide-slate-100">
           <%= for note <- @doctor_notes do %>
             <a
               href={"/8018/#{@patient.gsrn}/medical-camp/doctor_notes/#{note.id}"}
-              class="flex items-center justify-between py-3 hover:bg-gray-50 rounded px-2 transition-colors group"
+              class="flex items-center justify-between py-3 hover:bg-slate-50 rounded px-2 transition-colors group"
             >
               <div>
-                <p class="text-sm font-medium text-gray-800">
+                <p class="text-sm font-medium text-slate-800">
                   {note.date && Calendar.strftime(note.date, "%d %b %Y")}
-                  <span :if={note.time} class="text-gray-500 font-normal ml-1">
+                  <span :if={note.time} class="text-slate-500 font-normal ml-1">
                     · {note.time |> Time.to_string() |> String.slice(0..4)}
                   </span>
                 </p>
-                <p :if={note.symptoms} class="text-xs text-gray-500 mt-0.5 truncate max-w-xs">
+                <p :if={note.symptoms} class="text-xs text-slate-500 mt-0.5 truncate max-w-xs">
                   {note.symptoms}
                 </p>
                 <p :if={note.doctor} class="text-xs text-brand-accent mt-0.5">
@@ -100,7 +100,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteNew do
               </div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4 text-gray-400 group-hover:text-brand-primary flex-shrink-0"
+                class="h-4 w-4 text-slate-400 group-hover:text-brand-primary flex-shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

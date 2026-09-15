@@ -11,7 +11,7 @@ defmodule Medcamp.LabTestsFixtures do
     {:ok, lab_test} =
       attrs
       |> Enum.into(%{
-        desription: "some desription",
+        description: "some description",
         name: "some name",
         price: 42
       })

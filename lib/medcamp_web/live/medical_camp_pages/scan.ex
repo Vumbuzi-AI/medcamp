@@ -2,23 +2,12 @@ defmodule MedcampWeb.MedicalCampPages.Scan do
   use MedcampWeb, :live_view
 
   alias MedcampWeb.PublicTenant
-  alias Medcamp.Accounts
 
   @impl true
-  def mount(%{"gsrn" => gsrn}, session, socket) do
-    patient = PublicTenant.resolve_patient!(gsrn)
-
-    current_user =
-      case session["user_token"] do
-        nil -> nil
-        token -> Accounts.get_user_by_session_token(token)
-      end
-
-    {:ok,
-     socket
-     |> assign(:patient, patient)
-     |> assign(:current_user, current_user)
-     |> assign(:page_title, "Scan Next Patient")}
+  def mount(%{"gsrn" => _gsrn}, _session, socket) do
+    # Guarded by `MedicalCampAuth.:require_camp_auth` - `@current_user` and
+    # `@patient` are already assigned and org-matched.
+    {:ok, assign(socket, :page_title, "Scan Next Patient")}
   end
 
   @impl true
@@ -81,7 +70,7 @@ defmodule MedcampWeb.MedicalCampPages.Scan do
         </p>
       </div>
 
-      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+      <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-6">
         <div class="flex items-center mb-4">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +90,7 @@ defmodule MedcampWeb.MedicalCampPages.Scan do
         </div>
 
         <div id="qr-camera-scanner" phx-hook="QrCameraScanner" class="relative">
-          <video class="w-full rounded-lg border border-gray-300" autoplay playsinline muted></video>
+          <video class="w-full rounded-lg border border-slate-300" autoplay playsinline muted></video>
           <div class="qr-overlay hidden absolute inset-0 bg-green-500/20 rounded-lg items-center justify-center">
             <svg
               class="h-16 w-16 text-green-600"
@@ -117,7 +106,7 @@ defmodule MedcampWeb.MedicalCampPages.Scan do
               />
             </svg>
           </div>
-          <p class="qr-status text-sm text-center text-gray-500 mt-2">
+          <p class="qr-status text-sm text-center text-slate-500 mt-2">
             Point camera at patient's QR code...
           </p>
         </div>

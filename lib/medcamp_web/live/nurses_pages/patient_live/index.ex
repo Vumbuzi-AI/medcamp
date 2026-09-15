@@ -458,7 +458,7 @@ defmodule MedcampWeb.NursesPages.PatientIndex do
             >
               <div class="flex items-start gap-2">
                 <svg
-                  id={"https://medicalcamp.tibasasa.com/8018/#{@code_patient.gsrn}"}
+                  id={"#{MedcampWeb.Endpoint.url()}/8018/#{@code_patient.gsrn}"}
                   phx-hook="datamatrix"
                   class="datamatrix h-[70px] w-[70px]"
                 >

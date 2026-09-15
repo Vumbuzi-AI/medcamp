@@ -2,6 +2,9 @@ defmodule Medcamp.Accounts.User do
   use Ecto.Schema
   use Medcamp.Tenancy.Schema
   import Ecto.Changeset
+  import Medcamp.Validation, only: [validate_phone_number: 2]
+
+  alias Medcamp.Validation
 
   @roles ~w(admin doctor nurse receptionist pharmacist labtechnician)
 
@@ -29,11 +32,23 @@ defmodule Medcamp.Accounts.User do
     field :is_for_medical_camp, :boolean, default: false
     field :last_logged_in_at, :utc_datetime
     field :last_logged_out_at, :utc_datetime
+    field :activated_at, :utc_datetime
 
     field :gsrn, :string
 
     timestamps(type: :utc_datetime)
   end
+
+  @doc """
+  Lifecycle state for the users directory:
+
+    * `:active`   - `is_active`, can sign in
+    * `:pending`  - invited, has never set a password (no `activated_at`)
+    * `:inactive` - was activated at some point, then deactivated by an admin
+  """
+  def status(%__MODULE__{is_active: true}), do: :active
+  def status(%__MODULE__{activated_at: nil}), do: :pending
+  def status(%__MODULE__{}), do: :inactive
 
   @doc """
   A user changeset for registration.
@@ -60,11 +75,24 @@ defmodule Medcamp.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :role, :name, :gsrn, :otp, :is_for_medical_camp])
+    |> cast(attrs, [
+      :email,
+      :password,
+      :role,
+      :name,
+      :phone_number,
+      :gsrn,
+      :otp,
+      :is_for_medical_camp
+    ])
     |> validate_email(opts)
+    # No-op unless the caller passes `password_confirmation` (the self-serve
+    # organisation signup does; the superadmin add-admin form does not).
+    |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
     |> validate_otp_pin_if_changed()
     |> validate_required([:name])
+    |> validate_phone_number(:phone_number)
     |> validate_role()
     |> put_org_id()
   end
@@ -90,6 +118,7 @@ defmodule Medcamp.Accounts.User do
     |> validate_email(opts)
     |> validate_otp_pin_if_changed()
     |> validate_required([:name, :role])
+    |> validate_phone_number(:phone_number)
     |> validate_role()
     |> put_org_id()
   end
@@ -190,12 +219,13 @@ defmodule Medcamp.Accounts.User do
       :id_number
     ])
     |> validate_required([:name])
+    |> validate_phone_number(:phone_number)
   end
 
   defp validate_email(changeset, opts) do
     changeset
     |> validate_required([:email])
-    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
+    |> Validation.validate_email(:email, message: "must be a valid email address")
     |> validate_length(:email, max: 160)
     |> maybe_validate_unique_email(opts)
   end

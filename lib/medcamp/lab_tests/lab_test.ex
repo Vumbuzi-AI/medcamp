@@ -7,7 +7,7 @@ defmodule Medcamp.LabTests.LabTest do
     tenant_field()
 
     field :name, :string
-    field :desription, :string
+    field :description, :string
     field :price, :integer
     field :subsidized_price, :integer
     belongs_to :creator, Medcamp.Accounts.User
@@ -18,7 +18,7 @@ defmodule Medcamp.LabTests.LabTest do
   @doc false
   def changeset(lab_test, attrs) do
     lab_test
-    |> cast(attrs, [:name, :desription, :price, :subsidized_price, :creator_id])
+    |> cast(attrs, [:name, :description, :price, :subsidized_price, :creator_id])
     |> validate_required([:name, :price])
     |> put_subsidized_price_if_missing()
     |> put_org_id()

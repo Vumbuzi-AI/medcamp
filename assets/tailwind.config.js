@@ -16,6 +16,7 @@ module.exports = {
         brand: {
           DEFAULT: "#FD4F00",
           primary: "var(--brand-primary)",
+          "primary-dark": "var(--brand-primary-dark)",
           accent: "var(--brand-accent)",
           "accent-dark": "var(--brand-accent-dark)",
           50: "var(--brand-50)",
@@ -25,6 +26,10 @@ module.exports = {
         },
         darkblue: "#1D3557",
         grey: "#667085",
+      },
+      boxShadow: {
+        card: "0 1px 3px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05)",
+        "card-hover": "0 2px 6px rgba(15, 23, 42, 0.06), 0 14px 32px rgba(15, 23, 42, 0.08)",
       },
     },
   },

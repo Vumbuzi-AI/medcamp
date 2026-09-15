@@ -222,7 +222,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
         <div class="flex items-center gap-3">
           <.link
             navigate="/pharmacist/drug_allocations"
-            class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            class="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -266,7 +266,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
       />
       
     <!-- Tab Navigation -->
-      <div class="mt-6 border-b border-gray-200">
+      <div class="mt-6 border-b border-slate-200">
         <nav class="flex space-x-1" aria-label="Tabs">
           <button
             phx-click="switch_tab"
@@ -275,7 +275,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
               "px-6 py-3 text-sm font-medium border-b-2 transition-colors",
               if(@view_tab == :prescription,
                 do: "border-brand-accent text-brand-accent",
-                else: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                else: "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
               )
             ]}
           >
@@ -306,7 +306,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
               "px-6 py-3 text-sm font-medium border-b-2 transition-colors",
               if(@view_tab == :doctor_notes,
                 do: "border-brand-accent text-brand-accent",
-                else: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                else: "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
               ),
               if(@drug_allocation.doctor_note == nil, do: "opacity-50 cursor-not-allowed")
             ]}
@@ -328,7 +328,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
               </svg>
               Doctor Notes
               <%= if @drug_allocation.doctor_note == nil do %>
-                <span class="text-xs text-gray-400">(N/A)</span>
+                <span class="text-xs text-slate-400">(N/A)</span>
               <% end %>
             </div>
           </button>
@@ -344,10 +344,10 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
             <%= if @drug_allocation.doctor_note do %>
               <.doctor_note_card doctor_note={@drug_allocation.doctor_note} />
             <% else %>
-              <div class="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <div class="text-center py-12 bg-slate-50 rounded-lg border border-dashed border-slate-300">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="mx-auto h-12 w-12 text-gray-400"
+                  class="mx-auto h-12 w-12 text-slate-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -359,8 +359,8 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No Doctor Notes</h3>
-                <p class="mt-1 text-sm text-gray-500">
+                <h3 class="mt-2 text-sm font-medium text-slate-900">No Doctor Notes</h3>
+                <p class="mt-1 text-sm text-slate-500">
                   No clinical notes are linked to this prescription.
                 </p>
               </div>
@@ -454,13 +454,13 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
 
   defp doctor_note_card(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-      <div class="px-4 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+    <div class="bg-white rounded-lg shadow-card border border-slate-200 overflow-hidden">
+      <div class="px-4 py-4 bg-brand-50 border-b border-slate-200">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5 mr-2 text-blue-600"
+              class="h-5 w-5 mr-2 text-brand-primary"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -472,9 +472,9 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            <h2 class="text-lg font-semibold text-gray-800">Doctor's Clinical Notes</h2>
+            <h2 class="text-lg font-semibold text-slate-800">Doctor's Clinical Notes</h2>
           </div>
-          <div class="flex items-center text-sm text-gray-600">
+          <div class="flex items-center text-sm text-slate-600">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-4 w-4 mr-1"
@@ -499,13 +499,13 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
 
       <div class="p-4 sm:p-6">
         <!-- Doctor Info -->
-        <div class="flex items-center mb-4 pb-4 border-b border-gray-100">
-          <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center mr-3">
+        <div class="flex items-center mb-4 pb-4 border-b border-slate-100">
+          <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-primary font-bold flex items-center justify-center mr-3">
             {get_initials(@doctor_note.doctor.name)}
           </div>
           <div>
-            <p class="font-medium text-gray-900">Dr. {@doctor_note.doctor.name}</p>
-            <p class="text-sm text-gray-500">Attending Physician</p>
+            <p class="font-medium text-slate-900">Dr. {@doctor_note.doctor.name}</p>
+            <p class="text-sm text-slate-500">Attending Physician</p>
           </div>
         </div>
         
@@ -513,8 +513,8 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Diagnosis -->
           <%= if @doctor_note.diagnosis && @doctor_note.diagnosis != "" do %>
-            <div class="bg-slate-50 rounded-lg p-4 border border-purple-100">
-              <h4 class="text-sm font-semibold text-purple-800 uppercase tracking-wide mb-2 flex items-center">
+            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-2 flex items-center">
                 <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -525,14 +525,14 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
                 </svg>
                 Diagnosis
               </h4>
-              <p class="text-gray-800 font-medium whitespace-pre-line">{@doctor_note.diagnosis}</p>
+              <p class="text-slate-800 font-medium whitespace-pre-line">{@doctor_note.diagnosis}</p>
             </div>
           <% end %>
           
     <!-- Reason for Consultation -->
           <%= if @doctor_note.reason_for_consulatation && @doctor_note.reason_for_consulatation != "" do %>
-            <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
-              <h4 class="text-sm font-semibold text-blue-800 uppercase tracking-wide mb-2 flex items-center">
+            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-2 flex items-center">
                 <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -543,14 +543,16 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
                 </svg>
                 Reason for Consultation
               </h4>
-              <p class="text-gray-800 whitespace-pre-line">{@doctor_note.reason_for_consulatation}</p>
+              <p class="text-slate-800 whitespace-pre-line">
+                {@doctor_note.reason_for_consulatation}
+              </p>
             </div>
           <% end %>
           
     <!-- Symptoms -->
           <%= if @doctor_note.symptoms && @doctor_note.symptoms != "" do %>
-            <div class="bg-amber-50 rounded-lg p-4 border border-amber-100">
-              <h4 class="text-sm font-semibold text-amber-800 uppercase tracking-wide mb-2 flex items-center">
+            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-2 flex items-center">
                 <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -561,14 +563,14 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
                 </svg>
                 Presenting Symptoms
               </h4>
-              <p class="text-gray-800 whitespace-pre-line">{@doctor_note.symptoms}</p>
+              <p class="text-slate-800 whitespace-pre-line">{@doctor_note.symptoms}</p>
             </div>
           <% end %>
           
     <!-- Clinical Notes -->
           <%= if @doctor_note.clinical_notes && @doctor_note.clinical_notes != "" do %>
-            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2 flex items-center">
+            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-2 flex items-center">
                 <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -579,14 +581,14 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
                 </svg>
                 Clinical Notes
               </h4>
-              <p class="text-gray-800 whitespace-pre-line">{@doctor_note.clinical_notes}</p>
+              <p class="text-slate-800 whitespace-pre-line">{@doctor_note.clinical_notes}</p>
             </div>
           <% end %>
           
     <!-- Impression -->
           <%= if @doctor_note.impression && @doctor_note.impression != "" do %>
-            <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-100">
-              <h4 class="text-sm font-semibold text-indigo-800 uppercase tracking-wide mb-2 flex items-center">
+            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-2 flex items-center">
                 <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -597,7 +599,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
                 </svg>
                 Clinical Impression
               </h4>
-              <p class="text-gray-800 whitespace-pre-line">{@doctor_note.impression}</p>
+              <p class="text-slate-800 whitespace-pre-line">{@doctor_note.impression}</p>
             </div>
           <% end %>
         </div>
@@ -605,8 +607,8 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
     <!-- Additional Info -->
         <div class="mt-4 space-y-3">
           <%= if @doctor_note.past_medical_history && @doctor_note.past_medical_history != "" do %>
-            <div class="bg-red-50 rounded-lg p-3 border border-red-100">
-              <h4 class="text-xs font-semibold text-red-800 uppercase tracking-wide mb-1 flex items-center">
+            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+              <h4 class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1 flex items-center">
                 <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -617,15 +619,15 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
                 </svg>
                 Past Medical History
               </h4>
-              <p class="text-sm text-gray-800 whitespace-pre-line">
+              <p class="text-sm text-slate-800 whitespace-pre-line">
                 {@doctor_note.past_medical_history}
               </p>
             </div>
           <% end %>
 
           <%= if @doctor_note.investigations && @doctor_note.investigations != "" do %>
-            <div class="bg-teal-50 rounded-lg p-3 border border-teal-100">
-              <h4 class="text-xs font-semibold text-teal-800 uppercase tracking-wide mb-1 flex items-center">
+            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+              <h4 class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1 flex items-center">
                 <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -636,13 +638,13 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
                 </svg>
                 Investigations
               </h4>
-              <p class="text-sm text-gray-800 whitespace-pre-line">{@doctor_note.investigations}</p>
+              <p class="text-sm text-slate-800 whitespace-pre-line">{@doctor_note.investigations}</p>
             </div>
           <% end %>
 
           <%= if @doctor_note.lab_imaging_request && @doctor_note.lab_imaging_request != "" do %>
-            <div class="bg-sky-50 rounded-lg p-3 border border-sky-100">
-              <h4 class="text-xs font-semibold text-sky-800 uppercase tracking-wide mb-1 flex items-center">
+            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+              <h4 class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1 flex items-center">
                 <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -653,15 +655,15 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
                 </svg>
                 Lab/Imaging Requests
               </h4>
-              <p class="text-sm text-gray-800 whitespace-pre-line">
+              <p class="text-sm text-slate-800 whitespace-pre-line">
                 {@doctor_note.lab_imaging_request}
               </p>
             </div>
           <% end %>
 
           <%= if @doctor_note.prescribed_medication && @doctor_note.prescribed_medication != "" do %>
-            <div class="bg-green-50 rounded-lg p-3 border border-green-100">
-              <h4 class="text-xs font-semibold text-green-800 uppercase tracking-wide mb-1 flex items-center">
+            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+              <h4 class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1 flex items-center">
                 <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -672,15 +674,15 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
                 </svg>
                 Prescribed Medication (Doctor's Notes)
               </h4>
-              <p class="text-sm text-gray-800 whitespace-pre-line">
+              <p class="text-sm text-slate-800 whitespace-pre-line">
                 {@doctor_note.prescribed_medication}
               </p>
             </div>
           <% end %>
 
           <%= if @doctor_note.lifestyle_recommendations && @doctor_note.lifestyle_recommendations != "" do %>
-            <div class="bg-cyan-50 rounded-lg p-3 border border-cyan-100">
-              <h4 class="text-xs font-semibold text-cyan-800 uppercase tracking-wide mb-1 flex items-center">
+            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+              <h4 class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1 flex items-center">
                 <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -691,15 +693,15 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
                 </svg>
                 Lifestyle Recommendations
               </h4>
-              <p class="text-sm text-gray-800 whitespace-pre-line">
+              <p class="text-sm text-slate-800 whitespace-pre-line">
                 {@doctor_note.lifestyle_recommendations}
               </p>
             </div>
           <% end %>
 
           <%= if @doctor_note.last_period_date do %>
-            <div class="bg-pink-50 rounded-lg p-3 border border-pink-100">
-              <h4 class="text-xs font-semibold text-pink-800 uppercase tracking-wide mb-1 flex items-center">
+            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+              <h4 class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1 flex items-center">
                 <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -710,7 +712,7 @@ defmodule MedcampWeb.PharmacistsLive.DrugAllocationsShow do
                 </svg>
                 Last Period Date (LMP)
               </h4>
-              <p class="text-sm text-gray-800 font-medium">
+              <p class="text-sm text-slate-800 font-medium">
                 {Calendar.strftime(@doctor_note.last_period_date, "%d %B %Y")}
               </p>
             </div>

@@ -198,8 +198,6 @@ defmodule MedcampWeb.DrugsGivenController do
   end
 
   def scan_out_drug(conn, %{"drug_given_id" => drug_given_id, "batch" => batch}) do
-    IO.inspect(drug_given_id, label: "Drug Given ID")
-
     drugs_given = Medcamp.DrugsGiven.list_drugs_given_for_sichi(drug_given_id)
 
     valid_batches =

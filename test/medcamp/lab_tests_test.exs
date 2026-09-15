@@ -8,7 +8,7 @@ defmodule Medcamp.LabTestsTest do
 
     import Medcamp.LabTestsFixtures
 
-    @invalid_attrs %{name: nil, desription: nil, price: nil}
+    @invalid_attrs %{name: nil, description: nil, price: nil}
 
     test "list_lab_tests/0 returns all lab_tests" do
       lab_test = lab_test_fixture()
@@ -21,11 +21,11 @@ defmodule Medcamp.LabTestsTest do
     end
 
     test "create_lab_test/1 with valid data creates a lab_test" do
-      valid_attrs = %{name: "some name", desription: "some desription", price: 42}
+      valid_attrs = %{name: "some name", description: "some description", price: 42}
 
       assert {:ok, %LabTest{} = lab_test} = LabTests.create_lab_test(valid_attrs)
       assert lab_test.name == "some name"
-      assert lab_test.desription == "some desription"
+      assert lab_test.description == "some description"
       assert lab_test.price == 42
     end
 
@@ -38,13 +38,13 @@ defmodule Medcamp.LabTestsTest do
 
       update_attrs = %{
         name: "some updated name",
-        desription: "some updated desription",
+        description: "some updated description",
         price: 43
       }
 
       assert {:ok, %LabTest{} = lab_test} = LabTests.update_lab_test(lab_test, update_attrs)
       assert lab_test.name == "some updated name"
-      assert lab_test.desription == "some updated desription"
+      assert lab_test.description == "some updated description"
       assert lab_test.price == 43
     end
 

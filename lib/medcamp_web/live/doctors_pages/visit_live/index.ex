@@ -58,7 +58,6 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PatientVisitIndex do
     {:noreply, assign_visits(socket, socket.assigns.patient.id, socket.assigns.page)}
   end
 
-  @impl true
   defp assign_visits(socket, patient_id, page) do
     page = normalize_page(page)
     total_count = PatientVisits.count_patient_visits_by_patient_id(patient_id)
@@ -90,8 +89,8 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PatientVisitIndex do
 
   def render(assigns) do
     ~H"""
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      <.header class="text-brand-primary border-b border-gray-100 pb-4 mb-4">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-100 p-4">
+      <.header class="text-brand-primary border-b border-slate-100 pb-4 mb-4">
         <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -124,13 +123,13 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PatientVisitIndex do
         description="This patient has no recorded visits yet."
       />
 
-      <.table :if={@patient_visits != []} id="patient_visits" rows={@patient_visits}>
+      <.data_table :if={@patient_visits != []} id="patient_visits" rows={@patient_visits}>
         <:col :let={patient_visit} label="Patient">
           <div class="flex items-center py-3">
             <div class="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-primary font-medium mr-2 text-sm">
               {String.first(patient_visit.patient.first_name || "")}
             </div>
-            <span class="font-medium text-gray-900">
+            <span class="font-medium text-slate-900">
               {[
                 patient_visit.patient.first_name,
                 patient_visit.patient.middle_name
@@ -157,19 +156,19 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PatientVisitIndex do
                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <span class="text-gray-700">{patient_visit.date}</span>
+            <span class="text-slate-700">{patient_visit.date}</span>
           </div>
         </:col>
 
         <:col :let={patient_visit} label="Reason">
           <div class="max-w-xs py-3">
-            <span class="text-gray-700 line-clamp-2">{patient_visit.reason}</span>
+            <span class="text-slate-700 line-clamp-2">{patient_visit.reason}</span>
           </div>
         </:col>
 
         <:col :let={patient_visit} label="Receptionist/ Nurse">
           <div class="flex items-center py-3">
-            <span class="text-gray-700">{patient_visit.creator.name}</span>
+            <span class="text-slate-700">{patient_visit.creator.name}</span>
           </div>
         </:col>
 
@@ -180,13 +179,13 @@ defmodule MedcampWeb.DoctorsPagePatientLive.PatientVisitIndex do
                 Dr. {patient_visit.doctor.name}
               </span>
             <% else %>
-              <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-500">
+              <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-500">
                 Not Assigned
               </span>
             <% end %>
           </div>
         </:col>
-      </.table>
+      </.data_table>
 
       <.pagination
         page={@page}

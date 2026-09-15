@@ -31,7 +31,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
           {@template.name}
         </div>
         <:subtitle>
-          <span class="text-sm text-gray-500">
+          <span class="text-sm text-slate-500">
             Fill in the test results for this investigation
           </span>
         </:subtitle>
@@ -41,20 +41,20 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
       <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
-            <span class="text-gray-500">Patient:</span>
-            <span class="ml-1 font-medium text-gray-900">{@patient_name}</span>
+            <span class="text-slate-500">Patient:</span>
+            <span class="ml-1 font-medium text-slate-900">{@patient_name}</span>
           </div>
           <div>
-            <span class="text-gray-500">Lab Test No:</span>
-            <span class="ml-1 font-medium text-gray-900">{@lab_result_id}</span>
+            <span class="text-slate-500">Lab Test No:</span>
+            <span class="ml-1 font-medium text-slate-900">{@lab_result_id}</span>
           </div>
           <div>
-            <span class="text-gray-500">Requested On:</span>
-            <span class="ml-1 font-medium text-gray-900">{@requested_on}</span>
+            <span class="text-slate-500">Requested On:</span>
+            <span class="ml-1 font-medium text-slate-900">{@requested_on}</span>
           </div>
           <div>
-            <span class="text-gray-500">Doctor:</span>
-            <span class="ml-1 font-medium text-gray-900">{@doctor_name}</span>
+            <span class="text-slate-500">Doctor:</span>
+            <span class="ml-1 font-medium text-slate-900">{@doctor_name}</span>
           </div>
         </div>
       </div>
@@ -68,7 +68,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
         class="mt-6"
       >
         <!-- Sample Collection Info -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-lg mb-6">
           <.input
             field={@form[:sample_collected_on]}
             type="date"
@@ -88,7 +88,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
         <%= for {section, fields} <- @grouped_fields do %>
           <div class="mb-6">
             <%= if section != "main" do %>
-              <h3 class="text-sm font-semibold text-brand-primary uppercase tracking-wide mb-3 pb-2 border-b border-gray-200">
+              <h3 class="text-sm font-semibold text-brand-primary uppercase tracking-wide mb-3 pb-2 border-b border-slate-200">
                 {section}
               </h3>
             <% end %>
@@ -184,13 +184,13 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
 
     ~H"""
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">
+      <label class="block text-sm font-medium text-slate-700 mb-1">
         {@label}
         <%= if @required do %>
           <span class="text-red-500">*</span>
         <% end %>
         <%= if @unit do %>
-          <span class="text-gray-400 font-normal">({@unit})</span>
+          <span class="text-slate-400 font-normal">({@unit})</span>
         <% end %>
       </label>
       <input
@@ -198,11 +198,11 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
         step="any"
         name={"results[#{@field_name}]"}
         value={@existing_value}
-        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
+        class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
         placeholder={@ref_range}
       />
       <%= if @ref_range do %>
-        <p class="mt-1 text-xs text-gray-500">Ref: {@ref_range}</p>
+        <p class="mt-1 text-xs text-slate-500">Ref: {@ref_range}</p>
       <% end %>
     </div>
     """
@@ -221,7 +221,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
 
     ~H"""
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">
+      <label class="block text-sm font-medium text-slate-700 mb-1">
         {@label}
         <%= if @required do %>
           <span class="text-red-500">*</span>
@@ -231,7 +231,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
         type="text"
         name={"results[#{@field_name}]"}
         value={@existing_value}
-        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
+        class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
       />
     </div>
     """
@@ -252,7 +252,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
 
     ~H"""
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">
+      <label class="block text-sm font-medium text-slate-700 mb-1">
         {@label}
         <%= if @required do %>
           <span class="text-red-500">*</span>
@@ -260,7 +260,7 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
       </label>
       <select
         name={"results[#{@field_name}]"}
-        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
+        class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-accent focus:ring-brand-accent sm:text-sm"
       >
         <option value="">Select...</option>
         <%= for option <- @options do %>
@@ -287,9 +287,9 @@ defmodule MedcampWeb.LabPagesLabResultLive.TestEntryFormComponent do
         name={"results[#{@field_name}]"}
         value="true"
         checked={@existing_value == "true" || @existing_value == true}
-        class="h-4 w-4 rounded border-gray-300 text-brand-accent focus:ring-brand-accent"
+        class="h-4 w-4 rounded border-slate-300 text-brand-accent focus:ring-brand-accent"
       />
-      <label class="ml-2 block text-sm text-gray-700">
+      <label class="ml-2 block text-sm text-slate-700">
         {@label}
       </label>
     </div>

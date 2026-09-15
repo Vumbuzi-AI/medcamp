@@ -3,49 +3,52 @@ defmodule MedcampWeb.UserLoginLive do
 
   def render(assigns) do
     ~H"""
-    <div class="mx-auto flex min-h-screen w-full items-center justify-center px-4 sm:w-[90%] lg:justify-between lg:px-0">
-      <div class="hidden h-screen w-[48%] items-center justify-center lg:flex">
-        <img src="/images/why.png" alt="Medcamp Logo" class="mx-auto h-[90vh] w-full object-cover" />
-      </div>
-      <div class="flex min-h-screen w-full max-w-md flex-col items-center justify-center px-2 py-8 sm:px-6 lg:w-[48%] lg:max-w-none lg:px-12">
-        <.header class="text-center">
-          Sign to your account
-          <p class="text-[16px] text-grey font-normal">
-            Welcome back! Please enter your details.
-          </p>
-        </.header>
+    <.auth_split>
+      <h1 class="text-2xl font-bold tracking-[-0.01em]">Sign in to your account</h1>
+      <p class="mt-2 text-sm leading-relaxed text-slate-600">
+        Continue to your medical camp station, dashboard, or platform console.
+      </p>
 
-        <.simple_form
-          for={@form}
-          id="login_form"
-          action={~p"/users/log_in"}
-          class="w-full"
-          phx-update="ignore"
-        >
-          <.input field={@form[:email]} type="email" label="Email" required />
-          <.input field={@form[:password]} type="password" label="Password" required />
+      <.simple_form
+        for={@form}
+        id="login_form"
+        action={~p"/users/log_in"}
+        class="mt-6"
+        phx-update="ignore"
+      >
+        <.input field={@form[:email]} type="email" label="Email" required autocomplete="username" />
+        <.input
+          field={@form[:password]}
+          type="password"
+          label="Password"
+          required
+          autocomplete="current-password"
+        />
 
-          <:actions>
-            <.input field={@form[:remember_me]} type="checkbox" label="Keep me logged in" />
-            <.link href={~p"/users/reset_password"} class="text-sm font-semibold">
-              Forgot your password?
-            </.link>
-          </:actions>
-          <:actions>
-            <.button phx-disable-with="Logging in..." class="w-full">
-              Log in <span aria-hidden="true">→</span>
-            </.button>
-          </:actions>
-        </.simple_form>
-
-        <p class="mt-8 text-sm text-grey">
-          New here?
-          <.link navigate={~p"/organisations/register"} class="font-semibold text-brand-primary">
-            Create your organisation
+        <:actions>
+          <.input field={@form[:remember_me]} type="checkbox" label="Keep me logged in" />
+          <.link
+            href={~p"/users/reset_password"}
+            class="text-sm font-semibold text-[#0C2765] transition-colors duration-150 hover:text-[#52B2D8]"
+          >
+            Forgot your password?
           </.link>
-        </p>
-      </div>
-    </div>
+        </:actions>
+        <:actions>
+          <.auth_submit label="Sign in" phx-disable-with="Signing in..." />
+        </:actions>
+      </.simple_form>
+
+      <p class="mt-8 text-sm text-slate-600">
+        New here?
+        <.link
+          navigate={~p"/organisations/register"}
+          class="font-semibold text-[#0C2765] transition-colors duration-150 hover:text-[#52B2D8]"
+        >
+          Create your organisation
+        </.link>
+      </p>
+    </.auth_split>
     """
   end
 

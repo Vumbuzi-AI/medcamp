@@ -4,6 +4,7 @@ defmodule Medcamp.Patients.Patient do
   import Ecto.Changeset
 
   alias Medcamp.Patients.PatientDocument
+  alias Medcamp.Validation
 
   schema "patients" do
     tenant_field()
@@ -92,13 +93,9 @@ defmodule Medcamp.Patients.Patient do
       :home_address,
       :creator_id
     ])
-    |> validate_phone_number(:phone_number)
-    |> validate_phone_number(:emergency_contact_phone_number)
-    |> validate_format(
-      :email,
-      ~r/^[^\s]+@[^\s]+\.[^\s]+$/,
-      message: "must be a valid email address"
-    )
+    |> Validation.validate_phone_number(:phone_number)
+    |> Validation.validate_phone_number(:emergency_contact_phone_number)
+    |> Validation.validate_email()
     |> validate_length(:first_name, min: 2)
     |> validate_length(:last_name, min: 2)
     |> validate_length(:home_address, min: 3)
@@ -129,30 +126,6 @@ defmodule Medcamp.Patients.Patient do
     end)
   end
 
-  # Deliberately lenient: catches obvious garbage (letters, way too
-  # short/long) without enforcing one specific national format, since real
-  # patient/contact numbers may be local (07...) or international (+254...).
-  defp validate_phone_number(changeset, field) do
-    validate_change(changeset, field, fn field, phone ->
-      if is_binary(phone) and String.trim(phone) != "" do
-        digits = String.replace(phone, ~r/[^\d]/, "")
-
-        cond do
-          not Regex.match?(~r/^\+?[\d\s-]+$/, phone) ->
-            [{field, "is not a valid phone number"}]
-
-          String.length(digits) < 7 or String.length(digits) > 15 ->
-            [{field, "is not a valid phone number"}]
-
-          true ->
-            []
-        end
-      else
-        []
-      end
-    end)
-  end
-
   def public_booking_changeset(patient, attrs) do
     patient
     |> cast(attrs, [
@@ -163,7 +136,7 @@ defmodule Medcamp.Patients.Patient do
     ])
     |> update_change(:first_name, &normalize_text/1)
     |> update_change(:last_name, &normalize_text/1)
-    |> update_change(:email, &normalize_email/1)
+    |> update_change(:email, &Validation.normalize_email/1)
     |> update_change(:phone_number, &normalize_text/1)
     |> validate_required([
       :first_name,
@@ -171,6 +144,8 @@ defmodule Medcamp.Patients.Patient do
       :email,
       :phone_number
     ])
+    |> Validation.validate_email()
+    |> Validation.validate_phone_number(:phone_number)
     |> put_org_id()
   end
 
@@ -199,13 +174,4 @@ defmodule Medcamp.Patients.Patient do
   end
 
   defp normalize_text(value), do: value
-
-  defp normalize_email(value) when is_binary(value) do
-    case value |> String.trim() |> String.downcase() do
-      "" -> nil
-      trimmed -> trimmed
-    end
-  end
-
-  defp normalize_email(value), do: value
 end

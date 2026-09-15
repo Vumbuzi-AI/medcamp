@@ -55,19 +55,17 @@ defmodule Medcamp.Authorization.PanelSyncTest do
 
   test "re-running leaves per-user overrides untouched" do
     doctor = Medcamp.AccountsFixtures.user_fixture(%{role: "doctor"})
-    {:ok, _} = Authorization.deny_user_override(doctor, "doctor.doctor_procedures", nil)
+    {:ok, _} = Authorization.deny_user_override(doctor, "doctor.lab_results", nil)
 
     PanelSync.sync(Repo)
 
-    refute Authorization.can?(doctor, "doctor.doctor_procedures")
+    refute Authorization.can?(doctor, "doctor.lab_results")
     assert [%{effect: "deny"}] = Authorization.list_user_overrides(doctor)
   end
 
   test "restores a role default that was deleted out from under it" do
     permission_id =
-      Repo.one(
-        from(p in "permissions", where: p.slug == "doctor.doctor_procedures", select: p.id)
-      )
+      Repo.one(from(p in "permissions", where: p.slug == "doctor.lab_results", select: p.id))
 
     Repo.delete_all(
       from(rp in "role_permissions",
@@ -75,12 +73,12 @@ defmodule Medcamp.Authorization.PanelSyncTest do
       )
     )
 
-    refute "doctor.doctor_procedures" in Authorization.list_role_permissions("doctor")
+    refute "doctor.lab_results" in Authorization.list_role_permissions("doctor")
 
     assert %{role_grants_added: added} = PanelSync.sync(Repo)
     assert added >= 1
 
-    assert "doctor.doctor_procedures" in Authorization.list_role_permissions("doctor")
+    assert "doctor.lab_results" in Authorization.list_role_permissions("doctor")
   end
 
   test "retires a role grant for a catalog slug the role no longer lists" do
