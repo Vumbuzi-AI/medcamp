@@ -70,12 +70,22 @@ Tenancy.put_org_id(organisation.id)
 ## Camp ---------------------------------------------------------------------
 #
 # The seeded activity below has to land somewhere, so the organisation gets
-# one camp and it is made active before anything else is written.
+# one two-day camp and it is made active before anything else is written.
+
+camp_start_date = Date.add(Date.utc_today(), -1)
+camp_end_date = Date.utc_today()
+
+camp_attrs = %{
+  "name" => "Seed Camp",
+  "location" => "Kenya",
+  "start_date" => camp_start_date,
+  "end_date" => camp_end_date
+}
 
 camp =
   case Repo.one(from c in Medcamp.Camps.Camp, where: c.name == "Seed Camp", limit: 1) do
-    nil -> unwrap!.(Camps.create_camp(%{"name" => "Seed Camp", "location" => "Kenya"}), "camp")
-    existing -> existing
+    nil -> unwrap!.(Camps.create_camp(camp_attrs), "camp")
+    existing -> unwrap!.(Camps.update_camp(existing, camp_attrs), "camp")
   end
 
 {:ok, camp} = Camps.set_active_camp(camp)
@@ -92,8 +102,29 @@ otp_for_email = fn email, desired_otp ->
 end
 
 ensure_user = fn attrs ->
+  # Both ways `register_user/1` can report "this email is already here": the
+  # changeset's `unsafe_validate_unique` (a SELECT, scoped to the current
+  # organisation) and the unique index behind it (unscoped). Either one means
+  # the row exists and the seed should adopt it rather than abort.
+  taken_email? = fn changeset ->
+    case Keyword.get(changeset.errors, :email) do
+      {_message, metadata} when is_list(metadata) ->
+        Keyword.get(metadata, :constraint) == :unique or
+          Keyword.get(metadata, :validation) == :unsafe_unique
+
+      _ ->
+        false
+    end
+  end
+
+  # ...and both ways it can be found again: the organisation-scoped lookup
+  # matches what the changeset saw, the unscoped one matches the index.
+  existing_user = fn email ->
+    Accounts.get_organisation_user_by_email(email) || Accounts.get_user_by_email(email)
+  end
+
   user =
-    case Accounts.get_user_by_email(attrs.email) do
+    case existing_user.(attrs.email) do
       nil ->
         registration = %{
           "email" => attrs.email,
@@ -108,14 +139,8 @@ ensure_user = fn attrs ->
             user
 
           {:error, changeset} ->
-            email_error = Keyword.get(changeset.errors, :email)
-
-            if match?({_, metadata} when is_list(metadata), email_error) and
-                 Keyword.get(elem(email_error, 1), :constraint) == :unique do
-              # The lookup and insert are separate queries. If another seed
-              # process (or a concurrent request) inserted this email between
-              # them, use the row protected by the unique index.
-              case Accounts.get_user_by_email(attrs.email) do
+            if taken_email?.(changeset) do
+              case existing_user.(attrs.email) do
                 nil -> unwrap!.({:error, changeset}, "user #{attrs.email}")
                 user -> user
               end
@@ -383,7 +408,11 @@ drug_stock = [
   }
 ]
 
-for attrs <- drug_stock do
+for {attrs, drug_index} <- Enum.with_index(drug_stock, 1) do
+  # Deterministic demo acquisition price. Existing non-zero prices are kept so
+  # rerunning seeds never overwrites a price entered through the application.
+  default_unit_price = 5 + drug_index * 5
+
   item =
     case Repo.get_by(InventoryReceived, gtin: attrs.gtin) do
       nil ->
@@ -423,19 +452,29 @@ for attrs <- drug_stock do
     end
 
   for batch_attrs <- attrs.batches do
-    unless Repo.get_by(Medcamp.Batches.Batch, gtin: attrs.gtin, batch: batch_attrs.batch) do
-      unwrap!.(
-        DrugBatches.take_in_batch(%{
-          drug_id: drug.id,
-          inventory_received_id: item.id,
-          inventory_manager_id: pharmacist.id,
-          quantity: batch_attrs.quantity,
-          gtin: attrs.gtin,
-          batch: batch_attrs.batch,
-          expiry: batch_attrs.expiry
-        }),
-        "batch #{batch_attrs.batch}"
-      )
+    case Repo.get_by(Medcamp.Batches.Batch, gtin: attrs.gtin, batch: batch_attrs.batch) do
+      nil ->
+        unwrap!.(
+          DrugBatches.take_in_batch(%{
+            drug_id: drug.id,
+            inventory_received_id: item.id,
+            inventory_manager_id: pharmacist.id,
+            quantity: batch_attrs.quantity,
+            price_per_unit: default_unit_price,
+            gtin: attrs.gtin,
+            batch: batch_attrs.batch,
+            expiry: batch_attrs.expiry
+          }),
+          "batch #{batch_attrs.batch}"
+        )
+
+      %{price_per_unit: price} = batch when price in [nil, 0] ->
+        batch
+        |> Medcamp.Batches.Batch.changeset(%{price_per_unit: default_unit_price})
+        |> Repo.update!()
+
+      batch ->
+        batch
     end
   end
 end
@@ -578,17 +617,45 @@ patients =
           |> Repo.update!()
       end
 
-    # Every patient gets a current visit; roughly a third also get an earlier
-    # completed visit, so the patient timeline, visit history and the "all
-    # visits" screens have repeat attendance to show. Visits are spread over a
-    # fortnight rather than a week to give the date filters more to chew on.
+    # Every patient's activity falls within the camp's two-day window. Roughly
+    # a third attended on both days, which keeps repeat-visit screens useful;
+    # everyone else is split evenly between day one and day two.
     visit_plan =
-      [{:current, Date.add(Date.utc_today(), -rem(index - 1, 14)), visit_status_for.(index)}] ++
-        if rem(index, 3) == 0 do
-          [{:earlier, Date.add(Date.utc_today(), -(21 + rem(index, 14))), "completed"}]
-        else
-          []
-        end
+      if rem(index, 3) == 0 do
+        [
+          {:current, camp_end_date, visit_status_for.(index)},
+          {:earlier, camp_start_date, "completed"}
+        ]
+      else
+        visit_date = if rem(index, 2) == 0, do: camp_start_date, else: camp_end_date
+        [{:current, visit_date, visit_status_for.(index)}]
+      end
+
+    # The camp roster - and so the whole Medical Camp Dashboard - is driven by
+    # `camp_attendances`, which `Patients.register_*` writes as part of the
+    # registration transaction. These patients are inserted straight through
+    # the changeset, so the attendance row has to be written here or the camp
+    # looks empty however many patients and triages exist.
+    #
+    # Dated from the patient's earliest visit rather than "now" so the
+    # dashboard's per-day tabs span the camp instead of collapsing onto today.
+    first_seen_date = visit_plan |> Enum.map(fn {_, date, _} -> date end) |> Enum.min(Date)
+
+    first_seen_at =
+      first_seen_date
+      |> DateTime.new!(Time.new!(8 + rem(index, 6), rem(index * 7, 60), 0))
+      |> DateTime.truncate(:second)
+
+    %Medcamp.Camps.CampAttendance{}
+    |> Medcamp.Camps.CampAttendance.changeset(%{
+      patient_id: patient.id,
+      camp_id: camp.id,
+      first_seen_at: first_seen_at
+    })
+    |> Repo.insert(
+      on_conflict: [set: [first_seen_at: first_seen_at, updated_at: now]],
+      conflict_target: [:patient_id, :camp_id]
+    )
 
     for {occurrence, visit_date, visit_status} <- visit_plan do
       visit_reason =
@@ -639,7 +706,14 @@ patients =
           height: 150.0 + rem(index * 3, 35),
           weight: 48.0 + rem(index * 5, 42),
           allergies: if(rem(index, 7) == 0, do: "Penicillin", else: "No known allergies"),
-          emergency_scale: if(rem(index, 8) == 0, do: "Urgent", else: "Standard"),
+          # Must stay within `Triage.emergency_scales/0` — the changeset
+          # validates inclusion and the seed aborts on anything else.
+          emergency_scale:
+            cond do
+              rem(index, 8) == 0 -> "High"
+              rem(index, 3) == 0 -> "Medium"
+              true -> "Low"
+            end,
           pain: rem(index, 5) == 0,
           triage_notes: "Demo triage observations recorded during intake."
         }
@@ -726,8 +800,17 @@ patients =
             ]
           }
 
-          unless Repo.get_by(LabResult, doctor_note_id: doctor_note.id) do
-            LabResult.changeset(%LabResult{}, lab_attrs) |> Repo.insert!()
+          case Repo.get_by(LabResult, doctor_note_id: doctor_note.id) do
+            nil ->
+              LabResult.changeset(%LabResult{}, lab_attrs) |> Repo.insert!()
+
+            result ->
+              # The embedded test row is already deterministic and its schema
+              # rejects replacement without the existing embed ID. Update the
+              # parent result fields while retaining that seeded payload.
+              result
+              |> LabResult.changeset(Map.delete(lab_attrs, :tests))
+              |> Repo.update!()
           end
         end
 
@@ -740,6 +823,15 @@ patients =
 
           item = Repo.get!(InventoryReceived, drug.inventory_received_id)
           quantity = 6 + rem(index, 5)
+
+          unit_price =
+            Repo.one(
+              from b in Medcamp.Batches.Batch,
+                where: b.inventory_received_id == ^item.id,
+                select: max(b.price_per_unit)
+            ) || 0
+
+          dispensed_price = quantity * unit_price
 
           allocation_attrs = %{
             patient_id: patient.id,
@@ -761,7 +853,7 @@ patients =
                 unit_of_measurement: item.uom || "Tablets",
                 frequency: "Twice daily",
                 duration_in_days: 3,
-                price: 0,
+                price: dispensed_price,
                 strength: "Standard",
                 prescription_note: "Take after meals",
                 route_of_administration: "Oral",
@@ -782,16 +874,22 @@ patients =
                 existing
             end
 
-          if visit_status == "completed" and
-               is_nil(Repo.get_by(DrugGiven, drug_allocation_id: allocation.id, drug_id: drug.id)) do
-            DrugGiven.changeset(%DrugGiven{}, %{
+          if visit_status == "completed" do
+            dispense_attrs = %{
               drug_allocation_id: allocation.id,
               drug_id: drug.id,
               pharmacist_id: pharmacist.id,
               quantity: quantity,
-              price: 0
-            })
-            |> Repo.insert!()
+              price: dispensed_price
+            }
+
+            case Repo.get_by(DrugGiven,
+                   drug_allocation_id: allocation.id,
+                   drug_id: drug.id
+                 ) do
+              nil -> DrugGiven.changeset(%DrugGiven{}, dispense_attrs) |> Repo.insert!()
+              dispense -> DrugGiven.changeset(dispense, dispense_attrs) |> Repo.update!()
+            end
           end
         end
       end
@@ -800,11 +898,24 @@ patients =
     patient
   end)
 
+# Older versions of this seed spread triages over several weeks. Remove only
+# those recognisable demo rows so rerunning the seed fully reconciles an
+# existing development database to this camp's two-day window.
+patient_ids = Enum.map(patients, & &1.id)
+
+from(t in Triage,
+  where:
+    t.patient_id in ^patient_ids and
+      t.triage_notes == "Demo triage observations recorded during intake." and
+      (t.date < ^camp_start_date or t.date > ^camp_end_date)
+)
+|> Repo.delete_all()
+
 IO.puts("""
 Seeded medical camp:
   #{map_size(users)} staff logins + 1 superadmin (password: #{password})
   #{length(patients)} demo patients, each with a current visit and one in three
-    carrying an earlier completed visit, spread over the last three weeks
+    carrying an earlier completed visit, all within the two-day camp
   triage, consultations, lab requests/results, prescriptions and dispensing
     records following each visit's status
   #{length(lab_tests)} lab tests

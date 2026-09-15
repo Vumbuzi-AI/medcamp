@@ -13,8 +13,31 @@ defmodule Medcamp.DrugsGivenTest do
     import Medcamp.BatchesFixtures
     import Medcamp.InventoriesReceivedFixtures
     import Medcamp.AccountsFixtures
+    import Medcamp.CampsFixtures
 
     @invalid_attrs %{quantity: nil, price: nil}
+
+    test "total_spent_for_camp/2 sums dispensed prices for the selected camp and patients" do
+      camp = active_camp_fixture()
+      Medcamp.Camps.Scope.put_active_camp_id(camp.id)
+
+      included_allocation = drug_allocation_fixture()
+      another_allocation = drug_allocation_fixture()
+      drug_given_fixture(%{price: 1_250, drug_allocation: included_allocation})
+      drug_given_fixture(%{price: 750, drug_allocation: another_allocation})
+
+      assert DrugsGiven.total_spent_for_camp(
+               camp.id,
+               [included_allocation.patient_id, another_allocation.patient_id]
+             ) == 2_000
+
+      assert DrugsGiven.total_spent_for_camp(
+               camp.id,
+               [included_allocation.patient_id]
+             ) == 1_250
+
+      assert DrugsGiven.total_spent_for_camp(camp.id, []) == 0
+    end
 
     test "list_drugs_given/0 returns all drugs_given" do
       drug_given = drug_given_fixture()

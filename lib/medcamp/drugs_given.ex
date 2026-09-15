@@ -31,6 +31,23 @@ defmodule Medcamp.DrugsGiven do
     Repo.all(query)
   end
 
+  @doc """
+  Returns the total value of drugs dispensed for a camp and patient roster.
+
+  `DrugGiven.price` is the stored total calculated from the quantities and
+  batch unit prices used during dispensing.
+  """
+  def total_spent_for_camp(_camp_id, []), do: 0
+
+  def total_spent_for_camp(camp_id, patient_ids) do
+    from(dg in DrugGiven,
+      join: allocation in assoc(dg, :drug_allocation),
+      where: dg.camp_id == ^camp_id and allocation.patient_id in ^patient_ids,
+      select: coalesce(sum(dg.price), 0)
+    )
+    |> Repo.one()
+  end
+
   def list_drugs_given_for_sichi(id) do
     from(dg in DrugGiven,
       where: dg.id == ^id,

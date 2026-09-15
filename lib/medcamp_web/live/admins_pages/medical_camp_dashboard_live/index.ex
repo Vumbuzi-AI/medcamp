@@ -5,13 +5,14 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
   alias Medcamp.Chatbot
   alias Medcamp.Triages
   alias Medcamp.DoctorNotes
+  alias Medcamp.DrugsGiven
   alias Medcamp.LabResults
   alias Medcamp.Camps
   alias Medcamp.Tenancy
 
   @per_page 10
 
-  @dashboard_tabs ~w(overview patient_data ai_analysis financials downloads)a
+  @dashboard_tabs ~w(overview patient_data ai_analysis downloads)a
   @report_tabs ~w(triage notes labs ai)a
 
   @impl true
@@ -66,6 +67,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
      |> assign(:patient_ai_request_id, nil)
      |> assign(:patients_with_notes, 0)
      |> assign(:total_lab_tests, 0)
+     |> assign(:drug_total_spent, 0)
      |> assign(:financials, nil)
      |> assign(:reporting, empty_reporting())
      |> assign(:geographic_breakdown, [])
@@ -316,6 +318,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     |> assign(:triaged_ids, MapSet.new())
     |> assign(:patients_with_notes, 0)
     |> assign(:total_lab_tests, 0)
+    |> assign(:drug_total_spent, 0)
     |> assign(:financials, nil)
     |> assign(:reporting, empty_reporting())
     |> assign(:geographic_breakdown, [])
@@ -370,6 +373,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
       doctor_notes |> Enum.map(& &1.patient_id) |> MapSet.new() |> MapSet.size()
 
     total_lab_tests = total_test_count(lab_results)
+    drug_total_spent = DrugsGiven.total_spent_for_camp(socket.assigns.camp.id, patient_ids)
     financials = LabResults.camp_financials(patient_ids)
     reporting = build_reporting(patients, stats, triages, doctor_notes, lab_results, financials)
 
@@ -385,6 +389,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
     |> assign(:triaged_ids, triaged_ids)
     |> assign(:patients_with_notes, patients_with_notes)
     |> assign(:total_lab_tests, total_lab_tests)
+    |> assign(:drug_total_spent, drug_total_spent)
     |> assign(:financials, financials)
     |> assign(:reporting, reporting)
     |> assign(:geographic_breakdown, geographic_breakdown)
@@ -649,32 +654,6 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               <button
                 type="button"
                 role="tab"
-                id="dash-tab-financials"
-                aria-selected={to_string(@active_dashboard_tab == :financials)}
-                aria-controls="dash-panel-financials"
-                phx-click="set_dashboard_tab"
-                phx-value-tab="financials"
-                class={[
-                  "min-w-[7.5rem] flex-1 flex items-center justify-center gap-2 px-4 py-4 text-sm font-semibold transition-colors border-b-2 snap-start sm:min-w-0 sm:px-6",
-                  if(@active_dashboard_tab == :financials,
-                    do: "border-brand-primary text-brand-primary bg-brand-50",
-                    else: "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-                  )
-                ]}
-              >
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Financials
-              </button>
-              <button
-                type="button"
-                role="tab"
                 id="dash-tab-downloads"
                 aria-selected={to_string(@active_dashboard_tab == :downloads)}
                 aria-controls="dash-panel-downloads"
@@ -709,7 +688,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
 
         <div :if={@camp && @loading} class="space-y-6" aria-busy="true">
           <p class="sr-only" role="status">Loading camp data…</p>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
             <div
               :for={_ <- 1..4}
               class="h-24 animate-pulse rounded-xl border border-slate-200 bg-slate-100"
@@ -731,7 +710,7 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
         >
           
     <!-- Stats Grid -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
             <.camp_stat label="Total Patients" value={@stats.total} color="indigo" />
             <.camp_stat
               label="Triaged"
@@ -746,6 +725,12 @@ defmodule MedcampWeb.AdminMedicalCampLive.Index do
               subtitle={Enum.at(@reporting.highlights, 1).value <> " review rate"}
             />
             <.camp_stat label="Lab Tests" value={@total_lab_tests} color="teal" />
+            <.camp_stat
+              label="Drug Spend"
+              value={"KSh #{delimited(@drug_total_spent)}"}
+              color="indigo"
+              subtitle="dispensed value"
+            />
           </div>
           
     <!-- Executive Highlights -->

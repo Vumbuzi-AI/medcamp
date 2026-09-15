@@ -225,9 +225,10 @@ defmodule MedcampWeb.NurseDashboardLive.Index do
     |> Enum.map(&Map.delete(&1, :at))
   end
 
-  defp emergency_badge_color("high"), do: "bg-rose-100 text-rose-700"
-  defp emergency_badge_color("medium"), do: "bg-amber-100 text-amber-700"
-  defp emergency_badge_color("low"), do: "bg-emerald-100 text-emerald-700"
+  # Stored values are `Triage.emergency_scales/0` ("High"/"Medium"/"Low").
+  defp emergency_badge_color("High"), do: "bg-rose-100 text-rose-700"
+  defp emergency_badge_color("Medium"), do: "bg-amber-100 text-amber-700"
+  defp emergency_badge_color("Low"), do: "bg-emerald-100 text-emerald-700"
   defp emergency_badge_color(_), do: "bg-slate-100 text-slate-700"
 
   defp patient_name(nil), do: "Patient"
