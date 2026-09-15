@@ -919,7 +919,7 @@ Seeded medical camp:
   triage, consultations, lab requests/results, prescriptions and dispensing
     records following each visit's status
   #{length(lab_tests)} lab tests
-  #{length(drug_stock)} drugs across #{Enum.sum_by(drug_stock, &length(&1.batches))} batches, including short-dated ones for the expiry
+  #{length(drug_stock)} drugs across #{drug_stock |> Enum.map(&length(&1.batches)) |> Enum.sum()} batches, including short-dated ones for the expiry
     and stock-alert screens
 
 Log in as admin@gmail.com to add the rest of your camp staff, or
