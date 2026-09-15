@@ -352,14 +352,13 @@ defmodule MedcampWeb.NurseDashboardLive.Index do
     end)
   end
 
-  defp filter_patient_search(records, search) when search in [nil, ""], do: records
+  defp filter_patient_search(patients, search) when search in [nil, ""], do: patients
 
-  defp filter_patient_search(records, search) do
+  defp filter_patient_search(patients, search) do
     term = String.downcase(search)
 
-    Enum.filter(records, fn record ->
-      String.contains?(searchable_patient_text(record.patient), term)
-    end)
+    # `registrations` are patients themselves, not records that point at one.
+    Enum.filter(patients, &String.contains?(searchable_patient_text(&1), term))
   end
 
   defp searchable_patient_text(nil), do: ""
