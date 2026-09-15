@@ -3,6 +3,105 @@ defmodule MedcampWeb.ScanComponents do
   use Gettext, backend: MedcampWeb.Gettext
   import MedcampWeb.CoreComponents
 
+  @doc """
+  In-app camera scanner for patient QR codes / Data Matrix labels.
+
+  Driven by the `QrCameraScanner` JS hook, which pushes a `"qr_scanned"` event
+  with the raw decoded value. The `nonce` is part of the element id so bumping
+  it remounts the hook and restarts the camera after a failed lookup.
+  """
+  attr :id, :string, required: true
+  attr :target, :any, required: true
+  attr :nonce, :integer, default: 0
+  attr :error, :string, default: nil
+
+  def camera_scanner(assigns) do
+    ~H"""
+    <div class="space-y-2">
+      <div
+        id={"#{@id}-camera-#{@nonce}"}
+        phx-hook="QrCameraScanner"
+        phx-target={@target}
+        class="relative"
+      >
+        <video class="w-full rounded-lg border border-gray-300" autoplay playsinline muted></video>
+        <div class="qr-overlay hidden absolute inset-0 bg-green-500/20 rounded-lg items-center justify-center">
+          <svg class="h-16 w-16 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <p class="qr-status text-sm text-center text-gray-500 mt-2">
+          Point camera at the patient's QR code...
+        </p>
+      </div>
+
+      <p :if={@error} class="text-sm text-center text-red-600">{@error}</p>
+    </div>
+    """
+  end
+
+  @doc """
+  Live patient lookup for the scan pages, for when a patient has no card to
+  scan. Typing filters on name, phone, email, national ID or GSRN as you go and
+  the results are selectable — picking one goes to the same place a scan would.
+
+  The owning live component handles `"search_patients"` and `"select_patient"`.
+  """
+  attr :target, :any, required: true
+  attr :term, :string, default: ""
+  attr :results, :list, default: []
+
+  def patient_search(assigns) do
+    ~H"""
+    <div class="space-y-3">
+      <div class="flex items-center gap-3 text-xs uppercase tracking-wide text-gray-400">
+        <span class="flex-1 h-px bg-gray-200"></span>
+        <span>or find the patient</span>
+        <span class="flex-1 h-px bg-gray-200"></span>
+      </div>
+
+      <form phx-change="search_patients" phx-submit="search_patients" phx-target={@target}>
+        <.search_input
+          name="search"
+          value={@term}
+          placeholder="Search by name, phone, email, national ID or GSRN"
+          autocomplete="off"
+        />
+      </form>
+
+      <p :if={@term != "" and @results == []} class="text-sm text-gray-500">
+        No patients match "{@term}".
+      </p>
+
+      <ul :if={@results != []} class="divide-y divide-gray-100 rounded-md border border-gray-200">
+        <li :for={patient <- @results}>
+          <button
+            type="button"
+            phx-click="select_patient"
+            phx-value-id={patient.id}
+            phx-target={@target}
+            class="flex w-full items-center justify-between gap-4 px-3 py-2 text-left hover:bg-gray-50"
+          >
+            <span class="flex flex-col">
+              <span class="text-sm font-medium text-brand-primary">
+                {[patient.first_name, patient.middle_name, patient.last_name]
+                |> Enum.reject(&(&1 in [nil, ""]))
+                |> Enum.join(" ")}
+              </span>
+              <span class="text-xs text-gray-500">
+                {[patient.phone_number, patient.email, patient.national_id]
+                |> Enum.reject(&(&1 in [nil, ""]))
+                |> Enum.join(" · ")}
+              </span>
+            </span>
+            <span class="shrink-0 text-xs font-medium text-gray-400">{patient.gsrn}</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+    """
+  end
+
   def scan_card(assigns) do
     ~H"""
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 max-w-xl">

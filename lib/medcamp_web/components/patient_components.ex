@@ -345,16 +345,12 @@ defmodule MedcampWeb.PatientComponents do
                         <input
                           type="text"
                           id="text"
-                          value={"https://glocalhealthcentre.org/8018/#{@patient.gsrn}"}
+                          value={"https://medicalcamp.tibasasa.com/8018/#{@patient.gsrn}"}
                           class="hidden"
                         />
                       </div>
                     </div>
                     <div class="flex flex-col gap-1">
-                      <div class="flex text-xs gap-0 items-center">
-                        GS1 <span class="text-sm">&#174; </span>
-                      </div>
-
                       <div class="w-[80px] h-[80px]">
                         <div
                           phx-hook="CardQrCode"
@@ -806,16 +802,12 @@ defmodule MedcampWeb.PatientComponents do
                     <input
                       type="text"
                       id="text"
-                      value={"https://glocalhealthcentre.org/8018/#{@patient.gsrn}"}
+                      value={"https://medicalcamp.tibasasa.com/8018/#{@patient.gsrn}"}
                       class="hidden"
                     />
                   </div>
                 </div>
                 <div class="flex flex-col gap-1">
-                  <div class="flex text-xs gap-0 items-center">
-                    GS1 <span class="text-sm">&#174; </span>
-                  </div>
-
                   <div class="w-[80px] h-[80px]">
                     <div phx-hook="CardQrCode" phx-update="ignore" id="qrcode" class="rounded-md  " />
                   </div>

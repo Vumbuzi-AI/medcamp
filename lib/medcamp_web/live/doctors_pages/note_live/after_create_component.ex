@@ -25,24 +25,6 @@ defmodule MedcampWeb.AfterCreateNoteComponent do
               Prescribe Medicine
             </.link>
           </.button>
-
-          <.link navigate={"/doctor/patients/#{@patient.id}/notes/#{@doctor_note.id}/refer_patient"}>
-            <.button>
-              Refer Patient
-            </.button>
-          </.link>
-
-          <.button>
-            <.link navigate={"/doctor/patients/#{@patient.id}/notes/#{@doctor_note.id}/request_radiology_test"}>
-              Request Radiology Test
-            </.link>
-          </.button>
-
-          <.button>
-            <.link navigate={"/doctor/patients/#{@patient.id}/notes/#{@doctor_note.id}/admit_patient"}>
-              Admit Patient
-            </.link>
-          </.button>
         </div>
       </div>
     </div>

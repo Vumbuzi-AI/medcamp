@@ -187,10 +187,10 @@ defmodule Medcamp.Patients do
     |> Repo.preload(:documents)
   end
 
-  def search_patients(search_term) do
+  def search_patients(search_term, limit \\ nil) do
     search_term = "%#{search_term}%"
 
-    Repo.all(
+    query =
       from p in Patient,
         where:
           ilike(p.first_name, ^search_term) or
@@ -200,7 +200,10 @@ defmodule Medcamp.Patients do
             ilike(p.email, ^search_term) or
             ilike(p.phone_number, ^search_term) or
             ilike(p.gsrn, ^search_term)
-    )
+
+    query = if limit, do: from(p in query, limit: ^limit), else: query
+
+    Repo.all(query)
   end
 
   @doc """

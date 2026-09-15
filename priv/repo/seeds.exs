@@ -1,5 +1,6 @@
-# Seeds a medical camp with one login per role, a lab test catalogue and a
-# small drug stock, so a fresh database is immediately usable.
+# Seeds a medical camp with one login per role plus a superadmin, a lab test
+# catalogue, a stocked pharmacy and a full roster of patients with visits, so a
+# fresh database is immediately usable.
 #
 #     mix run priv/repo/seeds.exs
 #
@@ -225,46 +226,160 @@ Code.require_file(Path.expand("seeds/current_lab_test_templates.exs", __DIR__))
 
 # Each drug needs an item-master row (`inventories_received`) keyed by GTIN -
 # that is the identity a prescription and a dispense are recorded against.
+#
+# Several drugs carry more than one batch so that batch selection, FEFO
+# ordering and the expiry/stock-alert screens have something to work with. The
+# short-dated batches below are deliberate: they keep the expiry filters and
+# stock alerts populated.
 drug_stock = [
   %{
     gtin: "06161021090001",
     generic_name: "Paracetamol 500mg",
     brand_name: "Panadol",
-    batch: "PCM-2601",
-    expiry: "2027-06-30",
-    quantity: 500
+    uom: "Tablets",
+    batches: [
+      %{batch: "PCM-2601", expiry: "2027-06-30", quantity: 500},
+      %{batch: "PCM-2611", expiry: "2026-11-30", quantity: 240}
+    ]
   },
   %{
     gtin: "06161021090002",
     generic_name: "Amoxicillin 250mg",
     brand_name: "Amoxil",
-    batch: "AMX-2602",
-    expiry: "2027-03-31",
-    quantity: 300
+    uom: "Capsules",
+    batches: [
+      %{batch: "AMX-2602", expiry: "2027-03-31", quantity: 300},
+      %{batch: "AMX-2612", expiry: "2026-10-31", quantity: 150}
+    ]
   },
   %{
     gtin: "06161021090003",
     generic_name: "Artemether/Lumefantrine 20/120mg",
     brand_name: "Coartem",
-    batch: "ALU-2603",
-    expiry: "2026-12-31",
-    quantity: 200
+    uom: "Tablets",
+    batches: [%{batch: "ALU-2603", expiry: "2026-12-31", quantity: 200}]
   },
   %{
     gtin: "06161021090004",
     generic_name: "Albendazole 400mg",
     brand_name: "Zentel",
-    batch: "ALB-2604",
-    expiry: "2028-01-31",
-    quantity: 400
+    uom: "Tablets",
+    batches: [%{batch: "ALB-2604", expiry: "2028-01-31", quantity: 400}]
   },
   %{
     gtin: "06161021090005",
     generic_name: "Oral Rehydration Salts",
     brand_name: "ORS",
-    batch: "ORS-2605",
-    expiry: "2027-09-30",
-    quantity: 250
+    uom: "Sachets",
+    batches: [%{batch: "ORS-2605", expiry: "2027-09-30", quantity: 250}]
+  },
+  %{
+    gtin: "06161021090006",
+    generic_name: "Ibuprofen 400mg",
+    brand_name: "Brufen",
+    uom: "Tablets",
+    batches: [%{batch: "IBU-2606", expiry: "2027-08-31", quantity: 360}]
+  },
+  %{
+    gtin: "06161021090007",
+    generic_name: "Amlodipine 5mg",
+    brand_name: "Norvasc",
+    uom: "Tablets",
+    batches: [%{batch: "AML-2607", expiry: "2028-02-28", quantity: 300}]
+  },
+  %{
+    gtin: "06161021090008",
+    generic_name: "Metformin 500mg",
+    brand_name: "Glucophage",
+    uom: "Tablets",
+    batches: [
+      %{batch: "MET-2608", expiry: "2027-11-30", quantity: 420},
+      %{batch: "MET-2618", expiry: "2026-10-15", quantity: 120}
+    ]
+  },
+  %{
+    gtin: "06161021090009",
+    generic_name: "Omeprazole 20mg",
+    brand_name: "Losec",
+    uom: "Capsules",
+    batches: [%{batch: "OME-2609", expiry: "2027-07-31", quantity: 280}]
+  },
+  %{
+    gtin: "06161021090010",
+    generic_name: "Cetirizine 10mg",
+    brand_name: "Zyrtec",
+    uom: "Tablets",
+    batches: [%{batch: "CET-2610", expiry: "2028-04-30", quantity: 320}]
+  },
+  %{
+    gtin: "06161021090011",
+    generic_name: "Ferrous Sulphate + Folic Acid",
+    brand_name: "Ranferon",
+    uom: "Tablets",
+    batches: [%{batch: "FEF-2611", expiry: "2027-05-31", quantity: 500}]
+  },
+  %{
+    gtin: "06161021090012",
+    generic_name: "Cotrimoxazole 480mg",
+    brand_name: "Septrin",
+    uom: "Tablets",
+    batches: [%{batch: "COT-2612", expiry: "2027-02-28", quantity: 260}]
+  },
+  %{
+    gtin: "06161021090013",
+    generic_name: "Salbutamol Inhaler 100mcg",
+    brand_name: "Ventolin",
+    uom: "Inhalers",
+    batches: [%{batch: "SAL-2613", expiry: "2027-10-31", quantity: 60}]
+  },
+  %{
+    gtin: "06161021090014",
+    generic_name: "Hydrocortisone Cream 1%",
+    brand_name: "Cortaid",
+    uom: "Tubes",
+    batches: [%{batch: "HYD-2614", expiry: "2027-04-30", quantity: 90}]
+  },
+  %{
+    gtin: "06161021090015",
+    generic_name: "Amoxicillin Suspension 125mg/5ml",
+    brand_name: "Amoxil Syrup",
+    uom: "Bottles",
+    batches: [%{batch: "AMS-2615", expiry: "2026-09-30", quantity: 80}]
+  },
+  %{
+    gtin: "06161021090016",
+    generic_name: "Zinc Sulphate 20mg",
+    brand_name: "Zincovit",
+    uom: "Tablets",
+    batches: [%{batch: "ZNC-2616", expiry: "2028-03-31", quantity: 300}]
+  },
+  %{
+    gtin: "06161021090017",
+    generic_name: "Diclofenac 50mg",
+    brand_name: "Voltaren",
+    uom: "Tablets",
+    batches: [%{batch: "DIC-2617", expiry: "2027-12-31", quantity: 240}]
+  },
+  %{
+    gtin: "06161021090018",
+    generic_name: "Metronidazole 400mg",
+    brand_name: "Flagyl",
+    uom: "Tablets",
+    batches: [%{batch: "MTZ-2618", expiry: "2027-01-31", quantity: 300}]
+  },
+  %{
+    gtin: "06161021090019",
+    generic_name: "Losartan 50mg",
+    brand_name: "Cozaar",
+    uom: "Tablets",
+    batches: [%{batch: "LOS-2619", expiry: "2028-05-31", quantity: 200}]
+  },
+  %{
+    gtin: "06161021090020",
+    generic_name: "Multivitamin Syrup",
+    brand_name: "Vitaplex",
+    uom: "Bottles",
+    batches: [%{batch: "MVT-2620", expiry: "2027-06-30", quantity: 110}]
   }
 ]
 
@@ -279,7 +394,7 @@ for attrs <- drug_stock do
             "generic_name" => attrs.generic_name,
             "type" => "Drug",
             "category" => "Pharmaceuticals",
-            "uom" => "Tablets",
+            "uom" => attrs.uom,
             "user_id" => pharmacist.id
           }),
           "item master #{attrs.gtin}"
@@ -307,58 +422,80 @@ for attrs <- drug_stock do
         drug
     end
 
-  unless Repo.get_by(Medcamp.Batches.Batch, gtin: attrs.gtin, batch: attrs.batch) do
-    unwrap!.(
-      DrugBatches.take_in_batch(%{
-        drug_id: drug.id,
-        inventory_received_id: item.id,
-        inventory_manager_id: pharmacist.id,
-        quantity: attrs.quantity,
-        gtin: attrs.gtin,
-        batch: attrs.batch,
-        expiry: attrs.expiry
-      }),
-      "batch #{attrs.batch}"
-    )
+  for batch_attrs <- attrs.batches do
+    unless Repo.get_by(Medcamp.Batches.Batch, gtin: attrs.gtin, batch: batch_attrs.batch) do
+      unwrap!.(
+        DrugBatches.take_in_batch(%{
+          drug_id: drug.id,
+          inventory_received_id: item.id,
+          inventory_manager_id: pharmacist.id,
+          quantity: batch_attrs.quantity,
+          gtin: attrs.gtin,
+          batch: batch_attrs.batch,
+          expiry: batch_attrs.expiry
+        }),
+        "batch #{batch_attrs.batch}"
+      )
+    end
   end
 end
 
 ## Demo patients -----------------------------------------------------------
+#
+# The roster is generated rather than hand-listed so the camp has enough
+# volume to exercise pagination, dashboard counts and the queue screens. Names
+# are drawn from fixed pools by index, so re-running the seeds produces the
+# same roster and updates those patients instead of adding new ones.
 
-patient_names = [
-  {"Achieng", "Atieno", "Otieno", "Female"},
-  {"Brian", "Kamau", "Mwangi", "Male"},
-  {"Faith", "Wanjiku", "Njoroge", "Female"},
-  {"David", "Kiptoo", "Koech", "Male"},
-  {"Mary", "Naliaka", "Wekesa", "Female"},
-  {"Samuel", "Mutua", "Musyoka", "Male"},
-  {"Grace", "Wairimu", "Kariuki", "Female"},
-  {"John", "Omondi", "Ouma", "Male"},
-  {"Mercy", "Chebet", "Rono", "Female"},
-  {"Peter", "Muriithi", "Njenga", "Male"},
-  {"Lilian", "Akinyi", "Odhiambo", "Female"},
-  {"Kevin", "Barasa", "Wafula", "Male"},
-  {"Esther", "Muthoni", "Kimani", "Female"},
-  {"Daniel", "Kiprotich", "Langat", "Male"},
-  {"Joyce", "Nduta", "Maina", "Female"},
-  {"Collins", "Onyango", "Okello", "Male"},
-  {"Lucy", "Wambui", "Githinji", "Female"},
-  {"Joseph", "Munyao", "Mutiso", "Male"},
-  {"Irene", "Jepkoech", "Keter", "Female"},
-  {"George", "Odongo", "Opiyo", "Male"},
-  {"Beatrice", "Nanjala", "Simiyu", "Female"},
-  {"Dennis", "Karanja", "Macharia", "Male"},
-  {"Caroline", "Adhiambo", "Ochieng", "Female"},
-  {"Victor", "Kipngetich", "Bett", "Male"},
-  {"Ruth", "Nyambura", "Wanjohi", "Female"},
-  {"Eric", "Mwendwa", "Kioko", "Male"},
-  {"Ann", "Wangari", "Mbugua", "Female"},
-  {"Martin", "Wanyonyi", "Were", "Male"},
-  {"Sheila", "Cherono", "Korir", "Female"},
-  {"Paul", "Ochieng", "Owino", "Male"}
+patient_count = 120
+
+female_first_names =
+  ~w(Achieng Faith Mary Grace Mercy Lilian Esther Joyce Lucy Irene Beatrice Caroline Ruth Ann
+     Sheila Winnie Janet Purity Nancy Eunice Rose Dorcas Millicent Naomi Pauline Agnes Edith
+     Damaris Consolata Hellen)
+
+male_first_names =
+  ~w(Brian David Samuel John Peter Kevin Daniel Collins Joseph George Dennis Victor Eric Martin
+     Paul Stephen Antony Felix Moses Elijah Charles Isaac Nicholas Patrick Simon Timothy Vincent
+     Wilson Duncan Fredrick)
+
+middle_names =
+  ~w(Atieno Kamau Wanjiku Kiptoo Naliaka Mutua Wairimu Omondi Chebet Muriithi Akinyi Barasa
+     Muthoni Kiprotich Nduta Onyango Wambui Munyao Jepkoech Odongo Nanjala Karanja Adhiambo
+     Kipngetich Nyambura Mwendwa Wangari Wanyonyi Cherono Ochieng)
+
+surnames =
+  ~w(Otieno Mwangi Njoroge Koech Wekesa Musyoka Kariuki Ouma Rono Njenga Odhiambo Wafula Kimani
+     Langat Maina Okello Githinji Mutiso Keter Opiyo Simiyu Macharia Ochieng Bett Wanjohi Kioko
+     Mbugua Were Korir Owino)
+
+patient_names =
+  Enum.map(1..patient_count, fn index ->
+    gender = if rem(index, 2) == 0, do: "Female", else: "Male"
+
+    first_name_pool = if gender == "Female", do: female_first_names, else: male_first_names
+
+    first_name = Enum.at(first_name_pool, rem(div(index, 2), length(first_name_pool)))
+    middle_name = Enum.at(middle_names, rem(index * 7, length(middle_names)))
+    last_name = Enum.at(surnames, rem(index * 11, length(surnames)))
+
+    {first_name, middle_name, last_name, gender}
+  end)
+
+locations = [
+  "Nairobi",
+  "Kiambu",
+  "Machakos",
+  "Kajiado",
+  "Nakuru",
+  "Murang'a",
+  "Kisumu",
+  "Kakamega",
+  "Meru",
+  "Nyeri",
+  "Eldoret",
+  "Mombasa"
 ]
-
-locations = ["Nairobi", "Kiambu", "Machakos", "Kajiado", "Nakuru", "Murang'a"]
 
 visit_reasons = [
   "Fever and headache",
@@ -366,10 +503,27 @@ visit_reasons = [
   "Cough and sore throat",
   "Abdominal discomfort",
   "Back and joint pain",
-  "Medication review"
+  "Medication review",
+  "Dizziness and fatigue",
+  "Skin rash",
+  "Blood pressure follow-up",
+  "Persistent heartburn"
 ]
 
-visit_statuses = ~w(triage_pending triaged with_doctor lab_pending pharmacy_pending completed)
+# The camp should look like a camp: most patients have moved through, a
+# smaller tail is still queueing. Weighting the cycle keeps every queue
+# populated without making the whole roster look stuck at reception.
+visit_status_for = fn index ->
+  case rem(index, 10) do
+    0 -> "triage_pending"
+    1 -> "triaged"
+    2 -> "with_doctor"
+    3 -> "lab_pending"
+    4 -> "pharmacy_pending"
+    _ -> "completed"
+  end
+end
+
 nurse = users["nurse"]
 receptionist = users["receptionist"]
 doctor = users["doctor"]
@@ -424,186 +578,221 @@ patients =
           |> Repo.update!()
       end
 
-    visit_date = Date.add(Date.utc_today(), -rem(index - 1, 7))
-    visit_status = Enum.at(visit_statuses, rem(index - 1, length(visit_statuses)))
-    visit_reason = Enum.at(visit_reasons, rem(index - 1, length(visit_reasons)))
+    # Every patient gets a current visit; roughly a third also get an earlier
+    # completed visit, so the patient timeline, visit history and the "all
+    # visits" screens have repeat attendance to show. Visits are spread over a
+    # fortnight rather than a week to give the date filters more to chew on.
+    visit_plan =
+      [{:current, Date.add(Date.utc_today(), -rem(index - 1, 14)), visit_status_for.(index)}] ++
+        if rem(index, 3) == 0 do
+          [{:earlier, Date.add(Date.utc_today(), -(21 + rem(index, 14))), "completed"}]
+        else
+          []
+        end
 
-    visit_attrs = %{
-      patient_id: patient.id,
-      creator_id: receptionist.id,
-      doctor_id:
-        if(visit_status in ~w(with_doctor lab_pending pharmacy_pending completed),
-          do: users["doctor"].id,
-          else: nil
-        ),
-      date: visit_date,
-      time: Time.new!(8 + rem(index, 8), rem(index * 7, 60), 0),
-      visit_type: if(rem(index, 4) == 0, do: "Follow-up", else: "Medical camp"),
-      reason: "Demo: #{visit_reason}",
-      status: visit_status
-    }
-
-    visit =
-      case Repo.get_by(PatientVisit, patient_id: patient.id, reason: visit_attrs.reason) do
-        nil -> PatientVisit.changeset(%PatientVisit{}, visit_attrs) |> Repo.insert!()
-        visit -> PatientVisit.changeset(visit, visit_attrs) |> Repo.update!()
-      end
-
-    if visit_status != "triage_pending" do
-      triage_attrs = %{
-        patient_id: patient.id,
-        creator_id: nurse.id,
-        date: visit_date,
-        time: Time.new!(9 + rem(index, 7), rem(index * 5, 60), 0),
-        temperature: 36.2 + rem(index, 14) / 10,
-        blood_pressure: "#{105 + rem(index * 3, 35)}/#{65 + rem(index * 2, 25)}",
-        pulse_rate: 66.0 + rem(index * 3, 34),
-        oxygen_saturation: 95.0 + rem(index, 5),
-        height: 150.0 + rem(index * 3, 35),
-        weight: 48.0 + rem(index * 5, 42),
-        allergies: if(rem(index, 7) == 0, do: "Penicillin", else: "No known allergies"),
-        emergency_scale: if(rem(index, 8) == 0, do: "Urgent", else: "Standard"),
-        pain: rem(index, 5) == 0,
-        triage_notes: "Demo triage observations recorded during intake."
-      }
-
-      case Repo.get_by(Triage, patient_id: patient.id, date: visit_date) do
-        nil -> Triage.changeset(%Triage{}, triage_attrs) |> Repo.insert!()
-        triage -> Triage.changeset(triage, triage_attrs) |> Repo.update!()
-      end
-    end
-
-    # Downstream records follow the visit's position in the camp. This keeps
-    # the demo useful for every dashboard without inventing impossible data
-    # (for example, a dispensed drug on a visit still waiting for triage).
-    if visit_status != "triage_pending" do
-      diagnosis =
+    for {occurrence, visit_date, visit_status} <- visit_plan do
+      visit_reason =
         Enum.at(
-          ["Upper respiratory tract infection", "Malaria", "Gastritis", "Musculoskeletal pain"],
-          rem(index - 1, 4)
+          visit_reasons,
+          rem(index - 1 + if(occurrence == :earlier, do: 3, else: 0), length(visit_reasons))
         )
 
-      note_attrs = %{
-        patient_id: patient.id,
-        patient_visit_id: visit.id,
-        doctor_id: doctor.id,
-        date: visit_date,
-        time: Time.new!(10 + rem(index, 6), rem(index * 11, 60), 0),
-        reason_for_consulatation: visit_reason,
-        symptoms: visit_reason,
-        diagnosis: diagnosis,
-        diagnosis_icd_code: Enum.at(["J06.9", "B54", "K29.7", "M79.1"], rem(index - 1, 4)),
-        investigations: "Clinical examination and indicated point-of-care tests",
-        impression: diagnosis,
-        management: "Treat symptoms, complete prescribed medication, and return if worse.",
-        clinical_notes: "Demo consultation completed during the medical camp.",
-        doctor_signature: "Dr Amina Demo"
-      }
-
-      doctor_note =
-        case Repo.get_by(DoctorNote, patient_visit_id: visit.id) do
-          nil -> DoctorNote.changeset(%DoctorNote{}, note_attrs) |> Repo.insert!()
-          note -> DoctorNote.changeset(note, note_attrs) |> Repo.update!()
+      # The reason doubles as the idempotency key for the visit, so the two
+      # occurrences must not collide.
+      reason =
+        case occurrence do
+          :current -> "Demo: #{visit_reason}"
+          :earlier -> "Demo earlier visit: #{visit_reason}"
         end
 
-      if visit_status in ~w(lab_pending pharmacy_pending completed) do
-        requested_test = Enum.at(lab_tests, rem(index - 1, length(lab_tests)))
-        report_complete = visit_status != "lab_pending"
+      visit_attrs = %{
+        patient_id: patient.id,
+        creator_id: receptionist.id,
+        doctor_id:
+          if(visit_status in ~w(with_doctor lab_pending pharmacy_pending completed),
+            do: users["doctor"].id,
+            else: nil
+          ),
+        date: visit_date,
+        time: Time.new!(8 + rem(index, 8), rem(index * 7, 60), 0),
+        visit_type: if(occurrence == :earlier, do: "Follow-up", else: "Medical camp"),
+        reason: reason,
+        status: visit_status
+      }
 
-        lab_attrs = %{
-          name: requested_test.name,
-          description: "Demo laboratory request from camp consultation",
-          urgency: if(rem(index, 5) == 0, do: "Urgent", else: "Routine"),
+      visit =
+        case Repo.get_by(PatientVisit, patient_id: patient.id, reason: visit_attrs.reason) do
+          nil -> PatientVisit.changeset(%PatientVisit{}, visit_attrs) |> Repo.insert!()
+          visit -> PatientVisit.changeset(visit, visit_attrs) |> Repo.update!()
+        end
+
+      if visit_status != "triage_pending" do
+        triage_attrs = %{
           patient_id: patient.id,
-          doctor_id: doctor.id,
-          doctor_note_id: doctor_note.id,
-          lab_technician_id: if(report_complete, do: lab_technician.id, else: nil),
-          date_of_test: if(report_complete, do: visit_date, else: nil),
-          sample_collection_date: if(report_complete, do: visit_date, else: nil),
-          sample_collection_description:
-            if(report_complete,
-              do: "Sample collected and processed at camp laboratory",
-              else: nil
-            ),
-          technician_name: if(report_complete, do: lab_technician.name, else: nil),
-          test_findings:
-            if(report_complete, do: "Result reviewed; see structured test result.", else: nil),
-          report_complete: report_complete,
-          has_paid: true,
-          payment_type: "Medical camp",
-          total_amount_paid: 0,
-          time: Time.new!(11 + rem(index, 5), rem(index * 13, 60), 0),
-          tests: [
-            %{
-              name: requested_test.name,
-              price: requested_test.price,
-              serial: "DEMO-LAB-#{String.pad_leading(to_string(index), 4, "0")}",
-              result: if(report_complete, do: "Completed — within expected range", else: nil)
-            }
-          ]
+          creator_id: nurse.id,
+          date: visit_date,
+          time: Time.new!(9 + rem(index, 7), rem(index * 5, 60), 0),
+          temperature: 36.2 + rem(index, 14) / 10,
+          blood_pressure: "#{105 + rem(index * 3, 35)}/#{65 + rem(index * 2, 25)}",
+          pulse_rate: 66.0 + rem(index * 3, 34),
+          oxygen_saturation: 95.0 + rem(index, 5),
+          height: 150.0 + rem(index * 3, 35),
+          weight: 48.0 + rem(index * 5, 42),
+          allergies: if(rem(index, 7) == 0, do: "Penicillin", else: "No known allergies"),
+          emergency_scale: if(rem(index, 8) == 0, do: "Urgent", else: "Standard"),
+          pain: rem(index, 5) == 0,
+          triage_notes: "Demo triage observations recorded during intake."
         }
 
-        unless Repo.get_by(LabResult, doctor_note_id: doctor_note.id) do
-          LabResult.changeset(%LabResult{}, lab_attrs) |> Repo.insert!()
+        case Repo.get_by(Triage, patient_id: patient.id, date: visit_date) do
+          nil -> Triage.changeset(%Triage{}, triage_attrs) |> Repo.insert!()
+          triage -> Triage.changeset(triage, triage_attrs) |> Repo.update!()
         end
       end
 
-      if visit_status in ~w(pharmacy_pending completed) do
-        drug = Enum.at(demo_drugs, rem(index - 1, length(demo_drugs)))
-        item = Repo.get!(InventoryReceived, drug.inventory_received_id)
-        quantity = 6 + rem(index, 5)
+      # Downstream records follow the visit's position in the camp. This keeps
+      # the demo useful for every dashboard without inventing impossible data
+      # (for example, a dispensed drug on a visit still waiting for triage).
+      if visit_status != "triage_pending" do
+        diagnosis =
+          Enum.at(
+            ["Upper respiratory tract infection", "Malaria", "Gastritis", "Musculoskeletal pain"],
+            rem(index - 1, 4)
+          )
 
-        allocation_attrs = %{
+        note_attrs = %{
           patient_id: patient.id,
+          patient_visit_id: visit.id,
           doctor_id: doctor.id,
-          doctor_note_id: doctor_note.id,
-          pharmacist_id: pharmacist.id,
-          prescription: "#{item.generic_name}: take as directed after meals",
-          quantity: quantity,
-          has_been_assigned: true,
-          has_paid: true,
-          payment_type: "Medical camp",
-          total_amount_paid: 0,
-          drugs_assigned: [
-            %{
-              brand_name: item.brand_name,
-              generic_name: item.generic_name,
-              inventory_received_id: item.id,
-              quantity: quantity,
-              unit_of_measurement: item.uom || "Tablets",
-              frequency: "Twice daily",
-              duration_in_days: 3,
-              price: 0,
-              strength: "Standard",
-              prescription_note: "Take after meals",
-              route_of_administration: "Oral",
-              has_been_given: visit_status == "completed"
-            }
-          ]
+          date: visit_date,
+          time: Time.new!(10 + rem(index, 6), rem(index * 11, 60), 0),
+          reason_for_consulatation: visit_reason,
+          symptoms: visit_reason,
+          diagnosis: diagnosis,
+          diagnosis_icd_code: Enum.at(["J06.9", "B54", "K29.7", "M79.1"], rem(index - 1, 4)),
+          investigations: "Clinical examination and indicated point-of-care tests",
+          impression: diagnosis,
+          management: "Treat symptoms, complete prescribed medication, and return if worse.",
+          clinical_notes: "Demo consultation completed during the medical camp.",
+          doctor_signature: "Dr Amina Demo"
         }
 
-        allocation =
-          case Repo.get_by(DrugAllocation, doctor_note_id: doctor_note.id) do
-            nil ->
-              DrugAllocation.changeset(%DrugAllocation{}, allocation_attrs,
-                validate_available_quantity: false
-              )
-              |> Repo.insert!()
-
-            existing ->
-              existing
+        doctor_note =
+          case Repo.get_by(DoctorNote, patient_visit_id: visit.id) do
+            nil -> DoctorNote.changeset(%DoctorNote{}, note_attrs) |> Repo.insert!()
+            note -> DoctorNote.changeset(note, note_attrs) |> Repo.update!()
           end
 
-        if visit_status == "completed" and
-             is_nil(Repo.get_by(DrugGiven, drug_allocation_id: allocation.id, drug_id: drug.id)) do
-          DrugGiven.changeset(%DrugGiven{}, %{
-            drug_allocation_id: allocation.id,
-            drug_id: drug.id,
+        if visit_status in ~w(lab_pending pharmacy_pending completed) do
+          requested_test =
+            Enum.at(
+              lab_tests,
+              rem(index - 1 + if(occurrence == :earlier, do: 4, else: 0), length(lab_tests))
+            )
+
+          report_complete = visit_status != "lab_pending"
+
+          lab_attrs = %{
+            name: requested_test.name,
+            description: "Demo laboratory request from camp consultation",
+            urgency: if(rem(index, 5) == 0, do: "Urgent", else: "Routine"),
+            patient_id: patient.id,
+            doctor_id: doctor.id,
+            doctor_note_id: doctor_note.id,
+            lab_technician_id: if(report_complete, do: lab_technician.id, else: nil),
+            date_of_test: if(report_complete, do: visit_date, else: nil),
+            sample_collection_date: if(report_complete, do: visit_date, else: nil),
+            sample_collection_description:
+              if(report_complete,
+                do: "Sample collected and processed at camp laboratory",
+                else: nil
+              ),
+            technician_name: if(report_complete, do: lab_technician.name, else: nil),
+            test_findings:
+              if(report_complete, do: "Result reviewed; see structured test result.", else: nil),
+            report_complete: report_complete,
+            has_paid: true,
+            payment_type: "Medical camp",
+            total_amount_paid: 0,
+            time: Time.new!(11 + rem(index, 5), rem(index * 13, 60), 0),
+            tests: [
+              %{
+                name: requested_test.name,
+                price: requested_test.price,
+                serial:
+                  "DEMO-LAB-#{String.pad_leading(to_string(index), 4, "0")}-#{if occurrence == :earlier, do: "B", else: "A"}",
+                result: if(report_complete, do: "Completed — within expected range", else: nil)
+              }
+            ]
+          }
+
+          unless Repo.get_by(LabResult, doctor_note_id: doctor_note.id) do
+            LabResult.changeset(%LabResult{}, lab_attrs) |> Repo.insert!()
+          end
+        end
+
+        if visit_status in ~w(pharmacy_pending completed) do
+          drug =
+            Enum.at(
+              demo_drugs,
+              rem(index - 1 + if(occurrence == :earlier, do: 7, else: 0), length(demo_drugs))
+            )
+
+          item = Repo.get!(InventoryReceived, drug.inventory_received_id)
+          quantity = 6 + rem(index, 5)
+
+          allocation_attrs = %{
+            patient_id: patient.id,
+            doctor_id: doctor.id,
+            doctor_note_id: doctor_note.id,
             pharmacist_id: pharmacist.id,
+            prescription: "#{item.generic_name}: take as directed after meals",
             quantity: quantity,
-            price: 0
-          })
-          |> Repo.insert!()
+            has_been_assigned: true,
+            has_paid: true,
+            payment_type: "Medical camp",
+            total_amount_paid: 0,
+            drugs_assigned: [
+              %{
+                brand_name: item.brand_name,
+                generic_name: item.generic_name,
+                inventory_received_id: item.id,
+                quantity: quantity,
+                unit_of_measurement: item.uom || "Tablets",
+                frequency: "Twice daily",
+                duration_in_days: 3,
+                price: 0,
+                strength: "Standard",
+                prescription_note: "Take after meals",
+                route_of_administration: "Oral",
+                has_been_given: visit_status == "completed"
+              }
+            ]
+          }
+
+          allocation =
+            case Repo.get_by(DrugAllocation, doctor_note_id: doctor_note.id) do
+              nil ->
+                DrugAllocation.changeset(%DrugAllocation{}, allocation_attrs,
+                  validate_available_quantity: false
+                )
+                |> Repo.insert!()
+
+              existing ->
+                existing
+            end
+
+          if visit_status == "completed" and
+               is_nil(Repo.get_by(DrugGiven, drug_allocation_id: allocation.id, drug_id: drug.id)) do
+            DrugGiven.changeset(%DrugGiven{}, %{
+              drug_allocation_id: allocation.id,
+              drug_id: drug.id,
+              pharmacist_id: pharmacist.id,
+              quantity: quantity,
+              price: 0
+            })
+            |> Repo.insert!()
+          end
         end
       end
     end
@@ -613,12 +802,16 @@ patients =
 
 IO.puts("""
 Seeded medical camp:
-  #{map_size(users)} staff logins (password: #{password})
-  #{length(patients)} demo patients with visits and representative triage data
-  completed consultations, lab requests/results, prescriptions and dispensing records
+  #{map_size(users)} staff logins + 1 superadmin (password: #{password})
+  #{length(patients)} demo patients, each with a current visit and one in three
+    carrying an earlier completed visit, spread over the last three weeks
+  triage, consultations, lab requests/results, prescriptions and dispensing
+    records following each visit's status
   #{length(lab_tests)} lab tests
-  #{length(drug_stock)} drugs, each with one active batch
+  #{length(drug_stock)} drugs across #{Enum.sum_by(drug_stock, &length(&1.batches))} batches, including short-dated ones for the expiry
+    and stock-alert screens
 
-Log in as admin@gmail.com to add the rest of your camp staff.
+Log in as admin@gmail.com to add the rest of your camp staff, or
+superadmin@gmail.com for the platform-wide organisation screens.
 New batches are immediately available for prescribing and dispensing.
 """)

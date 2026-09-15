@@ -25,6 +25,14 @@ defmodule MedcampWeb.MedicalCampScanComponent do
           <h2 class="text-xl font-semibold text-brand-primary">Medical Camp - Patient QR Scanner</h2>
         </div>
 
+        <.camera_scanner id={@id} target={@myself} nonce={@scan_nonce} error={@scan_error} />
+
+        <div class="flex items-center gap-3 text-xs uppercase tracking-wide text-gray-400">
+          <span class="flex-1 h-px bg-gray-200"></span>
+          <span>or use a handheld scanner</span>
+          <span class="flex-1 h-px bg-gray-200"></span>
+        </div>
+
         <.input
           name="value[qr]"
           value={@qr_code_value}
@@ -52,6 +60,8 @@ defmodule MedcampWeb.MedicalCampScanComponent do
           <span>QR code will be automatically processed when scanned</span>
         </div>
       </.form>
+
+      <.patient_search target={@myself} term={@search_term} results={@search_results} />
     </div>
     """
   end
@@ -61,21 +71,56 @@ defmodule MedcampWeb.MedicalCampScanComponent do
     {:ok,
      socket
      |> assign(:qr_code_value, "")
+     |> assign_new(:scan_nonce, fn -> 0 end)
+     |> assign_new(:scan_error, fn -> nil end)
+     |> assign_new(:search_term, fn -> "" end)
+     |> assign_new(:search_results, fn -> [] end)
      |> assign(assigns)}
   end
 
   @impl true
-  def handle_event("check", %{"value" => %{"qr" => qr_code_value}}, socket) do
-    qr_code_value = extract_gsrn(qr_code_value)
+  def handle_event("qr_scanned", %{"value" => raw_value}, socket) do
+    {:noreply, handle_scanned_value(socket, raw_value)}
+  end
 
-    case Patients.get_patient_by_gsrn(qr_code_value) do
+  def handle_event("check", %{"value" => %{"qr" => qr_code_value}}, socket) do
+    {:noreply, handle_scanned_value(socket, qr_code_value)}
+  end
+
+  def handle_event("search_patients", %{"search" => term}, socket) do
+    {:noreply, assign(socket, search_term: term, search_results: search(term))}
+  end
+
+  def handle_event("select_patient", %{"id" => id}, socket) do
+    case Patients.get_patient(id) do
       nil ->
-        {:noreply, assign(socket, :qr_code_value, qr_code_value)}
+        {:noreply, socket}
 
       patient ->
         {:noreply,
-         socket
-         |> push_navigate(to: redirect_to_route(socket.assigns.current_user.role, patient))}
+         push_navigate(socket, to: redirect_to_route(socket.assigns.current_user.role, patient))}
+    end
+  end
+
+  defp search(term) do
+    case String.trim(term) do
+      "" -> []
+      term -> Patients.search_patients(term, 10)
+    end
+  end
+
+  defp handle_scanned_value(socket, raw_value) do
+    gsrn = extract_gsrn(raw_value)
+
+    case Patients.get_patient_by_gsrn(gsrn) do
+      nil ->
+        socket
+        |> assign(:qr_code_value, gsrn)
+        |> assign(:scan_error, "No patient found for #{gsrn}. Try scanning again.")
+        |> update(:scan_nonce, &(&1 + 1))
+
+      patient ->
+        push_navigate(socket, to: redirect_to_route(socket.assigns.current_user.role, patient))
     end
   end
 
