@@ -8,19 +8,21 @@ defmodule MedcampWeb.MedicalCampPages.Home do
   alias Medcamp.DrugAllocations
   alias Medcamp.DrugAllocations.DrugAllocation
   alias Medcamp.LabResults
+  alias MedcampWeb.MedicalCampRouting
 
   @impl true
-  def mount(%{"gsrn" => gsrn}, _session, socket) do
+  def mount(%{"gsrn" => _gsrn}, _session, socket) do
     # Guarded by `MedicalCampAuth.:require_camp_auth` - `@current_user` and
     # `@patient` are already assigned, org-matched, and role-checked.
     patient = socket.assigns.patient
+    station_path = MedicalCampRouting.after_scan_path(socket.assigns.current_user.role, patient)
 
     cond do
-      socket.assigns.live_action == :index and socket.assigns.current_user.role == "nurse" ->
-        {:ok, push_navigate(socket, to: "/8018/#{gsrn}/medical-camp/triages/new")}
-
-      socket.assigns.live_action == :index and socket.assigns.current_user.role == "doctor" ->
-        {:ok, push_navigate(socket, to: "/8018/#{gsrn}/medical-camp/doctor_notes")}
+      # A station role landing here goes straight to the form it is about to
+      # fill in; only roles without a station of their own see the overview.
+      socket.assigns.live_action == :index and
+          station_path != "/8018/#{patient.gsrn}/medical-camp" ->
+        {:ok, push_navigate(socket, to: station_path)}
 
       true ->
         {:ok,

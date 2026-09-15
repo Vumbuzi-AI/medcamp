@@ -249,6 +249,15 @@ defmodule Medcamp.DrugAllocations do
     |> Repo.preload([:pharmacist, :patient, :doctor, :drugs_given])
   end
 
+  def most_recent_drug_allocation_for_a_patient(patient_id) do
+    Repo.one(
+      from d in DrugAllocation,
+        where: d.patient_id == ^patient_id,
+        order_by: [desc: d.inserted_at],
+        limit: 1
+    )
+  end
+
   def list_drug_allocations_for_a_patient_paginated(patient_id, page \\ 1, per_page \\ 20) do
     from(d in DrugAllocation,
       where: d.patient_id == ^patient_id,

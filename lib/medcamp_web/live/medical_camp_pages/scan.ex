@@ -43,13 +43,8 @@ defmodule MedcampWeb.MedicalCampPages.Scan do
     end
   end
 
-  defp redirect_to_route(role, patient) do
-    case role do
-      "nurse" -> "/8018/#{patient.gsrn}/medical-camp/triages/new"
-      "doctor" -> "/8018/#{patient.gsrn}/medical-camp/doctor_notes"
-      _ -> "/8018/#{patient.gsrn}/medical-camp"
-    end
-  end
+  defp redirect_to_route(role, patient),
+    do: MedcampWeb.MedicalCampRouting.after_scan_path(role, patient)
 
   @impl true
   def render(assigns) do

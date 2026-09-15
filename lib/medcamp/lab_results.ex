@@ -237,6 +237,14 @@ defmodule Medcamp.LabResults do
     |> Repo.all()
   end
 
+  def most_recent_lab_result_for_patient(patient_id) do
+    LabResult
+    |> where([l], l.patient_id == ^patient_id)
+    |> order_by([l], desc: l.inserted_at)
+    |> limit(1)
+    |> Repo.one()
+  end
+
   def list_lab_results_for_patient_paginated(patient_id, page \\ 1, per_page \\ 10) do
     LabResult
     |> where([l], l.patient_id == ^patient_id)
