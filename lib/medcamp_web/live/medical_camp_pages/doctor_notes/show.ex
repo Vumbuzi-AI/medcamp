@@ -39,8 +39,7 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
      |> assign(:show_gsrn_modal, false)
      |> assign(:current_gsrn_test, nil)
      |> assign(:current_gsrn_lab_result, nil)
-     |> assign(:drug_allocation, %DrugAllocation{})
-     |> assign(:show_scanner, false)}
+     |> assign(:drug_allocation, %DrugAllocation{})}
   end
 
   @impl true
@@ -76,31 +75,6 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
 
   def handle_event("open_lab_modal", _, socket) do
     {:noreply, assign(socket, :show_lab_modal, true)}
-  end
-
-  def handle_event("open_scanner", _, socket) do
-    {:noreply, assign(socket, :show_scanner, true)}
-  end
-
-  def handle_event("close_scanner", _, socket) do
-    {:noreply, assign(socket, :show_scanner, false)}
-  end
-
-  def handle_event("qr_scanned", %{"value" => raw_value}, socket) do
-    gsrn = extract_gsrn(raw_value)
-
-    case PublicTenant.resolve_patient!(gsrn) do
-      nil ->
-        {:noreply,
-         socket
-         |> assign(:show_scanner, false)
-         |> put_flash(:error, "Patient not found for scanned QR code")}
-
-      patient ->
-        {:noreply,
-         socket
-         |> push_navigate(to: "/8018/#{patient.gsrn}/medical-camp/doctor_notes")}
-    end
   end
 
   def handle_event("close_lab_modal", _, socket) do
@@ -216,21 +190,6 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
        :drug_allocations,
        DrugAllocations.list_drug_allocations_for_a_doctor_note(note_id)
      )}
-  end
-
-  defp extract_gsrn(qr_code_value) do
-    cond do
-      String.starts_with?(qr_code_value, "https://") ->
-        parts = String.split(qr_code_value, "/")
-        idx = Enum.find_index(parts, &(&1 == "8018"))
-        if idx, do: Enum.at(parts, idx + 1, ""), else: List.last(parts)
-
-      String.starts_with?(qr_code_value, "8018") ->
-        String.slice(qr_code_value, 4..-1//-1)
-
-      true ->
-        qr_code_value
-    end
   end
 
   @impl true
@@ -492,74 +451,6 @@ defmodule MedcampWeb.MedicalCampPages.DoctorNoteShow do
             <% end %>
           </div>
         <% end %>
-      </div>
-
-      <%!-- Scan Next Patient --%>
-      <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
-        <%!-- <button
-          :if={!@show_scanner}
-          type="button"
-          phx-click="open_scanner"
-          class="w-full inline-flex items-center justify-center gap-3 rounded-lg bg-brand-primary px-6 py-4 text-lg font-semibold text-white hover:bg-brand-primary-dark transition-colors"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-            />
-          </svg>
-          Scan Next Patient
-        </button> --%>
-
-        <div :if={@show_scanner}>
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="text-lg font-semibold text-brand-primary">Scan Next Patient</h2>
-            <button
-              type="button"
-              phx-click="close_scanner"
-              class="text-slate-400 hover:text-slate-600"
-            >
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-          <div id="qr-camera-scanner" phx-hook="QrCameraScanner" class="relative">
-            <video class="w-full rounded-lg border border-slate-300" autoplay playsinline muted>
-            </video>
-            <div class="qr-overlay hidden absolute inset-0 bg-green-500/20 rounded-lg items-center justify-center">
-              <svg
-                class="h-16 w-16 text-green-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-            <p class="qr-status text-sm text-center text-slate-500 mt-2">
-              Point camera at patient's QR code...
-            </p>
-          </div>
-        </div>
       </div>
 
       <%!-- Lab Order Modal --%>

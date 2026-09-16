@@ -25,14 +25,6 @@ defmodule MedcampWeb.MedicalCampScanComponent do
           <h2 class="text-xl font-semibold text-brand-primary">Medical Camp - Patient QR Scanner</h2>
         </div>
 
-        <.camera_scanner id={@id} target={@myself} nonce={@scan_nonce} error={@scan_error} />
-
-        <div class="flex items-center gap-3 text-xs uppercase tracking-wide text-gray-400">
-          <span class="flex-1 h-px bg-gray-200"></span>
-          <span>or use a handheld scanner</span>
-          <span class="flex-1 h-px bg-gray-200"></span>
-        </div>
-
         <.input
           name="value[qr]"
           value={@qr_code_value}
@@ -59,6 +51,8 @@ defmodule MedcampWeb.MedicalCampScanComponent do
           </svg>
           <span>QR code will be automatically processed when scanned</span>
         </div>
+
+        <p :if={@scan_error} class="text-sm text-red-600">{@scan_error}</p>
       </.form>
 
       <.patient_search target={@myself} term={@search_term} results={@search_results} />
@@ -71,7 +65,6 @@ defmodule MedcampWeb.MedicalCampScanComponent do
     {:ok,
      socket
      |> assign(:qr_code_value, "")
-     |> assign_new(:scan_nonce, fn -> 0 end)
      |> assign_new(:scan_error, fn -> nil end)
      |> assign_new(:search_term, fn -> "" end)
      |> assign_new(:search_results, fn -> [] end)
@@ -79,10 +72,6 @@ defmodule MedcampWeb.MedicalCampScanComponent do
   end
 
   @impl true
-  def handle_event("qr_scanned", %{"value" => raw_value}, socket) do
-    {:noreply, handle_scanned_value(socket, raw_value)}
-  end
-
   def handle_event("check", %{"value" => %{"qr" => qr_code_value}}, socket) do
     {:noreply, handle_scanned_value(socket, qr_code_value)}
   end
@@ -117,7 +106,6 @@ defmodule MedcampWeb.MedicalCampScanComponent do
         socket
         |> assign(:qr_code_value, gsrn)
         |> assign(:scan_error, "No patient found for #{gsrn}. Try scanning again.")
-        |> update(:scan_nonce, &(&1 + 1))
 
       patient ->
         push_navigate(socket, to: redirect_to_route(socket.assigns.current_user.role, patient))
