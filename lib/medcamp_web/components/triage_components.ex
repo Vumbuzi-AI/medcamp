@@ -5,6 +5,78 @@ defmodule MedcampWeb.TriageComponents do
   alias Phoenix.LiveView.JS
   import MedcampWeb.CoreComponents
 
+  attr :triage, :map, required: true
+
+  @doc """
+  The vitals a clinician reads off a single triage, as a plain grid.
+
+  Shared by the camp overview's triage popup and the doctor note form's
+  triage tab so the two never drift apart.
+  """
+  def triage_vitals_grid(assigns) do
+    ~H"""
+    <div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+        <div class="bg-slate-50 rounded p-2">
+          <span class="text-slate-500 block">Date</span>
+          <span class="font-medium">{@triage.date}</span>
+        </div>
+        <div class="bg-slate-50 rounded p-2">
+          <span class="text-slate-500 block">Time</span>
+          <span class="font-medium">{@triage.time || "-"}</span>
+        </div>
+        <div class="bg-slate-50 rounded p-2">
+          <span class="text-slate-500 block">Temperature</span>
+          <span class="font-medium">{@triage.temperature || "-"} °C</span>
+        </div>
+        <div class="bg-slate-50 rounded p-2">
+          <span class="text-slate-500 block">Blood Pressure</span>
+          <span class="font-medium">{@triage.blood_pressure || "-"}</span>
+        </div>
+        <div class="bg-slate-50 rounded p-2">
+          <span class="text-slate-500 block">Pulse Rate</span>
+          <span class="font-medium">{@triage.pulse_rate || "-"} bpm</span>
+        </div>
+        <div class="bg-slate-50 rounded p-2">
+          <span class="text-slate-500 block">O2 Saturation</span>
+          <span class="font-medium">{@triage.oxygen_saturation || "-"} %</span>
+        </div>
+        <div class="bg-slate-50 rounded p-2">
+          <span class="text-slate-500 block">Weight</span>
+          <span class="font-medium">{@triage.weight || "-"} kg</span>
+        </div>
+        <div class="bg-slate-50 rounded p-2">
+          <span class="text-slate-500 block">Height</span>
+          <span class="font-medium">{@triage.height || "-"} cm</span>
+        </div>
+        <div class="bg-slate-50 rounded p-2">
+          <span class="text-slate-500 block">BMI</span>
+          <span class="font-medium">{@triage.bmi || "-"}</span>
+        </div>
+        <div class="bg-slate-50 rounded p-2">
+          <span class="text-slate-500 block">Emergency</span>
+          <span class={[
+            "font-medium",
+            @triage.emergency_scale == "High" && "text-red-600",
+            @triage.emergency_scale == "Medium" && "text-amber-600",
+            @triage.emergency_scale == "Low" && "text-green-600"
+          ]}>
+            {@triage.emergency_scale || "-"}
+          </span>
+        </div>
+      </div>
+      <div :if={@triage.allergies} class="mt-3 bg-red-50 rounded p-2 text-sm">
+        <span class="text-red-600 font-medium">Allergies: </span>
+        <span class="text-red-800">{@triage.allergies}</span>
+      </div>
+      <div :if={@triage.triage_notes} class="mt-2 bg-slate-50 rounded p-2 text-sm">
+        <span class="text-slate-500 font-medium">Notes: </span>
+        <span>{@triage.triage_notes}</span>
+      </div>
+    </div>
+    """
+  end
+
   def triages_table(assigns) do
     # Callers that only render a patient's own triages (e.g. the camp-link home
     # page) don't compute a separate `count` - derive it from the rows.

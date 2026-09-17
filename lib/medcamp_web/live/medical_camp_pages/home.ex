@@ -162,63 +162,7 @@ defmodule MedcampWeb.MedicalCampPages.Home do
         >
           <div class="p-2">
             <h2 class="text-lg font-bold text-brand-primary mb-4">Triage Details</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-              <div class="bg-slate-50 rounded p-2">
-                <span class="text-slate-500 block">Date</span>
-                <span class="font-medium">{@selected_triage.date}</span>
-              </div>
-              <div class="bg-slate-50 rounded p-2">
-                <span class="text-slate-500 block">Time</span>
-                <span class="font-medium">{@selected_triage.time || "-"}</span>
-              </div>
-              <div class="bg-slate-50 rounded p-2">
-                <span class="text-slate-500 block">Temperature</span>
-                <span class="font-medium">{@selected_triage.temperature || "-"} °C</span>
-              </div>
-              <div class="bg-slate-50 rounded p-2">
-                <span class="text-slate-500 block">Blood Pressure</span>
-                <span class="font-medium">{@selected_triage.blood_pressure || "-"}</span>
-              </div>
-              <div class="bg-slate-50 rounded p-2">
-                <span class="text-slate-500 block">Pulse Rate</span>
-                <span class="font-medium">{@selected_triage.pulse_rate || "-"} bpm</span>
-              </div>
-              <div class="bg-slate-50 rounded p-2">
-                <span class="text-slate-500 block">O2 Saturation</span>
-                <span class="font-medium">{@selected_triage.oxygen_saturation || "-"} %</span>
-              </div>
-              <div class="bg-slate-50 rounded p-2">
-                <span class="text-slate-500 block">Weight</span>
-                <span class="font-medium">{@selected_triage.weight || "-"} kg</span>
-              </div>
-              <div class="bg-slate-50 rounded p-2">
-                <span class="text-slate-500 block">Height</span>
-                <span class="font-medium">{@selected_triage.height || "-"} cm</span>
-              </div>
-              <div class="bg-slate-50 rounded p-2">
-                <span class="text-slate-500 block">BMI</span>
-                <span class="font-medium">{@selected_triage.bmi || "-"}</span>
-              </div>
-              <div class="bg-slate-50 rounded p-2">
-                <span class="text-slate-500 block">Emergency</span>
-                <span class={[
-                  "font-medium",
-                  @selected_triage.emergency_scale == "High" && "text-red-600",
-                  @selected_triage.emergency_scale == "Medium" && "text-amber-600",
-                  @selected_triage.emergency_scale == "Low" && "text-green-600"
-                ]}>
-                  {@selected_triage.emergency_scale || "-"}
-                </span>
-              </div>
-            </div>
-            <div :if={@selected_triage.allergies} class="mt-3 bg-red-50 rounded p-2 text-sm">
-              <span class="text-red-600 font-medium">Allergies: </span>
-              <span class="text-red-800">{@selected_triage.allergies}</span>
-            </div>
-            <div :if={@selected_triage.triage_notes} class="mt-2 bg-slate-50 rounded p-2 text-sm">
-              <span class="text-slate-500 font-medium">Notes: </span>
-              <span>{@selected_triage.triage_notes}</span>
-            </div>
+            <.triage_vitals_grid triage={@selected_triage} />
           </div>
         </.modal>
 
