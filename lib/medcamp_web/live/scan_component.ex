@@ -126,28 +126,6 @@ defmodule MedcampWeb.ScanComponent do
     end
   end
 
-  defp redirect_to_route(role, patient) do
-    case role do
-      "doctor" ->
-        "/doctor/patients/#{patient.id}"
-
-      "nurse" ->
-        "/nurse/#{patient.id}/patient_overview"
-
-      "reception" ->
-        "/reception/#{patient.id}/patient_overview"
-
-      "labtechnician" ->
-        "/lab/#{patient.id}/lab_results"
-
-      "pharmacist" ->
-        "/pharmacist/#{patient.id}/drug_allocations"
-
-      "radiologist" ->
-        "/radiologist/#{patient.id}/radiology_results"
-
-      _ ->
-        "/"
-    end
-  end
+  defp redirect_to_route(role, patient),
+    do: MedcampWeb.MedicalCampRouting.after_scan_path(role, patient)
 end

@@ -66,6 +66,10 @@ defmodule MedcampWeb.MedicalCampPages.Home do
     socket |> assign(:page_title, "Edit Triage") |> assign(:triage, triage)
   end
 
+  defp apply_action(socket, :new_triage, _params) do
+    socket |> assign(:page_title, "New Triage") |> assign(:triage, %Triage{})
+  end
+
   defp apply_action(socket, _, _params) do
     socket |> assign(:page_title, "Patient Details") |> assign(:triage, %Triage{})
   end

@@ -11,7 +11,7 @@ defmodule MedcampWeb.NursesPages.ScanIndex do
 
   @impl true
   def handle_params(%{"value" => %{"qr" => qr}}, _url, socket) do
-    qr = String.slice(qr, 2..-1//-1)
+    qr = String.replace_prefix(qr, "01", "")
 
     case Patients.get_patient_by_gsrn(qr) do
       nil ->
@@ -20,34 +20,18 @@ defmodule MedcampWeb.NursesPages.ScanIndex do
       patient ->
         {:noreply,
          socket
-         |> push_navigate(to: redirect_to_route(socket.assigns.current_user.role, patient))}
+         |> push_navigate(
+           to:
+             MedcampWeb.MedicalCampRouting.after_scan_path(
+               socket.assigns.current_user.role,
+               patient
+             )
+         )}
     end
   end
 
   def handle_params(_, _url, socket) do
     {:noreply, socket}
-  end
-
-  defp redirect_to_route(role, patient) do
-    case role do
-      "doctor" ->
-        "/doctor/patients/#{patient.id}"
-
-      "nurse" ->
-        "/nurse/#{patient.id}/patient_overview"
-
-      "reception" ->
-        "/reception/#{patient.id}/patient_overview"
-
-      "labtechnician" ->
-        "/lab/#{patient.id}/lab_results"
-
-      "pharmacist" ->
-        "/pharmacist/#{patient.id}/drug_allocations"
-
-      _ ->
-        "/"
-    end
   end
 
   @impl true
